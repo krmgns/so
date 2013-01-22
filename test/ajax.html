@@ -1,0 +1,54 @@
+<!doctype html>
+<html><head></head><body style="width:3000px; height:3000px;">
+
+<form id="form">
+    <input type="text" value="The input!">
+    <input type="button" value="The button!" onclick="ajax()">
+</form>
+
+<div id="result"></div>
+
+<script src="../mii.js"></script>
+<script src="../mii.ajax.js"></script>
+<script>
+mii.onReady(function($) {
+    var result = document.getElementById("result");
+    window.ajax = function() {
+        // var req = $.ajax({
+            // url: "/ajax.php",
+            // method: "POST",
+            // autoSend: false,
+            // noCache: true,
+            // timeout: 1000,
+            // data: {foo:1, bar:"the bar!"},
+            // dataType: "xml",
+            // headers: {"X-Foo": "The foo!", "X-Bar": "The bar!"}
+            // onStart: function(xhr){ result.innerHTML = "Start!"; },
+            // onProgress: function(xhr){ result.innerHTML = "Progress!"; },
+            // onSuccess: function(r, xhr){ result.innerHTML = r; },
+            // onComplete: function(r, xhr){ log(this.getAllResponseHeaders()); },
+            // onError: function(r, xhr){ log(this.statusCode); },
+            // onAbort: function(xhr){ log("Aborted!"); },
+            // 200: function(r){ log("Status: 200") },
+            // 404: function(r){ log("Status: 404") },
+            // 304: function(r){ log("Status: 304") },
+            // 500: function(r){ log("Status: 500") }
+        // })
+        // .setRequestHeader("X-Foo", "The foo!")
+        // .setRequestHeader({"X-Foo": "The foo!", "X-Bar": "The bar!"})
+        // .send();
+        
+        // log(req)
+        
+        // $.ajax("POST /ajax.php?a=1", {foo:1, bar:"the bar!"}, function(r) { log(r) });
+        // $.ajax.get("/ajax.php?a=1", function(r) { log(r) });
+        // $.ajax.post("/ajax.php?a=1", function(r) { log(r) });
+        // $.ajax.post("/ajax.php?a=1", {x:"kerem"}, function(r) { log(r) });
+        // $.ajax.load("/ajax.php", {x:"kerem"}, function(r) {
+            // result.innerHTML = r;
+        // });
+    }
+});
+</script>
+
+</body></html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<input type="button" onclick="__anim1()" value="__anim1">
+<input type="button" onclick="__anim2()" value="__anim2">
+<input type="button" onclick="fadeTo()" value="fadeTo">
+<input type="button" onclick="fadeIn()" value="fadeIn">
+<input type="button" onclick="fadeOut()" value="fadeOut">
+<input type="button" onclick="show()" value="show">
+<input type="button" onclick="hide()" value="hide">
+<input type="button" onclick="toggle()" value="toggle">
+<br clear="all">
+<style>
+#foo1,#foo2{font-family:comic sans ms;font-weight:bold;width:100px; height:100px; background-color:#000; float:left; color:#fff; margin:3px; opacity:1; filter:alpha(opacity=100); display:none}
+.li {width:100px; height:20px; background-color:#000; color:#fff; margin-bottom:1px; display:none}
+</style>
+<div id="foo1">Lorem 1</div>
+<br clear="all">
+<div id="foo2">Lorem 2</div>
+<br clear="all">
+<li class="li">Li 1</li>
+<li>Li 2</li>
+<li>Li 2</li>
+
+
+<script src="../mii.js"></script>
+<script src="../mii.animate.js"></script>
+<script src="../mii.dom.js"></script>
+<script>
+var $ = mii;
+var duration = 1500;
+var aProps = {fontSize:55, width:300}
+var bProps = {fontSize:2, width:100}
+// aProps = {fontSize:25}
+// bProps = {fontSize:12}
+function __anim1() {
+    $.dom("#foo1").animate(aProps, duration);
+}
+function __anim2() {
+    $.dom("#foo1").animate(bProps, duration);
+}
+function fadeTo() {
+    $.dom("#foo1,#foo2").fadeTo(0.35, duration);
+}
+function fadeIn() {
+    $.dom("#foo1,#foo2").fadeIn("slow");
+}
+function fadeOut() {
+    $.dom("#foo1,#foo2").fadeOut("slow");
+}
+var li = document.getElementsByTagName("li")
+function show() {
+    $.dom(li).show(1000);
+}
+function hide() {
+    $.dom(li).hide();
+}
+function toggle() {
+    $.dom(li).toggle("fast");
+}
+</script>

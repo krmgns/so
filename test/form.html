@@ -1,0 +1,26 @@
+<!doctype html>
+
+<form id="form" onsubmit="serialize(this); return !1">
+    <input type="hidden" name="secret" value="abc">
+    <p><input type="text" name="uname" value="kerem"></p>
+    <p><input type="password" name="upass" value="111"></p>
+    
+    <p><input type="checkbox" name="remember" checked></p>
+    
+    <p>
+        <input type="radio" name="gender" value="1">
+        <input type="radio" name="gender" value="2">
+    </p>
+    
+    <p><textarea name="about">Lorem ipsum dolor...</textarea></p>
+    <p><input type="submit" name="send" value="Submit!"></p>
+</form>
+
+<script src="../mii.js"></script>
+<script src="../mii.dom.js"></script>
+<script>
+function serialize(form) {
+    var data = mii.dom(form).serialize();
+    log(data)
+}
+</script>
