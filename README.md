@@ -151,7 +151,7 @@ Usage:
     });
     
     // complicated
-    var req = ajax({
+    var req = $.ajax({
         // The request URL
         url: "/ajax.php",
         // The request method (GET/POST/PUT/DELET)
@@ -193,19 +193,19 @@ Usage:
     // Finally send the request
     .send();
     // console.log(req)
-
-    ajax("POST /ajax.php", {foo:1, bar:"the bar!"}, function(content){ /* onSuccess */
+    
+    $.ajax("POST /ajax.php", {foo:1, bar:"the bar!"}, function(content){ /* onSuccess */
         console.log(content)
     });
     // Shortcut of GET
-    ajax.get("/ajax.php?a=1", function(content){ console.log(content) });
+    $.ajax.get("/ajax.php?a=1", function(content){ console.log(content) });
     // Shortcut of POST
-    ajax.post("/ajax.php?a=1", function(content){ console.log(content) });
-    ajax.post("/ajax.php?a=1", {foo:"the foo!"}, function(content){ console.log(content) });
+    $.ajax.post("/ajax.php?a=1", function(content){ console.log(content) });
+    $.ajax.post("/ajax.php?a=1", {foo:"the foo!"}, function(content){ console.log(content) });
     // Shortcut of load (GET)
-    ajax.load("/ajax.php", function(content){
+    $.ajax.load("/ajax.php", function(content){
         console.log(content);
     });
-    ajax.load("/ajax.php", {foo:"the foo!"}, function(content){
+    $.ajax.load("/ajax.php", {foo:"the foo!"}, function(content){
         console.log(content);
     });
