@@ -330,7 +330,7 @@ function sumComputedPixels(el, props) {
 }
 
 function toStyleProp(key) {
-	return (""+ key).replace(/-([a-z])/g, function($0, $1) {
+    return (""+ key).replace(/-([a-z])/g, function($0, $1) {
         return $1.toUpperCase();
     });
 }
@@ -403,7 +403,7 @@ function getScroll(el, type /*internal*/) {
 }
 
 function classRE(cls) {
-	return RE("(^|\\s)"+ cls + "(\\s|$)");
+    return RE("(^|\\s)"+ cls + "(\\s|$)");
 }
 
 var uuidKey = "x-mii-uuid",
@@ -873,36 +873,36 @@ $.extend(Dom.prototype, {
         
         var attrs = el.attributes, val;
         switch (key) {
-			case "class":
-			case "className":
-				val = attrs["class"] && attrs["class"].specified 
+            case "class":
+            case "className":
+                val = attrs["class"] && attrs["class"].specified 
                         ? el.className : null;
-				break;
-			case "src":
-			case "href":
-				val = el.getAttribute("href", 2);
-				break;
-			case "style":
+                break;
+            case "src":
+            case "href":
+                val = el.getAttribute("href", 2);
+                break;
+            case "style":
                 val = ie_lt8 ? (attrs.style && attrs.style.specified)
                                 ? el.style.cssText : null
                                     : el.getAttribute("style");
                 val = val && val.toLowerCase();
-				break;
-			case "tabindex":
-			case "tabIndex":
-				val = (val = el.getAttributeNode("tabindex")) && val.specified
+                break;
+            case "tabindex":
+            case "tabIndex":
+                val = (val = el.getAttributeNode("tabindex")) && val.specified
                         ? val.value
                         : el.getAttribute("tabindex");
-				break;
+                break;
             case "for":
-			case "htmlFor":
-				val = el.htmlFor || el.getAttribute("for");
-				break;
+            case "htmlFor":
+                val = el.htmlFor || el.getAttribute("for");
+                break;
             case "enctype":
-			case "encoding":
-				val = el.getAttribute("enctype") || el.enctype;
-				break;
-			default:
+            case "encoding":
+                val = el.getAttribute("enctype") || el.enctype;
+                break;
+            default:
                 if (re_stateAttrs.test(key)) {
                     val = el[key] === true || typeof el[key] !== "boolean"
                             && (val = el.getAttributeNode(key))
@@ -910,13 +910,13 @@ $.extend(Dom.prototype, {
                 } else {
                     val = el.getAttribute(fixedAttributes[key] || key);
                 }
-		}
+        }
         // IE7 (onclick etc.)
-		if (ie && typeof val === "function") {
+        if (ie && typeof val === "function") {
             val = /function.*?\(.*?\)\s*\{\s*(.*?)\s*\}/mi.exec(""+ val)
             val = val && val[1];
         }
-		return (val !== null) ? val : undefined;
+        return (val !== null) ? val : undefined;
     },
     removeAttr: function(key) {
         if (key === "*") {
