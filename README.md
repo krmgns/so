@@ -156,7 +156,7 @@ Usage:
     var req = $.ajax({
         // The request URL
         url: "/ajax.php",
-        // The request method (GET/POST/PUT/DELET)
+        // The request method (GET/POST/PUT/DELETE)
         method: "POST",
         // Required for chaining methods below
         autoSend: false,
