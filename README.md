@@ -2,6 +2,7 @@ Actually, I know that there are buch of JavaScript library, even more powerfull.
 
 Usage:
 
+```html
     <div id="container">
         ...
         <div id="div">div#div</div>
@@ -14,7 +15,8 @@ Usage:
         <input type="button" value="The button!">
     </div>
     <p>external p</p>
-    
+```
+```javascript    
     /* Selectors */
     var ps = $.dom("#container p") // all "p" in "#container"
     ps.first() // first p
@@ -209,3 +211,4 @@ Usage:
     $.ajax.load("/ajax.php", {foo:"the foo!"}, function(content){
         console.log(content);
     });
+```
