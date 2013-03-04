@@ -116,7 +116,7 @@ Usage:
     el.data("bar").x === 1  // true
     el.removeData("bar")    // undefined
     el.removeData("*") // remove all data
-    el.removeDataAll("*") // remove all data
+    el.removeDataAll() // remove all data
     
     /* form tools */
     $.dom("#form").serialize() // only for "form" elements
