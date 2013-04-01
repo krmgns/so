@@ -1127,7 +1127,7 @@ $.extend(Dom.prototype, {
                     continue;
                 }
                 
-                if (nodeName === "textarea" || nodeName === "button") {
+                if (nodeName === "textarea" || nodeName === "button" || nodeName === "select") {
                     data.push(encodeURIComponent(name) +"="+ 
                                 encodeURIComponent(el.value));
                 } else {
