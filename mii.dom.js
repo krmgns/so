@@ -482,7 +482,7 @@ Dom.prototype = {
         var els1 = this.toArray(),
             els2, els = [], type = typeof s;
         
-        if (s && type === "string") {
+        if (s && (type === "string" || type === "object")) {
             els2 = this.__init(s).toArray(),
             els = $.filter(els1, function(e) {
                 var el, i = 0;
