@@ -1127,18 +1127,11 @@ $.extend(Dom.prototype, {
                     continue;
                 }
                 
-                if (nodeName === "textarea" || nodeName === "button" || nodeName === "select") {
+                if (/^(textarea|select|button)$/i.test(nodeName)) {
                     data.push(encodeURIComponent(name) +"="+ 
                                 encodeURIComponent(el.value));
                 } else {
                     switch (type) {
-                        case "text":
-                        case "submit":
-                        case "password":
-                        case "hidden":
-                            data.push(encodeURIComponent(name) +"="+ 
-                                        encodeURIComponent(el.value));
-                            break;
                         case "checkbox":
                         case "radio":
                             if (el.checked || 
@@ -1148,11 +1141,21 @@ $.extend(Dom.prototype, {
                                     (type === "checkbox" ? "on" : encodeURIComponent(el.value)));
                             }
                             break;
+                        default:
+                            data.push(encodeURIComponent(name) +"="+ encodeURIComponent(el.value));
                     }
                 }
             }
         }
         return data.join("&").replace(/%20/g, "+");
+    },
+    serializeArray: function() {
+        var tmp = this.serialize(), array = {};
+        $.forEach(tmp.split("&"), function(a){
+            a = a.split("=");
+            array[a[0]] = a[1];
+        });
+        return array;
     }
 });
 

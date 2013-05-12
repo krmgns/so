@@ -20,7 +20,9 @@
 <script src="../mii.dom.js"></script>
 <script>
 function serialize(form) {
-    var data = mii.dom(form).serialize();
+    var data;
+    // data = mii.dom(form).serialize();
+    data = mii.dom(form).serializeArray();
     log(data)
 }
 </script>
