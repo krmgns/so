@@ -4,7 +4,7 @@
  * @description   : Multipurpose JavaScript Library
  * @copyright     : Kerem Gunes (2013)
  * @license       : MIT license <http://opensource.org/licenses/MIT>
- * @date          : 2013-01-19T01:04:42+02:00 (Europe/Istanbul)
+ * @date          : 2013-07-05 02:19 (Europe/Istanbul)
  *
  * Internal Modules: mii.event.js, mii.animate.js, mii.dom.js, mii.ajax.js
  * External Modules: Qwery.js <https://github.com/ded/qwery>
