@@ -118,8 +118,9 @@ Usage:
     el.removeData("*") // remove all data
     el.removeDataAll() // remove all data
     
-    /* form tools */
-    $.dom("#form").serialize() // only for "form" elements
+    /* form tools, only for "form" elements */
+    $.dom("#form").serialize()
+    $.dom("#form").serializeArray()
     
     /* events */
     ps.on("click", function() { alert("Hey!"); }) // alert on every click

@@ -21,6 +21,7 @@
 <li>Li 2</li>
 
 
+<script src="../qwery.min.js"></script>
 <script src="../mii.js"></script>
 <script src="../mii.animate.js"></script>
 <script src="../mii.dom.js"></script>
@@ -48,12 +49,12 @@ function fadeOut() {
 }
 var li = document.getElementsByTagName("li")
 function show() {
-    $.dom(li).show(1000);
+    $.dom(li).show(0);
 }
 function hide() {
-    $.dom(li).hide();
+    $.dom(li).hide(0);
 }
 function toggle() {
-    $.dom(li).toggle("fast");
+    $.dom(li).toggle(10);
 }
 </script>
