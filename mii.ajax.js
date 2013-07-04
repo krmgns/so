@@ -115,11 +115,16 @@ function Ajax(options) {
     
     // Prepare request data
     if (options.data) {
-        for (key in options.data) {
-            options.data.hasOwnProperty(key)
-                && data.push(key +"="+ encodeURIComponent(options.data[key]));
+        if ($.typeOf(options.data) === "object") {
+            for (key in options.data) {
+                options.data.hasOwnProperty(key)
+                    && data.push(encodeURIComponent(key) +"="+ encodeURIComponent(options.data[key]));
+            }
+            data = data.join("&").replace(/%20/g, "+");
+        } else {
+            data = options.data;
         }
-        data = data.join("&");
+        
         if (options.method == "POST" || options.method == "PUT") {
             options.data = data;
         } else {
