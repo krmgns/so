@@ -1,6 +1,6 @@
 Actually, I know that there are buch of JavaScript library, even more powerfull. But sometimes doing things myself makes me happy. That's it...
 
-See: http://miijs.com (uncompleted)
+See: http://miijs.com
 
 Usage:
 
