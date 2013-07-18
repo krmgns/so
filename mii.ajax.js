@@ -35,8 +35,7 @@ var re_validJson = /^\{.*?\}|\[.*?\]$/,
         onSuccess: $.emptyFunction,
         onError: $.emptyFunction,
         onAbort: $.emptyFunction
-    },
-    _now = $.now()
+    }
 ;
 
 function createRequest() {
@@ -139,7 +138,7 @@ function Ajax(options) {
     }
     // Add no-cache helper
     if (options.noCache !== false || options.method == "GET") {
-        options.url += options.url.indexOf("?") === -1 ? "?_="+ _now : "&_="+ _now;
+        options.url += options.url.indexOf("?") === -1 ? "?_="+ $.now() : "&_="+ $.now();
     }
     // Clear url
     options.url = options.url.replace(re_query, "?$1");
