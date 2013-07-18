@@ -14,10 +14,10 @@
 mii.onReady(function($) {
     var result = document.getElementById("result");
     window.ajax = function() {
-        // var req = $.ajax({
-            // url: "/ajax.php",
-            // method: "POST",
-            // autoSend: false,
+        var req = $.ajax({
+            url: "/books.xml",
+            method: "GET",
+            autoSend: false,
             // noCache: true,
             // timeout: 1000,
             // data: {foo:1, bar:"the bar!"},
@@ -33,10 +33,17 @@ mii.onReady(function($) {
             // 404: function(r){ log("Status: 404") },
             // 304: function(r){ log("Status: 304") },
             // 500: function(r){ log("Status: 500") }
-        // })
-        // .setRequestHeader("X-Foo", "The foo!")
+            
+            beforeSend: function(xhr) {
+                xhr.overrideMimeType("text/xml");
+            },
+            afterSend: function(xhr) {
+                // log(xhr);
+            }
+        })
+        .setRequestHeader("Accept", "text/xml")
         // .setRequestHeader({"X-Foo": "The foo!", "X-Bar": "The bar!"})
-        // .send();
+        .send();
         
         // log(req)
         

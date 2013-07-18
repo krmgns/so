@@ -34,7 +34,9 @@ var re_validJson = /^\{.*?\}|\[.*?\]$/,
         onProgress: $.emptyFunction,
         onSuccess: $.emptyFunction,
         onError: $.emptyFunction,
-        onAbort: $.emptyFunction
+        onAbort: $.emptyFunction,
+        beforeSend: null,
+        afterSend: null
     }
 ;
 
@@ -163,6 +165,7 @@ Ajax.prototype = {
             return this;
         }
         
+        
         // Open connection
         this._xhr.open(options.method, options.url, options.async);
         // Set request header for POST/PUT
@@ -183,8 +186,18 @@ Ajax.prototype = {
             };
         }
         
+        // Call beforeSend function
+        if (typeof options.beforeSend === "function") {
+            options.beforeSend.call(this, this._xhr);
+        }
+        
         // Send request
         this._xhr.send(options.data);
+        
+        // Call afterSend function
+        if (typeof options.afterSend === "function") {
+            options.afterSend.call(this, this._xhr);
+        }
         
         // Handle async
         if (!options.async) {
