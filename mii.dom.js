@@ -26,12 +26,12 @@ function RE(re, flags, x /*internal*/) {
     if (!_re_cache[x]) {
         _re_cache[x] = new RegExp(re, flags);
     }
-    
+
     // Simple GC
     setTimeout(function(){
         _re_cache = {};
     }, 60*1000);
-    
+
     return _re_cache[x];
 }
 
@@ -45,20 +45,20 @@ function getNodeName(node) {
 
 function getByTag(root, tag, i) {
     var els = root.getElementsByTagName(tag);
-    return i === true ? 
-               $.toArray(els) : isNaN(i) ? 
+    return i === true ?
+               $.toArray(els) : isNaN(i) ?
                    els : els[i];
 }
 
 function fixTable(table, doc) {
     var els = getByTag(table, "tbody"),
         el, i = els.length;
-    
+
     while (el = els[--i]) { // clean
-        !el.childNodes.length 
+        !el.childNodes.length
             && el.parentNode.removeChild(el);
     }
-    
+
     $.forEach(getByTag(table, "tbody", true), function(e) { // fix
         el = doc.createElement("tbody");
         while (e.firstChild) {
@@ -111,20 +111,20 @@ var attrFunctions = {
 
 function setAttributes(el, attrs) {
     if (el && el.nodeType === 1) {
-        var keyFixed, keyFixedDef, key, val, state, 
+        var keyFixed, keyFixedDef, key, val, state,
             re_true = /^(1|true)$/;
-        
+
         for (key in attrs) {
             keyFixed = fixedAttributes[key] || key;
             keyFixedDef = fixedAttributes["default"+ key];
             if (!keyFixed) continue;
-            
+
             val = (val = attrs[key]) != null ? val : "";
             if (key in attrFunctions) {
                 attrFunctions[key](el, val);
                 continue;
             }
-            
+
             if (re_stateAttrs.test(key)) {
                 // Set attribute as boolean
                 el[key] = (state = re_true.test(val));
@@ -140,11 +140,11 @@ function setAttributes(el, attrs) {
                 }
                 continue;
             }
-            
+
             // Bind `on*` events
-            (val && val.apply && 
+            (val && val.apply &&
                 (el[key.toLowerCase()] = function() {
-                    return val.apply(el, arguments); 
+                    return val.apply(el, arguments);
                 })
             // Or just set attribute
             ) || el.setAttribute(keyFixed, ""+ val);
@@ -171,19 +171,19 @@ function create(tag, attrs, doc) {
 function createFragment(content, doc) {
     var tmp = doc.createElement("tmp"), // tmp?
         fragment = doc.createDocumentFragment();
-    
+
     tmp.innerHTML = content;
     while (tmp.firstChild) {
         fragment.appendChild(tmp.firstChild);
     }
-    
+
     return fragment;
 }
 
 function createElementSafe(tag, doc, nameAttr) {
     var element;
     doc || (doc = DOC), nameAttr || (nameAttr = "");
-    
+
     if (ie_lt8) {
         // Set name for IE
         element = doc.createElement("<"+ tag +" name='" + nameAttr + "'>");
@@ -191,7 +191,7 @@ function createElementSafe(tag, doc, nameAttr) {
         element = doc.createElement(tag);
         if (nameAttr) element.setAttribute("name", ""+ nameAttr);
     }
-    
+
     return element;
 }
 
@@ -200,26 +200,26 @@ function createElement(content, doc) {
         _return = function(a, b, c) {
             return {tag: a, nodes: b, fixed: !!c};
         };
-    
+
     if (isDomInstance(content)) {
         return _return("Dom", content.toArray());
     }
-    
+
     if (isNode(content)) {
         return (tag = getNodeName(content))
                     && _return(tag, [content], fixedNodes[tag]);
     }
-    
+
     if ($.typeOf(content) === "object") {
         return (tag = _pick(content, "tag"))
                     && _return(tag, [create(tag, content, doc)], fixedNodes[tag]);
     }
-    
+
     tag = (re_tagName.exec(content) || [, ""])[1].toLowerCase();
     if (tag === "") { // Text node
         return _return("#text", [doc.createTextNode(content)]);
     }
-    
+
     if (fix = fix = fixedNodes[tag]) {
         content = fix.content.replace("#", content);
         frg = createFragment(content, doc).firstChild;
@@ -232,7 +232,7 @@ function createElement(content, doc) {
     } else {
         frg = createFragment(content, doc);
     }
-    
+
     return _return(tag, $.toArray(frg.childNodes), !!fix);
 }
 
@@ -241,26 +241,26 @@ function insert(fn, el, content, rev) {
         element = createElement(content, doc),
         nodes = element.nodes, node,
         scope, tBody, i = 0;
-    
+
     // Set target as `tbody`, otherwise IE7 doesn't add
     if (element.fixed && element.tag === "tr"
             && (tBody = getByTag(el, "tbody", 0)) != null) {
         el = tBody;
     }
-    
+
     fn = insertFunctions[fn], scope = el;
     while (node = nodes[i++]) {
         // For insertBefore/After etc.
         if (rev) scope = node, node = el;
         fn.call(scope, node);
     }
-    
+
     // Removes empty tbody's on IE (7-8)
-    if (element.fixed && ie_lt9 
+    if (element.fixed && ie_lt9
             && re_tableChildren.test(element.tag)) {
         fixTable(el, doc);
     }
-    
+
     return nodes;
 }
 
@@ -290,8 +290,8 @@ var fixedStyles = {
         "float": DOC.documentElement.style.styleFloat !== undefined ? "styleFloat" : "cssFloat"
     },
     nonuniteStyles = {
-        "opacity": 1, "zoom": 1, "zIndex": 1, 
-        "columnCount": 1, "columns": 1, "fillOpacity": 1, 
+        "opacity": 1, "zoom": 1, "zIndex": 1,
+        "columnCount": 1, "columns": 1, "fillOpacity": 1,
         "fontWeight": 1, "lineHeight": 1
     },
     getStyle = function(el, key) {
@@ -323,7 +323,7 @@ if (DOC.defaultView && DOC.defaultView.getComputedStyle) {
 
 function sumComputedPixels(el, props) {
     var sum = 0, i = 0, prop;
-    while (prop = props[i++]) { 
+    while (prop = props[i++]) {
         sum += parseFloat(getStyle(el, prop)) || 0;
     }
     return sum;
@@ -340,7 +340,7 @@ function parseStyleText(text) {
     text = (""+ text).split(RE("\\s*;\\s*"));
     while (text.length) {
         (s = text.shift().split(RE("\\s*:\\s*")))
-            && (s[0] = $.trim(s[0])) 
+            && (s[0] = $.trim(s[0]))
                 && (styles[s[0]] = s[1] || "");
     }
     return styles;
@@ -355,9 +355,9 @@ function rgbToHex(color) {
         g = parseInt(nums[3], 10).toString(16),
         b = parseInt(nums[4], 10).toString(16);
     return "#"+ (
-        (r.length == 1 ? r +"0" : r) +
-        (g.length == 1 ? g +"0" : g) +
-        (b.length == 1 ? b +"0" : b)
+        (r.length === 1 ? "0"+ r : r) +
+        (g.length === 1 ? "0"+ g : g) +
+        (b.length === 1 ? "0"+ b : b)
     );
 }
 
@@ -374,26 +374,26 @@ function getOffset(el, rel) {
         topScroll = win.pageYOffset || docEl.scrollTop,
         leftScroll = win.pageXOffset || docEl.scrollLeft;
     return {
-        top: rect.top + topScroll - 
+        top: rect.top + topScroll -
                 Math.max(0, docEl && docEl.clientTop, docBody.clientTop),
-        left: rect.left + leftScroll - 
+        left: rect.left + leftScroll -
                 Math.max(0, docEl && docEl.clientLeft, docBody.clientLeft)
     };
 }
 
 function getScroll(el, type /*internal*/) {
     type = type || $.typeOf(el);
-    
+
     var tag, scroll, doc, docEl, win;
-    
-    if (type === "window" || type === "document" || 
+
+    if (type === "window" || type === "document" ||
             ((tag = getNodeName(el)) && tag === "html" || tag === "body")) {
         // IE issue: Works only if `onscroll` called, does not work on `onload`
         doc = $.doc(el);
         win = $.win(doc);
         docEl = doc.documentElement;
         scroll = {
-            top: win.pageYOffset || docEl.scrollTop, 
+            top: win.pageYOffset || docEl.scrollTop,
             left: win.pageXOffset || docEl.scrollLeft
         };
     } else {
@@ -417,7 +417,7 @@ function getUuid(el) {
 }
 
 function getDataKey(key) {
-    return (key = key.replace(re_reduceDash, "-")) && 
+    return (key = key.replace(re_reduceDash, "-")) &&
                 re_dataKey.test(key) ? key : dataKey + key;
 }
 
@@ -453,8 +453,8 @@ Dom.prototype = {
         if (isDomInstance(selector)) {
             return selector;
         }
-        
-        if (selector && typeof selector === "object" && 
+
+        if (selector && typeof selector === "object" &&
                 !selector.nodeType && selector.length === undefined) {
             // Notation: $.dom({tag:"span"})
             selector = createElement(selector, DOC).nodes;
@@ -470,7 +470,7 @@ Dom.prototype = {
                 }
             }
         }
-        
+
         return new Dom(selector);
     },
     find: function(s, i) {
@@ -478,10 +478,10 @@ Dom.prototype = {
     },
     not: function(s) {
         if (!s) return this;
-        
+
         var els1 = this.toArray(),
             els2, els = [], type = typeof s;
-        
+
         if (s && (type === "string" || type === "object")) {
             els2 = this.__init(s).toArray(),
             els = $.filter(els1, function(e) {
@@ -493,7 +493,7 @@ Dom.prototype = {
         } else if (type === "number") {
             els1.splice(s - 1, 1) && (els = els1);
         }
-        
+
         return this.__init(els);
     },
     toArray: function() {
@@ -505,7 +505,7 @@ Dom.prototype = {
     filter: function(fn) {
         return this.__init($.filter(this, fn));
     },
-    reverse: function() {   
+    reverse: function() {
         // clone needs this sometimes (multiple clones)
         return this.__init(this.toArray().reverse());
     },
@@ -677,7 +677,7 @@ $.extend(Dom.prototype, {
         node = isNaN(i) ? node[0] : node[i];
         if (el && node) {
             return el.contains ?
-                        el != node && el.contains(node) : 
+                        el != node && el.contains(node) :
                             !!(el.compareDocumentPosition(node) & 16);
         }
     }
@@ -700,7 +700,7 @@ $.extend(Dom.prototype, {
               styles.zoom = styles.zoom || 1;
               delete styles.opacity;
             }
-            
+
             for (k in styles) {
                 if (styles.hasOwnProperty(k)) {
                     v = styles[k], k = toStyleProp(k);
@@ -759,23 +759,23 @@ $.extend(Dom.prototype, {
         var el = this[0];
         type = type || $.typeOf(el);
         if (type == "window") {
-            var doc = el.document, 
-                docBody = doc.body, 
+            var doc = el.document,
+                docBody = doc.body,
                 docEl = doc.documentElement,
                 css1Compat = (doc.compatMode === "CSS1Compat");
             return {
-                width: css1Compat && docEl.clientWidth || 
+                width: css1Compat && docEl.clientWidth ||
                             docBody && docBody.clientWidth || docEl.clientWidth,
-                height: css1Compat && docEl.clientHeight || 
+                height: css1Compat && docEl.clientHeight ||
                             docBody && docBody.clientHeight || docEl.clientHeight
             };
         }
         if (type == "document") {
-            var docBody = el.body, 
+            var docBody = el.body,
                 docEl = el.documentElement,
-                width = Math.max(docBody.scrollWidth, docBody.offsetWidth, 
+                width = Math.max(docBody.scrollWidth, docBody.offsetWidth,
                                  docEl.scrollWidth, docEl.offsetWidth),
-                height = Math.max(docBody.scrollHeight, docBody.offsetHeight, 
+                height = Math.max(docBody.scrollHeight, docBody.offsetHeight,
                                   docEl.scrollHeight, docEl.offsetHeight);
             // Fix for IE
             if (ie && docEl.clientWidth >= docEl.scrollWidth) width = docEl.clientWidth;
@@ -829,7 +829,7 @@ $.extend(Dom.prototype, {
             }
             // Set scroll top&left
             var doc, win, tag;
-            if (type === "window" || type === "document" || 
+            if (type === "window" || type === "document" ||
                     ((tag = getNodeName(el)) && tag === "html" || tag === "body")) {
                 doc = $.doc(el);
                 win = $.win(doc);
@@ -849,7 +849,7 @@ $.extend(Dom.prototype, {
         if ((el = this[0]) == null) {
             return;
         }
-        return el.hasAttribute ? el.hasAttribute(key) : 
+        return el.hasAttribute ? el.hasAttribute(key) :
                    // IE7
                   (el.attributes[key] && el.attributes[key].specified)
                        || el[key] || el[k];
@@ -870,12 +870,12 @@ $.extend(Dom.prototype, {
         if ((el = this[0]) == null) {
             return;
         }
-        
+
         var attrs = el.attributes, val;
         switch (key) {
             case "class":
             case "className":
-                val = attrs["class"] && attrs["class"].specified 
+                val = attrs["class"] && attrs["class"].specified
                         ? el.className : null;
                 break;
             case "src":
@@ -930,10 +930,10 @@ $.extend(Dom.prototype, {
                 }
             });
         }
-        
+
         var keys = $.trim(key).split(RE("\\s+")),
             i, keyFixed, keyFixedDef;
-        
+
         return this.forEach(function(el) {
             for (i = 0; i < keys.length; i++) {
                 keyFixed = fixedAttributes[keys[i]] || keys[i];
@@ -1007,7 +1007,7 @@ $.extend(Dom.prototype, {
     },
     removeClass: function(cls) {
         return this.forEach(function(el) {
-            el.className = (cls === "*") ? "" : 
+            el.className = (cls === "*") ? "" :
                                 $.trim((""+ el.className).replace(classRE(cls), " "));
         });
     },
@@ -1023,7 +1023,7 @@ $.extend(Dom.prototype, {
 $.extend(Dom.prototype, {
     data: function(key, val) {
         if (!this.length) return this;
-        
+
         // Set data
         if (typeof key === "object" || typeof val !== "undefined") {
             var data = key, uuid;
@@ -1045,15 +1045,15 @@ $.extend(Dom.prototype, {
                 }
             });
         }
-        
+
         // Get data
         key = getDataKey(key);
         var el = this[0],
             uuid = getUuid(el),
             attr = el.attributes[key],
-            data = (attr && attr.specified) ? attr.value : (_data_cache[uuid] && _data_cache[uuid][key]), 
+            data = (attr && attr.specified) ? attr.value : (_data_cache[uuid] && _data_cache[uuid][key]),
             num;
-        
+
         if (typeof data === "string") {
             switch (data) {
                 case "null":
@@ -1111,7 +1111,7 @@ $.extend(Dom.prototype, {
 $.extend(Dom.prototype, {
     serialize: function() {
         var form = this[0],
-            data = [], i = 0, 
+            data = [], i = 0,
             el, type, name, nodeName, attrs;
         // Only forms!!!
         if (form && getNodeName(form) === "form") {
@@ -1120,24 +1120,24 @@ $.extend(Dom.prototype, {
                 name = $.trim(el.name);
                 attrs = el.attributes;
                 nodeName = getNodeName(el);
-                
+
                 if (!type || !name || el.disabled ||
                         (attrs.disabled != null &&
                             attrs.disabled.specified && attrs.disabled === true)) {
                     continue;
                 }
-                
+
                 if (/^(textarea|select|button)$/i.test(nodeName)) {
-                    data.push(encodeURIComponent(name) +"="+ 
+                    data.push(encodeURIComponent(name) +"="+
                                 encodeURIComponent(el.value));
                 } else {
                     switch (type) {
                         case "checkbox":
                         case "radio":
-                            if (el.checked || 
-                                    (attrs.checked != null && 
+                            if (el.checked ||
+                                    (attrs.checked != null &&
                                         attrs.checked.specified && attrs.checked === true)) {
-                                data.push(encodeURIComponent(name) +"="+ 
+                                data.push(encodeURIComponent(name) +"="+
                                     (type === "checkbox" ? "on" : encodeURIComponent(el.value)));
                             }
                             break;
@@ -1177,35 +1177,35 @@ var defaultDisplays = {},
 
 // Credits: http://jquery.com
 function getDefaultDisplay(tagName) {
-    var el, ddIframeDoc, 
+    var el, ddIframeDoc,
         display = defaultDisplays[tagName];
-    
+
     if (!display) {
         el = document.createElement(tagName);
         document.body.appendChild(el);
         display = defaultDisplays[tagName] = getStyle(el, "display");
         document.body.removeChild(el);
-        
+
         if (!display || display === "none") {
             if (!ddIframe) {
                 ddIframe = document.createElement("iframe");
                 ddIframe.width = ddIframe.height = ddIframe.frameBorder = 0;
                 document.body.appendChild(ddIframe);
             }
-            
+
             if (!ddIframeDoc || !ddIframeDoc.createElement) {
                 ddIframeDoc = (ddIframe.contentWindow || ddIframe.contentDocument).document;
                 ddIframeDoc.write("<html><body></body></html>");
                 ddIframeDoc.close();
             }
-            
+
             el = ddIframeDoc.createElement(tagName);
             ddIframeDoc.body.appendChild(el);
             display = defaultDisplays[tagName] = getStyle(el, "display");
             document.body.removeChild(ddIframe);
         }
     }
-    
+
     return display;
 }
 
@@ -1235,7 +1235,7 @@ if ($.animate) {
             });
         },
         hide: function(duration, fn) {
-            return this.forEach(function(el) {  
+            return this.forEach(function(el) {
                 if ((el.offsetWidth || el.offsetHeight)) {
                     $.animate(el, {opacity:0}, duration, function(){
                         el.style.display = "none";
@@ -1257,7 +1257,7 @@ if ($.animate) {
                         this.fn = fn;
                     });
                 }
-            }); 
+            });
         }
     });
 }
