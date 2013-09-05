@@ -48,7 +48,7 @@ function createRequest() {
 
 function toJson(input) {
     if (!input || typeof input !== "string") return null;
-    
+
     input = $.trim(input);
     if (!re_validJson.test(input)) {
         throw ("No valid JSON data provided!");
@@ -64,9 +64,9 @@ function toXml(input) {
     if (input && input.nodeType === 9) {
         return input;
     }
-    
+
     if (!input || typeof input !== "string") return null;
-    
+
     var xml;
     if (window.DOMParser) {
         xml = (new DOMParser).parseFromString(input , "text/xml");
@@ -92,28 +92,28 @@ function parseResponseHeaders(allHeaders) {
 /*** The Ajax! ***/
 function Ajax(options) {
     var key, data = [];
-    
+
     // Create _xhr
     this._xhr = createRequest();
-    
+
     // Extend request headers
     if (options.headers) {
         defaultOptions.requestHeaders = $.mix({}, defaultOptions.requestHeaders, options.headers);
         delete options.headers;
     }
-    
+
     // Extend default options
     options = $.mix(defaultOptions, options);
-    
+
     // Set method name as uppercase
     options.method && (options.method = options.method.toUpperCase());
-    
+
     // Correct file path for "localhost" only
-    if (location.host === "localhost" 
+    if (location.host === "localhost"
             && options.url && options.url.charAt(0) == "/") {
         options.url = options.url.substring(1);
     }
-    
+
     // Prepare request data
     if (options.data) {
         if ($.typeOf(options.data) === "object") {
@@ -125,10 +125,8 @@ function Ajax(options) {
         } else {
             data = options.data;
         }
-        
-        if (options.method == "POST" || options.method == "PUT") {
-            options.data = data;
-        } else {
+
+        if (options.method == "GET") {
             if (options.url != "") {
                 options.url = options.url.indexOf("?") === -1
                     ? options.url += "?"+ data
@@ -136,6 +134,8 @@ function Ajax(options) {
             } else {
                 options.url += "?"+ data
             }
+        } else {
+            options.data = data;
         }
     }
     // Add no-cache helper
@@ -144,11 +144,11 @@ function Ajax(options) {
     }
     // Clear url
     options.url = options.url.replace(re_query, "?$1");
-    
+
     // Set options
     this.options = options;
     this.isAborted = this.isSent = false;
-    
+
     // Send if autoSend not false
     if (options.autoSend !== false) {
         return this.send();
@@ -159,68 +159,68 @@ Ajax.prototype = {
     send: function() {
         var that = this,
             options = this.options, key;
-        
+
         // Prevent re-send for chaining callbacks
         if (this.isSent || this.isAborted) {
             return this;
         }
-        
-        
+
+
         // Open connection
         this._xhr.open(options.method, options.url, options.async);
-        // Set request header for POST/PUT
-        if (options.method == "POST" || options.method == "PUT") {
-            this._xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        // Set request header for POST etc.
+        if (options.method != "GET" && options.data && options.data.length) {
+            this._xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         }
-        
+
         // Set request headers if exist
         for (key in options.requestHeaders) {
             options.requestHeaders.hasOwnProperty(key)
                 && this._xhr.setRequestHeader(key, options.requestHeaders[key]);
         }
-        
+
         // Define ready state change method
         if (options.async) {
             this._xhr.onreadystatechange = function() {
                 that._handleResponse(that, options);
             };
         }
-        
+
         // Call beforeSend function
         if (typeof options.beforeSend === "function") {
             options.beforeSend.call(this, this._xhr);
         }
-        
+
         // Send request
         this._xhr.send(options.data);
-        
+
         // Call afterSend function
         if (typeof options.afterSend === "function") {
             options.afterSend.call(this, this._xhr);
         }
-        
+
         // Handle async
         if (!options.async) {
             this._handleResponse(this, options);
         }
-        
+
         // Flag sent
         this.isSent = true;
-        
+
         // Check timeout
         if (options.timeout) {
             setTimeout(function() {
                 that.abort();
             }, options.timeout);
         }
-        
+
         return this;
     },
     abort: function() {
         // Abort request
         this.isAborted = true;
         this._xhr.abort();
-        
+
         // Call onabort method
         this.options.onAbort.call(this, this._xhr);
     },
@@ -251,7 +251,7 @@ Ajax.prototype = {
                 that.readyState = that._xhr.readyState;
                 that.statusCode = that._xhr.status;
                 that.statusText = that._xhr.statusText;
-        
+
                 // Process response content
                 var content = (options.dataType == "xml")
                             ? that._xhr.responseXML || that._xhr.responseText
@@ -261,23 +261,23 @@ Ajax.prototype = {
                 } else if (options.dataType == "xml") {
                     content = toXml(content);
                 }
-                
+
                 var statusCode = that._xhr.status;
                 // Call response status methods if exist
                 if (typeof options[statusCode] === "function") {
                     options[statusCode].call(that, content, that._xhr);
                 }
-                
+
                 // Call onsuccess/onerror method
                 if (statusCode >= 100 && statusCode < 400) {
                     options.onSuccess.call(that, content, that._xhr);
                 } else {
                     options.onError.call(that, content, that._xhr);
                 }
-                
+
                 // Call oncomplete method
                 options.onComplete.call(that, content, that._xhr);
-                
+
                 // Remove onreadystatechange
                 that._xhr.onreadystatechange = null;
                 break;
@@ -313,7 +313,7 @@ function request(theRequest, data, onSuccess, onError, onComplete) {
         data = onSuccess = onError = onComplete = undefined;
         onSuccess = args[1], onError = args[2], onComplete = args[3];
     }
-    
+
     return new Ajax({
         method: $.trim(theRequest[1]) || defaultOptions.method,
         url: $.trim(theRequest[2]),
