@@ -1016,6 +1016,13 @@ $.extend(Dom.prototype, {
             el.className = $.trim((""+ el.className)
                                     .replace(classRE(cls1), " "+ cls2 +" "));
         });
+    },
+    toggleClass: function(cls) {
+        if (this.hasClass(cls, this[0])) {
+            this.removeClass(cls);
+        } else {
+            this.addClass(cls);
+        }
     }
 });
 
