@@ -1019,9 +1019,9 @@ $.extend(Dom.prototype, {
     },
     toggleClass: function(cls) {
         if (this.hasClass(cls, this[0])) {
-            this.removeClass(cls);
+            return this.removeClass(cls);
         } else {
-            this.addClass(cls);
+            return this.addClass(cls);
         }
     }
 });
