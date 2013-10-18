@@ -139,7 +139,7 @@ function Ajax(options) {
         }
     }
     // Add no-cache helper
-    if (options.noCache !== false || options.method == "GET") {
+    if (options.method == "GET" && options.noCache !== false) {
         options.url += options.url.indexOf("?") === -1 ? "?_="+ $.now() : "&_="+ $.now();
     }
     // Clear url
@@ -329,6 +329,12 @@ $.ajax = function(options, data, onSuccess, onError, onComplete) {
     if (typeof options === "string") {
         return request(options, data, onSuccess, onError, onComplete);
     }
+    options = $.mix(options, {
+              data: data,
+         onSuccess: onSuccess  || options.onSuccess  || defaultOptions.onSuccess,
+           onError: onError    || options.onError    || defaultOptions.onError,
+        onComplete: onComplete || options.onComplete || defaultOptions.onComplete
+    });
     return new Ajax(options);
 };
 
