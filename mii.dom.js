@@ -1007,21 +1007,21 @@ $.extend(Dom.prototype, {
     },
     removeClass: function(cls) {
         return this.forEach(function(el) {
-            el.className = (cls === "*") ? "" :
-                                $.trim((""+ el.className).replace(classRE(cls), " "));
+            el.className = (cls === "*")
+                ? ""
+                : $.trim((""+ el.className).replace(classRE(cls), " "));
         });
     },
     replaceClass: function(cls1, cls2) {
         return this.forEach(function(el) {
-            el.className = $.trim((""+ el.className)
-                                    .replace(classRE(cls1), " "+ cls2 +" "));
+            el.className = $.trim((""+ el.className).replace(classRE(cls1), " "+ cls2 +" "));
         });
     },
     toggleClass: function(cls) {
-        if (this.hasClass(cls, this[0])) {
-            return this.removeClass(cls);
-        } else {
+        if (!this.hasClass(cls, this[0])) {
             return this.addClass(cls);
+        } else {
+            return this.removeClass(cls);
         }
     }
 });
