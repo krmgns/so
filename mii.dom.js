@@ -815,7 +815,7 @@ $.extend(Dom.prototype, {
             }
         }
     },
-    scroll: function(top, left, el /*internal*/) {
+    scroll: function(top, left) {
         var el, type;
         if (el = this[0]) {
             type = $.typeOf(el);
@@ -849,10 +849,8 @@ $.extend(Dom.prototype, {
         if ((el = this[0]) == null) {
             return;
         }
-        return el.hasAttribute ? el.hasAttribute(key) :
-                   // IE7
-                  (el.attributes[key] && el.attributes[key].specified)
-                       || el[key] || el[k];
+        return el.hasAttribute ? el.hasAttribute(key)
+            : (el.attributes[key] && el.attributes[key].specified) || el[key]; // IE7
     },
     setAttr: function(key, val) {
         return this.forEach(function(el) {
@@ -1083,7 +1081,7 @@ $.extend(Dom.prototype, {
             if (key === "*") {
                 return this.removeDataAll();
             }
-            var uuid = el.getAttribute(uuidKey), data;
+            var uuid = el.getAttribute(uuidKey);
             if (uuid !== null) { // Has uuid?
                 key = getDataKey(key);
                 if (_data_cache[uuid] && _data_cache[uuid][key]) {

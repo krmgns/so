@@ -10,10 +10,17 @@
 <script>
 mii.onReady(function($){
     var el = $.dom("#button");
-    el.on("click", function(){
-        el.fire("foo", function(e){
-            log(e);
-        });
+    el.addFireEvent("foo1", function(e){
+        log(e)
+    });
+    el.addFireEvent("foo2", function(e){
+        log(e)
+    });
+    el.on("click", function(e){
+        log(e);
+        el.fire("foo1");
+        el.fire("foo2");
+        el.removeFireEvent("foo1");
     });
 });
 </script>

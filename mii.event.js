@@ -15,6 +15,9 @@ var event = (function() {
         e.preventDefault = preventDefault;
         e.stopPropagation = stopPropagation;
         e.target = e.srcElement;
+        if (e.nodeType == 3) { // Safari bug
+            e.target = e.target.parentNode;
+        }
         e.relatedTarget = e.fromElement;
         e.keyCode = e.which;
         return e;
@@ -76,7 +79,51 @@ var event = (function() {
         });
     }
 
-    function fire(el, type, fn) {
+    var _ek = function(type) {
+        return "mii.event.fire."+ type;
+    };
+
+    function addFireEvent(el, type, fn) {
+        var eventKey = _ek(type),
+            eventObject, e;
+        if (document.createEventObject) {
+            // Dispatch for IE
+            e = document.createEventObject();
+            if (el[eventKey] == null) {
+                addEvent(el, type, fn);
+            }
+            eventObject = e;
+        } else {
+            // Dispatch for Firefox & others
+            e = document.createEvent("Event");
+            e.initEvent(type, true, true); // type, bubbling, cancelable
+            if (el[eventKey] == null) {
+                addEvent(el, type, fn);
+            }
+            eventObject = e;
+        }
+        el[eventKey] = eventObject;
+    }
+    function removeFireEvent(el, type) {
+        var eventKey = _ek(type);
+        el[eventKey] = null;
+    }
+
+    function fire(el, type) {
+        var eventKey = _ek(type),
+            eventObject = el[eventKey];
+        if (eventObject != null) {
+            if (el.fireEvent) {
+                // Dispatch for IE
+                return el.fireEvent("on"+ type, eventObject);
+            } else {
+                // Dispatch for Firefox & others
+                return !el.dispatchEvent(eventObject);
+            }
+        }
+    }
+
+    /*function fire(el, type, fn) {
         var eventKey = "mii.event.fire."+ type;
         if (document.createEventObject) {
             // Dispatch for IE
@@ -96,7 +143,7 @@ var event = (function() {
             }
             return !el.dispatchEvent(e);
         }
-    }
+    }*/
 
     return {
         once: once,
@@ -104,7 +151,9 @@ var event = (function() {
         off: removeEvent,
         addEvent: addEvent,
         removeEvent: removeEvent,
-        fire: fire
+        fire: fire,
+        addFireEvent: addFireEvent,
+        removeFireEvent: removeFireEvent,
     };
 })();
 
