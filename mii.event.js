@@ -80,21 +80,21 @@ var event = (function() {
         var eventKey = "mii.event.fire."+ type;
         if (document.createEventObject) {
             // Dispatch for IE
-            var de = document.createEventObject();
+            var e = document.createEventObject();
             if (el[eventKey] == null) {
                 el[eventKey] = "OK";
                 addEvent(el, type, fn);
             }
-            return el.fireEvent("on"+ type, de);
+            return el.fireEvent("on"+ type, e);
         } else {
             // Dispatch for Firefox & others
-            var de = document.createEvent("Event");
-            de.initEvent(type, true, true); // type, bubbling, cancelable
+            var e = document.createEvent("Event");
+            e.initEvent(type, true, true); // type, bubbling, cancelable
             if (el[eventKey] == null) {
                 el[eventKey] = "OK";
                 addEvent(el, type, fn);
             }
-            return !el.dispatchEvent(de);
+            return !el.dispatchEvent(e);
         }
     }
 
