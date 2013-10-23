@@ -104,6 +104,7 @@ var event = (function() {
         }
         el[eventKey] = eventObject;
     }
+
     function removeFireEvent(el, type) {
         var eventKey = _ek(type);
         el[eventKey] = null;
