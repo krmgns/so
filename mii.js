@@ -37,7 +37,7 @@ function makeArray(input) {
 }
 
 var mii = {
-    non: function() {},
+    fun: function() {},
 
     now: function() {
         return +(new Date);
