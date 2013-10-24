@@ -15,12 +15,12 @@ function makeArray(input) {
     if (mii.typeOf(input) === "array") {
         return input;
     }
-    
+
     var array = [],
         i = 0;
-    
-    if (!input || // null, undefined, "", 0 etc. 
-            typeof input === "string" || input.nodeType || 
+
+    if (!input || // null, undefined, "", 0 etc.
+            typeof input === "string" || input.nodeType ||
                    input.length === undefined || input == window) {
         array = [input];
     } else {
@@ -32,32 +32,32 @@ function makeArray(input) {
             }
         }
     }
-    
+
     return array;
 }
 
 var mii = {
-    emptyFunction: function() {},
-    
+    non: function() {},
+
     now: function() {
         return +(new Date);
     },
-    
+
     uuid: function() {
         return ++_uuid;
     },
-    
+
     win: function(el) {
         if (!el) return window;
         return el == el.window ?
                    el : el.nodeType === 9 ?
                        (el.defaultView || el.parentWindow) : null;
     },
-    
+
     doc: function(el) {
         return (el && el.ownerDocument) || document;
     },
-    
+
     typeOf: function(x) {
         if (x === null)               return "null";
         if (typeof x === "undefined") return "undefined";
@@ -67,11 +67,11 @@ var mii = {
         // if (typeof x !== "number" && /^\d+$/.test(x)) return "numeric";
         return fn_toString.call(x).slice(8, -1).toLowerCase();
     },
-    
+
     trim: function(s) {
         return (s != null) ? s.replace(re_trim, "") : "";
     },
-    
+
     isEmpty: function(x) {
         var type = this.typeOf(x);
         if (type === "undefined" || !x) return true; // "", null, false, undefined, 0, NaN
@@ -79,7 +79,7 @@ var mii = {
         if (type === "object") for (var i in x) return false; return true;
         return false;
     },
-    
+
     forEach: function(input, fn, scope) {
         var len = input && input.length, i;
         if (len !== undefined) {
@@ -93,7 +93,7 @@ var mii = {
         }
         return scope || input;
     },
-    
+
     filter: function(array, fn) {
         array = array || [];
         for (var i = 0, len = array.length, result = []; i < len; i++) {
@@ -103,7 +103,7 @@ var mii = {
         }
         return result;
     },
-    
+
     toArray: function(input) {
         var i = 0, len = arguments.length, array = [];
         while (i < len) {
@@ -111,7 +111,7 @@ var mii = {
         }
         return array;
     },
-    
+
     mix: function() {
         var args = arguments, i = 1, target, source;
         if (args.length < 2) {
@@ -120,17 +120,17 @@ var mii = {
         target = args[0];
         while (source = args[i++]) {
             for (var key in source) {
-                source.hasOwnProperty(key) 
+                source.hasOwnProperty(key)
                     && (target[key] = source[key]);
             }
         }
         return target;
     },
-    
+
     extend: function(target, source) {
         var targetType = typeof target,
             sourceType = typeof source;
-        
+
         if (targetType === "object" && sourceType === "undefined") {
             // self extend
             source = target, target = this;
@@ -139,10 +139,10 @@ var mii = {
                 ? this[target] = {}
                 : this[target];
         }
-        
+
         return this.mix(target, source);
     },
-        
+
     toString: function() {
         var args = arguments;
         if (!args.length) {
