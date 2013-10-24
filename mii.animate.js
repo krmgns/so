@@ -7,9 +7,9 @@ var defaultDuration = 350,
     fps = 60,
     ease = function(t,b,c,d) {return -c*(t/=d)*(t-2)+b},
     nonuniteStyles = {
-        "opacity": 1, "zoom": 1, "zIndex": 1, 
-        "columnCount": 1, "columns": 1, "fillOpacity": 1, 
-        "fontWeight": 1, "lineHeight": 1
+        "opacity"    : 1, "zoom"      : 1, "zIndex"     : 1,
+        "columnCount": 1, "columns"   : 1, "fillOpacity": 1,
+        "fontWeight" : 1, "lineHeight": 1
     },
     oldIE = $.browser.ie && $.browser.version < 9,
     requestAnimationFrame = window.requestAnimationFrame
@@ -53,10 +53,10 @@ Animation.prototype.animate = function(options, duration, fn) {
     this.startTime = $.now();
     this.elapsedTime = 0;
     this.fn = fn;
-    
+
     var that = this,
         key, startValue, endValue;
-    
+
     // Add animations
     for (key in this.options) {
         if (this.options.hasOwnProperty(key)) {
@@ -71,7 +71,7 @@ Animation.prototype.animate = function(options, duration, fn) {
             });
         }
     }
-    
+
     // Run animation
     (function run() {
         if (!that.stopped) {
@@ -83,7 +83,7 @@ Animation.prototype.animate = function(options, duration, fn) {
             }
         }
     })();
-    
+
     return this;
 };
 
@@ -121,20 +121,22 @@ $.extend(Animation.prototype, {
     },
     _fade: function(from, to, reverse) {
         var el = this.el, style = el.style;
-        
+
         // Set start value
         if (style.opacityValue == null) {
             style.opacityValue = from;
         }
-        
-        if (reverse) { // Decrease opacity
+
+        if (reverse) {
+            // Decrease opacity
             if (style.opacityValue <= to) {
                 style.opacityValue = to;
                 setOpacity(el, to);
                 return;
             }
             style.opacityValue -= ((this.elapsedTime / this.fix) / this.duration) * 0.1;
-        } else { // Increase opacity
+        } else {
+            // Increase opacity
             if (style.opacityValue >= to) {
                 style.opacityValue = to;
                 setOpacity(el, to);
@@ -142,7 +144,7 @@ $.extend(Animation.prototype, {
             }
             style.opacityValue += ((this.elapsedTime / this.fix) / this.duration) * 0.1;
         }
-        
+
         // Set opacity
         setOpacity(el, style.opacityValue);
     },
