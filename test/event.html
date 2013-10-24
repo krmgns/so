@@ -6,21 +6,21 @@
 <script src="../mii.js"></script>
 <script src="../mii.event.js"></script>
 <script src="../mii.dom.js"></script> -->
-<script src="../mii-pack.js"></script>
+<script src="../mii-all.js"></script>
 <script>
 mii.onReady(function($){
     var el = $.dom("#button");
-    el.addFireEvent("foo1", function(e){
+    el.addFireEvent("custom 1", function(e){
         log(e)
     });
-    el.addFireEvent("foo2", function(e){
+    el.addFireEvent("custom 2", function(e){
         log(e)
     });
     el.on("click", function(e){
         log(e);
-        el.fire("foo1");
-        el.fire("foo2");
-        el.removeFireEvent("foo1");
+        el.fire("custom 1");
+        el.fire("custom 2");
+        el.removeFireEvent("custom 1");
     });
 });
 </script>
