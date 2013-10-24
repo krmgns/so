@@ -124,28 +124,6 @@ var event = (function() {
         }
     }
 
-    /*function fire(el, type, fn) {
-        var eventKey = "mii.event.fire."+ type;
-        if (document.createEventObject) {
-            // Dispatch for IE
-            var e = document.createEventObject();
-            if (el[eventKey] == null) {
-                el[eventKey] = "OK";
-                addEvent(el, type, fn);
-            }
-            return el.fireEvent("on"+ type, e);
-        } else {
-            // Dispatch for Firefox & others
-            var e = document.createEvent("Event");
-            e.initEvent(type, true, true); // type, bubbling, cancelable
-            if (el[eventKey] == null) {
-                el[eventKey] = "OK";
-                addEvent(el, type, fn);
-            }
-            return !el.dispatchEvent(e);
-        }
-    }*/
-
     return {
         once: once,
         on: addEvent,
