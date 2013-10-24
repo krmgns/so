@@ -2,9 +2,9 @@ Actually, I know that there are buch of JavaScript libraries, even more powerful
 
 See: http://miijs.com
 
-* Browser Support
-    - IE7+ (not tested on 6)
-    - Chrome 1+
-    - Safari 3+
-    - Firefox 2+
-    - Opera
+*Browser Support*
+- IE7+ (not tested on 6)
+- Chrome 1+
+- Safari 3+
+- Firefox 2+
+- Opera
