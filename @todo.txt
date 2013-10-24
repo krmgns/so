@@ -1,0 +1,1 @@
+- Add: $.dom.nearestElement() and $.dom.farthestElement()
