@@ -36,7 +36,8 @@ function RE(re, flags, x /*internal*/) {
 }
 
 function isNode(node) {
-    return node && node.nodeType && (node.nodeType === 1 || node.nodeType === 3 || node.nodeType === 11);
+    return node && node.nodeType &&
+        (node.nodeType === 1 || node.nodeType === 3 || node.nodeType === 11);
 }
 
 function getNodeName(node) {
@@ -45,9 +46,9 @@ function getNodeName(node) {
 
 function getByTag(root, tag, i) {
     var els = root.getElementsByTagName(tag);
-    return i === true ?
-               $.toArray(els) : isNaN(i) ?
-                   els : els[i];
+    return (i === true)
+        ? $.toArray(els) : isNaN(i)
+        ? els : els[i];
 }
 
 function fixTable(table, doc) {
@@ -170,19 +171,20 @@ function create(tag, attrs, doc) {
 
 function createFragment(content, doc) {
     var tmp = doc.createElement("tmp"), // tmp?
-        fragment = doc.createDocumentFragment();
+        frg = doc.createDocumentFragment();
 
     tmp.innerHTML = content;
     while (tmp.firstChild) {
-        fragment.appendChild(tmp.firstChild);
+        frg.appendChild(tmp.firstChild);
     }
 
-    return fragment;
+    return frg;
 }
 
 function createElementSafe(tag, doc, nameAttr) {
     var element;
-    doc || (doc = DOC), nameAttr || (nameAttr = "");
+    doc || (doc = DOC);
+    nameAttr || (nameAttr = "");
 
     if (ie_lt8) {
         // Set name for IE
@@ -220,7 +222,7 @@ function createElement(content, doc) {
         return _return("#text", [doc.createTextNode(content)]);
     }
 
-    if (fix = fix = fixedNodes[tag]) {
+    if (fix = fixedNodes[tag]) {
         content = fix.content.replace("#", content);
         frg = createFragment(content, doc).firstChild;
         dep = fix.dep;
@@ -242,7 +244,7 @@ function insert(fn, el, content, rev) {
         nodes = element.nodes, node,
         scope, tBody, i = 0;
 
-    // Set target as `tbody`, otherwise IE7 doesn't add
+    // Set target as `tbody`, otherwise IE7 doesn't insert
     if (element.fixed && element.tag === "tr"
             && (tBody = getByTag(el, "tbody", 0)) != null) {
         el = tBody;
@@ -251,13 +253,14 @@ function insert(fn, el, content, rev) {
     fn = insertFunctions[fn], scope = el;
     while (node = nodes[i++]) {
         // For insertBefore/After etc.
-        if (rev) scope = node, node = el;
+        if (rev) {
+            scope = node; node = el;
+        }
         fn.call(scope, node);
     }
 
     // Removes empty tbody's on IE (7-8)
-    if (element.fixed && ie_lt9
-            && re_tableChildren.test(element.tag)) {
+    if (element.fixed && ie_lt9 && re_tableChildren.test(element.tag)) {
         fixTable(el, doc);
     }
 
@@ -287,12 +290,12 @@ function toPixel(el, key, value) {
 }
 
 var fixedStyles = {
-        "float": DOC.documentElement.style.styleFloat !== undefined ? "styleFloat" : "cssFloat"
+        "float": (DOC.documentElement.style.styleFloat !== undefined) ? "styleFloat" : "cssFloat"
     },
     nonuniteStyles = {
-        "opacity": 1, "zoom": 1, "zIndex": 1,
-        "columnCount": 1, "columns": 1, "fillOpacity": 1,
-        "fontWeight": 1, "lineHeight": 1
+        "opacity"    : 1, "zoom"      : 1, "zIndex"     : 1,
+        "columnCount": 1, "columns"   : 1, "fillOpacity": 1,
+        "fontWeight" : 1, "lineHeight": 1
     },
     getStyle = function(el, key) {
         return el.style[key] || "";
@@ -339,6 +342,7 @@ function parseStyleText(text) {
     var styles = {}, s;
     text = (""+ text).split(RE("\\s*;\\s*"));
     while (text.length) {
+        // wtf! :)
         (s = text.shift().split(RE("\\s*:\\s*")))
             && (s[0] = $.trim(s[0]))
                 && (styles[s[0]] = s[1] || "");
@@ -366,7 +370,7 @@ function getOffset(el, rel) {
     if (rel && (tag === "body" || tag === "html")) {
         return {top: 0, left: 0};
     }
-    var rect = el.getBoundingClientRect && el.getBoundingClientRect() || {},
+    var rect = el.getBoundingClientRect ? el.getBoundingClientRect() : {},
         doc = $.doc(el),
         win = $.win(doc),
         docEl = doc.documentElement,
@@ -570,8 +574,8 @@ $.extend(Dom.prototype, {
     },
     remove: function() {
         return this.forEach(function(el) {
-            (el = cleanElement(el)) &&
-                el.parentNode && el.parentNode.removeChild(el);
+            el = cleanElement(el);
+            el.parentNode && el.parentNode.removeChild(el);
         });
     },
     empty: function() {
@@ -673,12 +677,12 @@ $.extend(Dom.prototype, {
     },
     contains: function(node, i) {
         var el = this[0];
-        node = isDomInstance(node) ? node : this.__init(node);
+        node = this.__init(node);
         node = isNaN(i) ? node[0] : node[i];
         if (el && node) {
-            return el.contains ?
-                        el != node && el.contains(node) :
-                            !!(el.compareDocumentPosition(node) & 16);
+            return el.contains
+                ? el != node && el.contains(node)
+                : !!(el.compareDocumentPosition(node) & 16);
         }
     }
 });
@@ -696,9 +700,9 @@ $.extend(Dom.prototype, {
                 }
             }
             if (ie_lt9 && "opacity" in styles) {
-              styles.filter = "alpha(opacity=" + (styles.opacity * 100) + ")";
-              styles.zoom = styles.zoom || 1;
-              delete styles.opacity;
+                styles.filter = "alpha(opacity=" + (styles.opacity * 100) + ")";
+                styles.zoom = styles.zoom || 1;
+                delete styles.opacity;
             }
 
             for (k in styles) {
@@ -819,15 +823,15 @@ $.extend(Dom.prototype, {
         var el, type;
         if (el = this[0]) {
             type = $.typeOf(el);
-            // Get scroll top/left
+            // Get scroll top | left
             if (typeof top === "string") {
                 return getScroll(el, type)[top];
             }
-            // Get scroll top&left
+            // Get scroll top & left
             if (top == null && left == null) {
                 return getScroll(el, type);
             }
-            // Set scroll top&left
+            // Set scroll top & left
             var doc, win, tag;
             if (type === "window" || type === "document" ||
                     ((tag = getNodeName(el)) && tag === "html" || tag === "body")) {
@@ -881,9 +885,10 @@ $.extend(Dom.prototype, {
                 val = el.getAttribute("href", 2);
                 break;
             case "style":
-                val = ie_lt8 ? (attrs.style && attrs.style.specified)
-                                ? el.style.cssText : null
-                                    : el.getAttribute("style");
+                val = ie_lt8
+                    ? (attrs.style && attrs.style.specified)
+                        ? el.style.cssText : null
+                            : el.getAttribute("style");
                 val = val && val.toLowerCase();
                 break;
             case "tabindex":
