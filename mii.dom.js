@@ -1174,9 +1174,20 @@ if ($.event) {
     $.forEach($.event, function(fn) {
         if (fn !== "toString") { // Skip exposer
             Dom.prototype[fn] = function(type, callback) {
-                return this.forEach(function(el) {
-                    $.event[fn](el, type, callback);
-                });
+                var _this = this;
+                if (type.indexOf(",") > -1) {
+                    // Multi events
+                    $.forEach(type.split(/\s*,\s*/), function(type) {
+                        return _this.forEach(function(el) {
+                            $.event[fn](el, type, callback);
+                        });
+                    });
+                } else {
+                    // Single event
+                    return _this.forEach(function(el) {
+                        $.event[fn](el, type, callback);
+                    });
+                }
             };
         }
     });
