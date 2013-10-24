@@ -28,13 +28,13 @@ var re_validJson = /^\{.*?\}|\[.*?\]$/,
         noCache: true,
         requestHeaders: {"X-Requested-With": "XMLHttpRequest"},
         responseHeaders: {},
-        onStart: $.emptyFunction,
-        onStop: $.emptyFunction, // @todo: queue
-        onComplete: $.emptyFunction,
-        onProgress: $.emptyFunction,
-        onSuccess: $.emptyFunction,
-        onError: $.emptyFunction,
-        onAbort: $.emptyFunction,
+        onStart: $.non,
+        onStop: $.non, // @todo: queue
+        onComplete: $.non,
+        onProgress: $.non,
+        onSuccess: $.non,
+        onError: $.non,
+        onAbort: $.non,
         beforeSend: null,
         afterSend: null
     }
