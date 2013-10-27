@@ -882,7 +882,7 @@ $.extend(Dom.prototype, {
                 break;
             case "src":
             case "href":
-                val = el.getAttribute("href", 2);
+                val = el.getAttribute(key, 2);
                 break;
             case "style":
                 val = ie_lt8
