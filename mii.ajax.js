@@ -329,12 +329,22 @@ $.ajax = function(options, data, onSuccess, onError, onComplete) {
     if (typeof options === "string") {
         return request(options, data, onSuccess, onError, onComplete);
     }
+
+    // No data, change the alignment
+    if (typeof data === "function") {
+        // Keep arguments
+        var args = $.toArray(arguments);
+        // Prevent re-calls
+        data = onSuccess = onError = onComplete = undefined;
+        onSuccess = args[1], onError = args[2], onComplete = args[3];
+    }
+
     options = $.mix(options, {
-              data: data,
          onSuccess: onSuccess  || options.onSuccess  || defaultOptions.onSuccess,
            onError: onError    || options.onError    || defaultOptions.onError,
         onComplete: onComplete || options.onComplete || defaultOptions.onComplete
     });
+
     return new Ajax(options);
 };
 
