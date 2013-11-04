@@ -103,7 +103,7 @@ function Ajax(options) {
     }
 
     // Extend default options
-    options = $.mix(defaultOptions, options);
+    options = $.mix({}, defaultOptions, options);
 
     // Set method name as uppercase
     options.method && (options.method = options.method.toUpperCase());
