@@ -165,12 +165,12 @@ Ajax.prototype = {
             return this;
         }
 
-
         // Open connection
         this._xhr.open(options.method, options.url, options.async);
         // Set request header for POST etc.
         if (options.method != "GET" && options.data && options.data.length) {
             this._xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            this._xhr.setRequestHeader("Content-Length", options.data.length);
         }
 
         // Set request headers if exist
