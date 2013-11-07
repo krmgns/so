@@ -8,3 +8,4 @@ See: http://miijs.com
 - Safari 3+
 - Firefox 2+
 - Opera
+
