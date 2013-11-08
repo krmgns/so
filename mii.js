@@ -227,7 +227,6 @@ mii.import.files = [];
 mii.import.setPath = function(path) {
     mii.import.path = path;
 };
-
 mii.import.getPath = function() {
     return mii.import.path;
 };
