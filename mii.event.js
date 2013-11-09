@@ -84,14 +84,14 @@ var event = (function() {
         var eventKey = _ek(type),
             eventObject, e;
         if (document.createEventObject) {
-            // Dispatch for IE
+            // Create for IE
             e = document.createEventObject();
             if (el[eventKey] == null) {
                 addEvent(el, type, fn);
             }
             eventObject = e;
         } else {
-            // Dispatch for Firefox & others
+            // Create for Firefox & others
             e = document.createEvent("Event");
             e.initEvent(type, true, true); // type, bubbling, cancelable
             if (el[eventKey] == null) {
