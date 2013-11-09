@@ -15,9 +15,6 @@ var event = (function() {
         e.preventDefault = preventDefault;
         e.stopPropagation = stopPropagation;
         e.target = e.srcElement;
-        if (e.nodeType == 3) { // Safari bug
-            e.target = e.target.parentNode;
-        }
         e.relatedTarget = e.fromElement;
         e.keyCode = e.which;
         return e;
