@@ -1119,7 +1119,7 @@ $.extend(Dom.prototype, {
 
 // Dom: form tools
 $.extend(Dom.prototype, {
-    serialize: function() {
+    builtQuery: function() {
         var form = this[0],
             data = [], i = 0,
             el, type, name, nodeName, attrs;
@@ -1159,8 +1159,8 @@ $.extend(Dom.prototype, {
         }
         return data.join("&").replace(/%20/g, "+");
     },
-    serializeArray: function() {
-        var tmp = this.serialize(), array = {};
+    builtQueryArray: function() {
+        var tmp = this.builtQuery(), array = {};
         $.forEach(tmp.split("&"), function(a){
             a = a.split("=");
             array[a[0]] = a[1];
