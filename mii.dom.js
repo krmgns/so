@@ -1245,6 +1245,9 @@ if ($.animate) {
             return this.fadeTo(1, duration, fn);
         },
         fadeOut: function(duration, fn) {
+            if (fn === true || fn === "remove") {
+                fn = function(el) { $.dom(el).remove(); };
+            }
             return this.fadeTo(0, duration, fn);
         },
         show: function(duration, fn) {
