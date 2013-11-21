@@ -158,7 +158,7 @@ $.extend(Animation.prototype, {
 
 // Add `animate` to mii
 $.animate = function(el, options, duration, fn) {
-    return new Animation(el).animate(options, duration, fn);
+    return (new Animation(el)).animate(options, duration, fn);
 };
 
 // Define exposer
