@@ -589,10 +589,8 @@ $.extend(Dom.prototype, {
 $.forEach({parent: "parentNode", prev: "previousSibling", next: "nextSibling"}, function(fn, node) {
     Dom.prototype[fn] = function() {
         var n = this[0] && this[0][node];
-        if (n) {
-            while (n && n.nodeType !== 1) {
-                n = n[node];
-            }
+        while (n && n.nodeType !== 1) {
+            n = n[node];
         }
         return this.__init(n);
     };
