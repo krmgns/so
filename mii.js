@@ -164,6 +164,7 @@ var mii = {
     }
 };
 
+// On ready
 var onReadyCallbacks = [];
 
 mii.onReady = function(callback) {
@@ -181,6 +182,8 @@ mii.onReady = function(callback) {
     };
 };
 
+
+// Browser
 var re_browsers = {
     firefox: /firefox\/([\d\.]+)/,
     chrome: /chrome\/([\d\.]+)/,
@@ -202,8 +205,13 @@ mii.browser = function() {
     return browser;
 }();
 
+
+// Import
+var docHead = document.getElementsByTagName("head")[0];
+
 mii.import = function(src, callback) {
     src = mii.import.path + src;
+    // If file already not imported
     if (!mii.inArray(src, mii.import.files)) {
         var s = document.createElement("script");
         s.src = src;
@@ -216,7 +224,9 @@ mii.import = function(src, callback) {
                 }
             };
         }
-        document.getElementsByTagName("head")[0].appendChild(s);
+        // Append script
+        docHead.appendChild(s);
+        // Store imported files
         mii.import.files.push(src);
     }
 };
