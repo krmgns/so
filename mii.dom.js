@@ -1117,7 +1117,7 @@ $.extend(Dom.prototype, {
 
 // Dom: form tools
 $.extend(Dom.prototype, {
-    builtQuery: function() {
+    builtQuery: function(ws2plus /*internal*/) {
         var form = this[0],
             data = [], i = 0,
             el, type, name, nodeName, attrs;
@@ -1153,13 +1153,17 @@ $.extend(Dom.prototype, {
                 }
             }
         }
-        return data.join("&").replace(/%20/g, "+");
+        data = data.join("&");
+        if (ws2plus !== false) {
+            data = data.replace(/%20/g, "+");
+        }
+        return data;
     },
     builtQueryArray: function() {
-        var tmp = this.builtQuery(), array = {};
+        var tmp = this.builtQuery(false), array = {};
         $.forEach(tmp.split("&"), function(a){
             a = a.split("=");
-            array[decodeURIComponent(a[0])] = a[1];
+            array[decodeURIComponent(a[0])] = decodeURIComponent(a[1]);
         });
         return array;
     }
