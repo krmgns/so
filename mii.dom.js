@@ -1161,7 +1161,7 @@ $.extend(Dom.prototype, {
         var tmp = this.builtQuery(), array = {};
         $.forEach(tmp.split("&"), function(a){
             a = a.split("=");
-            array[a[0]] = a[1];
+            array[decodeURIComponent(a[0])] = a[1];
         });
         return array;
     }
