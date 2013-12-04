@@ -1140,11 +1140,9 @@ $.extend(Dom.prototype, {
                                 encodeURIComponent(el.value));
                 } else {
                     switch (type) {
-                        case "checkbox":
                         case "radio":
-                            if (el.checked ||
-                                    (attrs.checked != null &&
-                                        attrs.checked.specified && attrs.checked === true)) {
+                        case "checkbox":
+                            if (el.checked) {
                                 data.push(encodeURIComponent(name) +"="+
                                     (type === "checkbox" ? "on" : encodeURIComponent(el.value)));
                             }
