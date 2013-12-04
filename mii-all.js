@@ -1,6 +1,6 @@
 /**
  * @name            : mii.js
- * @version         : v2.0
+ * @version         : v2.1
  * @description     : Multipurpose JavaScript Library <https://github.com/qeremy/mii>
  * @copyright       : Kerem Gunes (2013)
  * @license         : MIT license <http://opensource.org/licenses/MIT>
