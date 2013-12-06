@@ -458,11 +458,23 @@ Dom.prototype = {
             return selector;
         }
 
-        if (selector && typeof selector === "object" &&
+        var typeofSelector = typeof selector;
+        if (selector && typeofSelector === "object" &&
                 !selector.nodeType && selector.length === undefined) {
             // Notation: $.dom({tag:"span"})
             selector = createElement(selector, DOC).nodes;
-        } else if (typeof selector === "string") {
+        } else if (typeofSelector === "string" &&
+            (root && typeof root === "object" &&
+                !root.nodeType && root.length === undefined)) {
+            selector = $.trim(selector);
+            // Notation: $.dom("span", {id: "foo"})
+            // Notation: $.dom("<span>", {id: "foo"})
+            if (re_tagName.test(selector)) {
+                selector = $.trim(RegExp.$1);
+            }
+            root.tag = selector;
+            selector = createElement(root, DOC).nodes;
+        } else if (typeofSelector === "string") {
             selector = $.trim(selector);
             if (re_htmlContent.test(selector)) {
                 // Notation: $.dom("<span>")
