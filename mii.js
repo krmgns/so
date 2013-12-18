@@ -205,42 +205,6 @@ mii.browser = function() {
     return browser;
 }();
 
-
-// Import
-var docHead = document.getElementsByTagName("head")[0];
-
-mii.import = function(src, callback) {
-    src = mii.import.path + src;
-    // If file already not imported
-    if (!mii.inArray(src, mii.import.files)) {
-        var s = document.createElement("script");
-        s.src = src;
-        s.async = true;
-        if (typeof callback === "function") {
-            s.onload = s.onreadystatechange = function(){
-                if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete") {
-                   s.onload = s.onreadystatechange = null;
-                   callback();
-                }
-            };
-        }
-        // Append script
-        docHead.appendChild(s);
-        // Store imported files
-        mii.import.files.push(src);
-    }
-};
-
-mii.import.path = "";
-mii.import.files = [];
-
-mii.import.setPath = function(path) {
-    mii.import.path = path;
-};
-mii.import.getPath = function() {
-    return mii.import.path;
-};
-
 // `mii` to window
 window.mii = mii;
 
