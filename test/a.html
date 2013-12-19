@@ -3,21 +3,29 @@
 
 
 <div id="container">
-    <p class="p p0"></p>
-    <p class="p p1"></p>
-    <p class="p p2"></p>
-    <p></p>
+    <p class="p p0">The p.p0</p>
+    <p class="p p1">The p.p1</p>
+    <p class="p p2 x">The p.p2</p>
+    <p>Just p</p>
 </div>
 <p></p>
 
-<script src="mii.js"></script>
-<script src="qwery.min.js"></script>
+<script src="../mii.js"></script>
+<script src="../mii.dom.js"></script>
+<script src="../qwery.min.js"></script>
 <script>
 mii.onReady(function($) {
-    var els = qwery("p", "#aa")
+    var els = $.dom("p", "#container")
+    // log(els)
+    // els.addClass("x")
+    els = els.toggleClass("p0")
     log(els)
+
+    // var el = $.dom(".p0");
+    // log(el.hasClass("p"))
 });
 
+// just onReady test
 // mii.onReady(function($) { log( (new Date).getTime() ) });
 // mii.onReady(function($) { log( (new Date).getTime() ) });
 // mii.onReady(function($) { log( (new Date).getTime() ) });
@@ -52,5 +60,11 @@ mii.onReady(function($) {
 // mii.onReady(function($) { log(i++) });
 </script>
 
+<style>
+.p0 {color: blue}
+.p1 {color: yellow}
+.p2 {color: red}
+.x {color: maroon}
+</style>
 
 </body></html>

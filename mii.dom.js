@@ -999,30 +999,39 @@ $.extend(Dom.prototype, {
 // Dom: class tools
 $.extend(Dom.prototype, {
     hasClass: function(cls, el /*internal*/) {
-        return (el = el || this[0]) && (" "+ el.className +" ").indexOf(" "+ cls +" ") > -1;
+        // Thanks: jsperf.com/pure-js-hasclass-vs-jquery-hasclass/30
+        return (el = el || this[0]) && classRE(cls).test(el.className);
     },
     addClass: function(cls) {
         cls = $.trim(cls).split(RE("\\s+"));
         return this.forEach(function(el) {
-            var i = 0, cs = [], c;
+            var i = 0, cl = [], c;
             while (c = cls[i++]) {
                 if (!this.hasClass(c, el)) {
-                    cs.push(c);
+                    cl.push(c);
                 }
             }
-            el.className = $.trim(el.className +" "+ cs.join(" "));
-        });
-    },
-    setClass: function(cls) { // Remove all classes and set only `cls` one
-        return this.forEach(function(el) {
-            el.className = $.trim(cls);
+            el.className = $.trim(el.className +" "+ cl.join(" "));
         });
     },
     removeClass: function(cls) {
+        if (cls === "*") {
+            // Remove all classes
+            return this.setClass("");
+        } else {
+            var c, cl = $.trim(cls).split(RE("\\s+"));
+            return this.forEach(function(el) {
+                while (c = cl.shift()) {
+                    el.className = (""+ el.className).replace(classRE(c), " ");
+                }
+                el.className = $.trim(el.className);
+            });
+        }
+    },
+    setClass: function(cls) {
+        // Remove all classes and set only `cls` one
         return this.forEach(function(el) {
-            el.className = (cls === "*")
-                ? ""
-                : $.trim((""+ el.className).replace(classRE(cls), " "));
+            el.className = $.trim(cls);
         });
     },
     replaceClass: function(cls1, cls2) {
@@ -1031,11 +1040,26 @@ $.extend(Dom.prototype, {
         });
     },
     toggleClass: function(cls) {
-        if (!this.hasClass(cls, this[0])) {
-            return this.addClass(cls);
-        } else {
-            return this.removeClass(cls);
-        }
+        var els1 = [], els2 = [];
+        this.forEach(function(el){
+            if (this.hasClass(cls, el)) {
+                els1.push(el);
+            } else {
+                els2.push(el);
+            }
+        });
+
+        // Remove existing class
+        $.forEach(els1, function(el){
+            el.className = $.trim((""+ el.className).replace(classRE(cls), " "));
+        });
+
+        // Add abset class
+        $.forEach(els2, function(el){
+            el.className = $.trim(el.className +" "+ cls);
+        });
+
+        return this;
     }
 });
 
