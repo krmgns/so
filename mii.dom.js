@@ -1018,15 +1018,14 @@ $.extend(Dom.prototype, {
         if (cls === "*") {
             // Remove all classes
             return this.setClass("");
-        } else {
-            var c, cl = $.trim(cls).split(RE("\\s+"));
-            return this.forEach(function(el) {
-                while (c = cl.shift()) {
-                    el.className = (""+ el.className).replace(classRE(c), " ");
-                }
-                el.className = $.trim(el.className);
-            });
         }
+        var c, cl = $.trim(cls).split(RE("\\s+"));
+        return this.forEach(function(el) {
+            while (c = cl.shift()) {
+                el.className = (""+ el.className).replace(classRE(c), " ");
+            }
+            el.className = $.trim(el.className);
+        });
     },
     setClass: function(cls) {
         // Remove all classes and set only `cls` one
@@ -1054,7 +1053,7 @@ $.extend(Dom.prototype, {
             el.className = $.trim((""+ el.className).replace(classRE(cls), " "));
         });
 
-        // Add abset class
+        // Add absent class
         $.forEach(els2, function(el){
             el.className = $.trim(el.className +" "+ cls);
         });
