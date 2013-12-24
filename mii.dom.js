@@ -609,44 +609,44 @@ $.forEach({parent: "parentNode", prev: "previousSibling", next: "nextSibling"}, 
 });
 
 $.extend(Dom.prototype, {
-    prevAll: function(i) {
-        var el = this[0], els = [], j = 0, n, ns, tmp, type = typeof i;
+    prevAll: function(src) {
+        var el = this[0], els = [], j = 0, n, ns, tmp;
         if (el && el.parentNode) {
             ns = el.parentNode.childNodes;
             while (n = ns[j++]) {
-                if (n === el) break;
+                if (n === el) {
+                    break;
+                }
                 n.nodeType === 1 && els.push(n);
             }
-            if (i && type === "string") {
-                tmp = this.__init(i, el.parentNode).toArray();
+            if (typeof src === "string") {
+                tmp = this.__init(src, el.parentNode).toArray();
                 els = $.filter(tmp, function(e) {
                     for (var i = 0, len = els.length; i < len; i++) {
                         if (els[i] == e) return true;
                     }
                 });
-            } else if (type === "number") {
-                els = els[i - 1];
             }
         }
         return this.__init(els);
     },
-    nextAll: function(i) {
-        var el = this[0], els = [], j = 0, n, ns, tmp, type = typeof i, found;
+    nextAll: function(src) {
+        var el = this[0], els = [], j = 0, n, ns, tmp, found;
         if (el && el.parentNode) {
             ns = el.parentNode.childNodes;
             while (n = ns[j++]) {
-                if (n === el) found = true;
+                if (n === el) {
+                    found = true;
+                }
                 found && n !== el && n.nodeType === 1 && els.push(n);
             }
-            if (i && type === "string") {
-                tmp = this.__init(i, el.parentNode).toArray();
+            if (typeof src === "string") {
+                tmp = this.__init(src, el.parentNode).toArray();
                 els = $.filter(tmp, function(e) {
                     for (var i = 0, len = els.length; i < len; i++) {
                         if (els[i] == e) return true;
                     }
                 });
-            } else if (type === "number") {
-                els = els[i - 1];
             }
         }
         return this.__init(els);
