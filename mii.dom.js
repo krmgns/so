@@ -333,7 +333,7 @@ function sumComputedPixels(el, props) {
 }
 
 function toStyleProp(key) {
-    return $.ext.toCamelCase(key);
+    return $.ext.camelizeStyleProperty(key);
 }
 
 function parseStyleText(text) {

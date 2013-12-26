@@ -3,9 +3,14 @@
 "use strict"; // @tmp
 
 $.extend($.ext, {
-    toCamelCase: function(input) {
-        return (""+ input).replace(/-([a-z])/g, function($0, $1) {
+    camelizeStyleProperty: function(input) {
+        return (""+ input).replace(/-([a-z])/gi, function($0, $1) {
             return $1.toUpperCase();
+        });
+    },
+    dasherizeStyleProperty: function(input) {
+        return (""+ input).replace(/([A-Z])/g, function($0, $1) {
+            return "-"+ $1.toLowerCase();
         });
     }
 });

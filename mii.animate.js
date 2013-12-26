@@ -38,7 +38,7 @@ Animation.prototype.animate = function(properties, duration, fn) {
     for (property in properties) {
         if (properties.hasOwnProperty(property)) {
             stopValue  = properties[property];
-            property   = $.ext.toCamelCase(property);
+            property   = $.ext.camelizeStyleProperty(property);
             isScroll   = property === "scrollTop" || property === "scrollLeft";
             startValue = isScroll
                 ? parseFloat(this.el.scroll(property.substring(6).toLowerCase()))
