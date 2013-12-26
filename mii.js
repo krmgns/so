@@ -56,15 +56,12 @@ var mii = {
         if (x === null) {
             return "null";
         }
-
         if (x === undefined || typeof x === "undefined") {
             return "undefined";
         }
-
         if (x.alert && x == x.window) {
             return "window";
         }
-
         if (x.nodeType === 9) {
             return "document";
         }
@@ -83,11 +80,9 @@ var mii = {
         if (!x || type === "undefined") {
             return true;
         }
-
         if (type === "array" || typeof x.length === "number") {
             return !x.length;
         }
-
         if (type === "object") {
             for (i in x) {
                 return false;

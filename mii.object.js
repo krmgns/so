@@ -5,7 +5,7 @@
 $.extend($.object, {
     filter: function(input, fn) {
         for (var i in input) {
-            if (!fn.call(input, i, input[i])) {
+            if (!fn.call(input, input[i], i)) {
                 delete input[i];
             }
         }

@@ -4,36 +4,26 @@
 
 <div id="container">
     <p class="p p0">Just p</p>
-    <p>Just p</p>
-    <p>Just p</p>
-    <p>Just p</p>
-    <p>Just p</p>
-    <p>Just p</p>
-    <p>Just p</p>
-    <p>Just p</p>
+    <p class="p p1">Just p</p>
     <p>Just p</p>
     <p class="p">Just p</p>
     <p class="p">Just p</p>
-    <p>Just p</p>
-    <p>Just p</p>
-    <p>Just p</p>
-    <p>Just p</p>
-    <p>Just p</p>
-    <p>Just p</p>
-    <p>Just p</p>
-    <p>Just p</p>
-    <p>Just p</p>
-    <p>Just p</p>
-    <p>Just p</p>
-    <p>Just p</p>
-    <p>Just p</p>
-    <p>Just p</p>
-    <p>Just p</p>
-    <p>Just p</p>
     <p>Just p</p>
     <p>Just p</p>
     <p>Just p</p>
     <div id="div"></div>
+    <p>Last p</p>
+    <p>Last p</p>
+    <p>Last p</p>
+    <p>Last p</p>
+    <p>Last p</p>
+    <p>Last p</p>
+    <p>Last p</p>
+    <p>Last p</p>
+    <p>Last p</p>
+    <p>Last p</p>
+    <p>Last p</p>
+    <p>Last p</p>
     <p>Last p</p>
 </div>
 
@@ -46,19 +36,13 @@
 <script src="../mii.dom.js"></script>
 <script>
 mii.onReady(function($) {
-    // opera & firefox wants "body", chrome wants "html"
     setTimeout(function(){
-        var tag = $.browser.chrome ? "html" : "body";
-        $.dom(tag).animate({"scroll-top": 750}, 750);
-        // $.dom(tag).animate({"scroll-top": 750, scrollLeft: 750}, 1000);
-        // log(tag)
-    }, 1000);
+        // $.dom("html").animate({"scroll-top": 750}, 750)
+    }, 1000)
 
-    // unutma!!!
-    // $.dom("#container").animate({"scroll-top": 750}, 450);
-
-    // var els = $.dom("p").not(".p0") // calismiyor
-    // log(els)
+    setTimeout(function(){
+        // $.dom("#container").animate({"scroll-top": 100}, 450)
+    }, 1000)
 });
 </script>
 
@@ -66,7 +50,7 @@ mii.onReady(function($) {
 body {/*width:10000px;*/ height: 10000px; line-height: 1px}
 p {background: red}
 .p0 {width: 200px; height: 200px}
-#container {border: 5px solid #000; height: 750px;}
+#container {border: 5px solid #000; height: 250px; overflow: auto;}
 #logger {position: fixed; top: 10px; right: 10px; font-size: 22px}
 </style>
 

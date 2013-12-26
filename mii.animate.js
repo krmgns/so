@@ -19,25 +19,25 @@ function Animation(el) {
     this.stopped = false;
 }
 
-Animation.prototype.animate = function(options, duration, fn) {
+Animation.prototype.animate = function(properties, duration, fn) {
+    // Stop if running
     this.stop();
-    this.running = true;
-    this.stopped = false;
-    this.options = options;
-    this.duration = (duration !== "" && !isNaN(duration)) ? duration : opt_shortcutDurations[duration] || opt_defaultDuration;
-    this.opacityFixer = (this.duration / 10) * 0.01 * 2;
-    this.animations = [];
-    this.startTime = $.now();
+
+    this.fn          = fn;
+    this.running     = true;
+    this.stopped     = false;
+    this.animations  = [];
+    this.startTime   = $.now();
     this.elapsedTime = 0;
-    this.fn = fn;
+    this.duration    = typeof duration === "number" ? duration : opt_shortcutDurations[duration] || opt_defaultDuration;
 
     var that = this,
-        property, startValue, stopValue, isScroll = false;
+        property, startValue, stopValue, isScroll;
 
     // Add animations
-    for (property in this.options) {
-        if (this.options.hasOwnProperty(property)) {
-            stopValue  = this.options[property];
+    for (property in properties) {
+        if (properties.hasOwnProperty(property)) {
+            stopValue  = properties[property];
             property   = $.ext.toCamelCase(property);
             isScroll   = property === "scrollTop" || property === "scrollLeft";
             startValue = isScroll
@@ -72,16 +72,27 @@ Animation.prototype.animate = function(options, duration, fn) {
 
 $.extend(Animation.prototype, {
     _start: function() {
-        var a, i = 0, el = this.el, animations = this.animations, current = 0;
+        var a, s, isBody,
+            i = 0, current = 0,
+            el = this.el, animations = this.animations;
+
         this.elapsedTime = $.now() - this.startTime;
+
         while (a = animations[i++]) {
             current = fn_ease(this.elapsedTime, 0.0, a.diff, this.duration);
             current = (a.reverse ? a.startValue - current : a.startValue + current);
-            if (a.isScroll) {
-                a.property === "scrollTop" && el.scroll(current + el[0].scrollTop, el.scroll("left"));
-                a.property === "scrollLeft" && el.scroll(el.scroll("top"), current + el[0].scrollLeft);
+            if (!a.isScroll) {
+                // Using "toFixed" for max percent
+                el.setStyle(a.property, current.toFixed(20));
             } else {
-                el.setStyle(a.property, current);
+                isBody = el[0].tagName === "BODY" || el[0].tagName === "HTML";
+                if (a.property === "scrollTop") {
+                    (s = current + el[0].scrollTop) && (!isBody && (s /= 2));
+                    el.scroll(s, el.scroll("left"));
+                } else {
+                    (s = current + el[0].scrollLeft) && (!isBody && (s /= 2));
+                    el.scroll(el.scroll("top"), s);
+                }
             }
         }
     },
@@ -89,8 +100,11 @@ $.extend(Animation.prototype, {
         var a, i = 0, el = this.el, animations = this.animations;
         while (a = animations[i++]) {
             if (a.isScroll) {
-                a.property === "scrollTop" && el.scroll(a.stopValue, el.scroll("left"));
-                a.property === "scrollLeft" && el.scroll(el.scroll("top"), a.stopValue);
+                if (a.property === "scrollTop") {
+                    el.scroll(a.stopValue, el.scroll("left"));
+                } else {
+                    el.scroll(el.scroll("top"), a.stopValue);
+                }
             } else {
                el.setStyle(a.property, a.stopValue);
             }
@@ -110,8 +124,8 @@ $.extend(Animation.prototype, {
 });
 
 // Add `animate` to mii
-$.animate = function(el, options, duration, fn) {
-    return (new Animation(el)).animate(options, duration, fn);
+$.animate = function(el, properties, duration, fn) {
+    return (new Animation(el)).animate(properties, duration, fn);
 };
 
 // Define exposer

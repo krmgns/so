@@ -435,13 +435,13 @@ function isDomInstance(x) {
 
 /*** The Dom! ***/
 function Dom(nodes) {
+    this.length = 0;
     if (nodes) {
         nodes = (!nodes.nodeType && typeof nodes.length === "number") // For node list
                     && /*and*/ (!nodes.document || !nodes.document.nodeType)  // For window
                         ? nodes /*get node list*/ : [nodes] /*make array*/;
-        this.length = nodes.length;
         for (var i = 0, len = nodes.length; i < len; i++) {
-            this[i] = nodes[i];
+            nodes[i] && (this[i] = nodes[i]) && this.length++;
         }
     }
     return this;
@@ -449,7 +449,6 @@ function Dom(nodes) {
 
 Dom.prototype = {
     constructor: Dom,
-    length: 0,
     // Base methods...
     __init: function(selector, root, i) {
         if (isDomInstance(selector)) {
@@ -465,8 +464,7 @@ Dom.prototype = {
             (root && typeof root === "object" &&
                 !root.nodeType && root.length === undefined)) {
             selector = $.trim(selector);
-            // Notation: $.dom("span", {id: "foo"})
-            // Notation: $.dom("<span>", {id: "foo"})
+            // Notation: $.dom("span", {id: "foo"}) or $.dom("<span>", {id: "foo"})
             if (re_tagName.test(selector)) {
                 selector = $.trim(RegExp.$1);
             }
@@ -491,24 +489,34 @@ Dom.prototype = {
         return this[0] ? this.__init(s, this[0], i) : this;
     },
     not: function(s) {
-        if (!s) return this;
+        var type = $.typeOf(s), src, els = [];
 
-        var els1 = this.toArray(),
-            els2, els = [], type = typeof s;
-
+        // Notation: $.dom("p").not(".red")
         if (s && (type === "string" || type === "object")) {
-            els2 = this.__init(s).toArray(),
-            els = $.array.filter(els1, function(e) {
-                var el, i = 0;
-                while (el = els2[i++]) {
-                    if (el != e) return true;
+            src = this.__init(s).toArray();
+            this.forEach(function(el, i){
+                var el, j = 0;
+                while(el = src[j++]) {
+                    if ($.array.has(this, el)) {
+                        this[i] = null;
+                    }
                 }
             });
-        } else if (type === "number") {
-            els1.splice(s - 1, 1) && (els = els1);
+            return this.__init(this.toArray());
         }
 
-        return this.__init(els);
+        // Notation: $.dom("p").not(0) or $.dom("p").not([0,1])
+        if (type === "number" || type === "array") {
+            s = $.array.make(s);
+            this.forEach(function(el, i){
+                if (!$.array.has(s, i)) {
+                    els.push(el);
+                }
+            });
+            return this.__init(els);
+        }
+
+        return this;
     },
     toArray: function() {
         return $.array.make(this);
@@ -517,13 +525,7 @@ Dom.prototype = {
         return $.forEach(this, fn, this /*scope*/);
     },
     filter: function(fn) {
-        var i = 0, el, els = [];
-        for (; el = this[i++];) {
-            if (fn(el)) {
-                els.push(el);
-            }
-        }
-        return this.__init(els);
+        return this.__init($.array.filter(this, fn));
     },
     reverse: function() {
         // "clone" needs this sometimes (multiple clones)
@@ -1278,9 +1280,9 @@ function getDefaultDisplay(tagName) {
 // Dom: animations
 if ($.animate) {
     $.extend(Dom.prototype, {
-        animate: function(options, duration, fn) {
+        animate: function(properties, duration, fn) {
             return this.forEach(function(el) {
-                $.animate(el, options, duration, fn);
+                $.animate(el, properties, duration, fn);
             });
         },
         fadeTo: function(to, duration, fn) {
@@ -1291,7 +1293,9 @@ if ($.animate) {
         },
         fadeOut: function(duration, fn) {
             if (fn === true || fn === "remove") {
-                fn = function(el) { $.dom(el).remove(); };
+                fn = function(el) {
+                    $.dom(el).remove();
+                };
             }
             return this.fadeTo(0, duration, fn);
         },
@@ -1299,14 +1303,14 @@ if ($.animate) {
             return this.forEach(function(el) {
                 if (!(el.offsetWidth || el.offsetHeight)) {
                     el.style.display = getDefaultDisplay(el.tagName);
-                    $.animate(el, {opacity:1}, duration, fn);
+                    $.animate(el, {opacity: 1}, duration, fn);
                 }
             });
         },
         hide: function(duration, fn) {
             return this.forEach(function(el) {
-                if ((el.offsetWidth || el.offsetHeight)) {
-                    $.animate(el, {opacity:0}, duration, function(){
+                if (el.offsetWidth || el.offsetHeight) {
+                    $.animate(el, {opacity: 0}, duration, function(){
                         el.style.display = "none";
                         this.fn = fn;
                     });
@@ -1318,10 +1322,10 @@ if ($.animate) {
                 if (!(el.offsetWidth || el.offsetHeight)) {
                     // Show element
                     el.style.display = getDefaultDisplay(el.tagName);
-                    $.animate(el, {opacity:1}, duration, fn);
+                    $.animate(el, {opacity: 1}, duration, fn);
                 } else {
                     // Hide element
-                    $.animate(el, {opacity:0}, duration, function(){
+                    $.animate(el, {opacity: 0}, duration, function(){
                         el.style.display = "none";
                         this.fn = fn;
                     });
