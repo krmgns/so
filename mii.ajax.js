@@ -307,7 +307,7 @@ function request(theRequest, data, onSuccess, onError, onComplete) {
     // No data, change the alignment
     if (typeof data === "function") {
         // Keep arguments
-        var args = $.toArray(arguments);
+        var args = $.array.make(arguments);
         // Prevent re-calls
         data = onSuccess = onError = onComplete = undefined;
         onSuccess = args[1], onError = args[2], onComplete = args[3];
@@ -332,7 +332,7 @@ $.ajax = function(options, data, onSuccess, onError, onComplete) {
     // No data, change the alignment
     if (typeof data === "function") {
         // Keep arguments
-        var args = $.toArray(arguments);
+        var args = $.array.make(arguments);
         // Prevent re-calls
         data = onSuccess = onError = onComplete = undefined;
         onSuccess = args[1], onError = args[2], onComplete = args[3];

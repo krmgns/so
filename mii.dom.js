@@ -47,7 +47,7 @@ function getNodeName(node) {
 function getByTag(root, tag, i) {
     var els = root.getElementsByTagName(tag);
     return (i === true)
-        ? $.toArray(els) : isNaN(i)
+        ? $.array.make(els) : isNaN(i)
         ? els : els[i];
 }
 
@@ -235,7 +235,7 @@ function createElement(content, doc) {
         frg = createFragment(content, doc);
     }
 
-    return _return(tag, $.toArray(frg.childNodes), !!fix);
+    return _return(tag, $.array.make(frg.childNodes), !!fix);
 }
 
 function insert(fn, el, content, rev) {
@@ -333,9 +333,7 @@ function sumComputedPixels(el, props) {
 }
 
 function toStyleProp(key) {
-    return (""+ key).replace(/-([a-z])/g, function($0, $1) {
-        return $1.toUpperCase();
-    });
+    return $.ext.toCamelCase(key);
 }
 
 function parseStyleText(text) {
@@ -500,7 +498,7 @@ Dom.prototype = {
 
         if (s && (type === "string" || type === "object")) {
             els2 = this.__init(s).toArray(),
-            els = $.filter(els1, function(e) {
+            els = $.array.filter(els1, function(e) {
                 var el, i = 0;
                 while (el = els2[i++]) {
                     if (el != e) return true;
@@ -513,29 +511,38 @@ Dom.prototype = {
         return this.__init(els);
     },
     toArray: function() {
-        return $.toArray(this);
+        return $.array.make(this);
     },
     forEach: function(fn) {
         return $.forEach(this, fn, this /*scope*/);
     },
     filter: function(fn) {
-        return this.__init($.filter(this, fn));
+        var i = 0, el, els = [];
+        for (; el = this[i++];) {
+            if (fn(el)) {
+                els.push(el);
+            }
+        }
+        return this.__init(els);
     },
     reverse: function() {
-        // clone needs this sometimes (multiple clones)
+        // "clone" needs this sometimes (multiple clones)
         return this.__init(this.toArray().reverse());
     },
     item: function(i) {
-        return this.__init(this[i - 1]);
+        return this.__init(this[i]);
     },
     first: function() {
-        return this.item(1);
+        return this.item(0);
     },
     last: function() {
-        return this.item(this.length);
+        return this.item(this.length - 1);
     },
     nth: function(i) {
         return this.item(i);
+    },
+    get: function(i) {
+        return this[i];
     }
 };
 
@@ -621,7 +628,7 @@ $.extend(Dom.prototype, {
             }
             if (typeof src === "string") {
                 tmp = this.__init(src, el.parentNode).toArray();
-                els = $.filter(tmp, function(e) {
+                els = $.array.filter(tmp, function(e) {
                     for (var i = 0, len = els.length; i < len; i++) {
                         if (els[i] == e) return true;
                     }
@@ -642,7 +649,7 @@ $.extend(Dom.prototype, {
             }
             if (typeof src === "string") {
                 tmp = this.__init(src, el.parentNode).toArray();
-                els = $.filter(tmp, function(e) {
+                els = $.array.filter(tmp, function(e) {
                     for (var i = 0, len = els.length; i < len; i++) {
                         if (els[i] == e) return true;
                     }
@@ -702,6 +709,7 @@ $.extend(Dom.prototype, {
     setStyle: function(key, val) {
         return this.forEach(function(el) {
             var styles = key, k, v;
+
             if (typeof styles === "string") {
                 if (val != null) {
                     styles = {}, (styles[key] = val);
@@ -709,6 +717,7 @@ $.extend(Dom.prototype, {
                     styles = parseStyleText(key);
                 }
             }
+
             if (ie_lt9 && "opacity" in styles) {
                 styles.filter = "alpha(opacity=" + (styles.opacity * 100) + ")";
                 styles.zoom = styles.zoom || 1;
@@ -722,14 +731,15 @@ $.extend(Dom.prototype, {
                     el.style[k] = v;
                 }
             }
+
             return el;
         });
     },
-    getStyle: function(key, computed) {
+    getStyle: function(key, hex) {
         var el = this[0], val;
         if (el) {
             key = toStyleProp(key), val = getStyle(el, key) || "";
-            if (val != null && computed === false && /color/i.test(key)) {
+            if (val != null && hex === true && /color/i.test(key)) {
                 val = rgbToHex(val);
             }
         }

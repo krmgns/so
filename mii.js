@@ -5,42 +5,30 @@ function log(s) { console.log(s) }
 "use strict"; // @tmp
 
 var document = window.document,
+
     fn_slice = [].slice,
     fn_toString = {}.toString,
+
     re_trim = /^\s+|\s+$/g,
+    re_browsers = {
+        firefox: /firefox\/([\d\.]+)/,
+        chrome: /chrome\/([\d\.]+)/,
+        safari: /webkit.*?version\/([\d\.]+)/,
+        opera: /opera.*?version\/([\d\.]+)/,
+        ie: /msie\s+([\d\.]+)/
+    },
+
+    onReadyCallbacks = [],
+
     _uuid = 0
 ;
 
-function makeArray(input) {
-    if (mii.typeOf(input) === "array") {
-        return input;
-    }
-
-    var array = [],
-        i = 0;
-
-    if (!input || // null, undefined, "", 0 etc.
-            typeof input === "string" || input.nodeType ||
-                   input.length === undefined || input == window) {
-        array = [input];
-    } else {
-        try {
-            array = fn_slice.call(input);
-        } catch (e) {
-            while (i < input.length) {
-                array.push(input[i++]);
-            }
-        }
-    }
-
-    return array;
-}
-
+/*** The Mii ***/
 var mii = {
     fun: function() {},
 
     now: function() {
-        return +(new Date);
+        return Date.now ? Date.now() : (new Date).getTime();
     },
 
     uuid: function() {
@@ -48,77 +36,86 @@ var mii = {
     },
 
     win: function(el) {
-        if (!el) return window;
-        return el == el.window ?
-                   el : el.nodeType === 9 ?
-                       (el.defaultView || el.parentWindow) : null;
+        if (!el) {
+            return window;
+        }
+        return (el == el.window)
+            ? el : el.nodeType === 9
+            ? (el.defaultView || el.parentWindow) : null;
     },
 
     doc: function(el) {
         return (el && el.ownerDocument) || document;
     },
 
+    trim: function(s) {
+        return (s != null) ? (""+ s).replace(re_trim, "") : "";
+    },
+
     typeOf: function(x) {
-        if (x === null)               return "null";
-        if (typeof x === "undefined") return "undefined";
-        if (x.alert && x == x.window) return "window";
-        if (x.nodeType === 9)         return "document";
-        // if (!isNaN(parseFloat(x)) && isFinite(x)) return "numeric";
-        // if (typeof x !== "number" && /^\d+$/.test(x)) return "numeric";
+        if (x === null) {
+            return "null";
+        }
+
+        if (x === undefined || typeof x === "undefined") {
+            return "undefined";
+        }
+
+        if (x.alert && x == x.window) {
+            return "window";
+        }
+
+        if (x.nodeType === 9) {
+            return "document";
+        }
+
         return fn_toString.call(x).slice(8, -1).toLowerCase();
     },
 
-    trim: function(s) {
-        return (s != null) ? s.replace(re_trim, "") : "";
+    isSet: function(x, i) {
+        return (i == null) ? x != null : x[i] != null;
     },
 
     isEmpty: function(x) {
-        var type = this.typeOf(x);
-        if (type === "undefined" || !x) return true; // "", null, false, undefined, 0, NaN
-        if (type === "array" || typeof x.length === "number") return !x.length;
-        if (type === "object") for (var i in x) return false; return true;
+        var type = this.typeOf(x), i;
+
+        // "", null, false, undefined, 0, NaN
+        if (!x || type === "undefined") {
+            return true;
+        }
+
+        if (type === "array" || typeof x.length === "number") {
+            return !x.length;
+        }
+
+        if (type === "object") {
+            for (i in x) {
+                return false;
+            }
+            return true;
+        }
+
         return false;
     },
 
     forEach: function(input, fn, scope) {
         var len = input && input.length, i;
         if (len !== undefined) {
-            for (i = 0; i < len; i++) {        // val => i
-                if (fn.call(scope || input[i], input[i], i, input) === false) break;
+            // val => i
+            for (i = 0; i < len; i++) {
+                if (fn.call(scope || input[i], input[i], i, input) === false) {
+                    break;
+                }
             }
         } else {
-            for (i in input) {                 // key => val
-                if (fn.call(scope || input[i], i, input[i], input) === false) break;
+            // key => val
+            for (i in input) {
+                if (fn.call(scope || input[i], i, input[i], input) === false) {
+                    break;
+                }
             }
         }
         return scope || input;
-    },
-
-    filter: function(array, fn) {
-        array = array || [];
-        for (var i = 0, len = array.length, result = []; i < len; i++) {
-            if (fn(array[i], i)) {
-                result.push(array[i]);
-            }
-        }
-        return result;
-    },
-
-    toArray: function(input) {
-        var i = 0, len = arguments.length, array = [];
-        while (i < len) {
-            array = array.concat(makeArray(arguments[i++]));
-        }
-        return array;
-    },
-
-    inArray: function(src, array) {
-        for (var i = array.length - 1; i >= 0; i--) {
-            if (array[i] == src) {
-                return true;
-            }
-        }
-        return false;
     },
 
     mix: function() {
@@ -165,13 +162,11 @@ var mii = {
 };
 
 // On ready
-var onReadyCallbacks = [];
-
 mii.onReady = function(callback) {
     if (typeof callback === "function") {
         onReadyCallbacks.push(callback);
     }
-    // I think enough so.. <https://developer.mozilla.org/en-US/docs/DOM/document.readyState>
+    // I think enough so... <https://developer.mozilla.org/en-US/docs/DOM/document.readyState>
     document.onreadystatechange = function() {
         if (this.readyState === "complete") {
             document.onreadystatechange = null;
@@ -184,14 +179,6 @@ mii.onReady = function(callback) {
 
 
 // Browser
-var re_browsers = {
-    firefox: /firefox\/([\d\.]+)/,
-    chrome: /chrome\/([\d\.]+)/,
-    safari: /webkit.*?version\/([\d\.]+)/,
-    opera: /opera.*?version\/([\d\.]+)/,
-    ie: /msie\s+([\d\.]+)/
-};
-
 mii.browser = function() {
     var ua = window.navigator.userAgent.toLowerCase(), k, re, browser = {};
     for (k in re_browsers) {
@@ -204,6 +191,9 @@ mii.browser = function() {
     browser["versionOrig"] = re[1];
     return browser;
 }();
+
+// Some more extensions...
+mii.ext = mii.array = mii.object = {};
 
 // `mii` to window
 window.mii = mii;

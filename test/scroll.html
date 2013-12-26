@@ -1,0 +1,75 @@
+<!doctype html>
+<html><head></head><body>
+
+
+<div id="container">
+    <p class="p p0">Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p class="p">Just p</p>
+    <p class="p">Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <p>Just p</p>
+    <div id="div"></div>
+    <p>Last p</p>
+</div>
+
+<script src="../qwery.min.js"></script>
+<script src="../mii.js"></script>
+<script src="../mii.ext.js"></script>
+<script src="../mii.array.js"></script>
+<script src="../mii.object.js"></script>
+<script src="../mii.animate.js"></script>
+<script src="../mii.dom.js"></script>
+<script>
+mii.onReady(function($) {
+    // opera & firefox wants "body", chrome wants "html"
+    setTimeout(function(){
+        var tag = $.browser.chrome ? "html" : "body";
+        $.dom(tag).animate({"scroll-top": 750}, 750);
+        // $.dom(tag).animate({"scroll-top": 750, scrollLeft: 750}, 1000);
+        // log(tag)
+    }, 1000);
+
+    // unutma!!!
+    // $.dom("#container").animate({"scroll-top": 750}, 450);
+
+    // var els = $.dom("p").not(".p0") // calismiyor
+    // log(els)
+});
+</script>
+
+<style>
+body {/*width:10000px;*/ height: 10000px; line-height: 1px}
+p {background: red}
+.p0 {width: 200px; height: 200px}
+#container {border: 5px solid #000; height: 750px;}
+#logger {position: fixed; top: 10px; right: 10px; font-size: 22px}
+</style>
+
+<div id="logger">...</div>
+
+</body></html>
