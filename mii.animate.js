@@ -99,14 +99,14 @@ $.extend(Animation.prototype, {
     _end: function() {
         var a, i = 0, el = this.el, animations = this.animations;
         while (a = animations[i++]) {
-            if (a.isScroll) {
+            if (!a.isScroll) {
+                el.setStyle(a.property, a.stopValue);
+            } else {
                 if (a.property === "scrollTop") {
                     el.scroll(a.stopValue, el.scroll("left"));
                 } else {
                     el.scroll(el.scroll("top"), a.stopValue);
                 }
-            } else {
-               el.setStyle(a.property, a.stopValue);
             }
         }
         // Call `onend` handler
