@@ -1312,7 +1312,7 @@ if ($.animate) {
                 if (el.offsetWidth || el.offsetHeight) {
                     $.animate(el, {opacity: 0}, duration, function(){
                         el.style.display = "none";
-                        fn.call(this);
+                        fn && fn.call(this);
                     });
                 }
             });
@@ -1327,7 +1327,7 @@ if ($.animate) {
                     // Hide element
                     $.animate(el, {opacity: 0}, duration, function(){
                         el.style.display = "none";
-                        fn.call(this);
+                        fn && fn.call(this);
                     });
                 }
             });
