@@ -1327,7 +1327,7 @@ if ($.animate) {
                     // Hide element
                     $.animate(el, {opacity: 0}, duration, function(){
                         el.style.display = "none";
-                        this.fn = fn;
+                        fn.call(this);
                     });
                 }
             });
