@@ -1312,7 +1312,7 @@ if ($.animate) {
                 if (el.offsetWidth || el.offsetHeight) {
                     $.animate(el, {opacity: 0}, duration, function(){
                         el.style.display = "none";
-                        this.fn = fn;
+                        fn.call(this);
                     });
                 }
             });
