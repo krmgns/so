@@ -1303,14 +1303,14 @@ if ($.animate) {
             return this.forEach(function(el) {
                 if (!(el.offsetWidth || el.offsetHeight)) {
                     el.style.display = getDefaultDisplay(el.tagName);
-                    $.animate(el, {opacity: 1}, duration, fn);
+                    $.animate(el, {opacity: 1}, duration || 0, fn);
                 }
             });
         },
         hide: function(duration, fn) {
             return this.forEach(function(el) {
                 if (el.offsetWidth || el.offsetHeight) {
-                    $.animate(el, {opacity: 0}, duration, function(){
+                    $.animate(el, {opacity: 0}, duration || 0, function(){
                         el.style.display = "none";
                         fn && fn.call(this);
                     });
@@ -1322,10 +1322,10 @@ if ($.animate) {
                 if (!(el.offsetWidth || el.offsetHeight)) {
                     // Show element
                     el.style.display = getDefaultDisplay(el.tagName);
-                    $.animate(el, {opacity: 1}, duration, fn);
+                    $.animate(el, {opacity: 1}, duration || 0, fn);
                 } else {
                     // Hide element
-                    $.animate(el, {opacity: 0}, duration, function(){
+                    $.animate(el, {opacity: 0}, duration || 0, function(){
                         el.style.display = "none";
                         fn && fn.call(this);
                     });
