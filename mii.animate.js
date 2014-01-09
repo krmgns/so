@@ -2,14 +2,14 @@
 
 "use strict"; // @tmp
 
-var op_fps = 60,
+var opt_fps = 60,
     opt_defaultDuration = 350,
     opt_shortcutDurations = {fast: 150, slow: 750},
     fn_ease = function(t,b,c,d) {return -c*(t/=d)*(t-2)+b}
 ;
 
 function timer(fn) {
-    setTimeout(fn, 1000 / op_fps);
+    setTimeout(fn, 1000 / opt_fps);
 }
 
 /*** The Animation ***/
