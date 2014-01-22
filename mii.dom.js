@@ -1285,11 +1285,11 @@ if ($.animate) {
                 $.animate(el, properties, duration, fn);
             });
         },
-        fadeTo: function(to, duration, fn) {
+        fade: function(to, duration, fn) {
             return this.animate({opacity: to}, duration, fn);
         },
         fadeIn: function(duration, fn) {
-            return this.fadeTo(1, duration, fn);
+            return this.fade(1, duration, fn);
         },
         fadeOut: function(duration, fn) {
             if (fn === true || fn === "remove") {
@@ -1297,7 +1297,7 @@ if ($.animate) {
                     $.dom(el).remove();
                 };
             }
-            return this.fadeTo(0, duration, fn);
+            return this.fade(0, duration, fn);
         },
         show: function(duration, fn) {
             return this.forEach(function(el) {
@@ -1330,6 +1330,14 @@ if ($.animate) {
                         fn && fn.call(this);
                     });
                 }
+            });
+        },
+        blip: function(duration) {
+            return this.forEach(function(el){
+                // "duration" is a must for this method
+                $.animate(el, {opacity: 0}, duration, function(){
+                    $.animate(el, {opacity: 1}, duration);
+                });
             });
         }
     });
