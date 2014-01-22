@@ -1,10 +1,10 @@
 /**
  * @name            : mii.js
- * @version         : v2.6
+ * @version         : v2.7
  * @description     : Multipurpose JavaScript Library <https://github.com/qeremy/mii>
  * @copyright       : Kerem Gunes (2013)
  * @license         : MIT license <http://opensource.org/licenses/MIT>
- * @date            : 2014.01.05 01:50 (Europe/Istanbul)
+ * @date            : 2014.01.22 10:50 (Europe/Istanbul)
  *
  * Internal Modules : mii.js (base), mii.ext.js, mii.array.js, mii.object.js, mii.event.js, mii.animate.js, mii.dom.js, mii.ajax.js
  * External Modules : qwery.js <https://github.com/ded/qwery>
