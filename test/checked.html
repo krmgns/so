@@ -1,0 +1,23 @@
+<!doctype html>
+
+<form id="form">
+    <p><input type="checkbox" name="remember" checked></p>
+    <input type="radio" name="gender" value="1">
+    <input type="radio" name="gender" value="2">
+    <p><button type="submit">Submit!</button></p>
+</form>
+
+<script src="all.php"></script>
+<script>
+mii.onReady(function($){
+    var form = $.dom("#form");
+    form.on("submit", function(e){
+        e.preventDefault();
+        var els;
+        els = form.find("input:checked");
+        // els = els.filter(function(el){ return el.checked; })
+        els = els.not("[type=checkbox]");
+        log(els)
+    });
+});
+</script>

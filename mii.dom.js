@@ -435,13 +435,17 @@ function isDomInstance(x) {
 
 /*** The Dom! ***/
 function Dom(nodes) {
+    // Set length first
     this.length = 0;
     if (nodes) {
         nodes = (!nodes.nodeType && typeof nodes.length === "number") // For node list
                     && /*and*/ (!nodes.document || !nodes.document.nodeType)  // For window
                         ? nodes /*get node list*/ : [nodes] /*make array*/;
         for (var i = 0, len = nodes.length; i < len; i++) {
-            nodes[i] && (this[i] = nodes[i]) && this.length++;
+            if (nodes[i]) {
+                this[i] = nodes[i];
+                this.length++;
+            }
         }
     }
     return this;
@@ -495,10 +499,10 @@ Dom.prototype = {
         if (s && (type === "string" || type === "object")) {
             src = this.__init(s).toArray();
             this.forEach(function(el, i){
-                var el, j = 0;
-                while(el = src[j++]) {
-                    if ($.array.has(this, el)) {
-                        this[i] = null;
+                var e, j = 0;
+                while (e = src[j++]) {
+                    if (e === el) {
+                        delete this[i];
                     }
                 }
             });
@@ -525,7 +529,7 @@ Dom.prototype = {
         return $.forEach(this, fn, this /*scope*/);
     },
     filter: function(fn) {
-        return this.__init($.array.filter(this, fn));
+        return this.__init($.array.filter(this.toArray(), fn));
     },
     reverse: function() {
         // "clone" needs this sometimes (multiple clones)
