@@ -438,7 +438,7 @@ function Dom(nodes) {
     // Set length first
     this.length = 0;
     if (nodes) {
-        nodes = (!nodes.nodeType && typeof nodes.length === "number") // For node list
+        nodes = (!nodes.nodeType && typeof nodes.length === "number") // For node list or arrays
                     && /*and*/ (!nodes.document || !nodes.document.nodeType)  // For window
                         ? nodes /*get node list*/ : [nodes] /*make array*/;
         for (var i = 0, len = nodes.length; i < len; i++) {

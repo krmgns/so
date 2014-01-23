@@ -14,10 +14,12 @@ mii.onReady(function($){
     form.on("submit", function(e){
         e.preventDefault();
         var els;
-        els = form.find("input:checked");
+        els = form.find("input").toArray();
+        // els = form.find("input:checked");
         // els = els.filter(function(el){ return el.checked; })
-        els = els.not("[type=checkbox]");
+        // els = els.not("[type=checkbox]");
         log(els)
+        log($.dom(els))
     });
 });
 </script>
