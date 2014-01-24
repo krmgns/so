@@ -76,17 +76,37 @@ var event = (function() {
         });
     }
 
+    function fire(el, type) {
+        var fn = el[type] || el["on"+ type];
+        if (fn && fn.call) {
+            fn.call(el);
+        }
+
+        // I wont use this way...
+        // var e;
+        // if (document.createEventObject) {
+        //     e = document.createEventObject();
+        //     e.type = type;
+        //     el.fireEvent("on" + e.type, e);
+        // } else {
+        //     e = document.createEvent("Event");
+        //     e.initEvent(type, true, true);
+        //     el.dispatchEvent(e);
+        // }
+    }
+
     var _ek = function(type) {
-        return "mii.event.fire."+ type;
+        return "mii.event.custom."+ type;
     };
 
-    function addFireEvent(el, type, fn) {
+    function addCustomEvent(el, type, fn) {
         var eventKey = _ek(type),
             eventObject, e;
         if (document.createEventObject) {
             // Create for IE
             e = document.createEventObject();
-            if (el[eventKey] == null) {
+            e.type = type;
+            if (!el[eventKey]) {
                 addEvent(el, type, fn);
             }
             eventObject = e;
@@ -94,7 +114,7 @@ var event = (function() {
             // Create for Firefox & others
             e = document.createEvent("Event");
             e.initEvent(type, true, true); // type, bubbling, cancelable
-            if (el[eventKey] == null) {
+            if (!el[eventKey]) {
                 addEvent(el, type, fn);
             }
             eventObject = e;
@@ -102,12 +122,11 @@ var event = (function() {
         el[eventKey] = eventObject;
     }
 
-    function removeFireEvent(el, type) {
-        var eventKey = _ek(type);
-        el[eventKey] = null;
+    function removeCustomEvent(el, type) {
+        el[_ek(type)] = null;
     }
 
-    function fire(el, type) {
+    function invokeCustomEvent(el, type) {
         var eventKey = _ek(type),
             eventObject = el[eventKey];
         if (eventObject != null) {
@@ -125,11 +144,15 @@ var event = (function() {
         once: once,
         on: addEvent,
         off: removeEvent,
+        fire: fire,
+        // Normal events
         addEvent: addEvent,
         removeEvent: removeEvent,
-        fire: fire,
-        addFireEvent: addFireEvent,
-        removeFireEvent: removeFireEvent,
+        invokeEvent: fire,
+        // Custom events
+        addCustomEvent: addCustomEvent,
+        removeCustomEvent: removeCustomEvent,
+        invokeCustomEvent: invokeCustomEvent,
     };
 })();
 

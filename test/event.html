@@ -2,25 +2,24 @@
 
 <button id="button">Test it.</button>
 
-<!-- <script src="../qwery.min.js"></script>
-<script src="../mii.js"></script>
-<script src="../mii.event.js"></script>
-<script src="../mii.dom.js"></script> -->
-<script src="../mii-all.js"></script>
+<script src="all.php"></script>
 <script>
 mii.onReady(function($){
     var el = $.dom("#button");
-    el.addFireEvent("custom 1", function(e){
-        log(e)
+
+    el.addCustomEvent("custom 1", function(e){
+        log(e.type)
     });
-    el.addFireEvent("custom 2", function(e){
-        log(e)
+    el.addCustomEvent("custom 2", function(e){
+        log(e.type)
     });
+
     el.on("click", function(e){
         log(e);
-        el.fire("custom 1");
-        el.fire("custom 2");
-        el.removeFireEvent("custom 1");
+        el.invokeCustomEvent("custom 1");
+        el.invokeCustomEvent("custom 2");
+        // Remove
+        el.removeCustomEvent("custom 1");
     });
 });
 </script>

@@ -1,0 +1,33 @@
+<!doctype html>
+
+<!-- both work -->
+<!-- <button id="button" onclick="foo.call(this, event)">Test it.</button> &nbsp; <a href="#" id="trigger">trigger</a> -->
+<button id="button">Test it.</button> &nbsp; <a href="#" id="trigger">trigger</a>
+
+<br><br>
+<form id="form">
+    <input name="a" value="1" size="1">
+</form>
+
+<script src="all.php"></script>
+<script>
+function foo(e) {
+    log(e)
+    log(this)
+}
+
+mii.onReady(function($){
+    var bu = $.dom("#button");
+    bu.on("click", function(e){
+        foo.call(this, e);
+        // $.dom("#form").fire("submit");
+    });
+
+    var tr = $.dom("#trigger");
+    tr.on("click", function(e){
+        e.preventDefault();
+        bu.fire("click");
+    });
+
+});
+</script>
