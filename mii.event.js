@@ -82,7 +82,7 @@ var event = (function() {
             fn.call(el);
         }
 
-        // I wont use this way...
+        // I won't use this way...
         // var e;
         // if (document.createEventObject) {
         //     e = document.createEventObject();
