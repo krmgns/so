@@ -1,0 +1,20 @@
+<!doctype html>
+<html><head></head><body>
+
+
+<p class="p aa b">Just p</p>
+<p class="p aa b">Just p</p>
+
+<script src="all.php"></script>
+<script>
+mii.onReady(function($) {
+    var p = $.dom("p");
+    p.removeClass("b p");
+});
+</script>
+
+<style>
+.p {background: red; width: 200px; height: 200px}
+</style>
+
+</body></html>

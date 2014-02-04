@@ -1035,9 +1035,10 @@ $.extend(Dom.prototype, {
             // Remove all classes
             return this.setClass("");
         }
-        var c, cl = $.trim(cls).split(RE("\\s+"));
+        var c, cl = $.trim(cls).split(RE("\\s+")), i;
         return this.forEach(function(el) {
-            while (c = cl.shift()) {
+            i = 0;
+            while (c = cl[i++]) {
                 el.className = (""+ el.className).replace(classRE(c), " ");
             }
             el.className = $.trim(el.className);
