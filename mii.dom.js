@@ -443,8 +443,7 @@ function Dom(nodes) {
                         ? nodes /*get node list*/ : [nodes] /*make array*/;
         for (var i = 0, len = nodes.length; i < len; i++) {
             if (nodes[i]) {
-                this[i] = nodes[i];
-                this.length++;
+                this[this.length++] = nodes[i];
             }
         }
     }
