@@ -113,6 +113,7 @@ var mii = {
         return scope || input;
     },
 
+    // Note: options = $.mix({}, defaultOptions, options);
     mix: function() {
         var args = arguments, i = 1, target, source;
         if (args.length < 2) {

@@ -31,7 +31,7 @@ windowScroll.prototype.run = function(to, duration, fn) {
     this.elapsedTime = 0;
 
     this.stopValue  = to;
-    this.startValue = this.window.scrollY || 0;
+    this.startValue = this.window.pageYOffset || this.window.document.documentElement.scrollTop || 0;
     this.reverse    = this.startValue > this.stopValue;
     this.diff       = Math.abs(this.stopValue - this.startValue);
 
