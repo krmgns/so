@@ -1,4 +1,3 @@
-- Add: $.dom.nearestElement() and $.dom.farthestElement()
 - Add: $.dom.and() // join elements $.dom('p.cls1').and('p.cls2'). note: but is not same? $.dom('p.cls1, p.cls2')
 - Add: $.ajax.queue
 - defer?

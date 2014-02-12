@@ -352,10 +352,12 @@ function rgbToHex(color) {
     if (color.substr(0, 1) === "#" || color.indexOf("rgb") === -1) {
         return color;
     }
+
     var nums = re_rgb.exec(color) || [, 0, 0, 0, 0],
         r = parseInt(nums[2], 10).toString(16),
         g = parseInt(nums[3], 10).toString(16),
         b = parseInt(nums[4], 10).toString(16);
+
     return "#"+ (
         (r.length === 1 ? "0"+ r : r) +
         (g.length === 1 ? "0"+ g : g) +
@@ -364,21 +366,25 @@ function rgbToHex(color) {
 }
 
 function getOffset(el, rel) {
-    var tag = getNodeName(el);
+    var tag = getNodeName(el),
+        rect = {top: 0, left: 0};
+
     if (rel && (tag === "body" || tag === "html")) {
-        return {top: 0, left: 0};
+        return rect;
     }
-    var rect = el.getBoundingClientRect ? el.getBoundingClientRect() : {},
+
+    var bcr = el.getBoundingClientRect ? el.getBoundingClientRect() : rect,
         doc = $.doc(el),
         win = $.win(doc),
         docEl = doc.documentElement,
         docBody = doc.body,
         topScroll = win.pageYOffset || docEl.scrollTop,
         leftScroll = win.pageXOffset || docEl.scrollLeft;
+
     return {
-        top: rect.top + topScroll -
+        top: bcr.top + topScroll -
                 Math.max(0, docEl && docEl.clientTop, docBody.clientTop),
-        left: rect.left + leftScroll -
+        left: bcr.left + leftScroll -
                 Math.max(0, docEl && docEl.clientLeft, docBody.clientLeft)
     };
 }
