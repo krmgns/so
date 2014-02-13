@@ -128,7 +128,7 @@ function setAttributes(el, attrs) {
 
             if (re_stateAttrs.test(key)) {
                 // Set attribute as boolean
-                el[key] = (state = re_true.test(val));
+                el[key] = (state = re_true.test(val) || val != "");
                 if (keyFixedDef) {
                     el[keyFixedDef] = state;
                 }
