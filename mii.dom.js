@@ -554,6 +554,9 @@ Dom.prototype = {
     },
     get: function(i) {
         return this[i];
+    },
+    tag: function(i) {
+        return getNodeName(this[0]);
     }
 };
 

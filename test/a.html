@@ -7,22 +7,28 @@
     <p class="p p1">The p.p1</p>
     <p class="p p2 x">The p.p2</p>
     <p>Just p</p>
+    <div class="p"></div>
 </div>
 <p></p>
 
-<script src="../mii.js"></script>
-<script src="../mii.dom.js"></script>
-<script src="../qwery.min.js"></script>
+<script src="mii-all.php"></script>
 <script>
 mii.onReady(function($) {
-    var els = $.dom("p", "#container")
+    var els = $.dom(".p", "#container")
     // log(els)
     // els.addClass("x")
     els = els.toggleClass("p0")
-    log(els)
+    // log(els)
 
-    // var el = $.dom(".p0");
+    // var el = $.dom(".p0")
     // log(el.hasClass("p"))
+
+    // log($.dom("#container").tag())
+
+    els.forEach(function(el){
+        log(el.tagName == "DIV")
+        log($.dom(el).tag() == "div")
+    });
 });
 
 // just onReady test
