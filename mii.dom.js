@@ -1258,8 +1258,7 @@ var defaultDisplays = {},
 
 // Credits: http://jquery.com
 function getDefaultDisplay(tagName) {
-    var el, ddIframeDoc,
-        display = defaultDisplays[tagName];
+    var el, display = defaultDisplays[tagName];
 
     if (!display) {
         el = document.createElement(tagName);

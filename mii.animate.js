@@ -5,6 +5,7 @@
 var opt_fps = 60,
     opt_defaultDuration = 350,
     opt_shortcutDurations = {fast: 150, slow: 750},
+    // Credits: http://easings.net/ (easeOutQuad)
     fn_ease = function(t,b,c,d) {return -c*(t/=d)*(t-2)+b}
 ;
 
