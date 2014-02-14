@@ -310,9 +310,9 @@ if (DOC.defaultView && DOC.defaultView.getComputedStyle) {
     };
 } else if (ie && DOC.documentElement.currentStyle) {
     getStyle = function(el, key) {
-        var val, filter = el.style.filter || "";
-        if (key == "opacity") {
-            val = re_opacity.exec(filter) || [, 100];
+        var val;
+        if (key === "opacity") {
+            val = re_opacity.exec(el.style.filter || "") || [, 100];
             val = parseFloat(val[1]) / 100;
         } else {
             val = el.currentStyle[key] || "";
@@ -325,7 +325,7 @@ if (DOC.defaultView && DOC.defaultView.getComputedStyle) {
 }
 
 function sumComputedPixels(el, props) {
-    var sum = 0, i = 0, prop;
+    var i = 0, sum = 0, prop;
     while (prop = props[i++]) {
         sum += parseFloat(getStyle(el, prop)) || 0;
     }
