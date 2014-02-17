@@ -297,7 +297,7 @@ Ajax.prototype = {
     getResponseHeader: function(key) {
         return this.options.responseHeaders[key.toLowerCase()];
     },
-    getAllResponseHeaders: function() {
+    getResponseHeaderAll: function() {
         return this.options.responseHeaders;
     }
 };
