@@ -7,7 +7,7 @@ var DOC = $.doc(),
     ie = $.browser.ie,
     ie_lt8 = ie && $.browser.version < 8,
     ie_lt9 = ie && $.browser.version < 9,
-    re_tagName = /<([a-z]+)/i,
+    re_tagName = /<([a-z-]+)/i,
     re_tableChildren = /^(?:thead|tbody|tfoot|col|colgroup|caption)$/i,
     re_formChildren = /^(button|input|select|textarea)$/i,
     re_stateAttrs = /^(checked|disabled|selected|readonly)$/i,
@@ -16,7 +16,7 @@ var DOC = $.doc(),
     re_bool = /^(true|false)$/,
     re_opacity = /opacity=(.*)?\)/i,
     re_rgb = /(.*?)rgb\((\d+),\s*(\d+),\s*(\d+)\)/,
-    re_htmlContent = /^<[^>]*>|<[^>]*>.*?<\/[^>]>$/i,
+    re_htmlContent = /<([a-z-]+)([^>]*)>|<([a-z-]+)([^>]*)>.*?<\/[^>]+>/i,
     _pick = function(o,i,d) {o||(o={});var r=o[i]; if(d!==false) delete o[i]; return r},
     _re_cache = {}
 ;
@@ -102,17 +102,15 @@ var insertFunctions = {
 
 var attrFunctions = {
     "name": function(el, val) { el.name = val; },
-    "html": function(el, val) { $.dom(el).setHtml(val); },
-    "text": function(el, val) { $.dom(el).setText(val); },
-    // Remember!!! data:{foo:"The foo!"}
+    // Notation: data:{foo:"The foo!"}
     "data": function(el, val) { $.dom(el).data(val); },
-    // Remember!!! style:{color:"blue"}
+    // Notation: style:{color:"blue"}
     "style": function(el, val) { $.dom(el).setStyle(val); }
 };
 
 function setAttributes(el, attrs) {
     if (el && el.nodeType === 1) {
-        var keyFixed, keyFixedDef, key, val, state,
+        var keyFixed, keyFixedDef, key, val, state, tmp,
             re_true = /^(1|true)$/;
 
         for (key in attrs) {
@@ -155,11 +153,39 @@ function setAttributes(el, attrs) {
 }
 
 function cloneElement(el, deep) {
-    var clone;
-    deep = !(deep === false);
-    clone = el.cloneNode(deep);
-    // if (deep) // copy events?
+    deep = (deep !== false);
+    var clone = el.cloneNode(false);
+    if (deep) {
+        if (el.childNodes.length) {
+            $.forEach(el.childNodes, function(e){
+                clone.appendChild(cloneElement(e, deep));
+            });
+        }
+        clone = cloneElementEvents(el, clone);
+    }
     return clone;
+}
+
+// @todo
+function cloneElementEvents(el, clone) {
+    // Needs `$.event` and `el.$events`
+    // if ($.event && el.$events) {}
+    return clone;
+}
+
+function cleanElement(el) {
+    var child;
+    while (child = el.firstChild) {
+        // Remove data
+        delete child.$data;
+        // Remove events
+        delete child.$events;
+        // Clean child element
+        cleanElement(child);
+        // Remove child element
+        el.removeChild(child);
+    }
+    return el;
 }
 
 function create(tag, attrs, doc) {
@@ -170,7 +196,7 @@ function create(tag, attrs, doc) {
 }
 
 function createFragment(content, doc) {
-    var tmp = doc.createElement("tmp"), // tmp?
+    var tmp = doc.createElement("mii-tmp"), // :)
         frg = doc.createDocumentFragment();
 
     tmp.innerHTML = content;
@@ -191,7 +217,9 @@ function createElementSafe(tag, doc, nameAttr) {
         element = doc.createElement("<"+ tag +" name='" + nameAttr + "'>");
     } else {
         element = doc.createElement(tag);
-        if (nameAttr) element.setAttribute("name", ""+ nameAttr);
+        if (nameAttr) {
+            element.setAttribute("name", nameAttr);
+        }
     }
 
     return element;
@@ -210,11 +238,6 @@ function createElement(content, doc) {
     if (isNode(content)) {
         return (tag = getNodeName(content))
                     && _return(tag, [content], fixedNodes[tag]);
-    }
-
-    if ($.typeOf(content) === "object") {
-        return (tag = _pick(content, "tag"))
-                    && _return(tag, [create(tag, content, doc)], fixedNodes[tag]);
     }
 
     tag = (re_tagName.exec(content) || [, ""])[1].toLowerCase();
@@ -238,42 +261,34 @@ function createElement(content, doc) {
     return _return(tag, $.array.make(frg.childNodes), !!fix);
 }
 
-function insert(fn, el, content, rev) {
-    var doc = $.doc(el),
-        element = createElement(content, doc),
-        nodes = element.nodes, node,
+function insert(fn, target, contents, reverse) {
+    var doc = $.doc(target),
+        element = createElement(contents, doc),
+        node, nodes = element.nodes,
         scope, tBody, i = 0;
 
     // Set target as `tbody`, otherwise IE7 doesn't insert
     if (element.fixed && element.tag === "tr"
-            && (tBody = getByTag(el, "tbody", 0)) != null) {
-        el = tBody;
+            && (tBody = getByTag(target, "tbody", 0)) != null) {
+        target = tBody;
     }
 
-    fn = insertFunctions[fn], scope = el;
+    fn = insertFunctions[fn], scope = target;
     while (node = nodes[i++]) {
-        // For insertBefore/After etc.
-        if (rev) {
-            scope = node; node = el;
+        // For insertBefore/insertAfter etc.
+        if (reverse) {
+            scope = node;
+            node = target;
         }
         fn.call(scope, node);
     }
 
     // Removes empty tbody's on IE (7-8)
     if (element.fixed && ie_lt9 && re_tableChildren.test(element.tag)) {
-        fixTable(el, doc);
+        fixTable(target, doc);
     }
 
     return nodes;
-}
-
-function cleanElement(el) {
-    // @todo: Remove data & events
-    // forEachRecursive(el.childNodes, cleanElement)
-    while (el.firstChild) {
-        el.removeChild(el.firstChild);
-    }
-    return el;
 }
 
 // Credits: http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291
@@ -349,7 +364,7 @@ function parseStyleText(text) {
 }
 
 function rgbToHex(color) {
-    if (color.substr(0, 1) === "#" || color.indexOf("rgb") === -1) {
+    if (color.charAt(0) === "#" || color.indexOf("rgb") === -1) {
         return color;
     }
 
@@ -425,7 +440,7 @@ function getUuid(el) {
 }
 
 function getDataKey(key) {
-    return (key = key.replace(re_reduceDash, "-")) &&
+    return (key = (""+ key).replace(re_reduceDash, "-")) &&
                 re_dataKey.test(key) ? key : dataKey + key;
 }
 
@@ -464,35 +479,31 @@ Dom.prototype = {
             return selector;
         }
 
-        var typeofSelector = typeof selector;
-        if (selector && typeofSelector === "object" &&
-                !selector.nodeType && selector.length === undefined) {
-            // Notation: $.dom({tag:"span"})
-            selector = createElement(selector, DOC).nodes;
-        } else if (typeofSelector === "string" &&
-            (root && typeof root === "object" &&
-                !root.nodeType && root.length === undefined)) {
+        var nodes;
+        if (typeof selector === "string") {
             selector = $.trim(selector);
-            // Notation: $.dom("span", {id: "foo"}) or $.dom("<span>", {id: "foo"})
-            if (re_tagName.test(selector)) {
-                selector = $.trim(RegExp.$1);
-            }
-            root.tag = selector;
-            selector = createElement(root, DOC).nodes;
-        } else if (typeofSelector === "string") {
-            selector = $.trim(selector);
+            // Notation: $.dom("<span>", {id: "foo"})
+            // Notation: $.dom("<span id='foo'>")
+            // Notation: $.dom("<span id='foo'>The span!</span>")
             if (re_htmlContent.test(selector)) {
-                // Notation: $.dom("<span>")
-                selector = createElement(selector, DOC).nodes;
-            } else {
-                selector = QSA(selector, root);
-                if (!isNaN(i) && selector && selector.length) { // NodeList
-                    selector = selector[i];
+                nodes = createElement(selector, DOC).nodes;
+                // Set attributes
+                if (root && typeof root === "object" && !root.nodeType && root.length === undefined) {
+                    $.forEach(nodes, function(node){
+                        setAttributes(node, root);
+                    });
                 }
             }
         }
 
-        return new Dom(selector);
+        if (!nodes) {
+            nodes = QSA(selector, root);
+            if (!isNaN(i) && nodes && nodes.length) { // NodeList
+                nodes = nodes[i];
+            }
+        }
+
+        return new Dom(nodes);
     },
     find: function(s, i) {
         return this[0] ? this.__init(s, this[0], i) : this;
@@ -562,9 +573,15 @@ Dom.prototype = {
 
 // Dom: setters & getters
 $.forEach(["append", "prepend", "before", "after", "replace"], function(fn) {
-    Dom.prototype[fn] = function(content) {
+    Dom.prototype[fn] = function(contents) {
         return this.forEach(function(el) {
-            insert(fn, el, content);
+            // @note: doesn't work without `clone`
+            if (contents.cloneNode) {
+                contents = cloneElement(contents);
+            } else if (contents[0] && contents[0].cloneNode) {
+                contents = cloneElement(contents[0]);
+            }
+            insert(fn, el, contents);
         });
     };
 });
@@ -572,9 +589,13 @@ $.forEach(["append", "prepend", "before", "after", "replace"], function(fn) {
 $.forEach(["appendTo", "prependTo", "insertBefore", "insertAfter"], function(fn) {
     Dom.prototype[fn] = function(toEl) {
         return this.forEach(function(el) {
-            if (!isDomInstance(toEl)) toEl = this.__init(toEl);
+            if (!isDomInstance(toEl)) {
+                toEl = this.__init(toEl);
+            }
             toEl.forEach(function(to) {
-                insert(fn, to, el /*content*/, true /*reverse*/);
+                // @note: doesn't work without `clone`
+                el = cloneElement(el);
+                insert(fn, to, el /*contents*/, true /*reverse*/);
             });
         });
     };
@@ -595,9 +616,6 @@ $.forEach({getHtml: "innerHTML", getText: textProp}, function(fn, prop) {
 });
 
 $.extend(Dom.prototype, {
-    create: function(tag, attrs) {
-        return this.__init(create(tag, attrs));
-    },
     clone: function(deep) {
         var clones = [];
         this.forEach(function(el, i) {
@@ -741,7 +759,9 @@ $.extend(Dom.prototype, {
             for (k in styles) {
                 if (styles.hasOwnProperty(k)) {
                     v = styles[k], k = toStyleProp(k);
-                    if (re_digit.test(v) && !(k in nonuniteStyles)) v = v +"px";
+                    if (re_digit.test(v) && !(k in nonuniteStyles)) {
+                        v += "px";
+                    }
                     el.style[k] = v;
                 }
             }
@@ -1090,86 +1110,38 @@ $.extend(Dom.prototype, {
 // Dom: data tools
 $.extend(Dom.prototype, {
     data: function(key, val) {
-        if (!this.length) return this;
-
-        // Set data
+        // Set data!
+        // Notation: $.dom(".foo").data("foo", "The foo!")
+        // Notation: $.dom(".foo").data({"foo": "The foo!"})
         if (typeof key === "object" || typeof val !== "undefined") {
-            var data = key, uuid;
+            var data = key;
             if (typeof data === "string") {
                 data = {}, (data[key] = val);
             }
             return this.forEach(function(el) {
-                uuid = getUuid(el);
-                el.setAttribute(uuidKey, uuid);
-                for (key in data) {
-                    val = data[key], key = getDataKey(key);
-                    if (typeof val === "function" || typeof val === "object") {
-                        // Cache!!!
-                        _data_cache[uuid] || (_data_cache[uuid] = {});
-                        _data_cache[uuid][key] = val;
-                    } else {
-                        el.setAttribute(key, ""+ val);
-                    }
+                el.$data = el.$data || {};
+                for (var key in data) {
+                    el.$data[key] = data[key];
                 }
             });
         }
 
         // Get data
-        key = getDataKey(key);
-        var el = this[0],
-            uuid = getUuid(el),
-            attr = el.attributes[key],
-            data = (attr && attr.specified) ? attr.value : (_data_cache[uuid] && _data_cache[uuid][key]),
-            num;
-
-        if (typeof data === "string") {
-            switch (data) {
-                case "null":
-                    data = null;
-                    break;
-                case "true":
-                case "false":
-                    data = (data === "true") ? true : false;
-                    break;
-                default:
-                    if (typeof (num = parseFloat(data)) === "number" && !isNaN(num)) {
-                        data = num;
-                    }
-            }
+        // Notation: $.dom(".foo").data("foo")
+        var el, data;
+        if (el = this[0]) {
+            el.$data = el.$data || {};
+            data = el.$data[key];
         }
         return data;
     },
     removeData: function(key) {
         return this.forEach(function(el) {
             if (key === "*") {
-                return this.removeDataAll();
-            }
-            var uuid = el.getAttribute(uuidKey);
-            if (uuid !== null) { // Has uuid?
-                key = getDataKey(key);
-                if (_data_cache[uuid] && _data_cache[uuid][key]) {
-                    try { delete _data_cache[uuid][key]; }
-                        catch(e) { _data_cache[uuid][key] = null; }
-                } else {
-                    el.removeAttribute(key);
-                }
-            }
-        });
-    },
-    removeDataAll: function() {
-        return this.forEach(function(el) {
-            var uuid = el.getAttribute(uuidKey), data, dataAttrs = [], i;
-            if (uuid !== null) { // Has uuid?
-                if (_data_cache[uuid]) {
-                    try { delete _data_cache[uuid]; }
-                        catch(e) { _data_cache[uuid] = null; }
-                }
-                for (i = el.attributes.length - 1; i >= 0; --i) {
-                    re_dataKey.test(el.attributes[i].name) && dataAttrs.push(RegExp.$1);
-                }
-                for (i = dataAttrs.length - 1; i >= 0; --i) {
-                    el.removeAttribute(dataAttrs[i]);
-                }
+                // Remove all
+                delete el.$data;
+            } else {
+                delete el.$data[key];
             }
         });
     }

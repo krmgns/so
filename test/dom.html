@@ -1,0 +1,43 @@
+<!doctype html>
+<html><head></head><body>
+
+<div id="d1"></div>
+<div id="d2"></div>
+
+<script src="mii-all.php"></script>
+<script>
+mii.onReady(function($) {
+    var tpl, attrs = {id:"foo", style:"display:inline"}
+    // tpl = $.dom("<mii-foo>", attrs)
+    // tpl = $.dom("<mii-foo x='1'>", attrs)
+    // tpl = $.dom("<mii-foo>aaa</mii-foo>", attrs)
+    tpl = $.dom("<mii-foo x='1'>aa.a</mii-foo>", attrs)
+
+    // tpl.append("The foo!")
+
+    var d1 = $.dom("#d1").get(0), d2 = $.dom("#d2").get(0)
+    var els = $.dom([d1,d2])
+
+    // els.append("<a href>bbb</a>")
+    // els.append("ccc")
+    // els.append(tpl)
+
+    tpl.on("click", function(){ log("123") })
+    // tpl.once("click", function(){ log(this) })
+    tpl.appendTo(els)
+    // tpl.appendTo("div")
+
+    // tpl.remove()
+
+    /*bunu silicez galiba*/
+    // els.forEach(function(el){
+    //     tpl.clone().appendTo(el)
+    // })
+
+    // log(tpl)
+
+    // $.dom("html").once("click", function(){ log(this) })
+})
+</script>
+
+</body></html>

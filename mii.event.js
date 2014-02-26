@@ -8,7 +8,7 @@ var event = (function() {
      * // Event handling functions modified from originals by Dean Edwards.
      * // http://dean.edwards.name/my/events.js
      */
-    var preventDefault  = function() { this.returnValue = false; },
+    var preventDefault = function() { this.returnValue = false; },
         stopPropagation = function() { this.cancelBubble = true; };
 
     function _fix(e) {
