@@ -189,7 +189,9 @@ mii.browser = function() {
 }();
 
 // Some more extensions...
-mii.ext = mii.array = mii.object = {};
+mii.ext = {};
+mii.array = {};
+mii.object = {};
 
 // `mii` to window
 window.mii = mii;
