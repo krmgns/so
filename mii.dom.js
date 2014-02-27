@@ -579,13 +579,15 @@ Dom.prototype = {
 
 // Dom: setters & getters
 $.forEach(["append", "prepend", "before", "after", "replace"], function(fn) {
-    Dom.prototype[fn] = function(contents) {
+    Dom.prototype[fn] = function(contents, cloning) {
         return this.forEach(function(el) {
             // @note: doesn't work without `clone` (so inserts only once)
-            if (contents.cloneNode) {
-                contents = cloneElement(contents);
-            } else if (contents[0] && contents[0].cloneNode) {
-                contents = cloneElement(contents[0]);
+            if (cloning !== false) {
+                if (contents.cloneNode) {
+                    contents = cloneElement(contents);
+                } else if (contents[0] && contents[0].cloneNode) {
+                    contents = cloneElement(contents[0]);
+                }
             }
             insert(fn, el, contents);
         });
@@ -593,14 +595,16 @@ $.forEach(["append", "prepend", "before", "after", "replace"], function(fn) {
 });
 
 $.forEach(["appendTo", "prependTo", "insertBefore", "insertAfter"], function(fn) {
-    Dom.prototype[fn] = function(toEl) {
+    Dom.prototype[fn] = function(toEl, cloning) {
         return this.forEach(function(el) {
             if (!isDomInstance(toEl)) {
                 toEl = this.__init(toEl);
             }
             toEl.forEach(function(to) {
                 // @note: doesn't work without `clone` (so inserts only once)
-                el = cloneElement(el);
+                if (cloning !== false) {
+                    el = cloneElement(el);
+                }
                 insert(fn, to, el /*contents*/, true /*reverse*/);
             });
         });

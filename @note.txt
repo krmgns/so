@@ -1,0 +1,13 @@
+- EVENT.ONCE ISSUE: append, prepend etc. use auto-clone (see cloneElement) adn thus "$.event.once" doesn't work properly (couldn't fix)... use instead manual $.dom.clone with $.dom.forEach and bind events using $.event.on. e.g:
+- EVENT.ONCE FIXEE:
+    // append with `false`
+    var div = $.dom("div")
+    var tpl = $.dom("<a>", {href:"#"}).setText("The A!")
+    div.forEach(function(el){
+        var a = tpl.clone()
+        a.once("click", function(e){
+            e.preventDefault()
+            alert("Hey!")
+        })
+        a.appendTo(el, false)
+    })
