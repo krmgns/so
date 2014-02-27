@@ -110,7 +110,7 @@ var attrFunctions = {
 
 function setAttributes(el, attrs) {
     if (el && el.nodeType === 1) {
-        var keyFixed, keyFixedDef, key, val, state, tmp,
+        var keyFixed, keyFixedDef, key, val, state,
             re_true = /^(1|true)$/;
 
         for (key in attrs) {
@@ -169,7 +169,13 @@ function cloneElement(el, deep) {
 // @todo
 function cloneElementEvents(el, clone) {
     // Needs `$.event` and `el.$events`
-    // if ($.event && el.$events) {}
+    if ($.event && el.$events) {
+        $.forEach(el.$events, function(type, events){
+            $.forEach(events, function(i, callback){
+                $.event.on(clone, type, callback);
+            });
+        });
+    }
     return clone;
 }
 
@@ -575,7 +581,7 @@ Dom.prototype = {
 $.forEach(["append", "prepend", "before", "after", "replace"], function(fn) {
     Dom.prototype[fn] = function(contents) {
         return this.forEach(function(el) {
-            // @note: doesn't work without `clone`
+            // @note: doesn't work without `clone` (so inserts only once)
             if (contents.cloneNode) {
                 contents = cloneElement(contents);
             } else if (contents[0] && contents[0].cloneNode) {
@@ -593,7 +599,7 @@ $.forEach(["appendTo", "prependTo", "insertBefore", "insertAfter"], function(fn)
                 toEl = this.__init(toEl);
             }
             toEl.forEach(function(to) {
-                // @note: doesn't work without `clone`
+                // @note: doesn't work without `clone` (so inserts only once)
                 el = cloneElement(el);
                 insert(fn, to, el /*contents*/, true /*reverse*/);
             });

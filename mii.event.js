@@ -3,12 +3,8 @@
 "use strict"; // @tmp
 
 var event = (function() {
-    /**
-     * Based on "mjijackson / events.js" <https://gist.github.com/1000988>
-     * // Event handling functions modified from originals by Dean Edwards.
-     * // http://dean.edwards.name/my/events.js
-     */
-    var preventDefault = function() { this.returnValue = false; },
+    var _i = 0,
+        preventDefault = function() { this.returnValue = false; },
         stopPropagation = function() { this.cancelBubble = true; };
 
     function _fix(e) {
@@ -22,57 +18,52 @@ var event = (function() {
 
     function handleEvent(e) {
         e = e || _fix(((this.ownerDocument || this.document || this).parentWindow || window).event);
-        var result = true, handlers = this.events[e.type];
-        for (var i in handlers) {
+        var result = true, callbacks = this.$events[e.type], callback, i;
+        for (i in callbacks) {
+            callback = callbacks[i];
             // Unable to get property 'call' of undefined or null reference
-            if (handlers[i] && handlers[i].call(this, e) === false) {
+            if (callback && callback.call(this, e) === false) {
                 result = false;
             }
         }
         return result;
     }
 
-    function addEvent(el, type, fn) {
+    function addEvent(el, type, callback) {
+        el.$events = el.$events || {};
+        if (!el.$events[type]) {
+            el.$events[type] = {};
+            if (el["on" + type]) {
+                el.$events[type][0] = el["on" + type];
+            }
+        }
+
+        callback.$i = callback.$i || _i++;
+        el.$events[type][callback.$i] = callback;
+
         if (el.addEventListener) {
-            el.addEventListener(type, fn, false);
+            el.addEventListener(type, callback, false);
         } else {
-            var handlers;
-            if (el.nodeType === 3 || el.nodeType === 8) {
-                return;
-            }
-            if (el.setInterval && (el !== window && !el.frameElement)) {
-                el = window;
-            }
-
-            el.events = el.events || {};
-            handlers  = el.events[type];
-            if (!handlers) {
-                handlers = el.events[type] = {};
-                if (el["on" + type]) handlers[0] = el["on" + type];
-            }
-
-            fn.UUID = fn.UUID || $.uuid();
-            handlers[fn.UUID] = fn;
             el["on" + type] = handleEvent;
         }
     }
 
-    function removeEvent(el, type, fn) {
+    function removeEvent(el, type, callback) {
         if (el.removeEventListener) {
-            el.removeEventListener(type, fn, false);
+            el.removeEventListener(type, callback, false);
         } else {
-            if (el.events && el.events[type] && fn.UUID) {
-                // delete el.events[type][fn.UUID];
-                el.events[type][fn.UUID] = null;
+            if (el.$events && el.$events[type]) {
+                delete el.$events[type][callback.$i];
             }
         }
     }
 
-    function once(el, type, fn) {
-        var _fn;
-        addEvent(el, type, _fn = function(e){
-            removeEvent(el, type, _fn);
-            fn.call(el, e);
+    function once(el, type, callback) {
+        var _callback;
+        // Doesn't work with cloned elements!!! Sorry :(
+        addEvent(el, type, _callback = function(){
+            removeEvent(el, type, _callback);
+            return callback.apply(el, arguments);
         });
     }
 
@@ -100,8 +91,7 @@ var event = (function() {
     };
 
     function addCustomEvent(el, type, fn) {
-        var eventKey = _ek(type),
-            eventObject, e;
+        var eventKey = _ek(type), e;
         if (document.createEventObject) {
             // Create for IE
             e = document.createEventObject();
@@ -109,7 +99,6 @@ var event = (function() {
             if (!el[eventKey]) {
                 addEvent(el, type, fn);
             }
-            eventObject = e;
         } else {
             // Create for Firefox & others
             e = document.createEvent("Event");
@@ -117,33 +106,31 @@ var event = (function() {
             if (!el[eventKey]) {
                 addEvent(el, type, fn);
             }
-            eventObject = e;
         }
-        el[eventKey] = eventObject;
+        el[eventKey] = e;
     }
 
     function removeCustomEvent(el, type) {
-        el[_ek(type)] = null;
+        delete el[_ek(type)];
     }
 
     function invokeCustomEvent(el, type) {
-        var eventKey = _ek(type),
-            eventObject = el[eventKey];
-        if (eventObject != null) {
+        var e = el[_ek(type)];
+        if (e) {
             if (el.fireEvent) {
                 // Dispatch for IE
-                return el.fireEvent("on"+ type, eventObject);
+                return el.fireEvent("on"+ type, e);
             } else {
                 // Dispatch for Firefox & others
-                return !el.dispatchEvent(eventObject);
+                return !el.dispatchEvent(e);
             }
         }
     }
 
     return {
-        once: once,
         on: addEvent,
         off: removeEvent,
+        once: once,
         fire: fire,
         // Normal events
         addEvent: addEvent,
@@ -152,7 +139,7 @@ var event = (function() {
         // Custom events
         addCustomEvent: addCustomEvent,
         removeCustomEvent: removeCustomEvent,
-        invokeCustomEvent: invokeCustomEvent,
+        invokeCustomEvent: invokeCustomEvent
     };
 })();
 

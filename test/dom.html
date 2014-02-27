@@ -22,10 +22,14 @@ mii.onReady(function($) {
     // els.append("ccc")
     // els.append(tpl)
 
-    tpl.on("click", function(){ log("123") })
+    // tpl.on("click", function(){ log("123") })
+    tpl.on("click", function(){ log(this) })
     // tpl.once("click", function(){ log(this) })
-    tpl.appendTo(els)
-    // tpl.appendTo("div")
+    // var fn = function(){ log(this); tpl.off("click", fn); };
+    // tpl.on("click", fn)
+
+    tpl.appendTo("div")
+    tpl.removeAttr("*").setText("x");
 
     // tpl.remove()
 
