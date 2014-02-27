@@ -3,13 +3,14 @@
 
 <form id="form">
     <input type="text" value="The input!">
-    <input type="button" value="The button!" onclick="ajax()">
+    <input type="button" value="Go!" onclick="ajax()">
 </form>
 
 <div id="result"></div>
 
-<script src="../mii.js"></script>
-<script src="../mii.ajax.js"></script>
+<script src="../mii-all.js"></script>
+<!-- <script src="../mii.js"></script> -->
+<!-- <script src="../mii.ajax.js"></script> -->
 <script>
 mii.onReady(function($) {
     var result = document.getElementById("result");
@@ -33,7 +34,7 @@ mii.onReady(function($) {
             // 404: function(r){ log("Status: 404") },
             // 304: function(r){ log("Status: 304") },
             // 500: function(r){ log("Status: 500") }
-            
+
             beforeSend: function(xhr) {
                 xhr.overrideMimeType("text/xml");
             },
@@ -44,9 +45,9 @@ mii.onReady(function($) {
         .setRequestHeader("Accept", "text/xml")
         // .setRequestHeader({"X-Foo": "The foo!", "X-Bar": "The bar!"})
         .send();
-        
-        // log(req)
-        
+
+        log(req)
+
         // $.ajax("POST /ajax.php?a=1", {foo:1, bar:"the bar!"}, function(r) { log(r) });
         // $.ajax.get("/ajax.php?a=1", function(r) { log(r) });
         // $.ajax.post("/ajax.php?a=1", function(r) { log(r) });
