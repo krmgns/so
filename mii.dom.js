@@ -16,7 +16,7 @@ var DOC = $.doc(),
     re_bool = /^(true|false)$/,
     re_opacity = /opacity=(.*)?\)/i,
     re_rgb = /(.*?)rgb\((\d+),\s*(\d+),\s*(\d+)\)/,
-    re_htmlContent = /<([a-z-]+)([^>]*)>|<([a-z-]+)([^>]*)>.*?<\/[^>]+>/i,
+    re_htmlContent = /^<([a-z-]+).*\/?>(?:.*<\/\1>|)$/i,
     _pick = function(o,i,d) {o||(o={});var r=o[i]; if(d!==false) delete o[i]; return r},
     _re_cache = {}
 ;

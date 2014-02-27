@@ -4,14 +4,15 @@
 <div id="d1"></div>
 <div id="d2"></div>
 
-<script src="mii-all.php"></script>
+<!-- <script src="mii-all.php"></script> -->
+<script src="../mii-all.js"></script>
 <script>
 mii.onReady(function($) {
     var tpl, attrs = {id:"foo", style:"display:inline"}
     // tpl = $.dom("<mii-foo>", attrs)
     // tpl = $.dom("<mii-foo x='1'>", attrs)
     // tpl = $.dom("<mii-foo>aaa</mii-foo>", attrs)
-    // tpl = $.dom("<mii-foo x='1'>aa.a</mii-foo>", attrs)
+    tpl = $.dom("<mii-foo x='1'>aa.a</mii-foo>", attrs)
 
     // tpl.append("The foo!")
 
@@ -22,36 +23,32 @@ mii.onReady(function($) {
     // els.append("ccc")
     // els.append(tpl)
 
-    // tpl.on("click", function(){ log("123") })
-    // tpl.on("click", function(){ log(this) })
-    // tpl.once("click", function(){ log(this) })
+    tpl.on("click", function(){ log("123") })
+    tpl.on("click", function(){ log("this") })
+    tpl.on("click", function(){ log(this) })
+    // tpl.once("click", function(){ log(this) }) // doesnt work, see below
     // var fn = function(){ log(this); tpl.off("click", fn); };
     // tpl.on("click", fn)
 
-    // tpl.appendTo("div")
+    tpl.appendTo("div")
     // tpl.removeAttr("*").setText("x");
 
     // tpl.remove()
-
-    /*bunu silicez galiba*/
-    // els.forEach(function(el){
-    //     tpl.clone().appendTo(el)
-    // })
 
     // log(tpl)
 
     // $.dom("html").once("click", function(){ log(this) })
 
-    var div = $.dom("div")
-    var tpl = $.dom("<a>", {href:"#"}).setText("The A!")
-    div.forEach(function(el){
-        var a = tpl.clone()
-        a.once("click", function(e){
-            e.preventDefault()
-            alert("Hey!")
-        })
-        a.appendTo(el, false)
-    })
+    // var div = $.dom("div")
+    // var tpl = $.dom("<a>", {href:"#"}).setText("The A!")
+    // div.forEach(function(el){
+    //     var a = tpl.clone()
+    //     a.once("click", function(e){
+    //         e.preventDefault()
+    //         alert("Hey!")
+    //     })
+    //     a.appendTo(el, false)
+    // })
 })
 </script>
 

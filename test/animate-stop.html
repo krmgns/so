@@ -13,7 +13,11 @@ mii.onReady(function($) {
     p.on("mouseover", function(){
         p.animate({width: 500}, 1000);
     }).on("mouseout", function(){
-        p.animate({width: 200}, 1000);
+        p.animate({width: 200}, 1000, function(el, anim){
+            log(el)
+            log(anim)
+            log(this)
+        });
     });
 });
 </script>
