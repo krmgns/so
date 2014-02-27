@@ -1,0 +1,25 @@
+<!doctype html>
+<html><head></head><body>
+
+
+<div id="container">
+    <p class="p">Just p</p>
+</div>
+
+<script src="mii-all.php"></script>
+<script>
+mii.onReady(function($) {
+    var p = $.dom(".p");
+    p.on("mouseover", function(){
+        p.animate({width: 500}, 1000);
+    }).on("mouseout", function(){
+        p.animate({width: 200}, 1000);
+    });
+});
+</script>
+
+<style>
+.p {background: red; width: 200px; height: 200px}
+</style>
+
+</body></html>

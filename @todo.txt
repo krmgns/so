@@ -2,4 +2,5 @@
 - Add: $.dom.and() // join elements $.dom('p.cls1').and('p.cls2'). note: but is not same? $.dom('p.cls1, p.cls2')
 - Add: $.ajax.queue
 - div.animate({top: '-=100'}) support?
+- div.stop().animate() support? (simdilik auto-stop yaptim, ama running anim bitince digerine gecme olayi yok)
 - defer?

@@ -15,14 +15,17 @@ function timer(fn) {
 
 /*** The Animation ***/
 function Animation(el) {
-    this.el      = $.dom(el);
+    this.el = $.dom(el);
     this.running = false
     this.stopped = false;
 }
 
 Animation.prototype.animate = function(properties, duration, fn) {
     // Stop if running
-    this.stop();
+    var animation = this.el[0].$animation;
+    if (animation && animation.running) {
+        animation.stop();
+    }
 
     this.fn          = fn;
     this.running     = true;
@@ -56,6 +59,9 @@ Animation.prototype.animate = function(properties, duration, fn) {
         }
     }
 
+    // For stop tool
+    this.el[0].$animation = this;
+
     // Run animation
     ;(function run() {
         if (!that.stopped) {
@@ -63,7 +69,9 @@ Animation.prototype.animate = function(properties, duration, fn) {
                 timer(run);
                 that._start();
             } else {
-                that._end(); // Finito!
+                // Finito!
+                that._end();
+                that.stop();
             }
         }
     })();
@@ -114,12 +122,15 @@ $.extend(Animation.prototype, {
         if (typeof this.fn === "function") {
             this.fn.call(this, this.el, this);
         }
-        this.stopped = true;
     },
     stop: function() {
         if (this.running) {
+            this.running = false;
             this.stopped = true;
         }
+        // Remove animation [No delete, can be used for `is(":animated")` like function]
+        this.el[0].$animation = null;
+
         return this;
     }
 });
