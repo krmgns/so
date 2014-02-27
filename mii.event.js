@@ -2,6 +2,7 @@
 
 "use strict"; // @tmp
 
+// Credits: https://gist.github.com/1000988 & http://dean.edwards.name/my/events.js
 var event = (function() {
     var _i = 0,
         preventDefault = function() { this.returnValue = false; },
