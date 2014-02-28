@@ -1274,9 +1274,9 @@ function getDefaultDisplay(tagName) {
 // Dom: animations
 if ($.animate) {
     $.extend(Dom.prototype, {
-        animate: function(properties, duration, fn) {
+        animate: function(properties, duration, onStart, onStop, easing) {
             return this.forEach(function(el) {
-                $.animate(el, properties, duration, fn);
+                $.animate(el, properties, duration, onStart, onStop, easing);
             });
         },
         fade: function(to, duration, fn) {

@@ -3,28 +3,27 @@
 
 
 <div id="container">
-    <p class="p">Just p</p>
+    <p class="p"></p>
 </div>
 
-<!-- <script src="../mii-all.js"></script> -->
 <script src="mii-all.php"></script>
+<!-- <script src="../mii-all.js"></script> -->
+<script src="../plugins/mii.animate.easing.js"></script>
 <script>
 mii.onReady(function($) {
-    var p = $.dom(".p");
-    p.on("mouseover", function(){
-        p.animate({width: 500}, 1000);
-    }).on("mouseout", function(){
-        p.animate({width: 200}, 1000, function(el, anim){
-            log(el)
-            log(anim)
-            log(this)
+    var easing = "easeInOutElastic";
+    $.dom(".p")
+        .on("mouseover", function(){
+            $.dom(this).animate({width:500, height:500}, 1000, null, null, easing);
+        })
+        .on("mouseout", function(){
+            $.dom(this).animate({width:50, height:50}, 1000, null, null, easing);
         });
-    });
 });
 </script>
 
 <style>
-.p {background: red; width: 200px; height: 200px}
+.p {background: red; width: 50px; height: 50px; border-radius: 50%; margin: 0 auto;}
 </style>
 
 </body></html>

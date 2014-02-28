@@ -1,3 +1,8 @@
+/**
+ * @name: mii.windowScroll
+ * @deps: mii, mii.ext, mii.dom
+ */
+
 ;(function($){
 
 // For now, it is only scroll to 'Y' direction...

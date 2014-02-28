@@ -11,7 +11,7 @@ var opt_fps = 60,
     opt_defaultDuration = 350,
     opt_shortcutDurations = {fast: 150, slow: 750},
     // Credits: http://easings.net/ (easeOutQuad)
-    fn_ease = function(t,b,c,d) {return -c*(t/=d)*(t-2)+b}
+    fn_easing = function(t,b,c,d) {return -c*(t/=d)*(t-2)+b}
 ;
 
 function timer(fn) {
@@ -19,12 +19,16 @@ function timer(fn) {
 }
 
 /*** The Animation ***/
-function Animation(el, properties) {
+function Animation(el, properties, duration, onStart, onStop) {
     this.el = $.dom(el);
+    this.onStart = onStart;
+    this.onStop = onStop;
+    this.duration = typeof duration === "number" ? duration : opt_shortcutDurations[duration] || opt_defaultDuration;
+
     this.running = false
     this.stopped = false;
-    this.animations = [];
 
+    this.animations = [];
     var property, startValue, stopValue, isScroll;
     // Add properties
     for (property in properties) {
@@ -48,15 +52,19 @@ function Animation(el, properties) {
     }
 }
 
-Animation.prototype.animate = function(duration, onEnd) {
+Animation.prototype.animate = function(easing) {
     // Stop if running
     var animation = this.el[0].$animation;
     if (animation && animation.running) {
         animation.stop();
     }
 
-    this.duration = typeof duration === "number" ? duration : opt_shortcutDurations[duration] || opt_defaultDuration;
-    this.onEnd = onEnd;
+    this.easing = fn_easing;
+    if ($.animate.easing && $.animate.easing[easing]) {
+        this.easing = function() {
+            return $.animate.easing[easing].apply($.animate.easing, arguments);
+        };
+    }
 
     this.running = true;
     this.stopped = false;
@@ -86,6 +94,11 @@ Animation.prototype.animate = function(duration, onEnd) {
 
 $.extend(Animation.prototype, {
     _start: function() {
+        // Call `onStart` handler
+        if (typeof this.onStart === "function") {
+            this.onStart.call(this, this.el, this);
+        }
+
         var a, s, isBody,
             i = 0, current = 0,
             el = this.el, animations = this.animations;
@@ -93,7 +106,7 @@ $.extend(Animation.prototype, {
         this.elapsedTime = $.now() - this.startTime;
 
         while (a = animations[i++]) {
-            current = fn_ease(this.elapsedTime, 0.0, a.diff, this.duration);
+            current = this.easing.call(null, this.elapsedTime, 0.0, a.diff, this.duration);
             current = (a.reverse ? a.startValue - current : a.startValue + current);
             if (!a.isScroll) {
                 // Using "toFixed" for max percent
@@ -123,9 +136,9 @@ $.extend(Animation.prototype, {
                 }
             }
         }
-        // Call `onend` handler
-        if (typeof this.onEnd === "function") {
-            this.onEnd.call(this, this.el, this);
+        // Call `onStop` handler
+        if (typeof this.onStop === "function") {
+            this.onStop.call(this, this.el, this);
         }
     },
     stop: function() {
@@ -141,8 +154,8 @@ $.extend(Animation.prototype, {
 });
 
 // Add `animate` to mii
-$.animate = function(el, properties, duration, onEnd) {
-    return (new Animation(el, properties)).animate(duration, onEnd);
+$.animate = function(el, properties, duration, onStart, onStop, easing) {
+    return (new Animation(el, properties, duration, onStart, onStop)).animate(easing);
 };
 
 // Define exposer
