@@ -1,3 +1,8 @@
+/**
+ * @name: mii.animate
+ * @deps: mii, mii.ext, mii.dom
+ */
+
 ;(function($) {
 
 "use strict"; // @tmp
@@ -14,31 +19,14 @@ function timer(fn) {
 }
 
 /*** The Animation ***/
-function Animation(el) {
+function Animation(el, properties) {
     this.el = $.dom(el);
     this.running = false
     this.stopped = false;
-}
+    this.animations = [];
 
-Animation.prototype.animate = function(properties, duration, fn) {
-    // Stop if running
-    var animation = this.el[0].$animation;
-    if (animation && animation.running) {
-        animation.stop();
-    }
-
-    this.fn          = fn;
-    this.running     = true;
-    this.stopped     = false;
-    this.animations  = [];
-    this.startTime   = $.now();
-    this.elapsedTime = 0;
-    this.duration    = typeof duration === "number" ? duration : opt_shortcutDurations[duration] || opt_defaultDuration;
-
-    var that = this,
-        property, startValue, stopValue, isScroll;
-
-    // Add animations
+    var property, startValue, stopValue, isScroll;
+    // Add properties
     for (property in properties) {
         if (properties.hasOwnProperty(property)) {
             stopValue  = properties[property];
@@ -58,20 +46,37 @@ Animation.prototype.animate = function(properties, duration, fn) {
             });
         }
     }
+}
+
+Animation.prototype.animate = function(duration, onEnd) {
+    // Stop if running
+    var animation = this.el[0].$animation;
+    if (animation && animation.running) {
+        animation.stop();
+    }
+
+    this.duration = typeof duration === "number" ? duration : opt_shortcutDurations[duration] || opt_defaultDuration;
+    this.onEnd = onEnd;
+
+    this.running = true;
+    this.stopped = false;
+    this.startTime = $.now();
+    this.elapsedTime = 0;
 
     // For stop tool
     this.el[0].$animation = this;
 
+    var _this = this;
     // Run animation
     ;(function run() {
-        if (!that.stopped) {
-            if (that.elapsedTime < that.duration) {
+        if (!_this.stopped) {
+            if (_this.elapsedTime < _this.duration) {
                 timer(run);
-                that._start();
+                _this._start();
             } else {
                 // Finito!
-                that._end();
-                that.stop();
+                _this._end();
+                _this.stop();
             }
         }
     })();
@@ -119,8 +124,8 @@ $.extend(Animation.prototype, {
             }
         }
         // Call `onend` handler
-        if (typeof this.fn === "function") {
-            this.fn.call(this, this.el, this);
+        if (typeof this.onEnd === "function") {
+            this.onEnd.call(this, this.el, this);
         }
     },
     stop: function() {
@@ -136,8 +141,8 @@ $.extend(Animation.prototype, {
 });
 
 // Add `animate` to mii
-$.animate = function(el, properties, duration, fn) {
-    return (new Animation(el)).animate(properties, duration, fn);
+$.animate = function(el, properties, duration, onEnd) {
+    return (new Animation(el, properties)).animate(duration, onEnd);
 };
 
 // Define exposer
