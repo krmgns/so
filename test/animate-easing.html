@@ -2,8 +2,10 @@
 <html><head></head><body>
 
 
+<div id="easing"></div>
+<br>
 <div id="container">
-    <p class="p"></p>
+    <p class="p"><br>Click</p>
 </div>
 
 <script src="mii-all.php"></script>
@@ -11,19 +13,25 @@
 <script src="../plugins/mii.animate.easing.js"></script>
 <script>
 mii.onReady(function($) {
-    var easing = "easeInOutElastic";
-    $.dom(".p")
-        .on("mouseover", function(){
-            $.dom(this).animate({width:500, height:500}, 1000, null, null, easing);
-        })
-        .on("mouseout", function(){
-            $.dom(this).animate({width:50, height:50}, 1000, null, null, easing);
+    $.forEach($.animate.easing, function(easing){
+        var input = $.dom("<label><input type=radio name=easing value="+ easing +">"+ easing +"</label>");
+        input.appendTo("#easing");
+    });
+    // properties, duration, onStart, onStop, easing
+    var p = $.dom(".p");
+        p.on("click", function(){
+            p.toggle(0, function(){log(this)})
+            // var easing = $.dom("input[name=easing]:checked").getValue();
+            // p.animate({left:500}, 1000, null, function(){
+            //     p.animate({left:10}, 1000, easing);
+            // }, easing);
         });
 });
 </script>
 
 <style>
-.p {background: red; width: 50px; height: 50px; border-radius: 50%; margin: 0 auto;}
+.p {background: red; width: 50px; height: 50px; cursor: pointer; position: absolute; left: 10; text-align: center;}
+#easings {position: absolute; top:0; left: 0}
 </style>
 
 </body></html>

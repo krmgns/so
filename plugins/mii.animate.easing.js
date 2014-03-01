@@ -1,4 +1,4 @@
-/*
+/**
  * jQuery Easing v1.3 - http://gsgd.co.uk/sandbox/jquery/easing/
  *
  * Uses the built in easing capabilities added In jQuery 1.1
@@ -33,18 +33,18 @@
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  *
-*/
+ */
 
 /**
  * @name: mii.animate.easing
- * @deps: mii, mii.ext, mii.dom, mii.animate
+ * @deps: mii, mii.animate
  */
 
-;(function($, undefined){
+;(function($){
 
 "use strict"; // @tmp
 
-if (!$.ext || !$.dom || !$.animate) return;
+if (!$.animate) return;
 
 $.animate.easing = {
     // Quad
@@ -195,7 +195,7 @@ $.animate.easing = {
     },
     // Bounce
     easeInBounce: function(t,b,c,d) {
-        return c-this.easeOutBounce(d-t,0,c,d)+b;
+        return c-$.animate.easing.easeOutBounce(d-t,0,c,d)+b;
     },
     easeOutBounce: function(t,b,c,d) {
         var s1=7.5625, s2=2.75;
@@ -211,9 +211,9 @@ $.animate.easing = {
     },
     easeInOutBounce: function(t,b,c,d) {
         if (t<d/2) {
-            return this.easeInBounce(t*2,0,c,d)*.5+b;
+            return $.animate.easing.easeInBounce(t*2,0,c,d)*.5+b;
         }
-        return this.easeOutBounce(t*2-d,0,c,d)*.5+c*.5+b;
+        return $.animate.easing.easeOutBounce(t*2-d,0,c,d)*.5+c*.5+b;
     }
 };
 

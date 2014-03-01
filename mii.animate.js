@@ -1,6 +1,6 @@
 /**
  * @name: mii.animate
- * @deps: mii, mii.ext, mii.dom
+ * @deps: mii, mii.ext, mii.array, mii.dom
  */
 
 ;(function($) {
@@ -59,12 +59,7 @@ Animation.prototype.animate = function(easing) {
         animation.stop();
     }
 
-    this.easing = fn_easing;
-    if ($.animate.easing && $.animate.easing[easing]) {
-        this.easing = function() {
-            return $.animate.easing[easing].apply($.animate.easing, arguments);
-        };
-    }
+    this.easing = ($.animate.easing && $.animate.easing[easing]) || fn_easing;
 
     this.running = true;
     this.stopped = false;
@@ -96,7 +91,7 @@ $.extend(Animation.prototype, {
     _start: function() {
         // Call `onStart` handler
         if (typeof this.onStart === "function") {
-            this.onStart.call(this, this.el, this);
+            this.onStart.call(this.el[0], this);
         }
 
         var a, s, isBody,
@@ -138,7 +133,7 @@ $.extend(Animation.prototype, {
         }
         // Call `onStop` handler
         if (typeof this.onStop === "function") {
-            this.onStop.call(this, this.el, this);
+            this.onStop.call(this.el[0], this);
         }
     },
     stop: function() {
@@ -155,6 +150,9 @@ $.extend(Animation.prototype, {
 
 // Add `animate` to mii
 $.animate = function(el, properties, duration, onStart, onStop, easing) {
+    // Swap args
+    if (typeof onStart === "string") easing = onStart;
+    if (typeof onStop === "string") easing = onStop;
     return (new Animation(el, properties, duration, onStart, onStop)).animate(easing);
 };
 

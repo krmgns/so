@@ -1279,49 +1279,49 @@ if ($.animate) {
                 $.animate(el, properties, duration, onStart, onStop, easing);
             });
         },
-        fade: function(to, duration, fn) {
-            return this.animate({opacity: to}, duration, fn);
+        fade: function(to, duration, callback) {
+            return this.animate({opacity: to}, duration, null, callback);
         },
-        fadeIn: function(duration, fn) {
-            return this.fade(1, duration, fn);
+        fadeIn: function(duration, callback) {
+            return this.fade(1, duration, callback);
         },
-        fadeOut: function(duration, fn) {
-            if (fn === true || fn === "remove") {
-                fn = function(el) {
+        fadeOut: function(duration, callback) {
+            if (callback === true || callback === "remove") {
+                callback = function(el) {
                     $.dom(el).remove();
                 };
             }
-            return this.fade(0, duration, fn);
+            return this.fade(0, duration, callback);
         },
-        show: function(duration, fn) {
+        show: function(duration, callback) {
             return this.forEach(function(el) {
                 if (!(el.offsetWidth || el.offsetHeight)) {
                     el.style.display = getDefaultDisplay(el.tagName);
-                    $.animate(el, {opacity: 1}, duration || 0, fn);
+                    $.animate(el, {opacity: 1}, duration || 0, null, callback);
                 }
             });
         },
-        hide: function(duration, fn) {
+        hide: function(duration, callback) {
             return this.forEach(function(el) {
                 if (el.offsetWidth || el.offsetHeight) {
-                    $.animate(el, {opacity: 0}, duration || 0, function(){
+                    $.animate(el, {opacity: 0}, duration || 0, null, function(){
                         el.style.display = "none";
-                        fn && fn.call(this);
+                        callback && callback.call(this);
                     });
                 }
             });
         },
-        toggle: function(duration, fn) {
+        toggle: function(duration, callback) {
             return this.forEach(function(el) {
                 if (!(el.offsetWidth || el.offsetHeight)) {
                     // Show element
                     el.style.display = getDefaultDisplay(el.tagName);
-                    $.animate(el, {opacity: 1}, duration || 0, fn);
+                    $.animate(el, {opacity: 1}, duration || 0, null, callback);
                 } else {
                     // Hide element
-                    $.animate(el, {opacity: 0}, duration || 0, function(){
+                    $.animate(el, {opacity: 0}, duration || 0, null, function(){
                         el.style.display = "none";
-                        fn && fn.call(this);
+                        callback && callback.call(this);
                     });
                 }
             });
