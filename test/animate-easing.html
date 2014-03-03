@@ -5,7 +5,8 @@
 <div id="easing"></div>
 <br>
 <div id="container">
-    <p class="p"><br>Click</p>
+    <div id="foo">Click</div>
+    <p></p>
 </div>
 
 <script src="mii-all.php"></script>
@@ -17,20 +18,36 @@ mii.onReady(function($) {
         var input = $.dom("<label><input type=radio name=easing value="+ easing +">"+ easing +"</label>");
         input.appendTo("#easing");
     });
+
+    var foo = $.dom("#foo");
+    // var i = $.dom("input").first();
+    // setTimeout(function run(){
+    //     var easing = i.getValue();
+    //     foo.next().setHtml(easing);
+    //     foo.insertAfter("<div>"+ 1 +"</div>");
+    //     foo.animate({left:500}, 1000, null, function(){
+    //         foo.animate({left:10}, 1000, null, function(){
+    //             i = i.parent().next().find("input").first();
+    //             if (i.length) {
+    //                 run();
+    //             }
+    //         }, easing);
+    //     }, easing);
+    // }, 1000);
+
     // properties, duration, onStart, onStop, easing
-    var p = $.dom(".p");
-        p.on("click", function(){
-            p.toggle(0, function(){log(this)})
-            // var easing = $.dom("input[name=easing]:checked").getValue();
-            // p.animate({left:500}, 1000, null, function(){
-            //     p.animate({left:10}, 1000, easing);
-            // }, easing);
-        });
+    foo.on("click", function(){
+        var easing = $.dom("input[name=easing]:checked").getValue();
+        foo.animate({left:500}, 1000, null, function(){
+            foo.animate({left:0}, 1000, easing);
+        }, easing);
+    });
 });
 </script>
 
 <style>
-.p {background: red; width: 50px; height: 50px; cursor: pointer; position: absolute; left: 10; text-align: center;}
+#container {width: 500px; height: 50px; border: 1px solid; position: relative; line-height: 50px}
+#foo {background: red; width: 50px; height: 50px; cursor: pointer; position: absolute; top: 0; left: 0; text-align: center;}
 #easings {position: absolute; top:0; left: 0}
 </style>
 

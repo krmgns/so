@@ -56,6 +56,7 @@ Animation.prototype.animate = function(easing) {
     // Stop if running
     var animation = this.el[0].$animation;
     if (animation && animation.running) {
+        // @todo (must be not auto-stop)
         animation.stop();
     }
 
@@ -91,7 +92,7 @@ $.extend(Animation.prototype, {
     _start: function() {
         // Call `onStart` handler
         if (typeof this.onStart === "function") {
-            this.onStart.call(this.el[0], this);
+            this.onStart(this.el[0], this);
         }
 
         var a, s, isBody,
@@ -133,7 +134,7 @@ $.extend(Animation.prototype, {
         }
         // Call `onStop` handler
         if (typeof this.onStop === "function") {
-            this.onStop.call(this.el[0], this);
+            this.onStop(this.el[0], this);
         }
     },
     stop: function() {
