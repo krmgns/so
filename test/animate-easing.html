@@ -6,8 +6,8 @@
 <br>
 <div id="container">
     <div id="foo">Click</div>
-    <p></p>
 </div>
+<p id="p"></p>
 
 <script src="mii-all.php"></script>
 <!-- <script src="../mii-all.js"></script> -->
@@ -20,20 +20,20 @@ mii.onReady(function($) {
     });
 
     var foo = $.dom("#foo");
-    // var i = $.dom("input").first();
-    // setTimeout(function run(){
-    //     var easing = i.getValue();
-    //     foo.next().setHtml(easing);
-    //     foo.insertAfter("<div>"+ 1 +"</div>");
-    //     foo.animate({left:500}, 1000, null, function(){
-    //         foo.animate({left:10}, 1000, null, function(){
-    //             i = i.parent().next().find("input").first();
-    //             if (i.length) {
-    //                 run();
-    //             }
-    //         }, easing);
-    //     }, easing);
-    // }, 1000);
+    var p = $.dom("#p");
+    var i = $.dom("input").first();
+    setTimeout(function run(){
+        var easing = i.getValue();
+        p.setText(easing);
+        foo.animate({left:500}, 1000, null, function(){
+            foo.animate({left:10}, 1000, null, function(){
+                i = i.parent().next().find("input").first();
+                if (i.length) {
+                    run();
+                }
+            }, easing);
+        }, easing);
+    }, 1000);
 
     // properties, duration, onStart, onStop, easing
     foo.on("click", function(){

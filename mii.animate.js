@@ -71,6 +71,12 @@ Animation.prototype.animate = function(easing) {
     this.el[0].$animation = this;
 
     var _this = this;
+
+    // Call `onStart` handler
+    if (typeof this.onStart === "function") {
+        this.onStart(this.el[0], this);
+    }
+
     // Run animation
     ;(function run() {
         if (!_this.stopped) {
@@ -90,11 +96,6 @@ Animation.prototype.animate = function(easing) {
 
 $.extend(Animation.prototype, {
     _start: function() {
-        // Call `onStart` handler
-        if (typeof this.onStart === "function") {
-            this.onStart(this.el[0], this);
-        }
-
         var a, s, isBody,
             i = 0, current = 0,
             el = this.el, animations = this.animations;
@@ -132,16 +133,18 @@ $.extend(Animation.prototype, {
                 }
             }
         }
-        // Call `onStop` handler
-        if (typeof this.onStop === "function") {
-            this.onStop(this.el[0], this);
-        }
     },
     stop: function() {
         if (this.running) {
             this.running = false;
             this.stopped = true;
         }
+
+        // Call `onStop` handler
+        if (typeof this.onStop === "function") {
+            this.onStop(this.el[0], this);
+        }
+
         // Remove animation [No delete, can be used for `is(":animated")` like function]
         this.el[0].$animation = null;
 
