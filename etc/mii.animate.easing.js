@@ -60,7 +60,7 @@ $.animate.easing = {
         }
         return -c/2*((--t)*(t-2)-1)+b;
     },
-    // cubic
+    // Cubic
     "ease-in-cubic": function(t,b,c,d) {
         return c*(t/=d)*t*t+b;
     },
@@ -73,7 +73,7 @@ $.animate.easing = {
         }
         return c/2*((t-=2)*t*t+2)+b;
     },
-    // quart
+    // Quart
     "ease-in-quart": function(t,b,c,d) {
         return c*(t/=d)*t*t*t+b;
     },
