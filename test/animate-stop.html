@@ -11,10 +11,10 @@
 mii.onReady(function($) {
     var p = $.dom(".p");
     p.on("mouseover", function(){
-        // p.animateStop();
+        p.animateStop();
         p.animate({width: 500}, 1000);
     }).on("mouseout", function(){
-        // p.animateStop();
+        p.animateStop();
         p.animate({width: 200}, 1000, function(el, anim){
             log(el)
             log(anim)
