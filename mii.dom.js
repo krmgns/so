@@ -17,7 +17,6 @@ var DOC = $.doc(),
     re_opacity = /opacity=(.*)?\)/i,
     re_rgb = /(.*?)rgb\((\d+),\s*(\d+),\s*(\d+)\)/,
     re_htmlContent = /^<([a-z-]+).*\/?>(?:.*<\/\1>|)$/i,
-    _pick = function(o,i,d) {o||(o={});var r=o[i]; if(d!==false) delete o[i]; return r},
     _re_cache = {}
 ;
 
@@ -196,7 +195,7 @@ function cleanElement(el) {
 
 function create(tag, attrs, doc) {
     return setAttributes(
-        createElementSafe(tag, doc, _pick(attrs, "name")),
+        createElementSafe(tag, doc, $.object.pick(attrs, "name")),
         attrs
     );
 }

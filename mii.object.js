@@ -41,6 +41,14 @@ $.extend($.object, {
         }
         return result;
     },
+    pick: function(source, key, deleting) {
+        source || (source = {});
+        var value = source[key];
+        if(deleting !== false) {
+            delete source[key];
+        }
+        return value;
+    }
 });
 
 // Define exposer
