@@ -1278,7 +1278,6 @@ if ($.animate) {
             return this.forEach(function(el){
                 var animation = el.$animation;
                 if (animation && animation.running) {
-                    // @todo (must be not auto-stop)
                     animation.stop();
                 }
             });
