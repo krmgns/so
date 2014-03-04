@@ -54,11 +54,7 @@ function Animation(el, properties, duration, onStart, onStop) {
 
 Animation.prototype.animate = function(easing) {
     // Stop if running
-    var animation = this.el[0].$animation;
-    if (animation && animation.running) {
-        // @todo (must be not auto-stop)
-        animation.stop();
-    }
+    this.stop();
 
     this.easing = ($.animate.easing && $.animate.easing[easing]) || fn_easing;
 

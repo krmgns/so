@@ -1274,6 +1274,15 @@ function getDefaultDisplay(tagName) {
 // Dom: animations
 if ($.animate) {
     $.extend(Dom.prototype, {
+        animateStop: function() {
+            return this.forEach(function(el){
+                var animation = el.$animation;
+                if (animation && animation.running) {
+                    // @todo (must be not auto-stop)
+                    animation.stop();
+                }
+            });
+        },
         animate: function(properties, duration, onStart, onStop, easing) {
             return this.forEach(function(el) {
                 $.animate(el, properties, duration, onStart, onStop, easing);
