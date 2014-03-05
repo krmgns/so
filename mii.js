@@ -18,10 +18,16 @@ var document = window.document,
         ie: /msie\s+([\d\.]+)/
     },
 
-    onReadyCallbacks = [],
+    _uuid = 0,
 
-    _uuid = 0
+    onReadyCallbacks = []
 ;
+
+function callCallbacks() {
+    while (onReadyCallbacks.length) {
+        onReadyCallbacks.shift()(mii);
+    }
+}
 
 /*** The Mii ***/
 var mii = {
@@ -162,13 +168,21 @@ mii.onReady = function(callback) {
     if (typeof callback === "function") {
         onReadyCallbacks.push(callback);
     }
+
+    // OK! I'm gonna use this...
+    if (document.addEventListener) {
+        document.addEventListener("DOMContentLoaded", function DOMContentLoaded(){
+            document.removeEventListener("DOMContentLoaded", DOMContentLoaded, false);
+            callCallbacks();
+        }, false);
+        return;
+    }
+
     // I think enough so... <https://developer.mozilla.org/en-US/docs/DOM/document.readyState>
     document.onreadystatechange = function() {
         if (this.readyState === "complete") {
             document.onreadystatechange = null;
-            while (onReadyCallbacks.length) {
-                onReadyCallbacks.shift()(mii);
-            }
+            callCallbacks();
         }
     };
 };
