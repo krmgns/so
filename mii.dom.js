@@ -1281,13 +1281,13 @@ if ($.animate) {
                 }
             });
         },
-        animate: function(properties, duration, onStart, onStop, easing) {
+        animate: function(properties, duration, callback, easing) {
             return this.forEach(function(el) {
-                $.animate(el, properties, duration, onStart, onStop, easing);
+                $.animate(el, properties, duration, callback, easing);
             });
         },
         fade: function(to, duration, callback) {
-            return this.animate({opacity: to}, duration, null, callback);
+            return this.animate({opacity: to}, duration, callback);
         },
         fadeIn: function(duration, callback) {
             return this.fade(1, duration, callback);
@@ -1304,16 +1304,16 @@ if ($.animate) {
             return this.forEach(function(el) {
                 if (!(el.offsetWidth || el.offsetHeight)) {
                     el.style.display = getDefaultDisplay(el.tagName);
-                    $.animate(el, {opacity: 1}, duration || 0, null, callback);
+                    $.animate(el, {opacity: 1}, duration || 0, callback);
                 }
             });
         },
         hide: function(duration, callback) {
             return this.forEach(function(el) {
                 if (el.offsetWidth || el.offsetHeight) {
-                    $.animate(el, {opacity: 0}, duration || 0, null, function(){
+                    $.animate(el, {opacity: 0}, duration || 0, function(){
                         el.style.display = "none";
-                        callback && callback.call(this);
+                        callback && callback.call(this, el);
                     });
                 }
             });
@@ -1323,12 +1323,12 @@ if ($.animate) {
                 if (!(el.offsetWidth || el.offsetHeight)) {
                     // Show element
                     el.style.display = getDefaultDisplay(el.tagName);
-                    $.animate(el, {opacity: 1}, duration || 0, null, callback);
+                    $.animate(el, {opacity: 1}, duration || 0, callback);
                 } else {
                     // Hide element
-                    $.animate(el, {opacity: 0}, duration || 0, null, function(){
+                    $.animate(el, {opacity: 0}, duration || 0, function(){
                         el.style.display = "none";
-                        callback && callback.call(this);
+                        callback && callback.call(this, el);
                     });
                 }
             });

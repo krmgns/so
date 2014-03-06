@@ -19,10 +19,9 @@ function timer(fn) {
 }
 
 /*** The Animation ***/
-function Animation(el, properties, duration, onStart, onStop) {
+function Animation(el, properties, duration, callback) {
     this.el = $.dom(el);
-    this.onStart = onStart;
-    this.onStop = onStop;
+    this.callback = callback;
     this.duration = typeof duration === "number" ? duration : opt_shortcutDurations[duration] || opt_defaultDuration;
 
     this.running = false
@@ -67,11 +66,6 @@ Animation.prototype.animate = function(easing) {
     this.el[0].$animation = this;
 
     var _this = this;
-
-    // Call `onStart` handler
-    if (typeof this.onStart === "function") {
-        this.onStart(this.el[0], this);
-    }
 
     // Run animation
     ;(function run() {
@@ -129,16 +123,16 @@ $.extend(Animation.prototype, {
                 }
             }
         }
+
+        // Call `callback` handler
+        if (typeof this.callback === "function") {
+            this.callback(this.el[0], this);
+        }
     },
     stop: function() {
         if (this.running) {
             this.running = false;
             this.stopped = true;
-        }
-
-        // Call `onStop` handler
-        if (typeof this.onStop === "function") {
-            this.onStop(this.el[0], this);
         }
 
         // Remove animation [No delete, can be used for `is(":animated")` like function]
@@ -149,11 +143,12 @@ $.extend(Animation.prototype, {
 });
 
 // Add `animate` to mii
-$.animate = function(el, properties, duration, onStart, onStop, easing) {
+$.animate = function(el, properties, duration, callback, easing) {
     // Swap args
-    if (typeof onStart === "string") easing = onStart;
-    if (typeof onStop === "string") easing = onStop;
-    return (new Animation(el, properties, duration, onStart, onStop)).animate(easing);
+    if (typeof callback === "string") {
+        easing = callback;
+    }
+    return (new Animation(el, properties, duration, callback)).animate(easing);
 };
 
 // Define exposer
