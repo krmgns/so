@@ -25,8 +25,8 @@ mii.onReady(function($) {
     setTimeout(function run(){
         var easing = i.getValue();
         p.setText(easing);
-        foo.animate({left:500}, 1000, null, function(){
-            foo.animate({left:10}, 1000, null, function(){
+        foo.animate({left:500}, 1000, function(){
+            foo.animate({left:10}, 1000, function(){
                 i = i.parent().next().find("input").first();
                 if (i.length) {
                     run();
@@ -38,7 +38,7 @@ mii.onReady(function($) {
     // properties, duration, onStart, onStop, easing
     foo.on("click", function(){
         var easing = $.dom("input[name=easing]:checked").getValue();
-        foo.animate({left:500}, 1000, null, function(){
+        foo.animate({left:500}, 1000, function(){
             foo.animate({left:0}, 1000, easing);
         }, easing);
     });

@@ -1,0 +1,29 @@
+.alert {
+    position: relative;
+    padding: 12px 18px;
+    border-radius: 4px;
+}
+.alert .alert-title,
+.alert .alert-title * {
+    font-size: 150%;
+    margin-bottom: 12px;
+}
+
+.label {
+    display: inline-block;
+    font-size: 80%;
+    line-height: 80%;
+    padding: 6px;
+    border-radius: 2px;
+}
+
+.alert.alert-gray,
+.label.label-gray    {background: #f7f7f7;}
+.alert.alert-primary,
+.label.label-primary {background: #40b3d9;}
+.label.label-success,
+.alert.alert-success {background: #b3d940;}
+.label.label-warning,
+.alert.alert-warning {background: #ffd940;}
+.label.label-danger,
+.alert.alert-danger  {background: #e74c3c;}

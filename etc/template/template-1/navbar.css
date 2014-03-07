@@ -1,0 +1,63 @@
+.navbar {
+    position: relative;
+    background-color: #2c3e50;
+    border-radius: 4px;
+    border: 1px solid transparent;
+}
+.navbar a {color: #fff; text-decoration: none;}
+
+.navbar-menu {}
+.navbar-menu a {
+    padding: 15px;
+    display: inline-block;
+    font-size: 15px;
+    line-height: 15px;
+}
+.navbar-menu a:hover,
+.navbar-menu a.active {
+    background-color: #243342;
+}
+
+.navbar-menu-left {float: left;}
+.navbar-menu-right {float: right;}
+
+.navbar-menu > li {
+    float: left;
+    font-size: 14px;
+    line-height: 14px;
+}
+
+.navbar-menu-dropdown {
+    position: relative;
+    z-index: 101;
+}
+.navbar-menu-dropdown > .navbar-menu-dropdown-menu {
+    margin-top: 1px
+}
+.navbar-menu-dropdown > .navbar-menu-dropdown-menu > li {}
+.navbar-menu-dropdown > .navbar-menu-dropdown-menu * {
+    font-size: 95%;
+    line-height: inherit;
+}
+.navbar-menu-dropdown > .navbar-menu-dropdown-menu > li > a {
+    width: 100%;
+    color: #858585;
+    padding: 10px 14px;
+}
+.navbar-menu-dropdown > .navbar-menu-dropdown-menu > li > a:hover {
+    color: #fff;
+}
+
+.navbar-menu-dropdown > .navbar-menu-dropdown-menu > .dropdown-head {
+    padding: 10px;
+    color: #555;
+    font-weight: bold;
+}
+.navbar-menu-dropdown > .navbar-menu-dropdown-menu > .dropdown-line {
+    margin: 4px;
+    border-top: 1px solid #eee;
+}
+
+.navbar-menu-right > .navbar-menu-dropdown > .navbar-menu-dropdown-menu {
+    left: -49% !important;
+}

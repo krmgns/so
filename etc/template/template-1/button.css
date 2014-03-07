@@ -1,0 +1,205 @@
+.btn {
+    display: inline-block;
+    padding: 9px 12px;
+    color: #555;
+    font-size: 15px;
+    font-weight: normal;
+    line-height: 15px;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    background-color: #eee;
+    -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
+}
+.btn:hover,
+.btn:focus {
+    color: #333;
+    text-decoration: none;
+    background-color: #ddd;
+}
+.btn:active,
+.btn.active {
+    -webkit-box-shadow: inset 0 3px 5px rgba(0,0,0,0.125);
+            box-shadow: inset 0 3px 5px rgba(0,0,0,0.125);
+}
+.btn.disabled,
+.btn[disabled] {
+    cursor: default;
+    pointer-events: none;
+    opacity: 0.65; filter: alpha(opacity=65);
+    -webkit-box-shadow: none;
+            box-shadow: none;
+}
+
+.btn-s {
+    padding: 6px 9px;
+    font-size: 10px;
+    line-height: 10px;
+}
+.btn-m {
+    padding: 9px 12px;
+    font-size: 14px;
+    line-height: 14px;
+}
+.btn-l {
+    padding: 12px 15px;
+    font-size: 18px;
+    line-height: 18px;
+}
+.btn-xl {
+    padding: 15px 18px;
+    font-size: 22px;
+    line-height: 22px;
+}
+.btn-xxl {
+    padding: 18px 21px;
+    font-size: 26px;
+    line-height: 26px;
+}
+
+/* primary */
+.btn-primary {
+    color: #fff;
+    border-color: #40b3d9;
+    background-color: #40b3d9;
+}
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active {
+    color: #fff;
+    border-color: #3aa8c9;
+    background-color: #3aa8c9;
+}
+.btn-primary.disabled,
+.btn-primary[disabled],
+.btn-primary.disabled:hover,
+.btn-primary[disabled]:hover,
+.btn-primary.disabled:focus,
+.btn-primary[disabled]:focus,
+.btn-primary.disabled:active,
+.btn-primary[disabled]:active,
+.btn-primary.disabled.active,
+.btn-primary[disabled].active {
+    border-color: #40b3d9;
+    background-color: #40b3d9;
+}
+.btn-primary .bubble {
+    color: #40b3d9;
+    background-color: #fff;
+}
+
+/* success */
+.btn-success {
+    color: #fff;
+    border-color: #b3d940;
+    background-color: #b3d940;
+}
+.btn-success:hover,
+.btn-success:focus,
+.btn-success:active,
+.btn-success.active {
+    color: #fff;
+    border-color: #a8c93a;
+    background-color: #a8c93a;
+}
+.btn-success.disabled,
+.btn-success[disabled],
+.btn-success.disabled:hover,
+.btn-success[disabled]:hover,
+.btn-success.disabled:focus,
+.btn-success[disabled]:focus,
+.btn-success.disabled:active,
+.btn-success[disabled]:active,
+.btn-success.disabled.active,
+.btn-success[disabled].active {
+    border-color: #b3d940;
+    background-color: #b3d940;
+}
+.btn-success .bubble {
+    color: #b3d940;
+    background-color: #fff;
+}
+
+/* warning */
+.btn-warning {
+    color: #fff;
+    border-color: #ffd940;
+    background-color: #ffd940;
+}
+.btn-warning:hover,
+.btn-warning:focus,
+.btn-warning:active,
+.btn-warning.active {
+    color: #fff;
+    border-color: #f2cd3c;
+    background-color: #f2cd3c;
+}
+.btn-warning.disabled,
+.btn-warning[disabled],
+.btn-warning.disabled:hover,
+.btn-warning[disabled]:hover,
+.btn-warning.disabled:focus,
+.btn-warning[disabled]:focus,
+.btn-warning.disabled:active,
+.btn-warning[disabled]:active,
+.btn-warning.disabled.active,
+.btn-warning[disabled].active {
+    border-color: #ffd940;
+    background-color: #ffd940;
+}
+.btn-warning .bubble {
+    color: #ffd940;
+    background-color: #fff;
+}
+
+/* danger */
+.btn-danger {
+  color: #fff;
+  border-color: #e74c3c;
+  background-color: #e74c3c;
+}
+.btn-danger:hover,
+.btn-danger:focus,
+.btn-danger:active,
+.btn-danger.active {
+  color: #fff;
+  border-color: #cd2a19;
+  background-color: #df2e1b;
+}
+.btn-danger.disabled,
+.btn-danger[disabled],
+.btn-danger.disabled:hover,
+.btn-danger[disabled]:hover,
+.btn-danger.disabled:focus,
+.btn-danger[disabled]:focus,
+.btn-danger.disabled:active,
+.btn-danger[disabled]:active,
+.btn-danger.disabled.active,
+.btn-danger[disabled].active {
+    border-color: #e74c3c;
+    background-color: #e74c3c;
+}
+.btn-danger .bubble {
+    color: #e74c3c;
+    background-color: #fff;
+}
+
+/* link & tranparent */
+.btn-link {
+    color: #0087ff !important;
+    background: #fff !important;
+    -webkit-box-shadow: none !important;
+            box-shadow: none !important;
+}
+.btn-transparent {
+    background: transparent !important;
+    -webkit-box-shadow: none !important;
+            box-shadow: none !important;
+}
+.btn-link:hover,
+.btn-transparent:hover {
+    text-decoration: underline;
+}

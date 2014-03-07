@@ -1,6 +1,14 @@
-- $.onReady() -> document.addEventListener("DOMContentLoaded", callback) if supports
-- Add: $.dom.and() // join elements $.dom('p.cls1').and('p.cls2'). note: but is not same? $.dom('p.cls1, p.cls2')
-- Add: $.ajax.queue
+- Add: $.dom.and() // join elements $.dom('p.cls1').and(this) or and(node node.firstChild ...).
+    note: but is not same? $.dom('p.cls1, p.cls2')
+- $.ajax.queue
 - div.animate({top: '-=100'}) support?
-- div.stop().animate() support? (simdilik auto-stop yaptim, ama running anim bitince digerine gecme olayi yok)
 - defer?
+
+- $.dom.setStyle() -> vendor prefix support (-webkit-transition etc., yes but with a plugin)
+$.dom.stylePrefix = {};
+$.dom.stylePrefix.vendor = ["-webkit", "-moz", "-ms", "-o"];
+$.dom.stylePrefix.propperties = [
+    "transition",
+    "border-box",
+    // etc...
+];

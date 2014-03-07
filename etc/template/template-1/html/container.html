@@ -1,0 +1,120 @@
+<div class="intro">
+    <h1>Hello World!</h1>
+    <p>Lorem Ipsum, dizgi ve baskı endüstrisinde kullanılan mıgır metinlerdir. Lorem Ipsum, adı bilinmeyen bir matbaacının bir hurufat numune kitabı oluşturmak üzere bir yazı galerisini alarak karıştırdığı 1500'lerden beri endüstri standardı sahte metinler olarak kullanılmıştır.</p>
+    <p><a class="btn btn-primary btn-xxl">Learn more</a></p>
+</div>
+
+<br>
+
+<h2>List groups</h2>
+<div class="tmp-boxes" width="100%">
+    <div class="tmp-box" width="33%">
+        <ul class="list">
+            <li class="list-item">Cras justo odio <span class="bubble">14</span></li>
+            <li class="list-item">Dapibus ac facilisis in <span class="bubble">2</span></li>
+            <li class="list-item">Morbi leo risus<span class="bubble">1</span></li>
+        </ul>
+    </div>
+    <div class="tmp-box" width="33%" style="padding-left:22px">
+        <div class="list">
+            <a href="#" class="list-item active">Cras justo odio <span class="bubble">14</span></a>
+            <a href="#" class="list-item">Dapibus ac facilisis in <span class="bubble">2</span></a>
+            <a href="#" class="list-item">Morbi leo risus <span class="bubble">1</span></a>
+        </div>
+    </div>
+    <div class="tmp-box" width="33%" style="padding-left:22px">
+        <div style="position:relative">
+            <div class="list" style="position:absolute; width:100%">
+                <a href="#" class="list-item">
+                    <h4>List group item head</h4>
+                    <p class="list-item-text">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p>
+                </a>
+                <a href="#" class="list-item">
+                    <h4>List group item head</h4>
+                    <p class="list-item-text">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<h2>Panel</h2>
+<div class="tmp-boxes" width="100%">
+    <div class="tmp-box" width="33%">
+        <div class="box">
+            <div class="box-body">Lorem ipsum dolor</div>
+        </div>
+        <div class="box">
+            <a href="#" role="toggle" class="toggle"><i class="arrow-down"></i></a>
+            <div class="box-head"><h6>Hello world!</h6></div>
+            <div class="box-body">Lorem ipsum dolor</div>
+        </div>
+        <div class="box">
+            <a href="#" role="toggle" class="toggle"><i class="arrow-down"></i></a>
+            <div class="box-head"><h6>Hello world!</h6></div>
+            <div class="box-body">Lorem Ipsum, dizgi ve baskı endüstrisinde kullanılan mıgır metinlerdir. Lorem Ipsum, adı bilinmeyen bir matbaacının bir hurufat numune kitabı oluşturmak üzere bir yazı galerisini alarak karıştırdığı 1500'lerden beri endüstri standardı sahte metinler olarak kullanılmıştır.</div>
+            <div class="box-foot"><a class="btn btn-primary">Go!</a></div>
+        </div>
+    </div>
+    <div class="tmp-box" width="33%" style="padding-left:22px">
+        <div class="box box-primary">
+            <a href="#" role="toggle" class="toggle"><i class="arrow-down"></i></a>
+            <div class="box-head"><h6>Hello world!</h6></div>
+            <div class="box-body">Lorem Ipsum, dizgi ve baskı endüstrisinde kullanılan mıgır metinlerdir.</div>
+            <div class="box-foot">Goodbye...</div>
+        </div>
+        <br>
+        <div class="box box-success">
+            <a href="#" role="toggle" class="toggle"><i class="arrow-down"></i></a>
+            <div class="box-head"><h6>Hello world!</h6></div>
+            <div class="box-body">Lorem Ipsum, dizgi ve baskı endüstrisinde kullanılan mıgır metinlerdir.</div>
+            <div class="box-foot">Goodbye...</div>
+        </div>
+    </div>
+    <div class="tmp-box" width="33%" style="padding-left:22px">
+        <div class="box box-warning">
+            <a href="#" role="toggle" class="toggle"><i class="arrow-down"></i></a>
+            <div class="box-head"><h6>Hello world!</h6></div>
+            <div class="box-body">Lorem Ipsum, dizgi ve baskı endüstrisinde kullanılan mıgır metinlerdir.</div>
+            <div class="box-foot">Goodbye...</div>
+        </div>
+        <br>
+        <div class="box box-danger">
+            <a href="#" role="toggle" class="toggle"><i class="arrow-down"></i></a>
+            <div class="box-head"><h6>Hello world!</h6></div>
+            <div class="box-body">Lorem Ipsum, dizgi ve baskı endüstrisinde kullanılan mıgır metinlerdir.</div>
+            <div class="box-foot">Goodbye...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+mii.onReady(function($){
+    $.dom(".box a[role='toggle']").on("click", function(e){
+        e.preventDefault();
+        // $.dom(this).parent().toggleClass("box-toggle");
+        var $parent = $.dom(this).parent();
+        if ($parent.getAttr("data-height") == null) {
+            $parent.setAttr("data-height", $parent.height());
+        }
+
+        if ($parent.hasClass("box-toggle")) {
+            $parent.removeClass("box-toggle");
+            $parent.setStyle("height", "");
+            // $parent.animate({"height": $parent.getAttr("data-height")}, "fast", function(){
+            //     $parent.setStyle("height", "");
+            // });
+        } else {
+            $parent.addClass("box-toggle");
+            $parent.setStyle("height", $parent.find(".box-head").outerHeight());
+            // $parent.animate({"height": $parent.find(".box-head").outerHeight()}, "fast");
+        }
+    });
+});
+</script>

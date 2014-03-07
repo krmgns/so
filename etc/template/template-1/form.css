@@ -1,0 +1,109 @@
+.form {
+    display: table;
+}
+.form .legend {
+    display: block;
+    width: 100%;
+    padding: 0 0 12px;
+    margin-bottom: 24px;
+    color: #2c3e50;
+    font-size: 22px;
+    line-height: inherit;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.form input, .form textarea, .form select {
+    vertical-align: text-bottom;
+}
+.form input[type="radio"],
+.form input[type="checkbox"] {
+    float: left;
+    margin: 6px 6px 0 0;
+}
+.form textarea {
+    resize: vertical;
+}
+
+.form .form-label {
+    width: 100%;
+    text-align: right;
+    font-weight: bold;
+    padding-right: 30px;
+    display: inline-block;
+}
+.form .form-label-check {
+    cursor: pointer;
+    padding-top: 6px;
+    display: inline-block;
+    font-size: 90%;
+    vertical-align: bottom;
+}
+
+.form .form-row {
+    width: 100%;
+    display: block;
+}
+.form .form-row:after {
+    clear: both;
+    content: ".";
+    visibility: hidden;
+}
+
+.form .form-col-left,
+.form .form-col-right {
+    display: table-cell;
+}
+.form .form-col-left {
+    width: 30%;
+    float: left;
+    padding-top: 8px; /* input:padding-top=8px */
+}
+.form .form-col-right {
+    width: 70%;
+}
+
+.form .form-element,
+.editable {
+    padding: 8px 12px;
+    border-width: 2px;
+    border-style: solid;
+    border-color: #dcdcdc;
+    border-radius: 4px;
+    background-color: #fff;
+    -webkit-box-shadow: none;
+            box-shadow: none;
+    -webkit-transition: 250ms;
+            transition: 250ms;
+}
+
+.form .form-element:focus,
+.editable:focus,
+.editable:active {
+    border-color: #c0c0c0;
+}
+
+.form .form-element.disabled,
+.form .form-element[disabled],
+.form .form-element.disabled:focus,
+.form .form-element[disabled]:focus,
+.editable.disabled,
+.editable.disabled:focus,
+.editable.disabled:active {
+    opacity: 0.65; filter: alpha(opacity=65);
+    background-color: #f7f7f7;
+}
+
+.form .form-row-success .form-flash-message {color: #b3d940;}
+.form .form-row-warning .form-flash-message {color: #ffd940;}
+.form .form-row-error .form-flash-message   {color: #e74c3c;}
+
+.form .form-row-success .form-element {border-color: #b3d940;}
+.form .form-row-warning .form-element {border-color: #ffd940;}
+.form .form-row-error   .form-element {border-color: #e74c3c;}
+
+.form .form-element-large {
+    font-size: 24px;
+}
+.form .form-element-small {
+    font-size: 10px;
+}
