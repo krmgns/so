@@ -98,8 +98,9 @@
 mii.onReady(function($){
     $.dom(".box a[role='toggle']").on("click", function(e){
         e.preventDefault();
-        // $.dom(this).parent().toggleClass("box-toggle");
-        var $parent = $.dom(this).parent();
+        $.dom(this).parent().toggleClass("box-toggle");
+
+        /*var $parent = $.dom(this).parent();
         if ($parent.getAttr("data-height") == null) {
             $parent.setAttr("data-height", $parent.height());
         }
@@ -114,7 +115,7 @@ mii.onReady(function($){
             $parent.addClass("box-toggle");
             $parent.setStyle("height", $parent.find(".box-head").outerHeight());
             // $parent.animate({"height": $parent.find(".box-head").outerHeight()}, "fast");
-        }
+        }*/
     });
 });
 </script>

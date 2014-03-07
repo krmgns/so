@@ -105,7 +105,10 @@
     /*-webkit-transition: height 350ms easy-out;
             transition: height 350ms ease-out;*/
 }
+.box.box-toggle > .box-head {
+    border-bottom-width: 0;
+}
 .box.box-toggle > .box-body,
 .box.box-toggle > .box-foot {
-    /*display: none;*/
+    display: none;
 }
