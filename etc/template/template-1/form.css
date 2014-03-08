@@ -1,7 +1,7 @@
 .form {
-    display: table;
+    display: block;
 }
-.form .legend {
+.form .form-legend {
     display: block;
     width: 100%;
     padding: 0 0 12px;
@@ -11,12 +11,8 @@
     line-height: inherit;
     border-bottom: 1px solid #e5e5e5;
 }
-
-.form input, .form textarea, .form select {
-    vertical-align: text-bottom;
-}
-.form input[type="radio"],
-.form input[type="checkbox"] {
+.form input[type="radio"].form-element,
+.form input[type="checkbox"].form-element {
     float: left;
     margin: 6px 6px 0 0;
 }
@@ -32,34 +28,33 @@
     display: inline-block;
 }
 .form .form-label-check {
-    cursor: pointer;
-    padding-top: 6px;
-    display: inline-block;
     font-size: 90%;
-    vertical-align: bottom;
+    cursor: pointer;
 }
 
 .form .form-row {
     width: 100%;
-    display: block;
-}
-.form .form-row:after {
-    clear: both;
-    content: ".";
-    visibility: hidden;
+    display: table;
 }
 
 .form .form-col-left,
 .form .form-col-right {
     display: table-cell;
+    padding: 12px 0;
+    vertical-align: top;
+    position: relative;
 }
 .form .form-col-left {
     width: 30%;
-    float: left;
-    padding-top: 8px; /* input:padding-top=8px */
 }
 .form .form-col-right {
     width: 70%;
+    padding-top: 6px;
+}
+
+.form .form-check-group {
+    top: 6px;
+    position: relative;
 }
 
 .form .form-element,
@@ -70,6 +65,7 @@
     border-color: #dcdcdc;
     border-radius: 4px;
     background-color: #fff;
+    vertical-align: middle;
     -webkit-box-shadow: none;
             box-shadow: none;
     -webkit-transition: 250ms;

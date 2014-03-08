@@ -1,7 +1,7 @@
 <div class="tmp-boxes">
     <div class="tmp-box" width="50%">
         <form class="form" style="width:600px">
-            <div class="legend">Legend</div>
+            <div class="form-legend">Legend</div>
             <div class="form-row">
                 <div class="form-col-left">
                     <label class="form-label">Email</label>
@@ -23,7 +23,9 @@
                     <label class="form-label">Checkbox</label>
                 </div>
                 <div class="form-col-right">
-                    <label class="form-label-check"><input type="checkbox"> Yes?</label>
+                    <div class="form-check-group">
+                        <label class="form-label-check"><input type="checkbox" class="form-element"> Yes?</label>
+                    </div>
                 </div>
             </div>
             <div class="form-row">
@@ -40,8 +42,10 @@
                     <label class="form-label">Radios</label>
                 </div>
                 <div class="form-col-right">
-                    <div><label class="form-label-check"><input type="radio" name="radio" value="1" checked> Option one is this</label></div>
-                    <div><label class="form-label-check"><input type="radio" name="radio" value="2">Option two can be something else</label></div>
+                    <div class="form-check-group">
+                        <div><label class="form-label-check"><input type="radio" name="radio" value="1" class="form-element" checked> Option one is this</label></div>
+                        <div><label class="form-label-check"><input type="radio" name="radio" value="2" class="form-element">Option two can be something else</label></div>
+                    </div>
                 </div>
             </div>
             <div class="form-row">

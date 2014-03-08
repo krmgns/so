@@ -515,9 +515,9 @@ Dom.prototype = {
     },
     not: function(s) {
         var type = $.typeOf(s), src, els = [];
-
+        // Notation: $.dom("p").not(this)
         // Notation: $.dom("p").not(".red")
-        if (s && (type === "string" || type === "object")) {
+        if (s && (type === "object" || type === "string" || type.substring(0,4) === "html")) {
             src = this.__init(s).toArray();
             this.forEach(function(el, i){
                 var e, j = 0;
