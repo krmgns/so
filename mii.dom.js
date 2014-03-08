@@ -515,6 +515,7 @@ Dom.prototype = {
     },
     not: function(s) {
         var type = $.typeOf(s), src, els = [];
+
         // Notation: $.dom("p").not(this)
         // Notation: $.dom("p").not(".red")
         if (s && (type === "object" || type === "string" || type.substring(0,4) === "html")) {
