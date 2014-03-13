@@ -2,6 +2,7 @@
     position: relative;
     padding: 12px 18px;
     border-radius: 4px;
+    margin-bottom: 1.5em;
 }
 .alert .alert-title,
 .alert .alert-title * {
@@ -27,3 +28,8 @@
 .alert.alert-warning {background: #ffd940;}
 .label.label-danger,
 .alert.alert-danger  {background: #e74c3c;}
+
+.alert-primary,
+.alert-success,
+.alert-warning,
+.alert-danger {color: #fff;}
