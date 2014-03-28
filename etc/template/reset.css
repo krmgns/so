@@ -61,3 +61,21 @@ form {
 .position-fixed {position: fixed;}
 
 .display-block {display: block;}
+
+
+
+/* @tmp */
+.tmp-container {
+    width: 90%;
+    margin: 0 auto 100px;
+}
+
+.tmp-boxes {
+    display: table;
+} .tmp-boxes .tmp-box {
+    display: table-cell;
+}
+
+.tmp-w300 {
+    width: 300px;
+}

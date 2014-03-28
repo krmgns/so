@@ -1,0 +1,69 @@
+<h2>Alert</h2>
+
+<div class="fixed">
+    <div class="alert alert-gray">
+        <a href="#" role="dismiss" class="toggle">&times;</a>
+        <div class="alert-title">Hey!</div>
+        <div class="alert-content">
+            Nullam quis risus eget urna mollis ornare vel eu leo. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nullam id dolor id nibh ultricies vehicula.
+        </div>
+    </div>
+</div>
+<br>
+<div class="tmp-boxes">
+    <div class="tmp-box" width="25%">
+        <div class="alert alert-primary">
+            <a href="#" role="dismiss" class="toggle">&times;</a>
+            <div class="alert-title">Hey!</div>
+            <div class="alert-content">
+                Nullam quis risus eget urna mollis ornare vel eu leo.
+            </div>
+        </div>
+    </div>
+    <div class="tmp-box" width="25%" style="padding-left:12px">
+        <div class="alert alert-success">
+            <a href="#" role="dismiss" class="toggle">&times;</a>
+            <div class="alert-title">Hey!</div>
+            <div class="alert-content">
+                Nullam quis risus eget urna mollis ornare vel eu leo.
+            </div>
+        </div>
+    </div>
+    <div class="tmp-box" width="25%" style="padding-left:12px">
+        <div class="alert alert-warning">
+            <a href="#" role="dismiss" class="toggle">&times;</a>
+            <div class="alert-title">Hey!</div>
+            <div class="alert-content">
+                Nullam quis risus eget urna mollis ornare vel eu leo.
+            </div>
+        </div>
+    </div>
+    <div class="tmp-box" width="25%" style="padding-left:12px">
+        <div class="alert alert-danger">
+            <a href="#" role="dismiss" class="toggle">&times;</a>
+            <div class="alert-title">Hey!</div>
+            <div class="alert-content">
+                Nullam quis risus eget urna mollis ornare vel eu leo.
+            </div>
+        </div>
+    </div>
+</div>
+
+<br>
+
+<h2>Label</h2>
+
+<div class="label label-gray">Default</div>
+<div class="label label-primary">Primary</div>
+<div class="label label-success">Success</div>
+<div class="label label-warning">Warning</div>
+<div class="label label-danger">Danger</div>
+
+<script>
+mii.onReady(function($){
+    $.dom(".alert a[role='dismiss']").on("click", function(e){
+        e.preventDefault();
+        $.dom(this).parent().fadeOut(50, true);
+    });
+});
+</script>

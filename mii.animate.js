@@ -1,6 +1,6 @@
 /**
  * @name: mii.animate
- * @deps: mii, mii.ext, mii.array, mii.dom
+ * @deps: mii, mii.ext, mii.dom
  */
 
 ;(function($) {

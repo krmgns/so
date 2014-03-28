@@ -789,6 +789,14 @@ $.extend(Dom.prototype, {
         }
         return val;
     },
+    removeStyle: function(key) {
+        return this.forEach(function(el) {
+            var tmp = key.split(/,+/);
+            while (tmp.length) {
+                el.style[toStyleProp(tmp.shift())] = "";
+            }
+        });
+    },
     innerWidth: function (el /*internal*/) {
         return (el = el || this[0]) && el.offsetWidth
                     - sumComputedPixels(el, ["borderLeftWidth", "borderRightWidth"]);
