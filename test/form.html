@@ -1,11 +1,11 @@
 <!doctype html>
 
-<form id="form" onsubmit="builtQuery(this); return !1">
+<form id="form" onsubmit="buildQuery(this); return !1">
     <input type="hidden" name="secret" value="abc">
     <p><input type="text" name="uname" value="kerem"></p>
     <p><input type="password" name="upass" value="111"></p>
 
-    <p><input type="checkbox" name="remember" checked></p>
+    <p><input type="checkbox" name="remember" value="0" checked></p>
 
     <p>
         <input type="radio" name="gender" value="1">
@@ -16,13 +16,12 @@
     <p><input type="submit" name="send" value="Submit!"></p>
 </form>
 
-<script src="../mii.js"></script>
-<script src="../mii.dom.js"></script>
+<script src="mii-all.php"></script>
 <script>
-function builtQuery(form) {
+function buildQuery(form) {
     var data;
-    // data = mii.dom(form).builtQuery();
-    data = mii.dom(form).builtQueryArray();
+    data = mii.dom(form).buildQuery();
+    // data = mii.dom(form).buildQueryArray();
     log(data)
 }
 </script>
