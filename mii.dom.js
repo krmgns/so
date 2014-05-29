@@ -434,21 +434,6 @@ function classRE(cls) {
     return RE("(^|\\s)"+ cls + "(\\s|$)");
 }
 
-var uuidKey = "x-mii-uuid",
-    dataKey = "x-mii-data-",
-    re_dataKey = RE("^("+ dataKey +"[^=]*)$"),
-    re_reduceDash = /-+/g,
-    _data_cache = {};
-
-function getUuid(el) {
-    return el.getAttribute(uuidKey) || $.uuid();
-}
-
-function getDataKey(key) {
-    return (key = (""+ key).replace(re_reduceDash, "-")) &&
-                re_dataKey.test(key) ? key : dataKey + key;
-}
-
 // qwery integration
 function QSA(s, root) { // @tmp
     // return (typeof s === "string") ? (root&&root.nodeType?root:DOC).querySelectorAll(s) : (s && s.nodeType) ? [s] : (s || [])
@@ -1155,11 +1140,13 @@ $.extend(Dom.prototype, {
     },
     removeData: function(key) {
         return this.forEach(function(el) {
-            if (key === "*") {
-                // Remove all
-                delete el.$data;
-            } else {
-                delete el.$data[key];
+            if (el.$data !== undefined) {
+                if (key === "*") {
+                    // Remove all
+                    delete el.$data;
+                } else {
+                    el.$data[key] !== undefined && (delete el.$data);
+                }
             }
         });
     }
