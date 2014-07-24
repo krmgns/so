@@ -1,5 +1,5 @@
 <?php
-$files = array('qwery.min', 'mii', 'mii.ext', 'mii.array', 'mii.object', 'mii.event', 'mii.animate', 'mii.dom', 'mii.ajax');
+$files = array('qwery.min', 'mii', 'mii.ext', 'mii.array', 'mii.object', 'mii.event', 'mii.ajax', 'mii.animate', 'mii.dom');
 
 header('Content-Type: text/javascript');
 foreach ($files as $file) {
