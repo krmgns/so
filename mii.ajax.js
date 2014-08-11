@@ -1,3 +1,8 @@
+/**
+ * @name: mii.ajax
+ * @deps: mii
+ */
+
 ;(function($) {
 
 "use strict"; // @tmp
@@ -47,7 +52,9 @@ function createRequest() {
 }
 
 function toJson(input) {
-    if (!input || typeof input !== "string") return null;
+    if (!input || typeof input !== "string") {
+        return null;
+    }
 
     input = $.trim(input);
     if (!re_validJson.test(input)) {
@@ -56,6 +63,7 @@ function toJson(input) {
     if (window.JSON && window.JSON.parse) {
         return window.JSON.parse(input);
     }
+    // ay em sori beybe...
     return eval("("+ input +")");
 }
 
@@ -77,17 +85,22 @@ function toXml(input) {
         xml.async = "false";
         xml.loadXML(input);
     }
+
     return xml;
 }
 
 function parseResponseHeaders(allHeaders) {
-    if (!allHeaders) return;
+    if (!allHeaders) {
+        return;
+    }
+
     var header, headers = allHeaders.split("\r\n"),
         responseHeaders = {}, tmp;
     while (header = headers.shift()) {
         tmp = header.split(":", 2);
         responseHeaders[tmp[0].toLowerCase()] = $.trim(tmp[1]);
     }
+
     return responseHeaders;
 }
 
@@ -159,7 +172,7 @@ function Ajax(options) {
 
 Ajax.prototype = {
     send: function() {
-        var that = this,
+        var _this = this,
             options = this.options, key;
 
         // Prevent re-send for chaining callbacks
@@ -183,7 +196,7 @@ Ajax.prototype = {
         // Define ready state change method
         if (options.async) {
             this.$xhr.onreadystatechange = function() {
-                that._handleResponse(that, options);
+                _this._handleResponse(_this, options);
             };
         }
 
@@ -211,7 +224,7 @@ Ajax.prototype = {
         // Check timeout
         if (options.timeout) {
             setTimeout(function() {
-                that.abort();
+                _this.abort();
             }, options.timeout);
         }
 
@@ -225,39 +238,39 @@ Ajax.prototype = {
         // Call onabort method
         this.options.onAbort.call(this, this.$xhr);
     },
-    _handleResponse: function(that, options) {
-        if (that.isAborted) {
-            that.$xhr.onreadystatechange = null;
+    _handleResponse: function(_this, options) {
+        if (_this.isAborted) {
+            _this.$xhr.onreadystatechange = null;
             return;
         }
 
         // Handle states
-        switch (that.$xhr.readyState) {
+        switch (_this.$xhr.readyState) {
             case xmlHttpStatuses.OPENED:
                 // Call onstart
-                options.onStart.call(that, that.$xhr);
+                options.onStart.call(_this, _this.$xhr);
                 break;
             case xmlHttpStatuses.HEADERS_RECEIVED:
                 // Get headers (suppressing IE7 error)
-                if (typeof that.$xhr.getAllResponseHeaders === "function") {
-                    options.responseHeaders = parseResponseHeaders(that.$xhr.getAllResponseHeaders());
+                if (typeof _this.$xhr.getAllResponseHeaders === "function") {
+                    options.responseHeaders = parseResponseHeaders(_this.$xhr.getAllResponseHeaders());
                 }
                 break;
             case xmlHttpStatuses.LOADING:
                 // Call onprogress
-                options.onProgress.call(that, that.$xhr);
+                options.onProgress.call(_this, _this.$xhr);
                 break;
             case xmlHttpStatuses.DONE:
-                that.isDone = true;
+                _this.isDone = true;
                 // Assign shortcuts
-                that.readyState = that.$xhr.readyState;
-                that.statusCode = that.$xhr.status;
-                that.statusText = that.$xhr.statusText;
+                _this.readyState = _this.$xhr.readyState;
+                _this.statusCode = _this.$xhr.status;
+                _this.statusText = _this.$xhr.statusText;
 
                 // Process response content
                 var content = (options.dataType == "xml")
-                    ? that.$xhr.responseXML || that.$xhr.responseText
-                    : that.$xhr.responseText;
+                    ? _this.$xhr.responseXML || _this.$xhr.responseText
+                    : _this.$xhr.responseText;
 
                 if (options.dataType == "json") {
                     content = toJson(content);
@@ -265,24 +278,24 @@ Ajax.prototype = {
                     content = toXml(content);
                 }
 
-                var statusCode = that.$xhr.status;
+                var statusCode = _this.$xhr.status;
                 // Call response status methods if exist
                 if (typeof options[statusCode] === "function") {
-                    options[statusCode].call(that, content, that.$xhr);
+                    options[statusCode].call(_this, content, _this.$xhr);
                 }
 
                 // Call onsuccess/onerror method
                 if (statusCode >= 100 && statusCode < 400) {
-                    options.onSuccess.call(that, content, that.$xhr);
+                    options.onSuccess.call(_this, content, _this.$xhr);
                 } else {
-                    options.onError.call(that, content, that.$xhr);
+                    options.onError.call(_this, content, _this.$xhr);
                 }
 
                 // Call oncomplete method
-                options.onComplete.call(that, content, that.$xhr);
+                options.onComplete.call(_this, content, _this.$xhr);
 
                 // Remove onreadystatechange
-                that.$xhr.onreadystatechange = null;
+                _this.$xhr.onreadystatechange = null;
                 break;
         }
     },

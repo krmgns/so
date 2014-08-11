@@ -1,3 +1,7 @@
+/**
+ * @name: mii
+ */
+
 function log(s) { console.log(s) }
 
 ;(function(window, undefined) {

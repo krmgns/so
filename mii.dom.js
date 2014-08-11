@@ -1,3 +1,8 @@
+/**
+ * @name: mii.dom
+ * @deps: mii, mii.ext, mii.array, mii.object, mii.event, mii.animate
+ */
+
 ;(function($) {
 
 "use strict"; // @tmp

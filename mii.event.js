@@ -1,3 +1,8 @@
+/**
+ * @name: mii.event
+ * @deps: mii
+ */
+
 ;(function($) {
 
 "use strict"; // @tmp

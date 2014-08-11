@@ -1,3 +1,8 @@
+/**
+ * @name: mii.object
+ * @deps: mii
+ */
+
 ;(function($) {
 
 "use strict"; // @tmp

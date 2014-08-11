@@ -1,3 +1,8 @@
+/**
+ * @name: mii.array
+ * @deps: mii
+ */
+
 ;(function($) {
 
 "use strict"; // @tmp
