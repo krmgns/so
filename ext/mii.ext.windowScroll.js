@@ -70,10 +70,11 @@ $.extend(WindowScroll.prototype, {
         if (typeof this.fn === "function") {
             this.fn.call(this, this.el, this);
         }
-        this.stopped = true;
+        this.stop();
     },
     stop: function() {
         if (this.running) {
+            this.running = false;
             this.stopped = true;
         }
         return this;
