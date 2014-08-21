@@ -55,7 +55,7 @@ Animation.prototype.animate = function(easing) {
     // Stop if running
     this.stop();
 
-    this.easing = ($.animate.easing && $.animate.easing[easing]) || fn_easing;
+    this.easing = ($.ext.animateEasing && $.ext.animateEasing[easing]) || fn_easing;
 
     this.running = true;
     this.stopped = false;
