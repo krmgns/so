@@ -40,15 +40,15 @@ WindowScroll.prototype.run = function(to, duration, fn) {
     this.reverse    = this.startValue > this.stopValue;
     this.diff       = Math.abs(this.stopValue - this.startValue);
 
-    var that = this;
+    var _this = this;
     // Run animation
     ;(function run() {
-        if (!that.stopped) {
-            if (that.elapsedTime < that.duration) {
+        if (!_this.stopped) {
+            if (_this.elapsedTime < _this.duration) {
                 timer(run);
-                that._start();
+                _this._start();
             } else {
-                that._end(); // Finito!
+                _this._end(); // Finito!
             }
         }
     })();
