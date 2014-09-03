@@ -500,16 +500,16 @@ Dom.prototype = {
 
         return new Dom(nodes);
     },
-    find: function(s, i) {
-        return this[0] ? this.__init(s, this[0], i) : this;
+    find: function(selector, i) {
+        return this[0] ? this.__init(selector, this[0], i) : this;
     },
-    not: function(s) {
-        var type = $.typeOf(s), src, els = [];
+    not: function(selector) {
+        var type = $.typeOf(selector), src, els = [];
 
         // Notation: $.dom("p").not(this)
         // Notation: $.dom("p").not(".red")
-        if (s && (type === "object" || type === "string" || type.substring(0,4) === "html")) {
-            src = this.__init(s).toArray();
+        if (selector && (type === "object" || type === "string" || type.substring(0,4) === "html")) {
+            src = this.__init(selector).toArray();
             this.forEach(function(el, i){
                 var e, j = 0;
                 while (e = src[j++]) {
@@ -523,9 +523,9 @@ Dom.prototype = {
 
         // Notation: $.dom("p").not(0) or $.dom("p").not([0,1])
         if (type === "number" || type === "array") {
-            s = $.array.make(s);
+            selector = $.array.make(selector);
             this.forEach(function(el, i){
-                if (!$.array.has(s, i)) {
+                if (!$.array.has(selector, i)) {
                     els.push(el);
                 }
             });
@@ -724,15 +724,8 @@ $.extend(Dom.prototype, {
         }
         return this.__init(els);
     },
-    contains: function(node, i) {
-        var el = this[0];
-        node = this.__init(node);
-        node = isNaN(i) ? node[0] : node[i];
-        if (el && node) {
-            return el.contains
-                ? el != node && el.contains(node)
-                : !!(el.compareDocumentPosition(node) & 16);
-        }
+    contains: function(el, i) {
+        return this[0] && this.__init(this[0]).find(el, i).length != 0;
     }
 });
 
@@ -913,7 +906,7 @@ $.extend(Dom.prototype, {
 $.extend(Dom.prototype, {
     hasAttr: function(key, el /*internal*/) {
         if ((el = this[0]) == null) {
-            return;
+            return false;
         }
         return el.hasAttribute ? el.hasAttribute(key)
             : (el.attributes[key] && el.attributes[key].specified) || el[key]; // IE7
