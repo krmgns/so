@@ -41,7 +41,7 @@ function RE(re, flags, x /*internal*/) {
 
 function isNode(node) {
     return node && node.nodeType &&
-        (node.nodeType === 1 || node.nodeType === 3 || node.nodeType === 11);
+        (node.nodeType === 1 || node.nodeType === 11);
 }
 
 function getNodeName(node) {
@@ -567,7 +567,7 @@ Dom.prototype = {
     }
 };
 
-// Dom: setters & getters
+// Dom: modifiers
 $.forEach(["append", "prepend", "before", "after", "replace"], function(fn) {
     Dom.prototype[fn] = function(contents, cloning) {
         return this.forEach(function(el) {
@@ -584,6 +584,7 @@ $.forEach(["append", "prepend", "before", "after", "replace"], function(fn) {
     };
 });
 
+// Dom: modifiers
 $.forEach(["appendTo", "prependTo", "insertBefore", "insertAfter"], function(fn) {
     Dom.prototype[fn] = function(toEl, cloning) {
         return this.forEach(function(el) {
@@ -601,20 +602,7 @@ $.forEach(["appendTo", "prependTo", "insertBefore", "insertAfter"], function(fn)
     };
 });
 
-$.forEach({setHtml: "innerHTML", setText: textProp}, function(fn, prop) {
-    Dom.prototype[fn] = function(content) {
-        return this.forEach(function(el) {
-            el[prop] = (content != null) ? content : "";
-        });
-    };
-});
-
-$.forEach({getHtml: "innerHTML", getText: textProp}, function(fn, prop) {
-    Dom.prototype[fn] = function() {
-        return this[0] && this[0][prop] || "";
-    };
-});
-
+// Dom: modifiers
 $.extend(Dom.prototype, {
     clone: function(deep) {
         var clones = [];
@@ -636,6 +624,21 @@ $.extend(Dom.prototype, {
     }
 });
 
+// Dom: contents
+$.forEach({setHtml: "innerHTML", setText: textProp}, function(fn, prop) {
+    Dom.prototype[fn] = function(content) {
+        return this.forEach(function(el) {
+            el[prop] = (content != null) ? content : "";
+        });
+    };
+});
+
+$.forEach({getHtml: "innerHTML", getText: textProp}, function(fn, prop) {
+    Dom.prototype[fn] = function() {
+        return this[0] && this[0][prop] || "";
+    };
+});
+
 // Dom: walkers
 $.forEach({parent: "parentNode", prev: "previousSibling", next: "nextSibling"}, function(fn, node) {
     Dom.prototype[fn] = function() {
@@ -646,7 +649,7 @@ $.forEach({parent: "parentNode", prev: "previousSibling", next: "nextSibling"}, 
         return this.__init(n);
     };
 });
-
+// Dom: walkers
 $.extend(Dom.prototype, {
     prevAll: function(src) {
         var el = this[0], els = [], j = 0, n, ns, tmp;
@@ -726,6 +729,16 @@ $.extend(Dom.prototype, {
     },
     contains: function(el, i) {
         return this[0] && this.__init(this[0]).find(el, i).length != 0;
+    },
+    hasChild: function(){
+        var child = this[0] && this[0].firstChild;
+        while (child) {
+            if (isNode(child)) {
+                return true;
+            }
+            child = child.nextSibling;
+        }
+        return false;
     }
 });
 
