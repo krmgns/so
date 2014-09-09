@@ -8,11 +8,11 @@
 <script src="../mii-all.js"></script>
 <script>
 mii.onReady(function($) {
-    var tpl, attrs = {id:"foo", style:"display:inline"}
+    // var tpl, attrs = {id:"foo", style:"display:inline"}
     // tpl = $.dom("<mii-foo>", attrs)
     // tpl = $.dom("<mii-foo x='1'>", attrs)
     // tpl = $.dom("<mii-foo>aaa</mii-foo>", attrs)
-    tpl = $.dom("<mii-foo x='1'>aa.a</mii-foo>", attrs)
+    // tpl = $.dom("<mii-foo x='1'>aa.a</mii-foo>", attrs)
 
     // tpl.append("The foo!")
 
@@ -23,14 +23,14 @@ mii.onReady(function($) {
     // els.append("ccc")
     // els.append(tpl)
 
-    tpl.on("click", function(){ log("123") })
-    tpl.on("click", function(){ log("this") })
-    tpl.on("click", function(){ log(this) })
+    // tpl.on("click", function(){ log("123") })
+    // tpl.on("click", function(){ log("this") })
+    // tpl.on("click", function(){ log(this) })
     // tpl.once("click", function(){ log(this) }) // doesnt work, see below
     // var fn = function(){ log(this); tpl.off("click", fn); };
     // tpl.on("click", fn)
 
-    tpl.appendTo("div")
+    // tpl.appendTo("div")
     // tpl.removeAttr("*").setText("x");
 
     // tpl.remove()
@@ -49,6 +49,9 @@ mii.onReady(function($) {
     //     })
     //     a.appendTo(el, false)
     // })
+
+    var divs = $.dom("bodys").find("div")
+    log(divs)
 })
 </script>
 

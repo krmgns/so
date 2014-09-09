@@ -13,7 +13,7 @@ mii.onReady(function($){
     ps.data({"fo-o":"The foo!", bar:"the barrr", xxx:true, a:alert})
     setTimeout(function(el){
         ps.item(0).removeData("*")
-        // ps.item(0).removeData("xxx")
+        ps.item(0).removeData("xxx")
         log( ps.item(0).data("xxx") )
     }, 1000)
 });
