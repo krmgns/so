@@ -173,7 +173,7 @@ function cloneElement(el, deep) {
 // @todo
 function cloneElementEvents(el, clone) {
     // Needs `$.event` and `el.$events`
-    if ($.event && el.$events) {
+    if (el.$events) {
         $.forEach(el.$events, function(type, events){
             $.forEach(events, function(i, callback){
                 $.event.on(clone, type, callback);
@@ -183,13 +183,11 @@ function cloneElementEvents(el, clone) {
     return clone;
 }
 
-function cleanElement(el) {
-    var child;
+function cleanElement(el, child /*internal*/) {
     while (child = el.firstChild) {
-        // Remove data
-        delete child.$data;
-        // Remove events
-        delete child.$events;
+        // Remove data & events
+        if (child.$data   !== undefined) delete child.$data;
+        if (child.$events !== undefined) delete child.$events;
         // Clean child element
         cleanElement(child);
         // Remove child element
@@ -614,7 +612,9 @@ $.extend(Dom.prototype, {
     remove: function() {
         return this.forEach(function(el) {
             el = cleanElement(el);
-            el.parentNode && el.parentNode.removeChild(el);
+            if (el.parentNode) {
+                el.parentNode.removeChild(el);
+            }
         });
     },
     empty: function() {
@@ -1153,10 +1153,9 @@ $.extend(Dom.prototype, {
         return this.forEach(function(el) {
             if (el.$data !== undefined) {
                 if (key === "*") {
-                    // Remove all
-                    delete el.$data;
-                } else {
-                    el.$data[key] !== undefined && (delete el.$data);
+                    delete el.$data; // Remove all
+                } else if (el.$data[key] !== undefined) {
+                    delete el.$data[key];
                 }
             }
         });
