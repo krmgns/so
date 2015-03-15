@@ -1,11 +1,11 @@
 /**
- * @name: mii.windowScroll
- * @deps: mii, mii.ext, mii.dom
+ * @name: so.ext.windowScroll
+ * @deps: so
  */
 
 ;(function($){
 
-// For now, it is only scroll to 'Y' direction...
+// for now, it is only scroll to 'y' direction...
 
 "use strict"; // @tmp
 
@@ -19,13 +19,13 @@ function timer(fn) {
     setTimeout(fn, 1000 / opt_fps);
 }
 
-function windowScroll(window) {
+function WindowScroll(window) {
     this.window  = window || $.win();
     this.running = false
     this.stopped = false;
 }
 
-windowScroll.prototype.run = function(to, duration, fn) {
+WindowScroll.prototype.run = function(to, duration, fn) {
     this.stop();
 
     this.fn          = fn;
@@ -40,15 +40,15 @@ windowScroll.prototype.run = function(to, duration, fn) {
     this.reverse    = this.startValue > this.stopValue;
     this.diff       = Math.abs(this.stopValue - this.startValue);
 
-    var that = this;
-    // Run animation
+    var _this = this;
+    // run animation
     ;(function run() {
-        if (!that.stopped) {
-            if (that.elapsedTime < that.duration) {
+        if (!_this.stopped) {
+            if (_this.elapsedTime < _this.duration) {
                 timer(run);
-                that._start();
+                _this._start();
             } else {
-                that._end(); // Finito!
+                _this._end(); // finito!
             }
         }
     })();
@@ -56,7 +56,7 @@ windowScroll.prototype.run = function(to, duration, fn) {
     return this;
 };
 
-$.extend(windowScroll.prototype, {
+$.extend(WindowScroll.prototype, {
     _start: function() {
         var current;
         this.elapsedTime = $.now() - this.startTime;
@@ -66,23 +66,24 @@ $.extend(windowScroll.prototype, {
     },
     _end: function() {
         this.window.scrollTo(0, this.stopValue);
-        // Call `onend` handler
+        // call `onend` handler
         if (typeof this.fn === "function") {
             this.fn.call(this, this.el, this);
         }
-        this.stopped = true;
+        this.stop();
     },
     stop: function() {
         if (this.running) {
+            this.running = false;
             this.stopped = true;
         }
         return this;
     }
 });
 
-// Add `windowScroll` to mii
-$.windowScroll = function(window, to, duration, fn) {
-    return (new windowScroll(window)).run(to, duration, fn);
+// add `windowscroll` to so
+$.ext.windowScroll = function(window, to, duration, fn) {
+    return (new WindowScroll(window)).run(to, duration, fn);
 }
 
-})(mii);
+})(so);

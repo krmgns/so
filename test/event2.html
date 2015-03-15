@@ -9,14 +9,14 @@
     <input name="a" value="1" size="1">
 </form>
 
-<script src="all.php"></script>
+<script src="so-all.php"></script>
 <script>
 function foo(e) {
     log(e)
     log(this)
 }
 
-mii.onReady(function($){
+so.onReady(function($){
     var bu = $.dom("#button");
     bu.on("click", function(e){
         foo.call(this, e);

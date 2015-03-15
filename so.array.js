@@ -1,6 +1,6 @@
 /**
- * @name: mii.array
- * @deps: mii
+ * @name: so.array
+ * @deps: so
  */
 
 ;(function($) {
@@ -58,7 +58,7 @@ $.extend($.array, {
     }
 });
 
-// Define exposer
-$.toString("array", "mii.array");
+// define exposer
+$.toString("array", "so.array");
 
-})(mii);
+})(so);

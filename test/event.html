@@ -2,9 +2,10 @@
 
 <button id="button">Test it.</button>
 
-<script src="all.php"></script>
+<!-- <script src="so-all.php"></script> -->
+<script src="../so-all.js"></script>
 <script>
-mii.onReady(function($){
+so.onReady(function($){
     var el = $.dom("#button");
 
     el.addCustomEvent("custom 1", function(e){
@@ -14,12 +15,17 @@ mii.onReady(function($){
         log(e.type)
     });
 
+    el.once("mouseleave", function(e){
+        log(e.type)
+    });
+
     el.on("click", function(e){
-        log(e);
-        el.invokeCustomEvent("custom 1");
-        el.invokeCustomEvent("custom 2");
-        // Remove
-        el.removeCustomEvent("custom 1");
+        // log(e);
+        el.fire("mouseleave");
+        el.fire("custom 1");
+        el.fire("custom 2");
+        // remove
+        el.removeCustomEvent("custom 2");
     });
 });
 </script>

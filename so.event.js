@@ -1,17 +1,21 @@
 /**
- * @name: mii.event
- * @deps: mii
+ * @name: so.event
+ * @deps: so
  */
 
 ;(function($) {
 
 "use strict"; // @tmp
 
-// Credits: https://gist.github.com/1000988 & http://dean.edwards.name/my/events.js
+// credits https://gist.github.com/1000988 & http://dean.edwards.name/my/events.js
 var event = (function() {
     var _i = 0,
         preventDefault = function() { this.returnValue = false; },
         stopPropagation = function() { this.cancelBubble = true; };
+
+    function _ek(type) {
+        return "so.event.custom."+ type;
+    }
 
     function _fix(e) {
         e.preventDefault = preventDefault;
@@ -27,7 +31,7 @@ var event = (function() {
         var result = true, callbacks = this.$events[e.type], callback, i;
         for (i in callbacks) {
             callback = callbacks[i];
-            // Unable to get property 'call' of undefined or null reference
+            // unable to get property 'call' of undefined or null reference
             if (callback && callback.call(this, e) === false) {
                 result = false;
             }
@@ -66,7 +70,7 @@ var event = (function() {
 
     function once(el, type, callback) {
         var _callback;
-        // Doesn't work with cloned elements!!! Sorry :(
+        // doesn't work with cloned elements, sorry :(
         addEvent(el, type, _callback = function(){
             removeEvent(el, type, _callback);
             return callback.apply(el, arguments);
@@ -74,39 +78,38 @@ var event = (function() {
     }
 
     function fire(el, type) {
-        var fn = el[type] || el["on"+ type];
-        if (fn && fn.call) {
-            fn.call(el);
+        var e;
+        // custom?
+        if (e = el[_ek(type)]) {
+            // removed flag
+            if (e === -1) {
+                return;
+            }
+            return invokeCustomEvent(el, type);
         }
 
-        // I won't use this way...
-        // var e;
-        // if (document.createEventObject) {
-        //     e = document.createEventObject();
-        //     e.type = type;
-        //     el.fireEvent("on" + e.type, e);
-        // } else {
-        //     e = document.createEvent("Event");
-        //     e.initEvent(type, true, true);
-        //     el.dispatchEvent(e);
-        // }
+        if (document.createEventObject) {
+            e = document.createEventObject();
+            e.type = type;
+            return el.fireEvent("on"+ e.type, e);
+        } else {
+            e = document.createEvent("Event");
+            e.initEvent(type, true, true);
+            return !el.dispatchEvent(e);
+        }
     }
-
-    var _ek = function(type) {
-        return "mii.event.custom."+ type;
-    };
 
     function addCustomEvent(el, type, fn) {
         var eventKey = _ek(type), e;
         if (document.createEventObject) {
-            // Create for IE
+            // create for ie
             e = document.createEventObject();
             e.type = type;
             if (!el[eventKey]) {
                 addEvent(el, type, fn);
             }
         } else {
-            // Create for Firefox & others
+            // create for firefox & others
             e = document.createEvent("Event");
             e.initEvent(type, true, true); // type, bubbling, cancelable
             if (!el[eventKey]) {
@@ -117,17 +120,17 @@ var event = (function() {
     }
 
     function removeCustomEvent(el, type) {
-        delete el[_ek(type)];
+        el[_ek(type)] = -1;
     }
 
     function invokeCustomEvent(el, type) {
         var e = el[_ek(type)];
         if (e) {
             if (el.fireEvent) {
-                // Dispatch for IE
+                // dispatch for ie
                 return el.fireEvent("on"+ type, e);
             } else {
-                // Dispatch for Firefox & others
+                // dispatch for firefox & others
                 return !el.dispatchEvent(e);
             }
         }
@@ -138,11 +141,11 @@ var event = (function() {
         off: removeEvent,
         once: once,
         fire: fire,
-        // Normal events
+        // normal events
         addEvent: addEvent,
         removeEvent: removeEvent,
         invokeEvent: fire,
-        // Custom events
+        // custom events
         addCustomEvent: addCustomEvent,
         removeCustomEvent: removeCustomEvent,
         invokeCustomEvent: invokeCustomEvent
@@ -151,7 +154,7 @@ var event = (function() {
 
 $.event = event;
 
-// Define exposer
-$.toString("event", "mii.event");
+// define exposer
+$.toString("event", "so.event");
 
-})(mii);
+})(so);

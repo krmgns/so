@@ -1,6 +1,6 @@
 /**
- * @name: mii.ext
- * @deps: mii
+ * @name: so.ext
+ * @deps: so
  */
 
 ;(function($) {
@@ -20,7 +20,7 @@ $.extend($.ext, {
     }
 });
 
-// Define exposer
-$.toString("ext", "mii.ext");
+// define exposer
+$.toString("ext", "so.ext");
 
-})(mii);
+})(so);

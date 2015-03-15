@@ -1,6 +1,6 @@
 /**
- * @name: mii.object
- * @deps: mii
+ * @name: so.object
+ * @deps: so
  */
 
 ;(function($) {
@@ -49,14 +49,14 @@ $.extend($.object, {
     pick: function(source, key, deleting) {
         source || (source = {});
         var value = source[key];
-        if(deleting !== false) {
+        if (deleting !== false) {
             delete source[key];
         }
         return value;
     }
 });
 
-// Define exposer
-$.toString("object", "mii.object");
+// define exposer
+$.toString("object", "so.object");
 
-})(mii);
+})(so);

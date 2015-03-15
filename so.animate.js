@@ -1,6 +1,6 @@
 /**
- * @name: mii.animate
- * @deps: mii, mii.ext, mii.dom
+ * @name: so.animate
+ * @deps: so, so.ext, so.dom
  */
 
 ;(function($) {
@@ -8,9 +8,9 @@
 "use strict"; // @tmp
 
 var opt_fps = 60,
-    opt_defaultDuration = 350,
-    opt_shortcutDurations = {fast: 150, slow: 750},
-    // Credits: http://easings.net/ (easeOutQuad)
+    opt_defaultDuration = 750,
+    opt_shortcutDurations = {fast: opt_defaultDuration / 2, slow: opt_defaultDuration * 2},
+    // credits: http://easings.net/ (easeOutQuad)
     fn_easing = function(t,b,c,d) {return -c*(t/=d)*(t-2)+b}
 ;
 
@@ -18,26 +18,27 @@ function timer(fn) {
     setTimeout(fn, 1000 / opt_fps);
 }
 
-/*** The Animation ***/
+/*** the animation ***/
 function Animation(el, properties, duration, callback) {
     this.el = $.dom(el);
     this.callback = callback;
-    this.duration = typeof duration === "number" ? duration : opt_shortcutDurations[duration] || opt_defaultDuration;
+    this.duration = (typeof duration === "number")
+        ? duration : opt_shortcutDurations[duration] || opt_defaultDuration;
 
     this.running = false
     this.stopped = false;
 
     this.animations = [];
     var property, startValue, stopValue, isScroll;
-    // Add properties
+    // add properties
     for (property in properties) {
         if (properties.hasOwnProperty(property)) {
             stopValue  = properties[property];
             property   = $.ext.camelizeStyleProperty(property);
-            isScroll   = property === "scrollTop" || property === "scrollLeft";
-            startValue = isScroll
-                ? parseFloat(this.el.scroll(property.substring(6).toLowerCase()))
-                : parseFloat(this.el.getStyle(property)) || 0;
+            isScroll   = (property === "scrollTop" || property === "scrollLeft");
+            startValue = !isScroll
+                ? parseFloat(this.el.getStyle(property)) || 0
+                : parseFloat(this.el.scroll(property.substring(6).toLowerCase()));
 
             this.animations.push({
                 property: property,
@@ -52,29 +53,29 @@ function Animation(el, properties, duration, callback) {
 }
 
 Animation.prototype.animate = function(easing) {
-    // Stop if running
+    // stop if running
     this.stop();
 
-    this.easing = ($.ext.animateEasing && $.ext.animateEasing[easing]) || fn_easing;
+    this.easing = ($.ext.easing && $.ext.easing[easing]) || fn_easing;
 
     this.running = true;
     this.stopped = false;
     this.startTime = $.now();
     this.elapsedTime = 0;
 
-    // For stop tool
+    // for stop tool
     this.el[0].$animation = this;
 
     var _this = this;
 
-    // Run animation
+    // run animation
     ;(function run() {
         if (!_this.stopped) {
             if (_this.elapsedTime < _this.duration) {
                 timer(run);
                 _this._start();
             } else {
-                // Finito!
+                // finito!
                 _this._end();
                 _this.stop();
             }
@@ -93,10 +94,10 @@ $.extend(Animation.prototype, {
         this.elapsedTime = $.now() - this.startTime;
 
         while (a = animations[i++]) {
-            current = this.easing.call(null, this.elapsedTime, 0.0, a.diff, this.duration);
-            current = (a.reverse ? a.startValue - current : a.startValue + current);
+            current = this.easing(this.elapsedTime, 0.0, a.diff, this.duration);
+            current = a.reverse ? (a.startValue - current) : (a.startValue + current);
             if (!a.isScroll) {
-                // Using "toFixed" for max percent
+                // use `toFixed` to get max percent
                 el.setStyle(a.property, current.toFixed(20));
             } else {
                 isBody = el[0].tagName === "BODY" || el[0].tagName === "HTML";
@@ -124,7 +125,7 @@ $.extend(Animation.prototype, {
             }
         }
 
-        // Call `callback` handler
+        // call `callback` handler
         if (typeof this.callback === "function") {
             this.callback(this.el[0], this);
         }
@@ -135,23 +136,23 @@ $.extend(Animation.prototype, {
             this.stopped = true;
         }
 
-        // Remove animation [No delete, can be used for `is(":animated")` like function]
+        // remove animation
         this.el[0].$animation = null;
 
         return this;
     }
 });
 
-// Add `animate` to mii
+// add `animate` to so
 $.animate = function(el, properties, duration, callback, easing) {
-    // Swap args
+    // swap args
     if (typeof callback === "string") {
         easing = callback;
     }
     return (new Animation(el, properties, duration, callback)).animate(easing);
 };
 
-// Define exposer
-$.toString("animate", "mii.animate");
+// define exposer
+$.toString("animate", "so.animate");
 
-})(mii);
+})(so);

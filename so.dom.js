@@ -1,6 +1,6 @@
 /**
- * @name: mii.dom
- * @deps: mii, mii.ext, mii.array, mii.object, mii.event, mii.animate
+ * @name: so.dom
+ * @deps: so, so.ext, so.array, so.object, so.event, so.animate
  */
 
 ;(function($) {
@@ -31,7 +31,7 @@ function RE(re, flags, x /*internal*/) {
         _re_cache[x] = new RegExp(re, flags);
     }
 
-    // Simple GC
+    // simple gc
     setTimeout(function(){
         _re_cache = {};
     }, 60*1000);
@@ -106,9 +106,9 @@ var insertFunctions = {
 
 var attrFunctions = {
     "name": function(el, val) { el.name = val; },
-    // Notation: data:{foo:"The foo!"}
+    // notation: data:{foo:"The foo!"}
     "data": function(el, val) { $.dom(el).data(val); },
-    // Notation: style:{color:"blue"}
+    // notation: style:{color:"blue"}
     "style": function(el, val) { $.dom(el).setStyle(val); }
 };
 
@@ -129,27 +129,27 @@ function setAttributes(el, attrs) {
             }
 
             if (re_stateAttrs.test(key)) {
-                // Set attribute as boolean
+                // set attribute as boolean
                 el[key] = (state = re_true.test(val) || val != "");
                 if (keyFixedDef) {
                     el[keyFixedDef] = state;
                 }
                 if (state) {
-                    // Set proper attribute (e.g: disabled="disabled")
+                    // set proper attribute (e.g: disabled="disabled")
                     el.setAttribute(keyFixed, key);
                 } else {
-                    // Remove attribute
+                    // remove attribute
                     el.removeAttribute(keyFixed);
                 }
                 continue;
             }
 
-            // Bind `on*` events
+            // bind `on*` events
             (val && val.apply &&
                 (el[key.toLowerCase()] = function() {
                     return val.apply(el, arguments);
                 })
-            // Or just set attribute
+            // or just set attribute
             ) || el.setAttribute(keyFixed, ""+ val);
         }
     }
@@ -172,7 +172,7 @@ function cloneElement(el, deep) {
 
 // @todo
 function cloneElementEvents(el, clone) {
-    // Needs `$.event` and `el.$events`
+    // needs `$.event` and `el.$events`
     if (el.$events) {
         $.forEach(el.$events, function(type, events){
             $.forEach(events, function(i, callback){
@@ -185,12 +185,12 @@ function cloneElementEvents(el, clone) {
 
 function cleanElement(el, child /*internal*/) {
     while (child = el.firstChild) {
-        // Remove data & events
+        // remove data & events
         if (child.$data   !== undefined) delete child.$data;
         if (child.$events !== undefined) delete child.$events;
-        // Clean child element
+        // clean child element
         cleanElement(child);
-        // Remove child element
+        // remove child element
         el.removeChild(child);
     }
     return el;
@@ -204,7 +204,7 @@ function create(tag, attrs, doc) {
 }
 
 function createFragment(content, doc) {
-    var tmp = doc.createElement("mii-tmp"), // :)
+    var tmp = doc.createElement("so-tmp"),
         frg = doc.createDocumentFragment();
 
     tmp.innerHTML = content;
@@ -221,7 +221,7 @@ function createElementSafe(tag, doc, nameAttr) {
     nameAttr || (nameAttr = "");
 
     if (ie_lt8) {
-        // Set name for IE
+        // set name for ie
         element = doc.createElement("<"+ tag +" name='" + nameAttr + "'>");
     } else {
         element = doc.createElement(tag);
@@ -249,7 +249,7 @@ function createElement(content, doc) {
     }
 
     tag = (re_tagName.exec(content) || [, ""])[1].toLowerCase();
-    if (tag === "") { // Text node
+    if (tag === "") { // text node
         return _return("#text", [doc.createTextNode(content)]);
     }
 
@@ -257,7 +257,7 @@ function createElement(content, doc) {
         content = fix.content.replace("#", content);
         frg = createFragment(content, doc).firstChild;
         dep = fix.dep;
-        // Remove node (FF sets selected=true last option)
+        // remove node (ff sets selected=true last option)
         if (fix.skip) {
             frg.removeChild(frg.firstChild);
         }
@@ -275,7 +275,7 @@ function insert(fn, target, contents, reverse) {
         node, nodes = element.nodes,
         scope, tBody, i = 0;
 
-    // Set target as `tbody`, otherwise IE7 doesn't insert
+    // set target as `tbody`, otherwise ie7 doesn't insert
     if (element.fixed && element.tag === "tr"
             && (tBody = getByTag(target, "tbody", 0)) != null) {
         target = tBody;
@@ -283,7 +283,7 @@ function insert(fn, target, contents, reverse) {
 
     fn = insertFunctions[fn], scope = target;
     while (node = nodes[i++]) {
-        // For insertBefore/insertAfter etc.
+        // for insertbefore/insertafter etc.
         if (reverse) {
             scope = node;
             node = target;
@@ -291,7 +291,7 @@ function insert(fn, target, contents, reverse) {
         fn.call(scope, node);
     }
 
-    // Removes empty tbody's on IE (7-8)
+    // removes empty tbody's on ie (7-8)
     if (element.fixed && ie_lt9 && re_tableChildren.test(element.tag)) {
         fixTable(target, doc);
     }
@@ -299,7 +299,7 @@ function insert(fn, target, contents, reverse) {
     return nodes;
 }
 
-// Credits: http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291
+// credits: http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291
 function toPixel(el, key, value) {
     var left, leftRS;
     left = el.style.left;
@@ -419,7 +419,7 @@ function getScroll(el, type /*internal*/) {
 
     if (type === "window" || type === "document" ||
             ((tag = getNodeName(el)) && tag === "html" || tag === "body")) {
-        // IE issue: Works only if `onscroll` called, does not work on `onload`
+        // ie issue: works only if `onscroll` called, does not work on `onload`
         doc = $.doc(el);
         win = $.win(doc);
         docEl = doc.documentElement;
@@ -439,7 +439,7 @@ function classRE(cls) {
 
 // qwery integration
 function QSA(s, root) { // @tmp
-    // return (typeof s === "string") ? (root&&root.nodeType?root:DOC).querySelectorAll(s) : (s && s.nodeType) ? [s] : (s || [])
+    /*return (typeof s === "string") ? (root&&root.nodeType?root:DOC).querySelectorAll(s) : (s && s.nodeType) ? [s] : (s || [])*/
     return qwery(s, root);
 }
 
@@ -447,13 +447,13 @@ function isDomInstance(x) {
     return (x instanceof Dom);
 }
 
-/*** The Dom! ***/
+/*** the dom ***/
 function Dom(nodes) {
-    // Set length first
+    // set length first
     this.length = 0;
     if (nodes) {
-        nodes = (!nodes.nodeType && typeof nodes.length === "number") // For node list or arrays
-                    && /*and*/ (!nodes.document || !nodes.document.nodeType)  // For window
+        nodes = (!nodes.nodeType && typeof nodes.length === "number") // for node list or arrays
+                    && /*and*/ (!nodes.document || !nodes.document.nodeType)  // for window
                         ? nodes /*get node list*/ : [nodes] /*make array*/;
         for (var i = 0, len = nodes.length; i < len; i++) {
             if (nodes[i]) {
@@ -466,7 +466,7 @@ function Dom(nodes) {
 
 Dom.prototype = {
     constructor: Dom,
-    // Base methods...
+    // base methods
     __init: function(selector, root, i) {
         if (isDomInstance(selector)) {
             return selector;
@@ -475,12 +475,12 @@ Dom.prototype = {
         var nodes;
         if (typeof selector === "string") {
             selector = $.trim(selector);
-            // Notation: $.dom("<span>", {id: "foo"})
-            // Notation: $.dom("<span id='foo'>")
-            // Notation: $.dom("<span id='foo'>The span!</span>")
+            // notation: $.dom("<span>", {id: "foo"})
+            // notation: $.dom("<span id='foo'>")
+            // notation: $.dom("<span id='foo'>The span!</span>")
             if (re_htmlContent.test(selector)) {
                 nodes = createElement(selector, DOC).nodes;
-                // Set attributes
+                // set attributes
                 if (root && typeof root === "object" && !root.nodeType && root.length === undefined) {
                     $.forEach(nodes, function(node){
                         setAttributes(node, root);
@@ -491,12 +491,12 @@ Dom.prototype = {
 
         if (!nodes) {
             nodes = QSA(selector, root);
-            if (!isNaN(i) && nodes && nodes.length) { // NodeList
+            if (!isNaN(i) && nodes && nodes.length) { // nodelist
                 nodes = nodes[i];
             }
         }
 
-        return new Dom(nodes);
+        return (new Dom(nodes));
     },
     find: function(selector, i) {
         return this[0] ? this.__init(selector, this[0], i) : this;
@@ -504,22 +504,22 @@ Dom.prototype = {
     not: function(selector) {
         var type = $.typeOf(selector), src, els = [];
 
-        // Notation: $.dom("p").not(this)
-        // Notation: $.dom("p").not(".red")
+        // notation: $.dom("p").not(this)
+        // notation: $.dom("p").not(".red")
         if (selector && (type === "object" || type === "string" || type.substring(0,4) === "html")) {
             src = this.__init(selector).toArray();
             this.forEach(function(el, i){
                 var e, j = 0;
                 while (e = src[j++]) {
-                    if (e === el) {
-                        delete this[i];
+                    if (e !== el) {
+                        els.push(el);
                     }
                 }
             });
-            return this.__init(this.toArray());
+            return this.__init(els);
         }
 
-        // Notation: $.dom("p").not(0) or $.dom("p").not([0,1])
+        // notation: $.dom("p").not(0) or $.dom("p").not([0,1])
         if (type === "number" || type === "array") {
             selector = $.array.make(selector);
             this.forEach(function(el, i){
@@ -565,7 +565,7 @@ Dom.prototype = {
     }
 };
 
-// Dom: modifiers
+// dom: modifiers
 $.forEach(["append", "prepend", "before", "after", "replace"], function(fn) {
     Dom.prototype[fn] = function(contents, cloning) {
         return this.forEach(function(el) {
@@ -582,7 +582,7 @@ $.forEach(["append", "prepend", "before", "after", "replace"], function(fn) {
     };
 });
 
-// Dom: modifiers
+// dom: modifiers
 $.forEach(["appendTo", "prependTo", "insertBefore", "insertAfter"], function(fn) {
     Dom.prototype[fn] = function(toEl, cloning) {
         return this.forEach(function(el) {
@@ -600,7 +600,7 @@ $.forEach(["appendTo", "prependTo", "insertBefore", "insertAfter"], function(fn)
     };
 });
 
-// Dom: modifiers
+// dom: modifiers
 $.extend(Dom.prototype, {
     clone: function(deep) {
         var clones = [];
@@ -624,7 +624,7 @@ $.extend(Dom.prototype, {
     }
 });
 
-// Dom: contents
+// dom: contents
 $.forEach({setHtml: "innerHTML", setText: textProp}, function(fn, prop) {
     Dom.prototype[fn] = function(content) {
         return this.forEach(function(el) {
@@ -639,7 +639,7 @@ $.forEach({getHtml: "innerHTML", getText: textProp}, function(fn, prop) {
     };
 });
 
-// Dom: walkers
+// dom: walkers
 $.forEach({parent: "parentNode", prev: "previousSibling", next: "nextSibling"}, function(fn, node) {
     Dom.prototype[fn] = function() {
         var n = this[0] && this[0][node];
@@ -649,7 +649,8 @@ $.forEach({parent: "parentNode", prev: "previousSibling", next: "nextSibling"}, 
         return this.__init(n);
     };
 });
-// Dom: walkers
+
+// dom: walkers
 $.extend(Dom.prototype, {
     prevAll: function(src) {
         var el = this[0], els = [], j = 0, n, ns, tmp;
@@ -742,7 +743,7 @@ $.extend(Dom.prototype, {
     }
 });
 
-// Dom: styles & dimensions
+// dom: styles & dimensions
 $.extend(Dom.prototype, {
     setStyle: function(key, val) {
         return this.forEach(function(el) {
@@ -849,7 +850,7 @@ $.extend(Dom.prototype, {
                                  docEl.scrollWidth, docEl.offsetWidth),
                 height = Math.max(docBody.scrollHeight, docBody.offsetHeight,
                                   docEl.scrollHeight, docEl.offsetHeight);
-            // Fix for IE
+            // fix for ie
             if (ie && docEl.clientWidth >= docEl.scrollWidth) width = docEl.clientWidth;
             if (ie && docEl.clientHeight >= docEl.scrollHeight) height = docEl.clientHeight;
             return {width: width, height: height};
@@ -858,7 +859,7 @@ $.extend(Dom.prototype, {
     },
     viewport: function() {
         if ($.typeOf(this[0]) !== "window") {
-            throw ("mii.dom.viewport(): This function only for `window`, use `mii.dom.dimensions()` instead.");
+            throw ("so.dom.viewport(): This function only for `window`, use `so.dom.dimensions()` instead.");
         }
         return this.dimensions();
     },
@@ -869,7 +870,8 @@ $.extend(Dom.prototype, {
             if (type === "window" || type === "document") {
                 return {top: 0, left: 0};
             }
-            if (rel) { // Get real & relative position
+            // get real & relative position
+            if (rel) {
                 var offset = getOffset(el), parentEl = el.parentNode,
                     parentOffset = getOffset(parentEl, rel);
                 if (parentEl && parentEl.nodeType === 1) {
@@ -891,15 +893,15 @@ $.extend(Dom.prototype, {
         var el, type;
         if (el = this[0]) {
             type = $.typeOf(el);
-            // Get scroll top | left
+            // get scroll top | left
             if (typeof top === "string") {
                 return getScroll(el, type)[top];
             }
-            // Get scroll top & left
+            // get scroll top & left
             if (top == null && left == null) {
                 return getScroll(el, type);
             }
-            // Set scroll top & left
+            // set scroll top & left
             var doc, win, tag;
             if (type === "window" || type === "document" ||
                     ((tag = getNodeName(el)) && tag === "html" || tag === "body")) {
@@ -915,7 +917,7 @@ $.extend(Dom.prototype, {
     }
 });
 
-// Dom: attributes & values
+// dom: attributes & values
 $.extend(Dom.prototype, {
     hasAttr: function(key, el /*internal*/) {
         if ((el = this[0]) == null) {
@@ -931,7 +933,7 @@ $.extend(Dom.prototype, {
                 attrs = {}, (attrs[key] = val || "");
             }
             if ("type" in attrs && ie_lt8) {
-                throw ("mii.dom.setAttr(): `type` attribute can not be modified!");
+                throw ("so.dom.setAttr(): `type` attribute can not be modified!");
             }
             setAttributes(el, attrs);
         });
@@ -982,7 +984,7 @@ $.extend(Dom.prototype, {
                     val = el.getAttribute(fixedAttributes[key] || key);
                 }
         }
-        // IE7 (onclick etc.)
+        // ie7 (onclick etc.)
         if (ie && typeof val === "function") {
             val = /function.*?\(.*?\)\s*\{\s*(.*?)\s*\}/mi.exec(""+ val)
             val = val && val[1];
@@ -1054,10 +1056,10 @@ $.extend(Dom.prototype, {
     }
 });
 
-// Dom: class tools
+// dom: class tools
 $.extend(Dom.prototype, {
     hasClass: function(cls, el /*internal*/) {
-        // Thanks: jsperf.com/pure-js-hasclass-vs-jquery-hasclass/30
+        // thanks: jsperf.com/pure-js-hasclass-vs-jquery-hasclass/30
         return (el = el || this[0]) && classRE(cls).test(el.className);
     },
     addClass: function(cls) {
@@ -1074,7 +1076,7 @@ $.extend(Dom.prototype, {
     },
     removeClass: function(cls) {
         if (cls === "*") {
-            // Remove all classes
+            // remove all classes
             return this.setClass("");
         }
         var i, c, cl = $.trim(cls).split(RE("\\s+"));
@@ -1087,7 +1089,7 @@ $.extend(Dom.prototype, {
         });
     },
     setClass: function(cls) {
-        // Remove all classes and set only `cls` one
+        // remove all classes and set only `cls` one
         return this.forEach(function(el) {
             el.className = $.trim(cls);
         });
@@ -1107,12 +1109,12 @@ $.extend(Dom.prototype, {
             }
         });
 
-        // Remove existing class
+        // remove existing class
         $.forEach(els1, function(el){
             el.className = $.trim((""+ el.className).replace(classRE(cls), " "));
         });
 
-        // Add absent class
+        // add non-existing class
         $.forEach(els2, function(el){
             el.className = $.trim(el.className +" "+ cls);
         });
@@ -1121,12 +1123,12 @@ $.extend(Dom.prototype, {
     }
 });
 
-// Dom: data tools
+// dom: data tools
 $.extend(Dom.prototype, {
     data: function(key, val) {
-        // Set data!
-        // Notation: $.dom(".foo").data("foo", "The foo!")
-        // Notation: $.dom(".foo").data({"foo": "The foo!"})
+        // set data
+        // notation: $.dom(".foo").data("foo", "The foo!")
+        // notation: $.dom(".foo").data({"foo": "The foo!"})
         if (typeof key === "object" || typeof val !== "undefined") {
             var data = key;
             if (typeof data === "string") {
@@ -1140,8 +1142,8 @@ $.extend(Dom.prototype, {
             });
         }
 
-        // Get data
-        // Notation: $.dom(".foo").data("foo")
+        // get data
+        // notation: $.dom(".foo").data("foo")
         var el, data;
         if (el = this[0]) {
             el.$data = el.$data || {};
@@ -1153,7 +1155,7 @@ $.extend(Dom.prototype, {
         return this.forEach(function(el) {
             if (el.$data !== undefined) {
                 if (key === "*") {
-                    delete el.$data; // Remove all
+                    delete el.$data; // remove all
                 } else if (el.$data[key] !== undefined) {
                     delete el.$data[key];
                 }
@@ -1162,13 +1164,13 @@ $.extend(Dom.prototype, {
     }
 });
 
-// Dom: form tools
+// dom: form tools
 $.extend(Dom.prototype, {
     buildQuery: function(ws2plus /*internal*/) {
         var form = this[0],
             data = [], i = 0,
             el, type, name, nodeName, attrs;
-        // Only forms!!!
+        // only forms!
         if (form && getNodeName(form) === "form") {
             while (el = form.elements[i++]) {
                 type = $.trim(el.type).toLowerCase();
@@ -1216,22 +1218,22 @@ $.extend(Dom.prototype, {
     }
 });
 
-// Dom: events
+// dom: events
 if ($.event) {
     $.forEach($.event, function(fn) {
-        if (fn !== "toString") { // Skip exposer
+        if (fn !== "toString") { // skip exposer
             Dom.prototype[fn] = function(type, callback) {
-                var _this = this;
                 if (type.indexOf(",") > -1) {
-                    // Multi events
+                    // multi events
+                    var _this = this;
                     $.forEach(type.split(/\s*,\s*/), function(type) {
                         return _this.forEach(function(el) {
                             $.event[fn](el, type, callback);
                         });
                     });
                 } else {
-                    // Single event
-                    return _this.forEach(function(el) {
+                    // single event
+                    return this.forEach(function(el) {
                         $.event[fn](el, type, callback);
                     });
                 }
@@ -1243,7 +1245,7 @@ if ($.event) {
 var defaultDisplays = {},
     ddIframe, ddIframeDoc;
 
-// Credits: http://jquery.com
+// credits: http://jquery.com
 function getDefaultDisplay(tagName) {
     var el, display = defaultDisplays[tagName];
 
@@ -1276,18 +1278,20 @@ function getDefaultDisplay(tagName) {
     return display;
 }
 
-// Dom: animations
+// dom: animations
 if ($.animate) {
     $.extend(Dom.prototype, {
-        animateStop: function() {
-            return this.forEach(function(el){
-                var animation = el.$animation;
-                if (animation && animation.running) {
-                    animation.stop();
-                }
-            });
-        },
         animate: function(properties, duration, callback, easing) {
+            // stop previous animation
+            if (properties === "stop") {
+                return this.forEach(function(el){
+                    var animation = el.$animation;
+                    if (animation && animation.running) {
+                        animation.stop();
+                    }
+                });
+            }
+            // do animation
             return this.forEach(function(el) {
                 $.animate(el, properties, duration, callback, easing);
             });
@@ -1299,6 +1303,7 @@ if ($.animate) {
             return this.fade(1, duration, callback);
         },
         fadeOut: function(duration, callback) {
+            // remove element after fading out
             if (callback === true || callback === "remove") {
                 callback = function(el) {
                     $.dom(el).remove();
@@ -1327,11 +1332,11 @@ if ($.animate) {
         toggle: function(duration, callback) {
             return this.forEach(function(el) {
                 if (!(el.offsetWidth || el.offsetHeight)) {
-                    // Show element
+                    // show element
                     el.style.display = getDefaultDisplay(el.tagName);
                     $.animate(el, {opacity: 1}, duration || 0, callback);
                 } else {
-                    // Hide element
+                    // hide element
                     $.animate(el, {opacity: 0}, duration || 0, function(){
                         el.style.display = "none";
                         callback && callback.call(this, el);
@@ -1341,7 +1346,7 @@ if ($.animate) {
         },
         blip: function(duration) {
             return this.forEach(function(el){
-                // "duration" is a must for this method
+                // `duration` is a must for this method
                 $.animate(el, {opacity: 0}, duration, function(){
                     $.animate(el, {opacity: 1}, duration);
                 });
@@ -1350,12 +1355,12 @@ if ($.animate) {
     });
 }
 
-// Add `dom` to mii
+// add `dom` to so
 $.dom = function(selector, root, i) {
     return (new Dom).__init(selector, root, i);
 };
 
-// Define exposer
-$.toString("dom", "mii.dom");
+// define exposer
+$.toString("dom", "so.dom");
 
-})(mii);
+})(so);

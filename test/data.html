@@ -4,17 +4,17 @@
 <p class="p2">p2</p>
 <p class="p3">p3</p>
 
-<!-- <script src="mii-all.php"></script> -->
-<script src="../mii-all.js"></script>
+<script src="so-all.php"></script>
 <script>
-mii.onReady(function($){
+so.onReady(function($){
     var ps = $.dom("p");
     ps.data("foo", "The foo!")
     ps.data({"fo-o":"The foo!", bar:"the barrr", xxx:true, a:alert})
     setTimeout(function(el){
-        ps.item(0).removeData("*")
+        // ps.item(0).removeData("*")
         ps.item(0).removeData("xxx")
         log( ps.item(0).data("xxx") )
+        log( ps.item(0).data("bar") )
     }, 1000)
 });
 </script>

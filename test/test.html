@@ -10,7 +10,7 @@
     <p class="p2">The p2 <i class="red">iii</i>.</p>
     <p class="p3">The p3 <i class="red">iii</i>.</p>
     <div><p class="red">p.in</p></div>
-    
+
     <input type="text" value="The input!">
     <input type="text" value="The input!">
     <input type="text" value="The input!">
@@ -30,12 +30,9 @@
     <div style="width:200px;height:200px"></div>
 </div>
 
-<script src="../mii.js"></script>
-<script src="../mii.event.js"></script>
-<script src="../qwery.min.js"></script>
-<script src="../mii.dom.js"></script>
+<script src="so-all.php"></script>
 <script>
-mii.onReady(function($) {
+so.onReady(function($) {
     var el = document.getElementById("container")
     // var ps = $.dom("#container").find("p").not(1).addClass("blue") // ps[0] = "p.p0"
     var ps = $.dom("#container > p").addClass("blue") // ps[0] = "p.p0"
@@ -53,9 +50,9 @@ mii.onReady(function($) {
     // ps.prependTo("#container")
     // ps.setHtml(" setHtml ")
     // ps.setText(" setText ")
-    
+
     // ps.forEach(function(el,i){ $.dom(el).empty() });
-    
+
     // var a = $.dom().create("a", {href:"#xxx", text:"aaa", onclick:function(){return!1}}) //.appendTo(el);
     // var table = document.getElementById("table")
     // $.dom("<tr><td><a href=#xxx>aaa</a></td><td>aaa</td></tr><tr><td><a href=#xxx>aaa</a></td><td>aaa</td></tr>").appendTo(table);
@@ -66,15 +63,15 @@ mii.onReady(function($) {
     // ps.empty();
     // ps.remove();
     // ps.forEach(function(el){ $.dom(el).append(a.clone()) }) // bu calisiyor sadece
-    
+
     // log( $.dom("p.p0").contains( $.dom("#a") ) )
     // log( $.dom("p.p1").contains( $.dom("i.red", null, 1) ) )
     // log( $.dom("p.p2").contains("i.red", 2) )
-    
+
     // ps.setStyle({"color":"#4D93BC","border":"1px solid red","width":"100px","margin":"3px"})
     // log( ps.getStyle("border-top-color", false) )
     // log( ps.innerHeight() )
-    
+
     // ps.setAttr({"foo":"The foo!",bar:"the barrr",xxx:null})
     // log( ps.hasAttr("xxx") )
     // log( ps.getAttr("xxx") )
@@ -84,12 +81,12 @@ mii.onReady(function($) {
             // log( $.dom(el).getAttr("xxx") )
         // })
     // }, 1000)
-    
+
     // ps.addClass("foo p0 blue")
     // ps.setClass(" aaa blue xxx ssssss")
     // setTimeout(function(el){ ps.replaceClass("blue","red") }, 1000)
     // log( ps.item(1).hasClass("p1") )
-    
+
     // ps.data("foo","The foo!")
     // ps.data({"fo-o":"The foo!", bar:"the barrr", xxx:true, a:alert})
     // setTimeout(function(el){
@@ -98,7 +95,7 @@ mii.onReady(function($) {
         // ps.item(1).removeData("xxx")
         // log( ps.item(1).data("xxx") )
     // }, 1000)
-    
+
     el = $.dom("p.p1")
     // log( el.parent() )
     // log( el.siblings() )
@@ -110,10 +107,12 @@ mii.onReady(function($) {
     // log( el.children("i").setStyle("color","pink") )
     // log( el.prevAll("p").setStyle("color","pink") )
     // log( el.nextAll("p").setStyle("color","pink") )
-    
+
     // log( ps.once("click", function(){ log(this.outerHTML) }) )
-    
-    ps.setStyle("color:#4d93bc;border:1px solid red;width:100px;margin:3px")
+
+    ps.setStyle("color:#4d93bc;border:1px solid red; width:1000px; height:50px; margin:3px; background:#000")
+    ps.item(0).fadeOut("fast")
+    ps.item(1).fadeOut("slow")
 });
 </script>
 

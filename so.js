@@ -1,5 +1,5 @@
 /**
- * @name: mii
+ * @name: so
  */
 
 function log(s) { console.log(s) }
@@ -22,19 +22,11 @@ var document = window.document,
         ie: /msie\s+([\d\.]+)/
     },
 
-    _uuid = 0,
-
-    onReadyCallbacks = []
+    _uuid = 0
 ;
 
-function callCallbacks() {
-    while (onReadyCallbacks.length) {
-        onReadyCallbacks.shift()(mii);
-    }
-}
-
-/*** The Mii ***/
-var mii = {
+/*** the so ***/
+var so = {
     fun: function() {},
 
     now: function() {
@@ -106,14 +98,14 @@ var mii = {
     forEach: function(input, fn, scope) {
         var len = input && input.length, i;
         if (len !== undefined) {
-            // val => i
+            // value => i
             for (i = 0; i < len; i++) {
                 if (fn.call(scope || input[i], input[i], i, input) === false) {
                     break;
                 }
             }
         } else {
-            // key => val
+            // key => value
             for (i in input) {
                 if (fn.call(scope || input[i], i, input[i], input) === false) {
                     break;
@@ -123,11 +115,11 @@ var mii = {
         return scope || input;
     },
 
-    // Note: options = $.mix({}, defaultOptions, options);
+    // note: options = $.mix({}, defaultOptions, options);
     mix: function() {
         var args = arguments, i = 1, target, source;
         if (args.length < 2) {
-            throw ("mii.mix(): Function accepts at least 2 arguments.");
+            throw ("so.mix(): Function accepts at least 2 arguments.");
         }
         target = args[0];
         while (source = args[i++]) {
@@ -158,42 +150,49 @@ var mii = {
     toString: function() {
         var args = arguments;
         if (!args.length) {
-            return "[object mii]";
+            return "[object so]";
         }
-        // Define `toString` methods of modules
+        // define `toString` methods of modules
         this[args[0]].toString = function() {
             return "[object "+ args[1] +"]";
         };
     }
 };
 
-// On ready
-mii.onReady = function(callback) {
+var callbacks = [];
+
+function fireCallbacks() {
+    while (callbacks.length) {
+        callbacks.shift()(so);
+    }
+}
+
+// on ready
+so.onReady = function(callback) {
     if (typeof callback === "function") {
-        onReadyCallbacks.push(callback);
+        callbacks.push(callback);
     }
 
-    // OK! I'm gonna use this...
+    // come on..
     if (document.addEventListener) {
-        document.addEventListener("DOMContentLoaded", function DOMContentLoaded(){
+        return document.addEventListener("DOMContentLoaded", function DOMContentLoaded(){
             document.removeEventListener("DOMContentLoaded", DOMContentLoaded, false);
-            callCallbacks();
+            fireCallbacks();
         }, false);
-        return;
     }
 
-    // I think enough so... <https://developer.mozilla.org/en-US/docs/DOM/document.readyState>
+    // credits https://developer.mozilla.org/DOM/document.readyState
     document.onreadystatechange = function() {
         if (this.readyState === "complete") {
             document.onreadystatechange = null;
-            callCallbacks();
+            fireCallbacks();
         }
     };
 };
 
 
-// Browser
-mii.browser = function() {
+// browser
+so.browser = function() {
     var ua = window.navigator.userAgent.toLowerCase(), k, re, browser = {};
     for (k in re_browsers) {
         if (re = re_browsers[k].exec(ua)) {
@@ -206,12 +205,12 @@ mii.browser = function() {
     return browser;
 }();
 
-// Some more extensions...
-mii.ext = {};
-mii.array = {};
-mii.object = {};
+// some more extensions...
+so.ext = {};
+so.array = {};
+so.object = {};
 
-// `mii` to window
-window.mii = mii;
+// `so` to window
+window.so = so;
 
 })(window);

@@ -8,21 +8,19 @@
 
 <div id="result"></div>
 
-<script src="../mii-all.js"></script>
-<!-- <script src="../mii.js"></script> -->
-<!-- <script src="../mii.ajax.js"></script> -->
+<script src="so-all.php"></script>
 <script>
-mii.onReady(function($) {
+so.onReady(function($) {
     var result = document.getElementById("result");
     window.ajax = function() {
         var req = $.ajax({
-            url: "/books.xml",
+            url: "books.xml",
             method: "GET",
             autoSend: false,
             // noCache: true,
             // timeout: 1000,
             // data: {foo:1, bar:"the bar!"},
-            // dataType: "xml",
+            dataType: "xml",
             // headers: {"X-Foo": "The foo!", "X-Bar": "The bar!"}
             // onStart: function(xhr){ result.innerHTML = "Start!"; },
             // onProgress: function(xhr){ result.innerHTML = "Progress!"; },

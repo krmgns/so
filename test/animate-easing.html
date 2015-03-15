@@ -9,36 +9,39 @@
 </div>
 <p id="p"></p>
 
-<script src="mii-all.php"></script>
-<!-- <script src="../mii-all.js"></script> -->
-<script src="../etc/mii.animate.easing.js"></script>
+<script src="so-all.php"></script>
+<script src="../ext/so.ext.easing.js"></script>
 <script>
-mii.onReady(function($) {
-    $.forEach($.animate.easing, function(easing){
-        var input = $.dom("<label><input type=radio name=easing value="+ easing +">"+ easing +"</label>");
+so.onReady(function($) {
+    var foo = $.dom("#foo");
+
+    $.forEach($.ext.easing, function(easing){
+        var input = $.dom("<label><input type='radio' name='easing' value='"+ easing +"'>"+ easing +"</label>");
+        input.on("click", function(){
+            foo.fire("click");
+        });
         input.appendTo("#easing");
     });
 
-    var foo = $.dom("#foo");
-    var p = $.dom("#p");
-    var i = $.dom("input").first();
-    setTimeout(function run(){
-        var easing = i.getValue();
-        p.setText(easing);
-        foo.animate({left:500}, 1000, function(){
-            foo.animate({left:10}, 1000, function(){
-                i = i.parent().next().find("input").first();
-                if (i.length) {
-                    run();
-                }
-            }, easing);
-        }, easing);
-    }, 1000);
+    // var p = $.dom("#p");
+    // var i = $.dom("input").first();
+    // setTimeout(function run(){
+    //     var easing = i.getValue();
+    //     p.setText(easing);
+    //     foo.animate({left:500}, 1000, function(){
+    //         foo.animate({left:10}, 1000, function(){
+    //             i = i.parent().next().find("input").first();
+    //             if (i.length) {
+    //                 run();
+    //             }
+    //         }, easing);
+    //     }, easing);
+    // }, 1000);
 
     // properties, duration, onStart, onStop, easing
     foo.on("click", function(){
         var easing = $.dom("input[name=easing]:checked").getValue();
-        foo.animate({left:500}, 1000, function(){
+        foo.animate("stop").animate({left:500}, 1000, function(){
             foo.animate({left:0}, 1000, easing);
         }, easing);
     });
