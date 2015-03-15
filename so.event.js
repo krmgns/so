@@ -81,11 +81,7 @@ var event = (function() {
         var e;
         // custom?
         if (e = el[_ek(type)]) {
-            // removed flag
-            if (e === -1) {
-                return;
-            }
-            return invokeCustomEvent(el, type);
+            return invokeCustomEvent(el, type, e);
         }
 
         if (document.createEventObject) {
@@ -100,39 +96,37 @@ var event = (function() {
     }
 
     function addCustomEvent(el, type, fn) {
-        var eventKey = _ek(type), e;
+        var key = _ek(type), e;
         if (document.createEventObject) {
             // create for ie
             e = document.createEventObject();
             e.type = type;
-            if (!el[eventKey]) {
+            if (!el[key]) {
                 addEvent(el, type, fn);
             }
         } else {
             // create for firefox & others
             e = document.createEvent("Event");
             e.initEvent(type, true, true); // type, bubbling, cancelable
-            if (!el[eventKey]) {
+            if (!el[key]) {
                 addEvent(el, type, fn);
             }
         }
-        el[eventKey] = e;
+        el[key] = e;
     }
 
     function removeCustomEvent(el, type) {
         el[_ek(type)] = -1;
     }
 
-    function invokeCustomEvent(el, type) {
+    function invokeCustomEvent(el, type, e /*internal*/) {
         var e = el[_ek(type)];
-        if (e) {
-            if (el.fireEvent) {
+        if (e && e !== -1) {
+            return el.fireEvent
                 // dispatch for ie
-                return el.fireEvent("on"+ type, e);
-            } else {
+                ? el.fireEvent("on"+ type, e)
                 // dispatch for firefox & others
-                return !el.dispatchEvent(e);
-            }
+                : !el.dispatchEvent(e);
         }
     }
 
