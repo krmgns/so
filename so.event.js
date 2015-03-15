@@ -135,7 +135,7 @@ var event = (function() {
         off: removeEvent,
         once: once,
         fire: fire,
-        // normal events
+        // regular events
         addEvent: addEvent,
         removeEvent: removeEvent,
         invokeEvent: fire,
