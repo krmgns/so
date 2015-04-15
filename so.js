@@ -27,7 +27,7 @@ var document = window.document,
 
 /*** the so ***/
 var so = {
-    fun: function() {},
+    fun: function() {return function(){}; },
 
     now: function() {
         return Date.now ? Date.now() : (new Date).getTime();
