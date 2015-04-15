@@ -78,6 +78,11 @@ var event = (function() {
     }
 
     function fire(el, type) {
+        // default events like form.submit() etc.
+        if (typeof el[type] == "function") {
+            return el[type].call(el);
+        }
+
         var e;
         // custom?
         if (e = el[_ek(type)]) {
