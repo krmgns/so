@@ -1,6 +1,6 @@
 /**
  * @name            : so.js
- * @version         : v4.0.1
+ * @version         : v4.0.2
  * @description     : Multipurpose JavaScript library. <https://github.com/qeremy/so>
  * @copyright       : Kerem Gunes (2013)
  * @license         : MIT license <http://opensource.org/licenses/MIT>
