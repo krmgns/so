@@ -20,7 +20,7 @@ function timer(fn) {
 
 /*** the animation ***/
 function Animation(el, properties, duration, callback) {
-    this.el = $.dom(el);
+    this.$el = $.dom(el);
     this.callback = callback;
     this.duration = (typeof duration === "number")
         ? duration : opt_shortcutDurations[duration] || opt_defaultDuration;
@@ -37,8 +37,8 @@ function Animation(el, properties, duration, callback) {
             property   = $.ext.camelizeStyleProperty(property);
             isScroll   = (property === "scrollTop" || property === "scrollLeft");
             startValue = !isScroll
-                ? parseFloat(this.el.getStyle(property)) || 0
-                : parseFloat(this.el.scroll(property.substring(6).toLowerCase()));
+                ? parseFloat(this.$el.getStyle(property)) || 0
+                : parseFloat(this.$el.scroll(property.substring(6).toLowerCase()));
 
             this.animations.push({
                 property: property,
@@ -61,17 +61,17 @@ Animation.prototype.animate = function(easing) {
     this.running = true;
     this.stopped = false;
     this.startTime = $.now();
-    this.elapsedTime = 0;
+    this.$elapsedTime = 0;
 
     // for stop tool
-    this.el[0].$animation = this;
+    this.$el[0].$animation = this;
 
     var _this = this;
 
     // run animation
     ;(function run() {
         if (!_this.stopped) {
-            if (_this.elapsedTime < _this.duration) {
+            if (_this.$elapsedTime < _this.duration) {
                 timer(run);
                 _this._start();
             } else {
@@ -89,12 +89,12 @@ $.extend(Animation.prototype, {
     _start: function() {
         var a, s, isBody,
             i = 0, current = 0,
-            el = this.el, animations = this.animations;
+            el = this.$el, animations = this.animations;
 
-        this.elapsedTime = $.now() - this.startTime;
+        this.$elapsedTime = $.now() - this.startTime;
 
         while (a = animations[i++]) {
-            current = this.easing(this.elapsedTime, 0.0, a.diff, this.duration);
+            current = this.easing(this.$elapsedTime, 0.0, a.diff, this.duration);
             current = a.reverse ? (a.startValue - current) : (a.startValue + current);
             if (!a.isScroll) {
                 // use `toFixed` to get max percent
@@ -112,7 +112,7 @@ $.extend(Animation.prototype, {
         }
     },
     _end: function() {
-        var a, i = 0, el = this.el, animations = this.animations;
+        var a, i = 0, el = this.$el, animations = this.animations;
         while (a = animations[i++]) {
             if (!a.isScroll) {
                 el.setStyle(a.property, a.stopValue);
@@ -127,7 +127,7 @@ $.extend(Animation.prototype, {
 
         // call `callback` handler
         if (typeof this.callback === "function") {
-            this.callback(this.el[0], this);
+            this.callback(this.$el[0], this);
         }
     },
     stop: function() {
@@ -137,7 +137,7 @@ $.extend(Animation.prototype, {
         }
 
         // remove animation
-        this.el[0].$animation = null;
+        this.$el[0].$animation = null;
 
         return this;
     }
