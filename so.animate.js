@@ -61,7 +61,7 @@ Animation.prototype.animate = function(easing) {
     this.running = true;
     this.stopped = false;
     this.startTime = $.now();
-    this.$elapsedTime = 0;
+    this.elapsedTime = 0;
 
     // for stop tool
     this.$el[0].$animation = this;
@@ -71,7 +71,7 @@ Animation.prototype.animate = function(easing) {
     // run animation
     ;(function run() {
         if (!_this.stopped) {
-            if (_this.$elapsedTime < _this.duration) {
+            if (_this.elapsedTime < _this.duration) {
                 timer(run);
                 _this._start();
             } else {
@@ -91,10 +91,10 @@ $.extend(Animation.prototype, {
             i = 0, current = 0,
             el = this.$el, animations = this.animations;
 
-        this.$elapsedTime = $.now() - this.startTime;
+        this.elapsedTime = $.now() - this.startTime;
 
         while (a = animations[i++]) {
-            current = this.easing(this.$elapsedTime, 0.0, a.diff, this.duration);
+            current = this.easing(this.elapsedTime, 0.0, a.diff, this.duration);
             current = a.reverse ? (a.startValue - current) : (a.startValue + current);
             if (!a.isScroll) {
                 // use `toFixed` to get max percent
