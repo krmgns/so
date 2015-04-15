@@ -4,7 +4,6 @@
  * @description     : Multipurpose JavaScript library. <https://github.com/qeremy/so>
  * @copyright       : Kerem Gunes (2013)
  * @license         : MIT license <http://opensource.org/licenses/MIT>
- * @date            : 2015-03-15 01:47 AM (Europe/Istanbul)
  *
  * Internal Modules : so.js (base), so.ext.js, so.array.js, so.object.js, so.event.js, so.animate.js, so.dom.js, so.ajax.js
  * External Modules : qwery.js <https://github.com/ded/qwery>
