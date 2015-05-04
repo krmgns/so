@@ -125,7 +125,7 @@ var event = (function() {
     }
 
     function invokeCustomEvent(el, type, e /*internal*/) {
-        var e = el[_ek(type)];
+        e = e || el[_ek(type)];
         if (e && e !== -1) {
             return el.fireEvent
                 // dispatch for ie
