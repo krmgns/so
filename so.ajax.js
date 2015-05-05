@@ -7,9 +7,9 @@
 
 "use strict"; // @tmp
 
-var re_validJson = /^\{.*?\}|\[.*?\]$/,
-    re_theRequest = /^([a-z]+?\s+|)(.*?)$/i,
-    re_query = /\?&(.*)/,
+var re_query = /\?&(.*)/,
+    re_validJson = /^\{.*?\}|\[.*?\]$/,
+    re_theRequest = /^([a-z]+|)\s*(.*?)\s*(?:@(json|xml|html)|)\s*$/i,
     xmlHttpObjects = [
         function() { return new ActiveXObject("Microsoft.XMLHTTP"); },
         function() { return new ActiveXObject("Msxml3.XMLHTTP"); },
@@ -51,23 +51,6 @@ function createRequest() {
     }
 }
 
-function toJson(input) {
-    if (!input || typeof input !== "string") {
-        return null;
-    }
-
-    input = $.trim(input);
-    if (!re_validJson.test(input)) {
-        throw ("No valid JSON provided!");
-    }
-    if (window.JSON && window.JSON.parse) {
-        return window.JSON.parse(input);
-    }
-
-    // ay em sori beybe...
-    return eval("("+ input +")");
-}
-
 function toXml(input) {
     // already document?
     if (input && input.nodeType === 9) {
@@ -90,12 +73,29 @@ function toXml(input) {
     return xml;
 }
 
-function parseResponseHeaders(allHeaders) {
-    if (!allHeaders) {
+function toJson(input) {
+    if (!input || typeof input !== "string") {
+        return null;
+    }
+
+    input = $.trim(input);
+    if (!re_validJson.test(input)) {
+        throw ("No valid JSON provided!");
+    }
+    if (window.JSON && window.JSON.parse) {
+        return window.JSON.parse(input);
+    }
+
+    // ay em sori beybe...
+    return eval("("+ input +")");
+}
+
+function parseResponseHeaders(rawHeaders) {
+    if (!rawHeaders) {
         return;
     }
 
-    var header, headers = allHeaders.split("\r\n"),
+    var header, headers = rawHeaders.split("\r\n"),
         responseHeaders = {}, tmp;
     while (header = headers.shift()) {
         tmp = header.split(":", 2);
@@ -320,35 +320,22 @@ Ajax.prototype = {
     }
 };
 
-function request(theRequest, data, onSuccess, onError, onComplete) {
-    theRequest = re_theRequest.exec($.trim(theRequest)) || [, "", ""];
-
-    // no data, change the alignment
-    if (typeof data === "function") {
-        // keep arguments
-        var args = $.array.make(arguments);
-        // prevent re-calls
-        data = onSuccess = onError = onComplete = undefined;
-        onSuccess = args[1], onError = args[2], onComplete = args[3];
-    }
-
-    return new Ajax({
-        method: $.trim(theRequest[1]) || defaultOptions.method,
-        url: $.trim(theRequest[2]),
-        data: data,
-        onSuccess: onSuccess || defaultOptions.onSuccess,
-        onError: onError || defaultOptions.onError,
-        onComplete: onComplete || defaultOptions.onComplete
-    });
-};
-
 // add ajax to so
 $.ajax = function(options, data, onSuccess, onError, onComplete) {
     if (typeof options === "string") {
-        return request(options, data, onSuccess, onError, onComplete);
+        // <method> <url> <response data type>
+        // notation: /foo
+        // notation: /foo @json
+        // notation: GET /foo @json
+        var theRequest = re_theRequest.exec($.trim(options)) || [, , ,];
+        options = {};
+        options.url = $.trim(theRequest[2]);
+        options.method = $.trim(theRequest[1]) || defaultOptions.method;
+        options.dataType = $.trim(theRequest[3]) || defaultOptions.dataType;
+    } else {
+        options = options || {};
     }
 
-    options = options || {};
     if (!options.url) {
         throw ("URL is required!");
     }
@@ -358,11 +345,15 @@ $.ajax = function(options, data, onSuccess, onError, onComplete) {
         // keep arguments
         var args = $.array.make(arguments);
         // prevent re-calls
-        data = onSuccess = onError = onComplete = undefined;
-        onSuccess = args[1], onError = args[2], onComplete = args[3];
+        data = onSuccess = onError = onComplete = null;
+        onSuccess  = args[1];
+        onError    = args[2];
+        onComplete = args[3];
     }
 
     options = $.mix(options, {
+              data: data       || options.data       || null,
+          dataType:               options.dataType   || defaultOptions.dataType,
          onSuccess: onSuccess  || options.onSuccess  || defaultOptions.onSuccess,
            onError: onError    || options.onError    || defaultOptions.onError,
         onComplete: onComplete || options.onComplete || defaultOptions.onComplete
@@ -371,10 +362,23 @@ $.ajax = function(options, data, onSuccess, onError, onComplete) {
     return new Ajax(options);
 };
 
-// shortcuts get/post/load/json?
+// shortcuts get/post/load?
 $.forEach({get: "GET", post: "POST", load: "GET"}, function(fn, method) {
-    $.ajax[fn] = function(url, data, onSuccess, onError, onComplete) {
-        return request(method +" "+ url, data, onSuccess, onError, onComplete);
+    $.ajax[fn] = function(options, data, onSuccess, onError, onComplete) {
+        if (typeof options === "string") {
+            return $.ajax(method +" "+ options, data, onSuccess, onError, onComplete);
+        } else {
+            options = options || {};
+            options.method = method;
+            return $.ajax(options, data, onSuccess, onError, onComplete);
+        }
+    };
+});
+
+// add more shortcuts like loadJson()
+$.forEach(["Xml", "Json", "Html"], function(dataType){
+    $.ajax["load"+ dataType] = function(url, data, onSuccess, onError, onComplete) {
+        return $.ajax("GET "+ url +" @"+ dataType.toLowerCase(), data, onSuccess, onError, onComplete);
     };
 });
 
