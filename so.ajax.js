@@ -58,7 +58,7 @@ function toJson(input) {
 
     input = $.trim(input);
     if (!re_validJson.test(input)) {
-        throw ("No valid JSON data provided!");
+        throw ("No valid JSON provided!");
     }
     if (window.JSON && window.JSON.parse) {
         return window.JSON.parse(input);
@@ -322,6 +322,7 @@ Ajax.prototype = {
 
 function request(theRequest, data, onSuccess, onError, onComplete) {
     theRequest = re_theRequest.exec($.trim(theRequest)) || [, "", ""];
+
     // no data, change the alignment
     if (typeof data === "function") {
         // keep arguments
@@ -345,6 +346,11 @@ function request(theRequest, data, onSuccess, onError, onComplete) {
 $.ajax = function(options, data, onSuccess, onError, onComplete) {
     if (typeof options === "string") {
         return request(options, data, onSuccess, onError, onComplete);
+    }
+
+    options = options || {};
+    if (!options.url) {
+        throw ("URL is required!");
     }
 
     // no data, change the alignment
