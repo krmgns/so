@@ -9,24 +9,20 @@ function log(s) { console.log(s) }
 "use strict"; // @tmp
 
 var document = window.document,
-
-    fn_toString = {}.toString,
-
+    _uuid = 0,
     re_trim = /^\s+|\s+$/g,
     re_browsers = {
-        firefox: /firefox\/([\d\.]+)/,
         chrome: /chrome\/([\d\.]+)/,
         safari: /webkit.*?version\/([\d\.]+)/,
+        firefox: /firefox\/([\d\.]+)/,
         opera: /opera.*?version\/([\d\.]+)/,
         ie: /msie\s+([\d\.]+)/
     },
-
-    _uuid = 0
-;
+    fn_toString = {}.toString;
 
 /*** the so ***/
 var so = {
-    fun: function() {return function(){}; },
+    fun: function() { return function(){}; },
 
     now: function() {
         return Date.now ? Date.now() : (new Date).getTime();
@@ -204,10 +200,8 @@ so.browser = function() {
     return browser;
 }();
 
-// some more extensions...
-so.ext = {};
-so.array = {};
-so.object = {};
+// some more extensions..
+so.ext = {}, so.array = {}, so.object = {};
 
 // `so` to window
 window.so = so;
