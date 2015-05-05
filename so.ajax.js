@@ -38,7 +38,7 @@ var re_query = /\?&(.*)/,
         onComplete: $.fun,
         onProgress: $.fun,
         onSuccess: $.fun,
-        onError: $.fun,
+        onFail: $.fun,
         onAbort: $.fun,
         beforeSend: null,
         afterSend: null
@@ -285,11 +285,11 @@ Ajax.prototype = {
                     options[statusCode].call(_this, content, _this.$xhr);
                 }
 
-                // call onsuccess/onerror method
+                // call onsuccess/onfail method
                 if (statusCode >= 100 && statusCode < 400) {
                     options.onSuccess.call(_this, content, _this.$xhr);
                 } else {
-                    options.onError.call(_this, content, _this.$xhr);
+                    options.onFail.call(_this, content, _this.$xhr);
                 }
 
                 // call oncomplete method
@@ -321,7 +321,7 @@ Ajax.prototype = {
 };
 
 // add ajax to so
-$.ajax = function(options, data, onSuccess, onError, onComplete) {
+$.ajax = function(options, data, onSuccess, onFail, onComplete) {
     if (typeof options === "string") {
         // <method> <url> <response data type>
         // notation: /foo
@@ -345,40 +345,38 @@ $.ajax = function(options, data, onSuccess, onError, onComplete) {
         // keep arguments
         var args = $.array.make(arguments);
         // prevent re-calls
-        data = onSuccess = onError = onComplete = null;
+        data = onSuccess = onFail = onComplete = null;
         onSuccess  = args[1];
-        onError    = args[2];
+        onFail     = args[2];
         onComplete = args[3];
     }
 
-    options = $.mix(options, {
+    return new Ajax($.mix(options, {
               data: data       || options.data       || null,
           dataType:               options.dataType   || defaultOptions.dataType,
          onSuccess: onSuccess  || options.onSuccess  || defaultOptions.onSuccess,
-           onError: onError    || options.onError    || defaultOptions.onError,
+            onFail: onFail     || options.onFail     || defaultOptions.onFail,
         onComplete: onComplete || options.onComplete || defaultOptions.onComplete
-    });
-
-    return new Ajax(options);
+    }));
 };
 
 // shortcuts get/post/load?
 $.forEach({get: "GET", post: "POST", load: "GET"}, function(fn, method) {
-    $.ajax[fn] = function(options, data, onSuccess, onError, onComplete) {
+    $.ajax[fn] = function(options, data, onSuccess, onFail, onComplete) {
         if (typeof options === "string") {
-            return $.ajax(method +" "+ options, data, onSuccess, onError, onComplete);
+            return $.ajax(method +" "+ options, data, onSuccess, onFail, onComplete);
         } else {
             options = options || {};
             options.method = method;
-            return $.ajax(options, data, onSuccess, onError, onComplete);
+            return $.ajax(options, data, onSuccess, onFail, onComplete);
         }
     };
 });
 
 // add more shortcuts like loadJson()
 $.forEach(["Xml", "Json", "Html"], function(dataType){
-    $.ajax["load"+ dataType] = function(url, data, onSuccess, onError, onComplete) {
-        return $.ajax("GET "+ url +" @"+ dataType.toLowerCase(), data, onSuccess, onError, onComplete);
+    $.ajax["load"+ dataType] = function(url, data, onSuccess, onFail, onComplete) {
+        return $.ajax("GET "+ url +" @"+ dataType.toLowerCase(), data, onSuccess, onFail, onComplete);
     };
 });
 
