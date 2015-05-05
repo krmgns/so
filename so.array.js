@@ -7,6 +7,8 @@
 
 "use strict"; // @tmp
 
+var fn_slice = [].slice;
+
 function makeArray(input) {
     if ($.typeOf(input) === "array") {
         return input;

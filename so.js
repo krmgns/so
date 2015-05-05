@@ -10,7 +10,6 @@ function log(s) { console.log(s) }
 
 var document = window.document,
 
-    fn_slice = [].slice,
     fn_toString = {}.toString,
 
     re_trim = /^\s+|\s+$/g,
