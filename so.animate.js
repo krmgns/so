@@ -8,8 +8,7 @@
 "use strict"; // @tmp
 
 var opt_fps = 60,
-    opt_defaultDuration = 750,
-    opt_shortcutDurations = {fast: opt_defaultDuration / 2, slow: opt_defaultDuration * 2},
+    opt_durations = {fast: 50, default: 350, slow: 650},
     // credits: http://easings.net/ (easeOutQuad)
     fn_easing = function(t,b,c,d) {return -c*(t/=d)*(t-2)+b}
 ;
@@ -23,7 +22,7 @@ function Animation(el, properties, duration, callback) {
     this.$el = $.dom(el);
     this.callback = callback;
     this.duration = (typeof duration === "number")
-        ? duration : opt_shortcutDurations[duration] || opt_defaultDuration;
+        ? duration : opt_durations[duration] || opt_durations.default;
 
     this.running = false
     this.stopped = false;
