@@ -8,8 +8,8 @@ function log(s) { console.log(s) }
 
 "use strict"; // @tmp
 
-var document = window.document,
-    _uuid = 0,
+var _uuid = 0,
+    fn_toString = {}.toString,
     re_trim = /^\s+|\s+$/g,
     re_browsers = {
         chrome: /chrome\/([\d\.]+)/,
@@ -17,8 +17,7 @@ var document = window.document,
         firefox: /firefox\/([\d\.]+)/,
         opera: /opera.*?version\/([\d\.]+)/,
         ie: /msie\s+([\d\.]+)/
-    },
-    fn_toString = {}.toString;
+    };
 
 /*** the so ***/
 var so = {
@@ -42,7 +41,7 @@ var so = {
     },
 
     doc: function(el) {
-        return (el && el.ownerDocument) || document;
+        return (el && el.ownerDocument) || window.document;
     },
 
     trim: function(s) {
@@ -163,10 +162,13 @@ function fireCallbacks() {
 }
 
 // on ready
-so.onReady = function(callback) {
+so.onReady = function(callback, document) {
     if (typeof callback === "function") {
         callbacks.push(callback);
     }
+
+    // iframe support
+    document = document || window.document;
 
     // come on..
     if (document.addEventListener) {
