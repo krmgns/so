@@ -570,7 +570,7 @@ $.forEach(["append", "prepend", "before", "after", "replace"], function(fn) {
     Dom.prototype[fn] = function(contents, cloning) {
         return this.forEach(function(el) {
             // @note: doesn't work without `clone` (so inserts only once)
-            if (cloning !== false) {
+            if (cloning === true) {
                 if (contents.cloneNode) {
                     contents = cloneElement(contents);
                 } else if (contents[0] && contents[0].cloneNode) {
@@ -591,7 +591,7 @@ $.forEach(["appendTo", "prependTo", "insertBefore", "insertAfter"], function(fn)
             }
             toEl.forEach(function(to) {
                 // @note: doesn't work without `clone` (so inserts only once)
-                if (cloning !== false) {
+                if (cloning === true) {
                     el = cloneElement(el);
                 }
                 insert(fn, to, el /*contents*/, true /*reverse*/);

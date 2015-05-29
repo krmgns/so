@@ -1,0 +1,32 @@
+<!doctype html>
+<html><head></head><body>
+
+<a href="#" id="a">a ... </a>
+
+<div id="d1"></div>
+<div id="d2"></div>
+
+<script src="so-all.php"></script>
+<script>
+so.onReady(function($) {
+    var div = $.dom("div"), tpl, click
+    tpl = $.dom("<a>", {href:"#"}).setText("The a ... ")
+    click = function(e){ log(this.innerHTML); e.preventDefault() }
+
+    tpl = $.dom("#a").getHtml(true)
+    div.forEach(function(el, i){
+        $.dom(tpl).on("click", click).append(i).appendTo(el)
+
+        // tpl = $.dom("#tpl").getHtml()
+        // $.dom(tpl).on("click", click).append(i).appendTo(el)
+
+        // tpl.clone().on("click", click).append(i).appendTo(el)
+    })
+})
+</script>
+
+<script type="text/x-tpl" id="tpl">
+<a href="#">The link .. </a>
+</script>
+
+</body></html>
