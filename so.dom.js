@@ -634,7 +634,10 @@ $.forEach({setHtml: "innerHTML", setText: textProp}, function(fn, prop) {
 });
 
 $.forEach({getHtml: "innerHTML", getText: textProp}, function(fn, prop) {
-    Dom.prototype[fn] = function() {
+    Dom.prototype[fn] = function(outer) {
+        if (outer && fn == "getHtml") { // outerHTML requested
+            prop = "outerHTML";
+        }
         return this[0] && this[0][prop] || "";
     };
 });
