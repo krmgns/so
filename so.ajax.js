@@ -108,6 +108,9 @@ function parseResponseHeaders(rawHeaders) {
 /*** the ajax ***/
 function Ajax(options) {
     var key, data = [];
+    // response data
+    this.responseData = null;
+    this.responseDataType = undefined; // @todo
 
     // create $xhr
     this.$xhr = createRequest();
@@ -264,36 +267,35 @@ Ajax.prototype = {
             case xmlHttpStatuses.DONE:
                 _this.isDone = true;
                 // assign shortcuts
-                _this.readyState = _this.$xhr.readyState;
                 _this.statusCode = _this.$xhr.status;
                 _this.statusText = _this.$xhr.statusText;
+                _this.readyState = _this.$xhr.readyState;
 
-                // process response content
-                var content = (options.dataType == "xml")
+                // process response data
+                this.responseData = (options.dataType == "xml")
                     ? _this.$xhr.responseXML || _this.$xhr.responseText
                     : _this.$xhr.responseText;
 
                 if (options.dataType == "json") {
-                    content = toJson(content);
+                    this.responseData = toJson(this.responseData);
                 } else if (options.dataType == "xml") {
-                    content = toXml(content);
+                    this.responseData = toXml(this.responseData);
                 }
 
-                var statusCode = _this.$xhr.status;
                 // call response status methods if exist
-                if (typeof options[statusCode] === "function") {
-                    options[statusCode].call(_this, content, _this.$xhr);
+                if (typeof options[_this.statusCode] === "function") {
+                    options[_this.statusCode].call(_this, this.responseData, _this.$xhr);
                 }
 
                 // call onsuccess/onfail method
-                if (statusCode >= 100 && statusCode < 400) {
-                    options.onSuccess.call(_this, content, _this.$xhr);
+                if (_this.statusCode >= 100 && _this.statusCode < 400) {
+                    options.onSuccess.call(_this, this.responseData, _this.$xhr);
                 } else {
-                    options.onFail.call(_this, content, _this.$xhr);
+                    options.onFail.call(_this, this.responseData, _this.$xhr);
                 }
 
                 // call ondone method
-                options.onDone.call(_this, content, _this.$xhr);
+                options.onDone.call(_this, this.responseData, _this.$xhr);
 
                 // remove onreadystatechange
                 _this.$xhr.onreadystatechange = null;
