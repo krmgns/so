@@ -112,8 +112,8 @@ function Ajax(options) {
     this.responseData = null;
     this.responseDataType = undefined; // @todo
 
-    // create $xhr
-    this.$xhr = createRequest();
+    // create request
+    this.xhr = createRequest();
 
     // extend request headers
     if (options.headers) {
@@ -185,36 +185,36 @@ Ajax.prototype = {
         }
 
         // open connection
-        this.$xhr.open(options.method, options.url, options.async);
+        this.xhr.open(options.method, options.url, options.async);
         // set request header for post etc.
         if (options.method != "GET" && options.data && options.data.length) {
-            this.$xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            this.xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         }
 
         // set request headers if exist
         for (key in options.requestHeaders) {
             options.requestHeaders.hasOwnProperty(key)
-                && this.$xhr.setRequestHeader(key, options.requestHeaders[key]);
+                && this.xhr.setRequestHeader(key, options.requestHeaders[key]);
         }
 
         // define ready state change method
         if (options.async) {
-            this.$xhr.onreadystatechange = function() {
+            this.xhr.onreadystatechange = function() {
                 _this._handleResponse(_this, options);
             };
         }
 
         // call beforesend function
         if (typeof options.beforeSend === "function") {
-            options.beforeSend.call(this, this.$xhr);
+            options.beforeSend.call(this, this.xhr);
         }
 
         // send request
-        this.$xhr.send(options.data);
+        this.xhr.send(options.data);
 
         // call aftersend function
         if (typeof options.afterSend === "function") {
-            options.afterSend.call(this, this.$xhr);
+            options.afterSend.call(this, this.xhr);
         }
 
         // handle async
@@ -237,44 +237,44 @@ Ajax.prototype = {
     abort: function() {
         // abort request
         this.isAborted = true;
-        this.$xhr.abort();
+        this.xhr.abort();
 
         // call onabort method
-        this.options.onAbort.call(this, this.$xhr);
+        this.options.onAbort.call(this, this.xhr);
     },
     _handleResponse: function(_this, options) {
         if (_this.isAborted) {
-            _this.$xhr.onreadystatechange = null;
+            _this.xhr.onreadystatechange = null;
             return;
         }
 
         // handle states
-        switch (_this.$xhr.readyState) {
+        switch (_this.xhr.readyState) {
             case xmlHttpStatuses.OPENED:
                 // call onstart
-                options.onStart.call(_this, _this.$xhr);
+                options.onStart.call(_this, _this.xhr);
                 break;
             case xmlHttpStatuses.HEADERS_RECEIVED:
                 // get headers (suppressing ie7 error)
-                if (typeof _this.$xhr.getAllResponseHeaders === "function") {
-                    options.responseHeaders = parseResponseHeaders(_this.$xhr.getAllResponseHeaders());
+                if (typeof _this.xhr.getAllResponseHeaders === "function") {
+                    options.responseHeaders = parseResponseHeaders(_this.xhr.getAllResponseHeaders());
                 }
                 break;
             case xmlHttpStatuses.LOADING:
                 // call onprogress
-                options.onProgress.call(_this, _this.$xhr);
+                options.onProgress.call(_this, _this.xhr);
                 break;
             case xmlHttpStatuses.DONE:
                 _this.isDone = true;
                 // assign shortcuts
-                _this.statusCode = _this.$xhr.status;
-                _this.statusText = _this.$xhr.statusText;
-                _this.readyState = _this.$xhr.readyState;
+                _this.statusCode = _this.xhr.status;
+                _this.statusText = _this.xhr.statusText;
+                _this.readyState = _this.xhr.readyState;
 
                 // process response data
                 this.responseData = (options.dataType == "xml")
-                    ? _this.$xhr.responseXML || _this.$xhr.responseText
-                    : _this.$xhr.responseText;
+                    ? _this.xhr.responseXML || _this.xhr.responseText
+                    : _this.xhr.responseText;
 
                 if (options.dataType == "json") {
                     this.responseData = toJson(this.responseData);
@@ -284,21 +284,21 @@ Ajax.prototype = {
 
                 // call response status methods if exist
                 if (typeof options[_this.statusCode] === "function") {
-                    options[_this.statusCode].call(_this, this.responseData, _this.$xhr);
+                    options[_this.statusCode].call(_this, this.responseData, _this.xhr);
                 }
 
                 // call onsuccess/onfail method
                 if (_this.statusCode >= 100 && _this.statusCode < 400) {
-                    options.onSuccess.call(_this, this.responseData, _this.$xhr);
+                    options.onSuccess.call(_this, this.responseData, _this.xhr);
                 } else {
-                    options.onFail.call(_this, this.responseData, _this.$xhr);
+                    options.onFail.call(_this, this.responseData, _this.xhr);
                 }
 
                 // call ondone method
-                options.onDone.call(_this, this.responseData, _this.$xhr);
+                options.onDone.call(_this, this.responseData, _this.xhr);
 
                 // remove onreadystatechange
-                _this.$xhr.onreadystatechange = null;
+                _this.xhr.onreadystatechange = null;
                 break;
         }
     },
