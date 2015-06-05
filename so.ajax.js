@@ -1,6 +1,6 @@
 /**
  * @name: so.ajax
- * @deps: so
+ * @deps: so, so.array
  */
 
 ;(function($) {
@@ -23,7 +23,7 @@ var re_query = /\?&(.*)/,
         LOADING: 3,
         DONE: 4
     },
-    defaultOptions = {
+    optionsDefault = {
         autoSend: true,
         url: "",
         method: "GET",
@@ -35,7 +35,7 @@ var re_query = /\?&(.*)/,
         responseHeaders: {},
         onStart: $.fun,
         onStop: $.fun, // @todo: queue
-        onComplete: $.fun,
+        onDone: $.fun,
         onProgress: $.fun,
         onSuccess: $.fun,
         onFail: $.fun,
@@ -82,8 +82,8 @@ function toJson(input) {
     if (!re_validJson.test(input)) {
         throw ("No valid JSON provided!");
     }
-    if (window.JSON && window.JSON.parse) {
-        return window.JSON.parse(input);
+    if (JSON && JSON.parse) {
+        return JSON.parse(input);
     }
 
     // ay em sori beybe...
@@ -114,12 +114,12 @@ function Ajax(options) {
 
     // extend request headers
     if (options.headers) {
-        defaultOptions.requestHeaders = $.mix({}, defaultOptions.requestHeaders, options.headers);
+        optionsDefault.requestHeaders = $.mix({}, optionsDefault.requestHeaders, options.headers);
         delete options.headers;
     }
 
     // extend default options
-    options = $.mix({}, defaultOptions, options);
+    options = $.mix({}, optionsDefault, options);
 
     // set method name as uppercase
     options.method && (options.method = options.method.toUpperCase());
@@ -292,8 +292,8 @@ Ajax.prototype = {
                     options.onFail.call(_this, content, _this.$xhr);
                 }
 
-                // call oncomplete method
-                options.onComplete.call(_this, content, _this.$xhr);
+                // call ondone method
+                options.onDone.call(_this, content, _this.$xhr);
 
                 // remove onreadystatechange
                 _this.$xhr.onreadystatechange = null;
@@ -321,7 +321,7 @@ Ajax.prototype = {
 };
 
 // add ajax to so
-$.ajax = function(options, data, onSuccess, onFail, onComplete) {
+$.ajax = function(options, data, onDone, onSuccess, onFail) {
     if (typeof options === "string") {
         // <method> <url> <response data type>
         // notation: /foo
@@ -330,8 +330,8 @@ $.ajax = function(options, data, onSuccess, onFail, onComplete) {
         var theRequest = re_theRequest.exec($.trim(options)) || [, , ,];
         options = {};
         options.url = $.trim(theRequest[2]);
-        options.method = $.trim(theRequest[1]) || defaultOptions.method;
-        options.dataType = $.trim(theRequest[3]) || defaultOptions.dataType;
+        options.method = $.trim(theRequest[1]) || optionsDefault.method;
+        options.dataType = $.trim(theRequest[3]) || optionsDefault.dataType;
     } else {
         options = options || {};
     }
@@ -345,38 +345,38 @@ $.ajax = function(options, data, onSuccess, onFail, onComplete) {
         // keep arguments
         var args = $.array.make(arguments);
         // prevent re-calls
-        data = onSuccess = onFail = onComplete = null;
-        onSuccess  = args[1];
-        onFail     = args[2];
-        onComplete = args[3];
+        data = onDone = onSuccess = onFail = null;
+        onDone    = args[1];
+        onSuccess = args[2];
+        onFail    = args[3];
     }
 
     return new Ajax($.mix(options, {
               data: data       || options.data       || null,
-          dataType:               options.dataType   || defaultOptions.dataType,
-         onSuccess: onSuccess  || options.onSuccess  || defaultOptions.onSuccess,
-            onFail: onFail     || options.onFail     || defaultOptions.onFail,
-        onComplete: onComplete || options.onComplete || defaultOptions.onComplete
+          dataType:               options.dataType   || optionsDefault.dataType,
+            onDone: onDone     || options.onDone     || optionsDefault.onDone,
+         onSuccess: onSuccess  || options.onSuccess  || optionsDefault.onSuccess,
+            onFail: onFail     || options.onFail     || optionsDefault.onFail
     }));
 };
 
 // shortcuts get/post/load?
 $.forEach({get: "GET", post: "POST", load: "GET"}, function(fn, method) {
-    $.ajax[fn] = function(options, data, onSuccess, onFail, onComplete) {
+    $.ajax[fn] = function(options, data, onDone, onSuccess, onFail) {
         if (typeof options === "string") {
-            return $.ajax(method +" "+ options, data, onSuccess, onFail, onComplete);
+            return $.ajax(method +" "+ options, data, onDone, onSuccess, onFail);
         } else {
             options = options || {};
             options.method = method;
-            return $.ajax(options, data, onSuccess, onFail, onComplete);
+            return $.ajax(options, data, onDone, onSuccess, onFail);
         }
     };
 });
 
 // add more shortcuts like loadJson()
 $.forEach(["Xml", "Json", "Html"], function(dataType){
-    $.ajax["load"+ dataType] = function(url, data, onSuccess, onFail, onComplete) {
-        return $.ajax("GET "+ url +" @"+ dataType.toLowerCase(), data, onSuccess, onFail, onComplete);
+    $.ajax["load"+ dataType] = function(url, data, onDone, onSuccess, onFail) {
+        return $.ajax("GET "+ url +" @"+ dataType.toLowerCase(), data, onDone, onSuccess, onFail);
     };
 });
 
