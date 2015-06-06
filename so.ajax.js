@@ -1,6 +1,6 @@
 /**
  * @name: so.ajax
- * @deps: so, so.array
+ * @deps: so, so.array, so.object
  */
 
 ;(function($) {
@@ -8,21 +8,23 @@
 "use strict"; // @tmp
 
 var re_query = /\?&(.*)/,
-    re_validJson = /^\{.*?\}|\[.*?\]$/,
-    re_theRequest = /^([a-z]+|)\s*(.*?)\s*(?:@(json|xml|html)|)\s*$/i,
+    re_json = /^\{.*?\}|\[.*?\]$/,
+    re_request = /^([a-z]+|)\s*(.*?)\s*(?:@(json|xml|html)|)\s*$/i,
     xmlHttpObjects = [
         function() { return new ActiveXObject("Microsoft.XMLHTTP"); },
         function() { return new ActiveXObject("Msxml3.XMLHTTP"); },
         function() { return new ActiveXObject("Msxml2.XMLHTTP"); },
         function() { return new XMLHttpRequest(); }
     ],
-    xmlHttpStatuses = {
+    // ready states
+    readyStates = {
         UNSENT: 0,
         OPENED: 1,
         HEADERS_RECEIVED: 2,
         LOADING: 3,
         DONE: 4
     },
+    // default options
     optionsDefault = {
         autoSend: true,
         url: "",
@@ -31,8 +33,6 @@ var re_query = /\?&(.*)/,
         data: null,
         dataType: "json",
         noCache: true,
-        requestHeaders: {"X-Requested-With": "XMLHttpRequest"},
-        responseHeaders: {},
         onStart: $.fun,
         onStop: $.fun, // @todo: queue
         onDone: $.fun,
@@ -53,7 +53,7 @@ function createRequest() {
 
 function toXml(input) {
     // already document?
-    if (input && input.nodeType === 9) {
+    if (input && input.nodeType == 9) {
         return input;
     }
 
@@ -79,7 +79,7 @@ function toJson(input) {
     }
 
     input = $.trim(input);
-    if (!re_validJson.test(input)) {
+    if (!re_json.test(input)) {
         throw ("No valid JSON provided!");
     }
     if (JSON && JSON.parse) {
@@ -90,94 +90,169 @@ function toJson(input) {
     return eval("("+ input +")");
 }
 
-function parseResponseHeaders(rawHeaders) {
-    if (!rawHeaders) {
+function buildQuery(data) {
+    var key, query = [];
+    for (key in data) {
+        data.hasOwnProperty(key)
+            && query.push(encodeURIComponent(key) +"="+ encodeURIComponent(data[key]));
+    }
+    return query.join("&").replace(/%20/g, "+");
+}
+
+function parseHeaders(headers) {
+    if (!headers) {
         return;
     }
 
-    var header, headers = rawHeaders.split("\r\n"),
-        responseHeaders = {}, tmp;
-    while (header = headers.shift()) {
-        tmp = header.split(":", 2);
-        responseHeaders[tmp[0].toLowerCase()] = $.trim(tmp[1]);
+    var tmp, tmps = headers.split("\r\n");
+    headers = {};
+    while (tmp = tmps.shift()) {
+        tmp = tmp.split(":", 2);
+        headers[$.trim(tmp[0]).toLowerCase()] = $.trim(tmp[1]);
     }
 
-    return responseHeaders;
+    return headers;
+}
+
+function onReadyStateChange(_this) {
+    if (_this.isAborted) {
+        _this.$xhr.onreadystatechange = null;
+        return;
+    }
+
+    // handle states
+    _this.readyState = _this.$xhr.readyState;
+    switch (_this.readyState) {
+        case readyStates.OPENED:
+            // call onstart
+            _this.options.onStart.call(_this, _this);
+            break;
+        case readyStates.HEADERS_RECEIVED:
+            // get headers (suppressing ie7 error)
+            if (typeof _this.$xhr.getAllResponseHeaders == "function") {
+                _this.response.headers = parseHeaders(_this.$xhr.getAllResponseHeaders());
+            }
+            break;
+        case readyStates.LOADING:
+            // call onprogress
+            _this.options.onProgress.call(_this, _this);
+            break;
+        case readyStates.DONE:
+            _this.isDone = true;
+            _this.response.status.code = _this.$xhr.status;
+            _this.response.status.text = _this.$xhr.statusText;
+
+            // process response data
+            _this.response.data = (_this.request.dataType == "xml")
+                ? _this.$xhr.responseXML || _this.$xhr.responseText
+                : _this.$xhr.responseText;
+
+            if (_this.request.dataType == "json") {
+                _this.response.data = toJson(_this.response.data);
+                _this.response.dataType = "json";
+            } else if (_this.request.dataType == "xml") {
+                _this.response.data = toXml(_this.response.data);
+                _this.response.dataType = "xml";
+            }
+
+            // call response status methods if exist
+            if (typeof _this.options[_this.response.status.code] == "function") {
+                _this.options[_this.response.status.code].call(_this, _this.response.data);
+            }
+
+            // call onsuccess/onfail method
+            if (_this.response.status.code >= 100 && _this.response.status.code < 400) {
+                _this.options.onSuccess.call(_this, _this.response.data);
+            } else {
+                _this.options.onFail.call(_this, _this.response.data);
+            }
+
+            // call ondone method
+            _this.options.onDone.call(_this, _this.response.data);
+
+            // remove onreadystatechange
+            _this.$xhr.onreadystatechange = null;
+            break;
+    }
 }
 
 /*** the ajax ***/
 function Ajax(options) {
-    var key, data = [];
-    // response data
-    this.responseData = null;
-    this.responseDataType = undefined; // @todo
+    // extend options
+    this.options = $.mix({}, optionsDefault, options);
 
     // create request
-    this.xhr = createRequest();
+    this.$xhr = createRequest();
+
+    // request & response
+    this.request = {
+            data: null,
+        dataType: optionsDefault.dataType,
+         headers: {"X-Requested-With": "XMLHttpRequest"}
+    };
+    this.response = {
+            data: null,
+        dataType: undefined,
+         headers: {},
+          status: {code: 0, text: ""}
+    };
 
     // extend request headers
-    if (options.headers) {
-        optionsDefault.requestHeaders = $.mix({}, optionsDefault.requestHeaders, options.headers);
-        delete options.headers;
+    if (this.options.headers) {
+        this.request.headers = $.extend(
+            this.request.headers, $.object.pick(this.options, 'headers'));
     }
 
-    // extend default options
-    options = $.mix({}, optionsDefault, options);
-
     // set method name as uppercase
-    options.method && (options.method = options.method.toUpperCase());
+    this.request.url = $.trim(this.options.url);
+    this.request.method = $.trim(this.options.method).toUpperCase();
 
     // correct file path for "localhost" only
-    if (location.host === "localhost"
-            && options.url && options.url.charAt(0) == "/") {
-        options.url = options.url.substring(1);
+    if (location.host == "localhost"
+            && this.request.url && this.request.url.charAt(0) == "/") {
+        this.request.url = this.request.url.substring(1);
     }
 
     // prepare request data
-    if (options.data) {
-        if ($.typeOf(options.data) === "object") {
-            for (key in options.data) {
-                options.data.hasOwnProperty(key)
-                    && data.push(encodeURIComponent(key) +"="+ encodeURIComponent(options.data[key]));
-            }
-            data = data.join("&").replace(/%20/g, "+");
-        } else {
-            data = options.data;
-        }
-
-        if (options.method == "GET") {
-            if (options.url != "") {
-                options.url = options.url.indexOf("?") === -1
-                    ? options.url += "?"+ data
-                    : options.url += "&"+ data;
+    if (this.options.data) {
+        this.request.data = (typeof this.options.data == "object")
+            ? buildQuery(this.options.data) : this.options.data;
+        // add data as query string
+        if (this.request.method == "GET") {
+            if (this.request.url) {
+                this.request.url = (this.request.url.indexOf("?") == -1)
+                    ? this.request.url += "?"+ this.request.data
+                    : this.request.url += "&"+ this.request.data;
             } else {
-                options.url += "?"+ data
+                this.request.url += "?"+ this.request.data
             }
-        } else {
-            options.data = data;
         }
     }
-    // add no-cache helper
-    if (options.method == "GET" && options.noCache !== false) {
-        options.url += options.url.indexOf("?") === -1 ? "?_="+ $.now() : "&_="+ $.now();
-    }
-    // clear url
-    options.url = options.url.replace(re_query, "?$1");
 
-    // set options
-    this.options = options;
-    this.isAborted = this.isSent = this.isDone = false;
+    // add no-cache helper
+    if (this.request.method == "GET" && this.options.noCache !== false) {
+        this.request.url += (this.request.url.indexOf("?") == -1)
+            ? "?_="+ $.now() : "&_="+ $.now();
+    }
+
+    // clear url
+    this.request.url = this.request.url.replace(re_query, "?$1");
+
+    // set states
+    this.readyState = 0;
+    this.isAborted  = false;
+    this.isSent     = false;
+    this.isDone     = false;
 
     // send if autosend not false
-    if (options.autoSend !== false) {
+    if (this.options.autoSend !== false) {
         return this.send();
     }
 }
 
-Ajax.prototype = {
+$.extend(Ajax.prototype, {
     send: function() {
-        var _this = this,
-            options = this.options, key;
+        var _this = this;
 
         // prevent re-send for chaining callbacks
         if (this.isSent || this.isAborted) {
@@ -185,155 +260,92 @@ Ajax.prototype = {
         }
 
         // open connection
-        this.xhr.open(options.method, options.url, options.async);
+        this.$xhr.open(this.request.method, this.request.url, this.options.async);
         // set request header for post etc.
-        if (options.method != "GET" && options.data && options.data.length) {
-            this.xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        if (this.request.method != "GET" && this.request.data && this.request.data.length) {
+            this.$xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         }
 
         // set request headers if exist
-        for (key in options.requestHeaders) {
-            options.requestHeaders.hasOwnProperty(key)
-                && this.xhr.setRequestHeader(key, options.requestHeaders[key]);
+        for (var key in this.request.headers) {
+            this.request.headers.hasOwnProperty(key)
+                && this.$xhr.setRequestHeader(key, this.request.headers[key]);
         }
 
         // define ready state change method
-        if (options.async) {
-            this.xhr.onreadystatechange = function() {
-                _this._handleResponse(_this, options);
+        if (this.options.async) {
+            this.$xhr.onreadystatechange = function(){
+                onReadyStateChange(_this);
             };
         }
 
         // call beforesend function
-        if (typeof options.beforeSend === "function") {
-            options.beforeSend.call(this, this.xhr);
+        if (typeof this.options.beforeSend == "function") {
+            this.options.beforeSend.call(this, this);
         }
 
         // send request
-        this.xhr.send(options.data);
+        this.$xhr.send(this.request.data);
 
         // call aftersend function
-        if (typeof options.afterSend === "function") {
-            options.afterSend.call(this, this.xhr);
+        if (typeof this.options.afterSend == "function") {
+            this.options.afterSend.call(this, this);
         }
 
         // handle async
-        if (!options.async) {
-            this._handleResponse(this, options);
+        if (!this.options.async) {
+            onReadyStateChange(this);
         }
 
         // sent flag
         this.isSent = true;
 
         // check timeout
-        if (options.timeout) {
-            setTimeout(function() {
-                _this.abort();
-            }, options.timeout);
+        if (this.options.timeout) {
+            setTimeout(function(){ _this.abort(); }, this.options.timeout);
         }
 
         return this;
     },
     abort: function() {
-        // abort request
         this.isAborted = true;
-        this.xhr.abort();
-
+        // abort request
+        this.$xhr.abort();
         // call onabort method
-        this.options.onAbort.call(this, this.xhr);
+        this.options.onAbort.call(this, this);
     },
-    _handleResponse: function(_this, options) {
-        if (_this.isAborted) {
-            _this.xhr.onreadystatechange = null;
-            return;
-        }
-
-        // handle states
-        switch (_this.xhr.readyState) {
-            case xmlHttpStatuses.OPENED:
-                // call onstart
-                options.onStart.call(_this, _this.xhr);
-                break;
-            case xmlHttpStatuses.HEADERS_RECEIVED:
-                // get headers (suppressing ie7 error)
-                if (typeof _this.xhr.getAllResponseHeaders === "function") {
-                    options.responseHeaders = parseResponseHeaders(_this.xhr.getAllResponseHeaders());
-                }
-                break;
-            case xmlHttpStatuses.LOADING:
-                // call onprogress
-                options.onProgress.call(_this, _this.xhr);
-                break;
-            case xmlHttpStatuses.DONE:
-                _this.isDone = true;
-                // assign shortcuts
-                _this.statusCode = _this.xhr.status;
-                _this.statusText = _this.xhr.statusText;
-                _this.readyState = _this.xhr.readyState;
-
-                // process response data
-                this.responseData = (options.dataType == "xml")
-                    ? _this.xhr.responseXML || _this.xhr.responseText
-                    : _this.xhr.responseText;
-
-                if (options.dataType == "json") {
-                    this.responseData = toJson(this.responseData);
-                } else if (options.dataType == "xml") {
-                    this.responseData = toXml(this.responseData);
-                }
-
-                // call response status methods if exist
-                if (typeof options[_this.statusCode] === "function") {
-                    options[_this.statusCode].call(_this, this.responseData, _this.xhr);
-                }
-
-                // call onsuccess/onfail method
-                if (_this.statusCode >= 100 && _this.statusCode < 400) {
-                    options.onSuccess.call(_this, this.responseData, _this.xhr);
-                } else {
-                    options.onFail.call(_this, this.responseData, _this.xhr);
-                }
-
-                // call ondone method
-                options.onDone.call(_this, this.responseData, _this.xhr);
-
-                // remove onreadystatechange
-                _this.xhr.onreadystatechange = null;
-                break;
-        }
-    },
-    setRequestHeader: function(key, val) {
-        // while calling this method, don't forget to set autosend=false
-        if (typeof key === "object") {
+    setRequestHeader: function(key, value) {
+        // while calling this method, don't forget to set autoSend=false
+        if (typeof key == "object") {
             for (var i in key) {
                 key.hasOwnProperty(i)
-                    && (this.options.requestHeaders[i] = key[i]);
+                    && (this.request.headers[i] = key[i]);
             }
         } else {
-            this.options.requestHeaders[key] = val;
+            this.request.headers[key] = value;
         }
         return this;
     },
     getResponseHeader: function(key) {
-        return this.options.responseHeaders[key.toLowerCase()];
+        return this.response.headers[key.toLowerCase()];
     },
     getResponseHeaderAll: function() {
-        return this.options.responseHeaders;
+        return this.response.headers;
     }
-};
+});
 
 // add ajax to so
 $.ajax = function(options, data, onDone, onSuccess, onFail) {
-    if (typeof options === "string") {
+    if (typeof options == "string") {
         // <method> <url> <response data type>
         // notation: /foo
         // notation: /foo @json
         // notation: GET /foo @json
-        var theRequest = re_theRequest.exec($.trim(options)) || [, , ,];
+        var tmp = re_request.exec($.trim(options)) || [,,,];
         options = {};
-        options.url = $.trim(theRequest[2]);
-        options.method = $.trim(theRequest[1]) || optionsDefault.method;
-        options.dataType = $.trim(theRequest[3]) || optionsDefault.dataType;
+        options.url = $.trim(tmp[2]);
+        options.method = $.trim(tmp[1]) || optionsDefault.method;
+        options.dataType = $.trim(tmp[3]) || optionsDefault.dataType;
     } else {
         options = options || {};
     }
@@ -342,8 +354,8 @@ $.ajax = function(options, data, onDone, onSuccess, onFail) {
         throw ("URL is required!");
     }
 
-    // no data, change the alignment
-    if (typeof data === "function") {
+    // swap args
+    if (typeof data == "function") {
         // keep arguments
         var args = $.array.make(arguments);
         // prevent re-calls
@@ -365,7 +377,7 @@ $.ajax = function(options, data, onDone, onSuccess, onFail) {
 // shortcuts get/post/load?
 $.forEach({get: "GET", post: "POST", load: "GET"}, function(fn, method) {
     $.ajax[fn] = function(options, data, onDone, onSuccess, onFail) {
-        if (typeof options === "string") {
+        if (typeof options == "string") {
             return $.ajax(method +" "+ options, data, onDone, onSuccess, onFail);
         } else {
             options = options || {};
