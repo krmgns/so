@@ -157,18 +157,18 @@ function onReadyStateChange(_this) {
 
             // call response status methods if exist
             if (typeof _this.options[_this.response.status.code] == "function") {
-                _this.options[_this.response.status.code].call(_this, _this.response.data);
+                _this.options[_this.response.status.code].call(_this, _this.response.data, _this);
             }
 
             // call onsuccess/onfail method
             if (_this.response.status.code >= 100 && _this.response.status.code < 400) {
-                _this.options.onSuccess.call(_this, _this.response.data);
+                _this.options.onSuccess.call(_this, _this.response.data, _this);
             } else {
-                _this.options.onFail.call(_this, _this.response.data);
+                _this.options.onFail.call(_this, _this.response.data, _this);
             }
 
             // call ondone method
-            _this.options.onDone.call(_this, _this.response.data);
+            _this.options.onDone.call(_this, _this.response.data, _this);
 
             // remove onreadystatechange
             _this.$xhr.onreadystatechange = null;
