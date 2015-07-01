@@ -187,7 +187,7 @@ function Ajax(options) {
     // request & response
     this.request = {
             data: null,
-        dataType: optionsDefault.dataType,
+        dataType: this.options.dataType,
          headers: {"X-Requested-With": "XMLHttpRequest"}
     };
     this.response = {
