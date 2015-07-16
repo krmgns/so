@@ -1157,7 +1157,7 @@ $.extend(Dom.prototype, {
     dataAttr: function(key, val) {
         var el = this[0];
         if (el) {
-            el = this.__init(this[0]);
+            el = this.__init(el);
             return (val === undefined)
                 ? el.getAttr("data-"+ key)
                 : el.setAttr("data-"+ key, value);
