@@ -4,17 +4,22 @@
 <p class="p2">p2</p>
 <p class="p3">p3</p>
 
+<p id="p" data-foo="123">p data attr</p>
+
 <script src="so-all.php"></script>
 <script>
 so.onReady(function($){
-    var ps = $.dom("p");
-    ps.data("foo", "The foo!")
-    ps.data({"fo-o":"The foo!", bar:"the barrr", xxx:true, a:alert})
-    setTimeout(function(el){
-        // ps.item(0).removeData("*")
-        ps.item(0).removeData("xxx")
-        log( ps.item(0).data("xxx") )
-        log( ps.item(0).data("bar") )
-    }, 1000)
+    // var ps = $.dom("p");
+    // ps.data("foo", "The foo!")
+    // ps.data({"fo-o":"The foo!", bar:"the barrr", xxx:true, a:alert})
+    // setTimeout(function(el){
+    //     // ps.item(0).removeData("*")
+    //     ps.item(0).removeData("xxx")
+    //     log( ps.item(0).data("xxx") )
+    //     log( ps.item(0).data("bar") )
+    // }, 1000)
+
+    var p = $.dom("#p");
+    log(p.dataAttr("foo"))
 });
 </script>

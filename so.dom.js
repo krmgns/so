@@ -1154,6 +1154,15 @@ $.extend(Dom.prototype, {
         }
         return data;
     },
+    dataAttr: function(key, val) {
+        var el = this[0];
+        if (el) {
+            el = this.__init(this[0]);
+            return (val === undefined)
+                ? el.getAttr("data-"+ key)
+                : el.setAttr("data-"+ key, value);
+        }
+    },
     removeData: function(key) {
         return this.forEach(function(el) {
             if (el.$data !== undefined) {
@@ -1164,6 +1173,9 @@ $.extend(Dom.prototype, {
                 }
             }
         });
+    },
+    removeDataAttr: function(key){
+        return this.__init(this[0]).removeAttr("data-"+ key);
     }
 });
 
