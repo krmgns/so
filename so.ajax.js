@@ -184,11 +184,16 @@ function Ajax(options) {
     // create request
     this.$xhr = createRequest();
 
+    var url = $.trim(this.options.url),
+        method = $.trim(this.options.method).toUpperCase();
+
     // request & response
     this.request = {
             data: null,
         dataType: this.options.dataType,
-         headers: {"X-Requested-With": "XMLHttpRequest"}
+         headers: {"X-Requested-With": "XMLHttpRequest", "X-HTTP-Method-Override": method},
+             url: url,
+          method: method
     };
     this.response = {
             data: null,
@@ -202,10 +207,6 @@ function Ajax(options) {
         this.request.headers = $.extend(
             this.request.headers, $.object.pick(this.options, 'headers'));
     }
-
-    // set method name as uppercase
-    this.request.url = $.trim(this.options.url);
-    this.request.method = $.trim(this.options.method).toUpperCase();
 
     // correct file path for "localhost" only
     if (location.host == "localhost"
@@ -337,7 +338,7 @@ $.extend(Ajax.prototype, {
 // add ajax to so
 $.ajax = function(options, data, onDone, onSuccess, onFail) {
     if (typeof options == "string") {
-        // <method> <url> <response data type>
+        // <method> <url> @<response data type>
         // notation: /foo
         // notation: /foo @json
         // notation: GET /foo @json
