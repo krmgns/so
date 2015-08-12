@@ -1278,7 +1278,7 @@ function getDefaultDisplay(tagName) {
             }
 
             if (!ddIframeDoc || !ddIframeDoc.createElement) {
-                ddIframeDoc = (ddIframe.contentWindow || ddIframe.contentDocument).document;
+                ddIframeDoc = (ddIframe.contentDocument || ddIframe.contentWindow.document);
                 ddIframeDoc.write("<html><body></body></html>");
                 ddIframeDoc.close();
             }
