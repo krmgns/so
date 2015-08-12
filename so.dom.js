@@ -478,7 +478,7 @@ Dom.prototype = {
         }
 
         var nodes;
-        if (typeof selector === "string") {
+        if (type == "string") {
             selector = $.trim(selector);
             // notation: $.dom("<span>", {id: "foo"})
             // notation: $.dom("<span id='foo'>")
@@ -1235,6 +1235,20 @@ $.extend(Dom.prototype, {
             array[decodeURIComponent(a[0])] = decodeURIComponent(a[1]);
         });
         return array;
+    }
+});
+
+// dom: iframe tools
+$.extend(Dom.prototype, {
+    getWindow: function(el /*internal*/){
+        if (el = this[0]) {
+            return this.__init(el.contentWindow);
+        }
+    },
+    getDocument: function(el /*internal*/){
+        if (el = this[0]) {
+            return this.__init(el.contentDocument || el.contentWindow.document);
+        }
     }
 });
 
