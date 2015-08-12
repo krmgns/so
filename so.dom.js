@@ -472,6 +472,7 @@ Dom.prototype = {
             return selector;
         }
 
+        // somehow qwery does not catch iframe windows (detected while adding getWindow() method)
         var type = $.typeOf(selector);
         if (type == "window" || type == "document") {
             return new Dom(selector);
