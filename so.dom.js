@@ -472,6 +472,11 @@ Dom.prototype = {
             return selector;
         }
 
+        var type = $.typeOf(selector);
+        if (type == "window" || type == "document") {
+            return new Dom(selector);
+        }
+
         var nodes;
         if (typeof selector === "string") {
             selector = $.trim(selector);
