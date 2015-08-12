@@ -502,7 +502,7 @@ Dom.prototype = {
             }
         }
 
-        return (new Dom(nodes));
+        return new Dom(nodes);
     },
     find: function(selector, i) {
         return this[0] ? this.__init(selector, this[0], i) : this;
