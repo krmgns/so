@@ -1166,7 +1166,7 @@ $.extend(Dom.prototype, {
             el = this.__init(el);
             return (val === undefined)
                 ? el.getAttr("data-"+ key)
-                : el.setAttr("data-"+ key, value);
+                : el.setAttr("data-"+ key, val);
         }
     },
     removeData: function(key) {
