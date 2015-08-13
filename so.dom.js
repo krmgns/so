@@ -170,7 +170,6 @@ function cloneElement(el, deep) {
     return clone;
 }
 
-// @todo
 function cloneElementEvents(el, clone) {
     // needs `$.event` and `el.$events`
     if (el.$events) {
