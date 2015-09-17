@@ -91,10 +91,28 @@ function toJson(input) {
 }
 
 function buildQuery(data) {
-    var key, query = [];
+    var key, value, valueType, k, v, query = [];
     for (key in data) {
-        data.hasOwnProperty(key)
-            && query.push(encodeURIComponent(key) +"="+ encodeURIComponent(data[key]));
+        if (data.hasOwnProperty(key)) {
+            value = data[key];
+            valueType = $.typeOf(value);
+            if (valueType == "array") {
+                if (value.length) {
+                    while (v = value.shift()) {
+                        query.push(encodeURIComponent(key) +"[]="+ encodeURIComponent(v));
+                    }
+                } else {
+                    query.push(encodeURIComponent(key) +"[]=");
+                }
+            } else if (valueType == "object") {
+                for (k in value) {
+                    value.hasOwnProperty(k)
+                        && query.push(encodeURIComponent(key) +"["+ k +"]="+ encodeURIComponent(value[k]));
+                }
+            } else {
+                query.push(encodeURIComponent(key) +"="+ encodeURIComponent(value));
+            }
+        }
     }
     return query.join("&").replace(/%20/g, "+");
 }
