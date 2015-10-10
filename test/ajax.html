@@ -13,7 +13,7 @@
 so.onReady(function($) {
     var result = document.getElementById("result");
     window.ajax = function() {
-        var req = $.ajax({
+        var ajax = $.ajax({
             url: "books.xml",
             method: "GET",
             autoSend: false,
@@ -25,8 +25,8 @@ so.onReady(function($) {
             // onStart: function(xhr){ result.innerHTML = "Start!"; },
             // onProgress: function(xhr){ result.innerHTML = "Progress!"; },
             // onSuccess: function(r, xhr){ result.innerHTML = r; },
-            // onComplete: function(r, xhr){ log(this.getAllResponseHeaders()); },
-            // onError: function(r, xhr){ log(this.statusCode); },
+            // onDone: function(r, xhr){ log(this.$xhr.getAllResponseHeaders()); },
+            // onFail: function(r, xhr){ log(this.response.status.code); },
             // onAbort: function(xhr){ log("Aborted!"); },
             // 200: function(r){ log("Status: 200") },
             // 404: function(r){ log("Status: 404") },
@@ -34,17 +34,20 @@ so.onReady(function($) {
             // 500: function(r){ log("Status: 500") }
 
             beforeSend: function(xhr) {
-                xhr.overrideMimeType("text/xml");
+                // log(xhr.$xhr)
+                xhr.$xhr.overrideMimeType("text/xml");
+                xhr.$xhr.setRequestHeader("X-Foo", "foo header")
             },
             afterSend: function(xhr) {
-                // log(xhr);
+                // log(xhr.$xhr);
             }
         })
         .setRequestHeader("Accept", "text/xml")
         // .setRequestHeader({"X-Foo": "The foo!", "X-Bar": "The bar!"})
         .send();
 
-        log(req)
+        log(ajax)
+        log(ajax.$xhr)
 
         // $.ajax("POST /ajax.php?a=1", {foo:1, bar:"the bar!"}, function(r) { log(r) });
         // $.ajax.get("/ajax.php?a=1", function(r) { log(r) });
