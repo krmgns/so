@@ -36,7 +36,7 @@ so.onReady(function($) {
             beforeSend: function(xhr) {
                 // log(xhr.$xhr)
                 xhr.$xhr.overrideMimeType("text/xml");
-                xhr.$xhr.setRequestHeader("X-Foo", "foo header")
+                xhr.$xhr.setRequestHeader("X-Foo", "foo header");
             },
             afterSend: function(xhr) {
                 // log(xhr.$xhr);
