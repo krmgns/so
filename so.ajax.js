@@ -223,7 +223,7 @@ function Ajax(options) {
     // extend request headers
     if (this.options.headers) {
         this.request.headers = $.extend(
-            this.request.headers, $.object.pick(this.options, 'headers'));
+            this.request.headers, $.object.pick(this.options, "headers"));
     }
 
     // correct file path for "localhost" only
