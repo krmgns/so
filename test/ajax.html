@@ -33,14 +33,15 @@ so.onReady(function($) {
             // 404: function(r){ log("Status: 404") },
             // 304: function(r){ log("Status: 304") },
             // 500: function(r){ log("Status: 500") }
-            beforeSend: function(ajax) {
+            onSendBefore: function(ajax) {
                 // log(ajax.$xhr)
                 ajax.$xhr.overrideMimeType("text/xml");
                 ajax.$xhr.setRequestHeader("X-Foo1", "foo header 1");
                 // or
-                this.$xhr.setRequestHeader("X-Foo2", "foo header 2");
+                // this.$xhr.overrideMimeType("text/xml");
+                // this.$xhr.setRequestHeader("X-Foo2", "foo header 2");
             },
-            afterSend: function(ajax) {
+            onSendAfter: function(ajax) {
                 // log(ajax.$xhr);
             }
         })
