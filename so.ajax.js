@@ -281,7 +281,8 @@ $.extend(Ajax.prototype, {
         // open connection
         this.$xhr.open(this.request.method, this.request.url, this.options.async);
         // set request header for post etc.
-        if (this.request.method != "GET" && this.request.data && this.request.data.length) {
+        if (this.request.method != "GET"
+                && this.request.data && this.request.data.length) {
             this.$xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         }
 
@@ -321,7 +322,9 @@ $.extend(Ajax.prototype, {
 
         // check timeout
         if (this.options.timeout) {
-            setTimeout(function(){ _this.abort(); }, this.options.timeout);
+            setTimeout(function(){
+                _this.abort();
+            }, this.options.timeout);
         }
 
         return this;
