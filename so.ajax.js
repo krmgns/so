@@ -40,6 +40,7 @@ var re_query = /\?&(.*)/,
         onSuccess: $.fun,
         onFail: $.fun,
         onAbort: $.fun,
+        onTimeout: $.fun,
         beforeSend: null,
         afterSend: null
     }
@@ -324,6 +325,7 @@ $.extend(Ajax.prototype, {
         if (this.options.timeout) {
             setTimeout(function(){
                 _this.abort();
+                _this.options.onTimeout.call(this, this);
             }, this.options.timeout);
         }
 
