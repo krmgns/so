@@ -18,13 +18,13 @@ so.onReady(function($) {
             method: "GET",
             autoSend: false,
             // noCache: true,
-            timeout: 1000,
+            // timeout: 1000,
             // data: {foo:1, bar:"the bar!"},
-            dataType: "xml",
+            dataType: "html",
             // headers: {"X-Foo": "The foo!", "X-Bar": "The bar!"}
             // onStart: function(ajax){ result.innerHTML = "Start!"; },
             // onProgress: function(ajax){ result.innerHTML = "Progress!"; },
-            // onSuccess: function(r, ajax){ result.innerHTML = r; },
+            onSuccess: function(r, ajax){ result.innerHTML = r; },
             // onDone: function(r, ajax){ log(this.$xhr.getAllResponseHeaders()); },
             // onFail: function(r, ajax){ log(this.response.status.code); },
             // onAbort: function(ajax){ log("Aborted!"); },
@@ -35,7 +35,7 @@ so.onReady(function($) {
             // 500: function(r){ log("Status: 500") }
             onSendBefore: function(ajax) {
                 // log(ajax.$xhr)
-                ajax.$xhr.overrideMimeType("text/xml");
+                // ajax.$xhr.overrideMimeType("text/xml");
                 ajax.$xhr.setRequestHeader("X-Foo1", "foo header 1");
                 // or
                 // this.$xhr.overrideMimeType("text/xml");
@@ -45,8 +45,8 @@ so.onReady(function($) {
                 // log(ajax.$xhr);
             }
         })
-        .setRequestHeader("Accept", "text/xml")
-        // .setRequestHeader({"X-Foo": "The foo!", "X-Bar": "The bar!"})
+        // .setRequestHeader("Accept", "text/xml")
+        .setRequestHeader({"X-Foo": "The foo!", "X-Bar": "The bar!"})
         .send();
 
         log(ajax)
