@@ -22,24 +22,25 @@ so.onReady(function($) {
             // data: {foo:1, bar:"the bar!"},
             dataType: "xml",
             // headers: {"X-Foo": "The foo!", "X-Bar": "The bar!"}
-            // onStart: function(xhr){ result.innerHTML = "Start!"; },
-            // onProgress: function(xhr){ result.innerHTML = "Progress!"; },
-            // onSuccess: function(r, xhr){ result.innerHTML = r; },
-            // onDone: function(r, xhr){ log(this.$xhr.getAllResponseHeaders()); },
-            // onFail: function(r, xhr){ log(this.response.status.code); },
-            // onAbort: function(xhr){ log("Aborted!"); },
+            // onStart: function(ajax){ result.innerHTML = "Start!"; },
+            // onProgress: function(ajax){ result.innerHTML = "Progress!"; },
+            // onSuccess: function(r, ajax){ result.innerHTML = r; },
+            // onDone: function(r, ajax){ log(this.$xhr.getAllResponseHeaders()); },
+            // onFail: function(r, ajax){ log(this.response.status.code); },
+            // onAbort: function(ajax){ log("Aborted!"); },
             // 200: function(r){ log("Status: 200") },
             // 404: function(r){ log("Status: 404") },
             // 304: function(r){ log("Status: 304") },
             // 500: function(r){ log("Status: 500") }
-
-            beforeSend: function(xhr) {
-                // log(xhr.$xhr)
-                xhr.$xhr.overrideMimeType("text/xml");
-                xhr.$xhr.setRequestHeader("X-Foo", "foo header");
+            beforeSend: function(ajax) {
+                // log(ajax.$xhr)
+                ajax.$xhr.overrideMimeType("text/xml");
+                ajax.$xhr.setRequestHeader("X-Foo1", "foo header 1");
+                // or
+                this.$xhr.setRequestHeader("X-Foo2", "foo header 2");
             },
-            afterSend: function(xhr) {
-                // log(xhr.$xhr);
+            afterSend: function(ajax) {
+                // log(ajax.$xhr);
             }
         })
         .setRequestHeader("Accept", "text/xml")
