@@ -41,8 +41,8 @@ var re_query = /\?&(.*)/,
         onFail: $.fun,
         onAbort: $.fun,
         onTimeout: $.fun,
-        beforeSend: null,
-        afterSend: null
+        onSendBefore: null,
+        onSendAfter: null
     }
 ;
 
@@ -300,17 +300,17 @@ $.extend(Ajax.prototype, {
             };
         }
 
-        // call beforesend function
-        if (typeof this.options.beforeSend == "function") {
-            this.options.beforeSend.call(this, this);
+        // call before send
+        if (typeof this.options.onSendBefore == "function") {
+            this.options.onSendBefore.call(this, this);
         }
 
         // send request
         this.$xhr.send(this.request.data);
 
-        // call aftersend function
-        if (typeof this.options.afterSend == "function") {
-            this.options.afterSend.call(this, this);
+        // call after send
+        if (typeof this.options.onSendAfter == "function") {
+            this.options.onSendAfter.call(this, this);
         }
 
         // handle async
