@@ -1,6 +1,6 @@
 <?php
 
-// sleep(3);
+sleep(3);
 
 $response = mt_rand();
 // $response = json_encode(array("response" => "PHP"));

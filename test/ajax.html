@@ -14,11 +14,11 @@ so.onReady(function($) {
     var result = document.getElementById("result");
     window.ajax = function() {
         var ajax = $.ajax({
-            url: "books.xml",
+            url: "ajax.php",
             method: "GET",
             autoSend: false,
             // noCache: true,
-            // timeout: 1000,
+            timeout: 1000,
             // data: {foo:1, bar:"the bar!"},
             dataType: "xml",
             // headers: {"X-Foo": "The foo!", "X-Bar": "The bar!"}
@@ -28,6 +28,7 @@ so.onReady(function($) {
             // onDone: function(r, ajax){ log(this.$xhr.getAllResponseHeaders()); },
             // onFail: function(r, ajax){ log(this.response.status.code); },
             // onAbort: function(ajax){ log("Aborted!"); },
+            onTimeout: function(ajax){ log("Timeout!"); },
             // 200: function(r){ log("Status: 200") },
             // 404: function(r){ log("Status: 404") },
             // 304: function(r){ log("Status: 304") },
