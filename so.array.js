@@ -46,7 +46,7 @@ $.extend($.array, {
             result.push(fn.call(input, input[i], i))
         }
         return result;
-    }
+    },
     filter: function(input, fn) {
         for (var i = 0, len = input.length, result = []; i < len; i++) {
             if (fn.call(input, input[i], i)) {
