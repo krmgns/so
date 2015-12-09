@@ -9,7 +9,7 @@
 
 var fn_slice = [].slice;
 
-function makeArray(input) {
+function make(input) {
     if ($.typeOf(input) === "array") {
         return input;
     }
@@ -37,7 +37,7 @@ $.extend($.array, {
     make: function() {
         var i = 0, len = arguments.length, result = [];
         while (i < len) {
-            result = result.concat(makeArray(arguments[i++]));
+            result = result.concat(make(arguments[i++]));
         }
         return result;
     },
