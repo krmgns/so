@@ -34,7 +34,7 @@ function makeArray(input) {
 }
 
 $.extend($.array, {
-    make: function(input) {
+    make: function() {
         var i = 0, len = arguments.length, result = [];
         while (i < len) {
             result = result.concat(makeArray(arguments[i++]));
