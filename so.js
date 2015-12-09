@@ -94,14 +94,14 @@ var so = {
         if (len !== undefined) {
             // value => i
             for (i = 0; i < len; i++) {
-                if (fn.call(scope || input[i], input[i], i, input) === false) {
+                if (false === fn.call(scope || input[i], input[i], i, input)) {
                     break;
                 }
             }
         } else {
             // key => value
             for (i in input) {
-                if (fn.call(scope || input[i], i, input[i], input) === false) {
+                if (false === fn.call(scope || input[i], i, input[i], input)) {
                     break;
                 }
             }
