@@ -42,15 +42,13 @@ $.extend($.array, {
         return result;
     },
     map: function(input, fn){
-        var i = 0, len = input.length, result = [];
-        for (i; i < len; i++) {
+        for (var i = 0, len = input.length, result = []; i < len; i++) {
             result.push(fn.call(input, input[i], i))
         }
         return result;
     }
     filter: function(input, fn) {
-        var i = 0, len = input.length, result = [];
-        for (i; i < len; i++) {
+        for (var i = 0, len = input.length, result = []; i < len; i++) {
             if (fn.call(input, input[i], i)) {
                 result.push(input[i]);
             }
