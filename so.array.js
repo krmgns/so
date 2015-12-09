@@ -57,9 +57,9 @@ $.extend($.array, {
         }
         return result;
     },
-    has: function(input, src) {
+    has: function(input, search) {
         for (var i = input.length - 1; i >= 0; i--) {
-            if (src == input[i]) {
+            if (search == input[i]) {
                 return true;
             }
         }
