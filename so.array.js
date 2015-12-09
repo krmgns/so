@@ -14,23 +14,23 @@ function makeArray(input) {
         return input;
     }
 
-    var i = 0, arr = [];
+    var i = 0, array = [];
 
     if (!input || // null, undefined, "", 0 etc.
             typeof input === "string" || input.nodeType ||
                    input.length === undefined || input == window) {
-        arr = [input];
+        array = [input];
     } else {
         try {
-            arr = fn_slice.call(input);
+            array = fn_slice.call(input);
         } catch (e) {
             while (i < input.length) {
-                arr.push(input[i++]);
+                array.push(input[i++]);
             }
         }
     }
 
-    return arr;
+    return array;
 }
 
 $.extend($.array, {
