@@ -58,7 +58,7 @@ $.extend($.array, {
         return result;
     },
     has: function(input, search, strict) {
-        for (var i = input.length - 1; i >= 0; i--) {
+        for (var i = 0, len = input.length; i < len; i++) {
             if (strict === true) {
                 if (search === input[i]) {
                     return true;
