@@ -1,0 +1,5 @@
+// add user defined methods to elements
+- $.dom.defineMethod(function(element){ ... })
+
+// etc shotcuts
+- $el.isChecked(), $el.isSelected()
