@@ -1,6 +1,7 @@
 /**
  * @name: so.ext.cookie
  * @deps: so
+ * @vers: 1.0.0
  * @cred: https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie
  */
 
