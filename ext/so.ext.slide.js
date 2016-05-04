@@ -1,6 +1,7 @@
 /**
  * @name: so.ext.slide
  * @deps: so, so.dom, so.animate
+ * @vers: 1.0.0
  */
 
 ;(function($){
