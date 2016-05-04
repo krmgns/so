@@ -1,6 +1,7 @@
 /**
  * @name: so.ext.windowScroll
  * @deps: so
+ * @vers: 1.0.0
  */
 
 ;(function($){
