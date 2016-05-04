@@ -3,6 +3,7 @@
  *
  * @name: so.ext.easing
  * @deps: so
+ * @vers: 1.0.0
  */
 
 ;(function($){
