@@ -1,6 +1,7 @@
 /**
  * @name: so.ext.modal
  * @deps: so, so.dom
+ * @vers: 1.0.2
  */
 
 ;(function($){
@@ -11,7 +12,7 @@ $.ext.modalObjects = [];
 var tpl = '\
 <div class="modal">\
     <div class="modal-box">\
-        <div class="modal-x"><i class="fa fa-close"></i></div>\
+        <div class="modal-x"><i>&times;</i></div>\
         <div class="modal-head"></div>\
         <div class="modal-body"></div>\
         <div class="modal-foot"></div>\
@@ -22,7 +23,8 @@ var optionsDefault = {
     width: 450,
     height: null,
     title: "", body: "",
-    onOpen: $.fun(), onClose: $.fun(),
+    onOpen: $.fun(),
+    onClose: $.fun(),
     closable: false
 };
 
@@ -99,7 +101,9 @@ $.extend(Modal.prototype, {
         // call onopen
         window.setTimeout(function() {
             _this.$modal.find(".modal-box").addClass("open");
-            _this.options.onOpen && _this.options.onOpen(_this);
+            if (typeof _this.options.onOpen == "function") {
+                _this.options.onOpen.call(_this, _this);
+            }
 
             var $head = _this.$modal.find(".modal-head");
             if ($head.getHtml() == "") {
@@ -119,8 +123,8 @@ $.extend(Modal.prototype, {
         // and remove 1 second later
         window.setTimeout(function() {
             _this.$modal.fadeOut(0, function(el){
-                if (typeof _this.options.onClose) {
-                    _this.options.onClose(_this);
+                if (typeof _this.options.onClose == "function") {
+                    _this.options.onClose.call(_this, _this);
                 }
                 $.dom(el).remove();
             });
