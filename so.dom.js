@@ -437,8 +437,7 @@ function classRE(cls) {
 }
 
 // qwery integration
-function QSA(s, root) { // @tmp
-    /*return (typeof s === "string") ? (root&&root.nodeType?root:DOC).querySelectorAll(s) : (s && s.nodeType) ? [s] : (s || [])*/
+function QSA(s, root) {
     return qwery(s, root);
 }
 
@@ -1083,8 +1082,8 @@ $.extend(Dom.prototype, {
         });
     },
     removeClass: function(cls) {
+        // remove all classes
         if (cls === "*") {
-            // remove all classes
             return this.setClass("");
         }
         var i, c, cl = $.trim(cls).split(RE("\\s+"));
