@@ -1,7 +1,7 @@
 /**
  * @name: so.ext.slide
  * @deps: so, so.dom, so.animate
- * @vers: 1.0.0
+ * @vers: 1.0.1
  */
 
 ;(function($){
@@ -96,8 +96,13 @@ $.extend(Slide.prototype, {
     },
     listen: function(){
         var _this = this;
-        $.dom(this.options.prevBtn).on("click", function(){ _this.prev(); });
-        $.dom(this.options.nextBtn).on("click", function(){ _this.next(); });
+        if (this.options.prevBtn) {
+            $.dom(this.options.prevBtn).on("click", function(){ _this.prev(); });
+        }
+        if (this.options.nextBtn) {
+            $.dom(this.options.nextBtn).on("click", function(){ _this.next(); });
+        }
+        return this;
     },
     setOption: function(key, value){
         this.options[key] = value;
