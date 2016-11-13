@@ -325,7 +325,7 @@ $.extend(Ajax.prototype, {
         if (this.options.timeout) {
             setTimeout(function(){
                 _this.abort();
-                _this.options.onTimeout.call(this, this);
+                _this.options.onTimeout.call(_this, _this);
             }, this.options.timeout);
         }
 
