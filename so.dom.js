@@ -15,7 +15,7 @@ var DOC = $.doc(),
     re_tagName = /<([a-z-]+)/i,
     re_tableChildren = /^(?:thead|tbody|tfoot|col|colgroup|caption)$/i,
     re_formChildren = /^(button|input|select|textarea)$/i,
-    re_stateAttrs = /^(checked|disabled|selected|readonly)$/i,
+    re_stateAttrs = /^(checked|selected|disabled|readonly)$/i,
     re_styleUnits = /^-?[\d\.]+(?:in|cm|mm|em|ex|pt|pc|%)/i,
     re_digit = /^-?[\d\.]+$/,
     re_bool = /^(true|false)$/,
@@ -561,10 +561,10 @@ Dom.prototype = {
     nth: function(i) {
         return this.item(i);
     },
-    get: function(i) {
-        return this[i];
+    get: function() {
+        return this[0];
     },
-    tag: function(i) {
+    tag: function() {
         return getNodeName(this[0]);
     }
 };
@@ -1234,6 +1234,34 @@ $.extend(Dom.prototype, {
             array[decodeURIComponent(a[0])] = decodeURIComponent(a[1]);
         });
         return array;
+    }
+});
+
+// dom: form element tools
+$.extend(Dom.prototype, {
+    checked: function(option){
+        if (option == null) {
+            return this[0] && !!this[0].checked;
+        }
+        return this.setAttr({checked: !!option});
+    },
+    selected: function(option){
+        if (option == null) {
+            return this[0] && !!this[0].selected;
+        }
+        return this.setAttr({selected: !!option});
+    },
+    disabled: function(option){
+        if (option == null) {
+            return this[0] && !!this[0].disabled;
+        }
+        return this.setAttr({disabled: !!option});
+    },
+    readonly: function(option){
+        if (option == null) {
+            return this[0] && !!this[0].readOnly;
+        }
+        return this.setAttr({readonly: !!option});
     }
 });
 

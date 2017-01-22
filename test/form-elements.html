@@ -1,0 +1,22 @@
+<!doctype html>
+
+<form id="form">
+    <input value="abc" readonly="readonly"> <br>
+    <input type="checkbox" checked readonly> <br>
+    <input type="radio" value="1" checked> <br>
+    <input type="button" value="button" disabled> <br>
+    <textarea readonly="readonly">shshsh</textarea> <br>
+    <select><option>1</option><option selected>2</option></select> <br>
+</form>
+
+<script src="so-all.php"></script>
+<script>
+so.onReady(function($){
+    // var els = $.dom("#form").find("input,select,textarea")
+    var els = $.dom("#form").find("select option")
+    els.forEach(function(el) {
+        el = $.dom(el)
+        console.log(el.tag(), el.selected(), Math.random())
+    })
+});
+</script>
