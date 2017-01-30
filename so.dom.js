@@ -1057,6 +1057,16 @@ $.extend(Dom.prototype, {
     }
 });
 
+// dom: id tools
+$.extend(Dom.prototype, {
+    setId: function(id) {
+        return this.setAttr("id", id);
+    },
+    getId: function() {
+        return this.getAttr("id");
+    }
+});
+
 // dom: class tools
 $.extend(Dom.prototype, {
     hasClass: function(cls, el /*internal*/) {
