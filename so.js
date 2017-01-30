@@ -32,6 +32,9 @@ if (!sp.isNumeric) { sp.isNumeric = function(s /* internal */) {
 }}
 if (!sp.format) { sp.format = function() {
     var s = this, ms = s.match(/(%s)/g) || [], i = 0, m;
+    if (ms.length > arguments.length) {
+        throw ("No arguments enough!");
+    }
     while (m = ms.shift()) {
         s = s.replace(/(%s)/, arguments[i++]);
     }
