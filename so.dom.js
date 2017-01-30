@@ -1046,9 +1046,9 @@ $.extend(Dom.prototype, {
         if (el) {
             var val, tag = getTagName(el);
             if (tag == "select" && null != (val = el.options[el.selectedIndex])) {
-                val = hasAttribute(el, "value") && (val.disabled || val.parentNode.disabled) ? null : val.value;
+                val = hasAttribute(val, "value") ? (val.disabled || val.parentNode.disabled ? "" : val.value) : "";
             } else if (tag == "button" && ie_lt8 && null != (val = el.getAttributeNode("value"))) {
-                val = val && val.specified ? val.value : null;
+                val = val && val.specified ? val.value : "";
             } else {
                 val = el.value;
             }
