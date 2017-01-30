@@ -113,7 +113,7 @@ var attrFunctions = {
 
 function setAttributes(el, attrs) {
     if (isNodeElement(el)) {
-        var keyFixed, keyFixedDef, key, val, state,
+        var keyFixed, keyFixedDef, key, val,
             re_true = /^(1|true)$/;
 
         for (key in attrs) {
@@ -128,16 +128,14 @@ function setAttributes(el, attrs) {
             }
 
             if (re_stateAttrs.test(key)) {
-                // set attribute as boolean
-                el[key] = (state = re_true.test(val) || val != "");
+                el[key] = re_true.test(val) || val != ""; // set attribute as bool
                 if (keyFixedDef) {
-                    el[keyFixedDef] = state;
+                    el[keyFixedDef] = el[key];
                 }
-                if (state) {
-                    // set proper attribute (e.g: disabled="disabled")
+                // set proper attribute (e.g: disabled="disabled") or remove if false
+                if (el[key]) {
                     el.setAttribute(keyFixed, key);
                 } else {
-                    // remove attribute
                     el.removeAttribute(keyFixed);
                 }
                 continue;
@@ -145,11 +143,9 @@ function setAttributes(el, attrs) {
 
             // bind `on*` events
             (val && val.apply &&
-                (el[key.toLowerCase()] = function() {
-                    return val.apply(el, arguments);
-                })
+                (el[key.toLowerCase()] = function(){ return val.apply(el, arguments); })
             // or just set attribute
-            ) || el.setAttribute(keyFixed, ""+ val);
+            ) || el.setAttribute(keyFixed, val);
         }
     }
     return el;
@@ -266,8 +262,7 @@ function createElement(content, doc) {
 function insert(fn, target, contents, reverse) {
     var doc = $.doc(target),
         element = createElement(contents, doc),
-        node, nodes = element.nodes,
-        scope, tBody, i = 0;
+        node, nodes = element.nodes, scope, tBody, i = 0;
 
     // set target as `tbody`, otherwise ie7 doesn't insert
     if (element.fixed && element.tag == "tr" && (tBody = getByTag(target, "tbody", 0)) != null) {
@@ -284,9 +279,18 @@ function insert(fn, target, contents, reverse) {
         fn.call(scope, node);
     }
 
-    // removes empty tbody's on ie (7-8)
-    if (element.fixed && ie_lt9 && re_tableChildren.test(element.tag)) {
-        fixTable(target, doc);
+    if (element.fixed) {
+        // remove empty tbody's on ie (7-8)
+        if (ie_lt9 && re_tableChildren.test(element.tag)) {
+            fixTable(target, doc);
+        } else if (getTagName(target) == "select") { // fix selected option
+            $.dom("option", target).forEach(function(option){
+                var $option = $.dom(option);
+                if ($option.hasAttr("selected")) {
+                    $option.setAttr("selected", "selected");
+                }
+            });
+        }
     }
 
     return nodes;
@@ -919,12 +923,10 @@ $.extend(Dom.prototype, {
 
 // dom: attributes & values
 $.extend(Dom.prototype, {
-    hasAttr: function(key, el /*internal*/) {
-        if ((el = this[0]) == null) {
-            return false;
-        }
-        return el.hasAttribute ? el.hasAttribute(key)
-            : (el.attributes[key] && el.attributes[key].specified) || el[key]; // IE7
+    hasAttr: function(key) {
+        var el = this[0];
+        return el && (el.hasAttribute ? el.hasAttribute(key)
+            : (el.attributes[key] && el.attributes[key].specified) || el[key]); // ie7
     },
     setAttr: function(key, val) {
         return this.forEach(function(el) {
