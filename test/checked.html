@@ -16,7 +16,7 @@ so.onReady(function($){
         var els;
         // els = form.find("input").toArray();
         els = form.find("input:checked");
-        // els = els.filter(function(el){ return el.checked; })
+        els = els.filter(function(el){ return el.checked; })
         // els = els.not("[type=checkbox]");
         log(els)
         log($.dom(els))

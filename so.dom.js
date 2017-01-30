@@ -195,10 +195,7 @@ function cleanElement(el, child /*internal*/) {
 }
 
 function create(tag, attrs, doc) {
-    return setAttributes(
-        createElementSafe(tag, doc, $.object.pick(attrs, "name")),
-        attrs
-    );
+    return setAttributes(createElementSafe(tag, doc, $.object.pick(attrs, "name")), attrs);
 }
 
 function createFragment(content, doc) {
@@ -539,10 +536,14 @@ Dom.prototype = {
         return $.forEach(this, fn, this /*scope*/);
     },
     map: function(fn) {
-        return initDom($.array.map(this.toArray(), fn));
+        return initDom($.array.map(this, function(_, el){
+            return fn(el);
+        }));
     },
     filter: function(fn) {
-        return initDom($.array.filter(this.toArray(), fn));
+        return initDom($.array.filter(this, function(_, el){
+            return fn(el);
+        }));
     },
     reverse: function() {
         // "clone" needs this sometimes (multiple clones)
@@ -664,7 +665,7 @@ $.extend(Dom.prototype, {
             }
             if (typeof src == "string") {
                 tmp = initDom(src, el.parentNode).toArray();
-                els = $.array.filter(tmp, function(e) {
+                els = $.array.filter(tmp, function(_, e) {
                     for (var i = 0, len = els.length; i < len; i++) {
                         if (els[i] == e) return true;
                     }
@@ -685,7 +686,7 @@ $.extend(Dom.prototype, {
             }
             if (typeof src == "string") {
                 tmp = initDom(src, el.parentNode).toArray();
-                els = $.array.filter(tmp, function(e) {
+                els = $.array.filter(tmp, function(_, e) {
                     for (var i = 0, len = els.length; i < len; i++) {
                         if (els[i] == e) return true;
                     }

@@ -8,6 +8,12 @@
 "use strict"; // @tmp
 
 $.extend($.object, {
+    map: function(input, fn) {
+        for (var i in input) {
+            input[i] = fn.call(input, input[i], i);
+        }
+        return input;
+    },
     filter: function(input, fn) {
         for (var i in input) {
             if (!fn.call(input, input[i], i)) {
@@ -16,21 +22,13 @@ $.extend($.object, {
         }
         return input;
     },
-    hasKey: function(input, src) {
-        for (var i in input) {
-            if (src == i) {
-                return true;
-            }
+    pick: function(input, key, valueDefault) {
+        var value = valueDefault;
+        if (key in input) {
+            value = input[key];
+            delete input[key];
         }
-        return false;
-    },
-    hasVal: function(input, src) {
-        for (var i in input) {
-            if (src == input[i]) {
-                return true;
-            }
-        }
-        return false;
+        return value;
     },
     keys: function(input) {
         var i, result = [];
@@ -39,20 +37,28 @@ $.extend($.object, {
         }
         return result;
     },
-    vals: function(input) {
+    values: function(input) {
         var i, result = [];
         for (i in input) {
             result.push(input[i]);
         }
         return result;
     },
-    pick: function(source, key, deleting) {
-        source || (source = {});
-        var value = source[key];
-        if (deleting !== false) {
-            delete source[key];
+    hasKey: function(input, search, strict) {
+        for (var i in input) {
+            if (!strict ? search == i : search === i) {
+                return true;
+            }
         }
-        return value;
+        return false;
+    },
+    hasValue: function(input, search, strict) {
+        for (var i in input) {
+            if (!strict ? search == input[i] : search === input[i]) {
+                return true;
+            }
+        }
+        return false;
     }
 });
 

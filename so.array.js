@@ -43,24 +43,22 @@ $.extend($.array, {
     },
     map: function(input, fn){
         for (var i = 0, len = input.length, result = []; i < len; i++) {
-            result.push(fn.call(input, input[i], i))
+            result[i] = fn.call(input, i, input[i]);
         }
         return result;
     },
     filter: function(input, fn) {
         for (var i = 0, len = input.length, result = []; i < len; i++) {
-            if (fn.call(input, input[i], i)) {
+            if (fn.call(input, i, input[i])) {
                 result.push(input[i]);
             }
         }
         return result;
     },
     has: function(input, search, strict) {
-        for (var i = 0, len = input.length; i < len; i++) {
-            if (!strict) {
-                if (search == input[i]) return true;
-            } else {
-                if (search === input[i]) return true;
+        for (var i = 0, len = input.length, ok; i < len; i++) {
+            if (!strict ? search == input[i] : search === input[i]) {
+                return true;
             }
         }
         return false;
