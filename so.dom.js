@@ -25,6 +25,14 @@ var DOC = $.doc(),
     _re_cache = {}
 ;
 
+function KV(key, val) {
+    var ret = key;
+    if (typeof ret == "string") {
+        ret = {}, ret[key] = val;
+    }
+    return ret;
+}
+
 function RE(re, flags, x /*internal*/) {
     x = re + (flags || "");
     if (!_re_cache[x]) {
@@ -110,6 +118,65 @@ var attrFunctions = {
     // notation: style:{color:"blue"}
     "style": function(el, val) { $.dom(el).setStyle(val); }
 };
+
+function hasAttribute(el, key) {
+    return isNodeElement(el) && (el.hasAttribute ? el.hasAttribute(key)
+        : (el.attributes[key] && el.attributes[key].specified) || el[key]); // ie7
+}
+
+function setAttribute(el, key, val) {
+    var attrs = KV(key, val);
+    if ("type" in attrs && ie_lt8) {
+        throw ("so.dom.setAttr(): `type` attribute can not be modified!");
+    }
+    setAttributes(el, attrs);
+}
+
+function getAttribute(el, key) {
+    var val, attrs;
+    if (isNodeElement(el)) {
+        attrs = el.attributes;
+        switch (key) {
+            case "class":
+            case "className":
+                val = attrs["class"] && attrs["class"].specified ? el.className : null;
+                break;
+            case "src":
+            case "href":
+                val = el.getAttribute(key, 2);
+                break;
+            case "style":
+                val = ie_lt8 ? (attrs.style && attrs.style.specified ? el.style.cssText : null) : el.getAttribute("style");
+                val = val && val.toLowerCase();
+                break;
+            case "tabindex":
+            case "tabIndex":
+                val = (val = el.getAttributeNode("tabindex")) && val.specified ? val.value : el.getAttribute("tabindex");
+                break;
+            case "for":
+            case "htmlFor":
+                val = el.htmlFor || el.getAttribute("for");
+                break;
+            case "enctype":
+            case "encoding":
+                val = el.getAttribute("enctype") || el.enctype;
+                break;
+            default:
+                if (re_stateAttrs.test(key)) {
+                    val = el[key] === true || (typeof el[key] != "boolean" && (val = el.getAttributeNode(key))
+                        && val.nodeValue !== false) ? key : null;
+                } else {
+                    val = el.getAttribute(fixedAttributes[key] || key);
+                }
+        }
+        // ie7 (onclick etc.)
+        if (ie && typeof val == "function") {
+            val = /function.*?\(.*?\)\s*\{\s*(.*?)\s*\}/mi.exec(""+ val)
+            val = val && val[1];
+        }
+    }
+    return (val !== null) ? val : undefined;
+}
 
 function setAttributes(el, attrs) {
     if (isNodeElement(el)) {
@@ -226,9 +293,7 @@ function createElementSafe(tag, doc, nameAttr) {
 
 function createElement(content, doc) {
     var frg, fix, dep, tag,
-        _return = function(a, b, c) {
-            return {tag: a, nodes: b, fixed: !!c};
-        };
+        _return = function(a, b, c) { return {tag: a, nodes: b, fixed: !!c}; };
 
     if (isDomInstance(content)) {
         return _return("Dom", content.toArray());
@@ -753,13 +818,8 @@ $.extend(Dom.prototype, {
     setStyle: function(key, val) {
         return this.forEach(function(el) {
             var styles = key, k, v;
-
             if (typeof styles == "string") {
-                if (val != null) {
-                    styles = {}, (styles[key] = val);
-                } else {
-                    styles = parseStyleText(key);
-                }
+                styles = (val != null) ? KV(key, val) : parseStyleText(key);
             }
 
             if (ie_lt9 && "opacity" in styles) {
@@ -924,80 +984,20 @@ $.extend(Dom.prototype, {
 // dom: attributes & values
 $.extend(Dom.prototype, {
     hasAttr: function(key) {
-        var el = this[0];
-        return el && (el.hasAttribute ? el.hasAttribute(key)
-            : (el.attributes[key] && el.attributes[key].specified) || el[key]); // ie7
+        return hasAttribute(this[0], key);
     },
     setAttr: function(key, val) {
         return this.forEach(function(el) {
-            var attrs = key;
-            if (typeof attrs == "string") {
-                attrs = {}, (attrs[key] = val || "");
-            }
-            if ("type" in attrs && ie_lt8) {
-                throw ("so.dom.setAttr(): `type` attribute can not be modified!");
-            }
-            setAttributes(el, attrs);
+            setAttribute(el, key, val);
         });
     },
-    getAttr: function(key, el /*internal*/) {
-        if ((el = this[0]) == null) {
-            return;
-        }
-
-        var attrs = el.attributes, val;
-        switch (key) {
-            case "class":
-            case "className":
-                val = attrs["class"] && attrs["class"].specified
-                        ? el.className : null;
-                break;
-            case "src":
-            case "href":
-                val = el.getAttribute(key, 2);
-                break;
-            case "style":
-                val = ie_lt8
-                    ? (attrs.style && attrs.style.specified)
-                        ? el.style.cssText : null
-                            : el.getAttribute("style");
-                val = val && val.toLowerCase();
-                break;
-            case "tabindex":
-            case "tabIndex":
-                val = (val = el.getAttributeNode("tabindex")) && val.specified
-                        ? val.value
-                        : el.getAttribute("tabindex");
-                break;
-            case "for":
-            case "htmlFor":
-                val = el.htmlFor || el.getAttribute("for");
-                break;
-            case "enctype":
-            case "encoding":
-                val = el.getAttribute("enctype") || el.enctype;
-                break;
-            default:
-                if (re_stateAttrs.test(key)) {
-                    val = el[key] === true || typeof el[key] != "boolean"
-                            && (val = el.getAttributeNode(key))
-                                && val.nodeValue !== false ? key : null;
-                } else {
-                    val = el.getAttribute(fixedAttributes[key] || key);
-                }
-        }
-        // ie7 (onclick etc.)
-        if (ie && typeof val == "function") {
-            val = /function.*?\(.*?\)\s*\{\s*(.*?)\s*\}/mi.exec(""+ val)
-            val = val && val[1];
-        }
-        return (val !== null) ? val : undefined;
+    getAttr: function(key) {
+        return getAttribute(this[0], key);
     },
     removeAttr: function(key) {
         if (key == "*") {
             return this.forEach(function(el) {
-                var attrs = el.attributes, attr,
-                        i = el.attributes.length - 1;
+                var attr, attrs = el.attributes, i = el.attributes.length - 1;
                 for (; i >= 0, (attr = el.attributes[i]); --i) {
                     if (attr.specified)  {
                         el.removeAttribute(attr.name);
@@ -1012,8 +1012,7 @@ $.extend(Dom.prototype, {
             for (i = 0; i < keys.length; i++) {
                 keyFixed = fixedAttributes[keys[i]] || keys[i];
                 keyFixedDef = fixedAttributes["default"+ keys[i]];
-                if (re_formChildren.test(el.tagName)
-                        && re_stateAttrs.test(keyFixed)) {
+                if (re_formChildren.test(el.tagName) && re_stateAttrs.test(keyFixed)) {
                     el[keyFixed] = false;
                     if (keyFixedDef) el[keyFixedDef] = false;
                 }
@@ -1047,7 +1046,7 @@ $.extend(Dom.prototype, {
         if (el) {
             var val, tag = getTagName(el);
             if (tag == "select" && null != (val = el.options[el.selectedIndex])) {
-                val = (val.disabled || val.parentNode.disabled) ? null : val.value;
+                val = hasAttribute(el, "value") && (val.disabled || val.parentNode.disabled) ? null : val.value;
             } else if (tag == "button" && ie_lt8 && null != (val = el.getAttributeNode("value"))) {
                 val = val && val.specified ? val.value : null;
             } else {
@@ -1132,10 +1131,7 @@ $.extend(Dom.prototype, {
         // notation: $.dom(".foo").data("foo", "The foo!")
         // notation: $.dom(".foo").data({"foo": "The foo!"})
         if (typeof key == "object" || typeof val != "undefined") {
-            var data = key;
-            if (typeof data == "string") {
-                data = {}, (data[key] = val);
-            }
+            var data = KV(key, val);
             return this.forEach(function(el) {
                 el.$data = el.$data || {};
                 for (var key in data) {
