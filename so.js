@@ -19,6 +19,18 @@ var _uuid = 0,
     },
     fn_toString = {}.toString;
 
+// shorthand string helpers
+var sp = String.prototype;
+if (!sp.toInt) { sp.toInt = function(base) {
+    return this.isNumeric(this) ? parseInt(this, base || 10) : null;
+}}
+if (!sp.toFloat) { sp.toFloat = function() {
+    return this.isNumeric(this) ? parseFloat(this) : null;
+}}
+if (!sp.isNumeric) { sp.isNumeric = function(s /* internal */) {
+    return (s = (s != null) ? s : this) !== "" && !isNaN(parseFloat(this)) && isFinite(this);
+}}
+
 /*** the so ***/
 var so = {
     fun: function() { return function(){}; },
@@ -214,7 +226,6 @@ so.browser = function() {
             browser["versionOrig"] = re[1];
         }
     }
-    log(browser)
 
     return browser;
 }();

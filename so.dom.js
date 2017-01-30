@@ -40,28 +40,27 @@ function RE(re, flags, x /*internal*/) {
 }
 
 function isNode(node) {
-    return node && node.nodeType &&
-        (node.nodeType === 1 || node.nodeType === 11);
+    return node && (node.nodeType == 1 || node.nodeType == 11);
 }
 
-function getNodeName(node) {
+function isNodeElement(node) {
+    return node && node.nodeType == 1;
+}
+
+function getTagName(node) {
     return node && node.nodeName && node.nodeName.toLowerCase();
 }
 
 function getByTag(root, tag, i) {
     var els = root.getElementsByTagName(tag);
-    return (i === true)
-        ? $.array.make(els) : isNaN(i)
-        ? els : els[i];
+    return (i === true) ? $.array.make(els) : isNaN(i) ? els : els[i];
 }
 
 function fixTable(table, doc) {
-    var els = getByTag(table, "tbody"),
-        el, i = els.length;
+    var els = getByTag(table, "tbody"), el, i = els.length;
 
     while (el = els[--i]) { // clean
-        !el.childNodes.length
-            && el.parentNode.removeChild(el);
+        if (!el.childNodes.length) el.parentNode.removeChild(el);
     }
 
     $.forEach(getByTag(table, "tbody", true), function(e) { // fix
@@ -113,7 +112,7 @@ var attrFunctions = {
 };
 
 function setAttributes(el, attrs) {
-    if (el && el.nodeType === 1) {
+    if (isNodeElement(el)) {
         var keyFixed, keyFixedDef, key, val, state,
             re_true = /^(1|true)$/;
 
@@ -243,12 +242,11 @@ function createElement(content, doc) {
     }
 
     if (isNode(content)) {
-        return (tag = getNodeName(content))
-                    && _return(tag, [content], fixedNodes[tag]);
+        return (tag = getTagName(content)) && _return(tag, [content], fixedNodes[tag]);
     }
 
     tag = (re_tagName.exec(content) || [, ""])[1].toLowerCase();
-    if (tag === "") { // text node
+    if (tag == "") { // text node
         return _return("#text", [doc.createTextNode(content)]);
     }
 
@@ -275,8 +273,7 @@ function insert(fn, target, contents, reverse) {
         scope, tBody, i = 0;
 
     // set target as `tbody`, otherwise ie7 doesn't insert
-    if (element.fixed && element.tag === "tr"
-            && (tBody = getByTag(target, "tbody", 0)) != null) {
+    if (element.fixed && element.tag == "tr" && (tBody = getByTag(target, "tbody", 0)) != null) {
         target = tBody;
     }
 
@@ -304,7 +301,7 @@ function toPixel(el, key, value) {
     left = el.style.left;
     leftRS = el.runtimeStyle && el.runtimeStyle.left;
     leftRS && (el.runtimeStyle.left = el.currentStyle.left);
-    el.style.left = (key === "fontSize") ? "1em" : value;
+    el.style.left = (key == "fontSize") ? "1em" : value;
     value = el.style.pixelLeft;
     el.style.left = left;
     leftRS && (el.runtimeStyle.left = leftRS);
@@ -333,7 +330,7 @@ if (DOC.defaultView && DOC.defaultView.getComputedStyle) {
 } else if (ie && DOC.documentElement.currentStyle) {
     getStyle = function(el, key) {
         var val;
-        if (key === "opacity") {
+        if (key == "opacity") {
             val = re_opacity.exec(el.style.filter || "") || [, 100];
             val = parseFloat(val[1]) / 100;
         } else {
@@ -371,7 +368,7 @@ function parseStyleText(text) {
 }
 
 function rgbToHex(color) {
-    if (color.charAt(0) === "#" || color.indexOf("rgb") === -1) {
+    if (!color || color.charAt(0) == "#" || color.indexOf("rgb") == -1) {
         return color;
     }
 
@@ -381,17 +378,16 @@ function rgbToHex(color) {
         b = parseInt(nums[4], 10).toString(16);
 
     return "#"+ (
-        (r.length === 1 ? "0"+ r : r) +
-        (g.length === 1 ? "0"+ g : g) +
-        (b.length === 1 ? "0"+ b : b)
+        (r.length == 1 ? "0"+ r : r) +
+        (g.length == 1 ? "0"+ g : g) +
+        (b.length == 1 ? "0"+ b : b)
     );
 }
 
 function getOffset(el, rel) {
-    var tag = getNodeName(el),
-        rect = {top: 0, left: 0};
+    var tag = getTagName(el), rect = {top: 0, left: 0};
 
-    if (rel && (tag === "body" || tag === "html")) {
+    if (rel && (tag == "body" || tag == "html")) {
         return rect;
     }
 
@@ -416,8 +412,8 @@ function getScroll(el, type /*internal*/) {
 
     var tag, scroll, doc, docEl, win;
 
-    if (type === "window" || type === "document" ||
-            ((tag = getNodeName(el)) && tag === "html" || tag === "body")) {
+    if (type == "window" || type == "document" ||
+            ((tag = getTagName(el)) && tag == "html" || tag == "body")) {
         // ie issue: works only if `onscroll` called, does not work on `onload`
         doc = $.doc(el);
         win = $.win(doc);
@@ -436,21 +432,59 @@ function classRE(cls) {
     return RE("(^|\\s)"+ cls + "(\\s|$)");
 }
 
-// qwery integration
-function QSA(s, root) {
-    return qwery(s, root);
+// qwery integration (for now, qwery will be removed in the future)
+function query(selector, root) {
+    return qwery(selector, root);
 }
 
 function isDomInstance(x) {
     return (x instanceof Dom);
 }
 
+function initDom(selector, root, i) {
+    if (isDomInstance(selector)) {
+        return selector;
+    }
+
+    // somehow qwery does not catch iframe windows (detected while adding getWindow() method)
+    var type = $.typeOf(selector);
+    if (type == "window" || type == "document") {
+        return new Dom(selector, selector);
+    }
+
+    var nodes;
+    if (type == "string") {
+        selector = $.trim(selector);
+        // notation: $.dom("<span>", {id: "foo"})
+        // notation: $.dom("<span id='foo'>")
+        // notation: $.dom("<span id='foo'>The span!</span>")
+        if (re_htmlContent.test(selector)) {
+            nodes = createElement(selector, DOC).nodes;
+            // set attributes
+            if (root && typeof root == "object" && !root.nodeType && root.length == null) {
+                $.forEach(nodes, function(node){
+                    setAttributes(node, root);
+                });
+            }
+        }
+    }
+
+    if (!nodes) {
+        nodes = query(selector, root);
+        if (!isNaN(i) && nodes && nodes.length) { // node list
+            nodes = nodes[i];
+        }
+    }
+
+    return new Dom(nodes, selector);
+}
+
 /*** the dom ***/
-function Dom(nodes) {
+function Dom(nodes, selector) {
     // set length first
     this.length = 0;
     if (nodes) {
-        nodes = (!nodes.nodeType && typeof nodes.length === "number") // for node list or arrays
+        nodes = (!nodes.nodeType && typeof nodes.length == "number") // for node list or arrays
                     && /*and*/ (!nodes.document || !nodes.document.nodeType)  // for window
                         ? nodes /*get node list*/ : [nodes] /*make array*/;
         for (var i = 0, len = nodes.length; i < len; i++) {
@@ -464,54 +498,16 @@ function Dom(nodes) {
 
 Dom.prototype = {
     constructor: Dom,
-    // base methods
-    __init: function(selector, root, i) {
-        if (isDomInstance(selector)) {
-            return selector;
-        }
-
-        // somehow qwery does not catch iframe windows (detected while adding getWindow() method)
-        var type = $.typeOf(selector);
-        if (type == "window" || type == "document") {
-            return new Dom(selector);
-        }
-
-        var nodes;
-        if (type == "string") {
-            selector = $.trim(selector);
-            // notation: $.dom("<span>", {id: "foo"})
-            // notation: $.dom("<span id='foo'>")
-            // notation: $.dom("<span id='foo'>The span!</span>")
-            if (re_htmlContent.test(selector)) {
-                nodes = createElement(selector, DOC).nodes;
-                // set attributes
-                if (root && typeof root === "object" && !root.nodeType && root.length === undefined) {
-                    $.forEach(nodes, function(node){
-                        setAttributes(node, root);
-                    });
-                }
-            }
-        }
-
-        if (!nodes) {
-            nodes = QSA(selector, root);
-            if (!isNaN(i) && nodes && nodes.length) { // nodelist
-                nodes = nodes[i];
-            }
-        }
-
-        return new Dom(nodes);
-    },
     find: function(selector, i) {
-        return this[0] ? this.__init(selector, this[0], i) : this;
+        return this[0] ? initDom(selector, this[0], i) : this;
     },
     not: function(selector) {
         var type = $.typeOf(selector), src, els = [];
 
         // notation: $.dom("p").not(this)
         // notation: $.dom("p").not(".red")
-        if (selector && (type === "object" || type === "string" || type.substring(0,4) === "html")) {
-            src = this.__init(selector).toArray();
+        if (selector && (type == "object" || type == "string" || type.substring(0,4) == "html")) {
+            src = initDom(selector).toArray();
             this.forEach(function(el, i){
                 var e, j = 0;
                 while (e = src[j++]) {
@@ -520,18 +516,18 @@ Dom.prototype = {
                     }
                 }
             });
-            return this.__init(els);
+            return initDom(els);
         }
 
         // notation: $.dom("p").not(0) or $.dom("p").not([0,1])
-        if (type === "number" || type === "array") {
+        if (type == "number" || type == "array") {
             selector = $.array.make(selector);
             this.forEach(function(el, i){
                 if (!$.array.has(selector, i)) {
                     els.push(el);
                 }
             });
-            return this.__init(els);
+            return initDom(els);
         }
 
         return this;
@@ -542,30 +538,27 @@ Dom.prototype = {
     forEach: function(fn) {
         return $.forEach(this, fn, this /*scope*/);
     },
+    map: function(fn) {
+        return initDom($.array.map(this.toArray(), fn));
+    },
     filter: function(fn) {
-        return this.__init($.array.filter(this.toArray(), fn));
+        return initDom($.array.filter(this.toArray(), fn));
     },
     reverse: function() {
         // "clone" needs this sometimes (multiple clones)
-        return this.__init(this.toArray().reverse());
+        return initDom(this.toArray().reverse());
     },
-    item: function(i) {
-        return this.__init(this[i]);
+    get: function(i) {
+        return initDom(this[i = (i != null) ? i : 0]);
     },
     first: function() {
-        return this.item(0);
+        return this.get(0);
     },
     last: function() {
-        return this.item(this.length - 1);
-    },
-    nth: function(i) {
-        return this.item(i);
-    },
-    get: function() {
-        return this[0];
+        return this.get(this.length - 1);
     },
     tag: function() {
-        return getNodeName(this[0]);
+        return getTagName(this[0]);
     }
 };
 
@@ -574,7 +567,7 @@ $.forEach(["append", "prepend", "before", "after", "replace"], function(fn) {
     Dom.prototype[fn] = function(contents, cloning) {
         return this.forEach(function(el) {
             // @note: doesn't work without `clone` (so inserts only once)
-            if (cloning === true) {
+            if (cloning) {
                 if (contents.cloneNode) {
                     contents = cloneElement(contents);
                 } else if (contents[0] && contents[0].cloneNode) {
@@ -591,11 +584,11 @@ $.forEach(["appendTo", "prependTo", "insertBefore", "insertAfter"], function(fn)
     Dom.prototype[fn] = function(toEl, cloning) {
         return this.forEach(function(el) {
             if (!isDomInstance(toEl)) {
-                toEl = this.__init(toEl);
+                toEl = initDom(toEl);
             }
             toEl.forEach(function(to) {
                 // @note: doesn't work without `clone` (so inserts only once)
-                if (cloning === true) {
+                if (cloning) {
                     el = cloneElement(el);
                 }
                 insert(fn, to, el /*contents*/, true /*reverse*/);
@@ -611,7 +604,7 @@ $.extend(Dom.prototype, {
         this.forEach(function(el, i) {
             clones[i] = cloneElement(el, deep);
         });
-        return this.__init(clones);
+        return initDom(clones);
     },
     remove: function() {
         return this.forEach(function(el) {
@@ -653,7 +646,7 @@ $.forEach({parent: "parentNode", prev: "previousSibling", next: "nextSibling"}, 
         while (n && n.nodeType !== 1) {
             n = n[node];
         }
-        return this.__init(n);
+        return initDom(n);
     };
 });
 
@@ -664,13 +657,13 @@ $.extend(Dom.prototype, {
         if (el && el.parentNode) {
             ns = el.parentNode.childNodes;
             while (n = ns[j++]) {
-                if (n === el) {
+                if (n == el) {
                     break;
                 }
-                n.nodeType === 1 && els.push(n);
+                if (isNodeElement(n)) els.push(n);
             }
-            if (typeof src === "string") {
-                tmp = this.__init(src, el.parentNode).toArray();
+            if (typeof src == "string") {
+                tmp = initDom(src, el.parentNode).toArray();
                 els = $.array.filter(tmp, function(e) {
                     for (var i = 0, len = els.length; i < len; i++) {
                         if (els[i] == e) return true;
@@ -678,20 +671,20 @@ $.extend(Dom.prototype, {
                 });
             }
         }
-        return this.__init(els);
+        return initDom(els);
     },
     nextAll: function(src) {
         var el = this[0], els = [], j = 0, n, ns, tmp, found;
         if (el && el.parentNode) {
             ns = el.parentNode.childNodes;
             while (n = ns[j++]) {
-                if (n === el) {
+                if (n == el) {
                     found = true;
                 }
-                found && n !== el && n.nodeType === 1 && els.push(n);
+                if (found && n != el && isNodeElement(n)) els.push(n);
             }
-            if (typeof src === "string") {
-                tmp = this.__init(src, el.parentNode).toArray();
+            if (typeof src == "string") {
+                tmp = initDom(src, el.parentNode).toArray();
                 els = $.array.filter(tmp, function(e) {
                     for (var i = 0, len = els.length; i < len; i++) {
                         if (els[i] == e) return true;
@@ -699,44 +692,44 @@ $.extend(Dom.prototype, {
                 });
             }
         }
-        return this.__init(els);
+        return initDom(els);
     },
     children: function(i) {
         var el = this[0], els = [], j = 0, n, ns, type = typeof i;
         if (el) {
-            if (i && type === "string") {
-                els = this.__init(i, el);
+            if (i && type == "string") {
+                els = initDom(i, el);
             } else {
                 ns = el.childNodes;
                 while (n = ns[j++]) {
-                    n.nodeType === 1 && els.push(n);
+                    if (isNodeElement(n)) els.push(n);
                 }
-                els = (type === "number") ? els[i] : els;
+                els = (type == "number") ? els[i] : els;
             }
         }
-        return this.__init(els);
+        return initDom(els);
     },
     siblings: function(i) {
         var el = this[0], els = [], j = 0, n, ns, type = typeof i;
         if (el && el.parentNode) {
-            if (i && type === "string") {
-                this.__init(i, el.parentNode).forEach(function(e) {
-                    if (e !== el && e.parentNode === el.parentNode) {
+            if (i && type == "string") {
+                initDom(i, el.parentNode).forEach(function(e) {
+                    if (e != el && e.parentNode == el.parentNode) {
                         els.push(e);
                     }
                 });
             } else {
                 ns = el.parentNode.childNodes;
                 while (n = ns[j++]) {
-                    n !== el && n.nodeType === 1 && els.push(n);
+                    if (n != el && isNodeElement(n)) els.push(n);
                 }
-                els = (type === "number") ? els[i] : els;
+                els = (type == "number") ? els[i] : els;
             }
         }
-        return this.__init(els);
+        return initDom(els);
     },
     contains: function(el, i) {
-        return this[0] && this.__init(this[0]).find(el, i).length != 0;
+        return this[0] && !!initDom(this[0]).find(el, i).length;
     },
     hasChild: function(){
         var child = this[0] && this[0].firstChild;
@@ -756,7 +749,7 @@ $.extend(Dom.prototype, {
         return this.forEach(function(el) {
             var styles = key, k, v;
 
-            if (typeof styles === "string") {
+            if (typeof styles == "string") {
                 if (val != null) {
                     styles = {}, (styles[key] = val);
                 } else {
@@ -826,13 +819,13 @@ $.extend(Dom.prototype, {
     width: function() {
         var el = this[0];
         if (el && el.alert) return this.dimensions("window").width;
-        if (el && el.nodeType === 9) return this.dimensions("document").width;
+        if (el && el.nodeType == 9) return this.dimensions("document").width;
         return this.innerWidth(el) - sumComputedPixels(el, ["paddingLeft", "paddingRight"]);
     },
     height: function() {
         var el = this[0];
         if (el && el.alert) return this.dimensions("window").height;
-        if (el && el.nodeType === 9) return this.dimensions("document").height;
+        if (el && el.nodeType == 9) return this.dimensions("document").height;
         return this.innerHeight(el) - sumComputedPixels(el, ["paddingTop", "paddingBottom"]);
     },
     dimensions: function(type /*internal*/) {
@@ -842,7 +835,7 @@ $.extend(Dom.prototype, {
             var doc = el.document,
                 docBody = doc.body,
                 docEl = doc.documentElement,
-                css1Compat = (doc.compatMode === "CSS1Compat");
+                css1Compat = (doc.compatMode == "CSS1Compat");
             return {
                 width: css1Compat && docEl.clientWidth ||
                             docBody && docBody.clientWidth || docEl.clientWidth,
@@ -865,7 +858,7 @@ $.extend(Dom.prototype, {
         return {width: this.width(), height: this.height()};
     },
     viewport: function() {
-        if ($.typeOf(this[0]) !== "window") {
+        if ($.typeOf(this[0]) != "window") {
             throw ("so.dom.viewport(): This function only for `window`, use `so.dom.dimensions()` instead.");
         }
         return this.dimensions();
@@ -874,14 +867,14 @@ $.extend(Dom.prototype, {
         var el, type;
         if (el = this[0]) {
             type = $.typeOf(el);
-            if (type === "window" || type === "document") {
+            if (type == "window" || type == "document") {
                 return {top: 0, left: 0};
             }
             // get real & relative position
             if (rel) {
                 var offset = getOffset(el), parentEl = el.parentNode,
                     parentOffset = getOffset(parentEl, rel);
-                if (parentEl && parentEl.nodeType === 1) {
+                if (isNodeElement(parentEl)) {
                     parentOffset.top += parseFloat(getStyle(parentEl, "borderTopWidth")) || 0;
                     parentOffset.left += parseFloat(getStyle(parentEl, "borderLeftWidth")) || 0;
                 }
@@ -901,7 +894,7 @@ $.extend(Dom.prototype, {
         if (el = this[0]) {
             type = $.typeOf(el);
             // get scroll top | left
-            if (typeof top === "string") {
+            if (typeof top == "string") {
                 return getScroll(el, type)[top];
             }
             // get scroll top & left
@@ -910,8 +903,7 @@ $.extend(Dom.prototype, {
             }
             // set scroll top & left
             var doc, win, tag;
-            if (type === "window" || type === "document" ||
-                    ((tag = getNodeName(el)) && tag === "html" || tag === "body")) {
+            if (type == "window" || type == "document" || ((tag = getTagName(el)) && tag == "html" || tag == "body")) {
                 doc = $.doc(el);
                 win = $.win(doc);
                 win.scrollTo(left, top);
@@ -936,7 +928,7 @@ $.extend(Dom.prototype, {
     setAttr: function(key, val) {
         return this.forEach(function(el) {
             var attrs = key;
-            if (typeof attrs === "string") {
+            if (typeof attrs == "string") {
                 attrs = {}, (attrs[key] = val || "");
             }
             if ("type" in attrs && ie_lt8) {
@@ -984,7 +976,7 @@ $.extend(Dom.prototype, {
                 break;
             default:
                 if (re_stateAttrs.test(key)) {
-                    val = el[key] === true || typeof el[key] !== "boolean"
+                    val = el[key] === true || typeof el[key] != "boolean"
                             && (val = el.getAttributeNode(key))
                                 && val.nodeValue !== false ? key : null;
                 } else {
@@ -992,14 +984,14 @@ $.extend(Dom.prototype, {
                 }
         }
         // ie7 (onclick etc.)
-        if (ie && typeof val === "function") {
+        if (ie && typeof val == "function") {
             val = /function.*?\(.*?\)\s*\{\s*(.*?)\s*\}/mi.exec(""+ val)
             val = val && val[1];
         }
         return (val !== null) ? val : undefined;
     },
     removeAttr: function(key) {
-        if (key === "*") {
+        if (key == "*") {
             return this.forEach(function(el) {
                 var attrs = el.attributes, attr,
                         i = el.attributes.length - 1;
@@ -1011,8 +1003,7 @@ $.extend(Dom.prototype, {
             });
         }
 
-        var keys = $.trim(key).split(RE("\\s+")),
-            i, keyFixed, keyFixedDef;
+        var keys = $.trim(key).split(RE("\\s+")), keyFixed, keyFixedDef, i;
 
         return this.forEach(function(el) {
             for (i = 0; i < keys.length; i++) {
@@ -1028,15 +1019,17 @@ $.extend(Dom.prototype, {
         });
     },
     setValue: function(val) {
-        val += "";
+        val += ""; // @important
         return this.forEach(function(el) {
-            var tag = getNodeName(el), i = 0, opt, valAttr;
+            var tag = getTagName(el), i = 0, opt, valAttr;
             if (re_formChildren.test(tag)) {
-                if (tag === "select") {
+                if (tag == "select") {
                     while (opt = el.options[i++]) {
-                        if (opt.value === val) opt.selected = true;
+                        if (opt.value === val) {
+                            opt.selected = true;
+                        }
                     }
-                } else if (tag === "button" && ie_lt8) {
+                } else if (tag == "button" && ie_lt8) {
                     valAttr = $.doc(el).createAttribute("value");
                     valAttr.value = val;
                     el.setAttributeNode(valAttr);
@@ -1046,14 +1039,13 @@ $.extend(Dom.prototype, {
             }
         });
     },
-    getValue: function(el /*internal*/) {
-        if (el = this[0]) {
-            var val, tag = getNodeName(el);
-            if (tag === "select") {
-                val = el.options[el.selectedIndex];
+    getValue: function() {
+        var el = this[0];
+        if (el) {
+            var val, tag = getTagName(el);
+            if (tag == "select" && null != (val = el.options[el.selectedIndex])) {
                 val = (val.disabled || val.parentNode.disabled) ? null : val.value;
-            } else if (tag === "button" && ie_lt8) {
-                val = el.getAttributeNode("value");
+            } else if (tag == "button" && ie_lt8 && null != (val = el.getAttributeNode("value"))) {
                 val = val && val.specified ? val.value : null;
             } else {
                 val = el.value;
@@ -1083,7 +1075,7 @@ $.extend(Dom.prototype, {
     },
     removeClass: function(cls) {
         // remove all classes
-        if (cls === "*") {
+        if (cls == "*") {
             return this.setClass("");
         }
         var i, c, cl = $.trim(cls).split(RE("\\s+"));
@@ -1136,9 +1128,9 @@ $.extend(Dom.prototype, {
         // set data
         // notation: $.dom(".foo").data("foo", "The foo!")
         // notation: $.dom(".foo").data({"foo": "The foo!"})
-        if (typeof key === "object" || typeof val !== "undefined") {
+        if (typeof key == "object" || typeof val != "undefined") {
             var data = key;
-            if (typeof data === "string") {
+            if (typeof data == "string") {
                 data = {}, (data[key] = val);
             }
             return this.forEach(function(el) {
@@ -1158,19 +1150,10 @@ $.extend(Dom.prototype, {
         }
         return data;
     },
-    dataAttr: function(key, val) {
-        var el = this[0];
-        if (el) {
-            el = this.__init(el);
-            return (val === undefined)
-                ? el.getAttr("data-"+ key)
-                : el.setAttr("data-"+ key, val);
-        }
-    },
     removeData: function(key) {
         return this.forEach(function(el) {
-            if (el.$data !== undefined) {
-                if (key === "*") {
+            if (el.$data) {
+                if (key == "*") {
                     delete el.$data; // remove all
                 } else if (el.$data[key] !== undefined) {
                     delete el.$data[key];
@@ -1178,60 +1161,50 @@ $.extend(Dom.prototype, {
             }
         });
     },
+    dataAttr: function(key, val) {
+        return (val !== undefined)
+            ? initDom(this[0]).setAttr("data-"+ key, val) : initDom(this[0]).getAttr("data-"+ key);
+    },
     removeDataAttr: function(key){
-        return this.__init(this[0]).removeAttr("data-"+ key);
+        return initDom(this[0]).removeAttr("data-"+ key);
     }
 });
 
 // dom: form tools
 $.extend(Dom.prototype, {
-    buildQuery: function(ws2plus /*internal*/) {
-        var form = this[0],
-            data = [], i = 0,
-            el, type, name, nodeName, attrs;
-        // only forms!
-        if (form && getNodeName(form) === "form") {
+    buildQuery: function(plus /*internal*/) {
+        var form = this[0], data = "";
+        if (getTagName(form) == "form") {
+            var data = [], i = 0, el, elType, elName;
             while (el = form.elements[i++]) {
-                type = $.trim(el.type).toLowerCase();
-                name = $.trim(el.name);
-                attrs = el.attributes;
-                nodeName = getNodeName(el);
-
-                if (!type || !name || el.disabled ||
-                        (attrs.disabled != null &&
-                            attrs.disabled.specified && attrs.disabled === true)) {
+                elType = $.trim(el.type).toLowerCase();
+                elName = $.trim(el.name);
+                if (!elType || !elName || el.disabled ||
+                        (el.attributes && el.attributes.disabled != null &&
+                            el.attributes.disabled.specified && el.attributes.disabled === true)) {
                     continue;
                 }
 
-                if (/^(textarea|select|button)$/i.test(nodeName)) {
-                    data.push(encodeURIComponent(name) +"="+
-                                encodeURIComponent(el.value));
+                if ($.array.has(["select", "textarea", "button"], getTagName(el))) {
+                    data.push(encodeURIComponent(elName) +"="+ encodeURIComponent(el.value));
+                } else if ($.array.has(["radio", "checkbox"]) && el.checked) {
+                    data.push(encodeURIComponent(elName) +"="+
+                        (elType == "checkbox" ? (el.value != null ? el.value : "on") : encodeURIComponent(el.value)));
                 } else {
-                    switch (type) {
-                        case "radio":
-                        case "checkbox":
-                            if (el.checked) {
-                                data.push(encodeURIComponent(name) +"="+
-                                    (type === "checkbox" ? (el.value != null ? el.value : "on") : encodeURIComponent(el.value)));
-                            }
-                            break;
-                        default:
-                            data.push(encodeURIComponent(name) +"="+ encodeURIComponent(el.value));
-                    }
+                    data.push(encodeURIComponent(elName) +"="+ encodeURIComponent(el.value));
                 }
             }
-        }
-        data = data.join("&");
-        if (ws2plus !== false) {
-            data = data.replace(/%20/g, "+");
+            data = data.join("&");
+            if (plus !== false) {
+                data = data.replace(/%20/g, "+");
+            }
         }
         return data;
     },
     buildQueryArray: function() {
         var tmp = this.buildQuery(false), array = {};
         $.forEach(tmp.split("&"), function(a){
-            a = a.split("=");
-            array[decodeURIComponent(a[0])] = decodeURIComponent(a[1]);
+            a = a.split("="), array[decodeURIComponent(a[0])] = decodeURIComponent(a[1]);
         });
         return array;
     }
@@ -1269,12 +1242,12 @@ $.extend(Dom.prototype, {
 $.extend(Dom.prototype, {
     getWindow: function(el /*internal*/){
         if (el = this[0]) {
-            return this.__init(el.contentWindow);
+            return initDom(el.contentWindow);
         }
     },
     getDocument: function(el /*internal*/){
         if (el = this[0]) {
-            return this.__init(el.contentDocument || el.contentWindow.document);
+            return initDom(el.contentDocument || el.contentWindow.document);
         }
     }
 });
@@ -1316,7 +1289,7 @@ function getDefaultDisplay(tagName) {
         display = defaultDisplays[tagName] = getStyle(el, "display");
         document.body.removeChild(el);
 
-        if (!display || display === "none") {
+        if (!display || display == "none") {
             if (!ddIframe) {
                 ddIframe = document.createElement("iframe");
                 ddIframe.width = ddIframe.height = ddIframe.frameBorder = 0;
@@ -1344,7 +1317,7 @@ if ($.animate) {
     $.extend(Dom.prototype, {
         animate: function(properties, duration, callback, easing) {
             // stop previous animation
-            if (properties === "stop") {
+            if (properties == "stop") {
                 return this.forEach(function(el){
                     var animation = el.$animation;
                     if (animation && animation.running) {
@@ -1365,7 +1338,7 @@ if ($.animate) {
         },
         fadeOut: function(duration, callback) {
             // remove element after fading out
-            if (callback === true || callback === "remove") {
+            if (callback === true || callback == "remove") {
                 callback = function(el) {
                     $.dom(el).remove();
                 };
@@ -1418,7 +1391,7 @@ if ($.animate) {
 
 // add `dom` to so
 $.dom = function(selector, root, i) {
-    return (new Dom).__init(selector, root, i);
+    return initDom(selector, root, i);
 };
 
 // define exposer
