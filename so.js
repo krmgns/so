@@ -30,6 +30,13 @@ if (!sp.toFloat) { sp.toFloat = function() {
 if (!sp.isNumeric) { sp.isNumeric = function(s /* internal */) {
     return (s = (s != null) ? s : this) !== "" && !isNaN(parseFloat(this)) && isFinite(this);
 }}
+if (!sp.format) { sp.format = function() {
+    var s = this, ms = s.match(/(%s)/g) || [], i = 0, m;
+    while (m = ms.shift()) {
+        s = s.replace(/(%s)/, arguments[i++]);
+    }
+    return s;
+}}
 
 /*** the so ***/
 var so = {
