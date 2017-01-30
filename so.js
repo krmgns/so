@@ -2,14 +2,13 @@
  * @name: so
  */
 
-function log(s) { console.log(s) }
+function log(s) { console.log.apply(console, arguments); }
 
 ;(function(window, undefined) {
 
 "use strict"; // @tmp
 
 var _uuid = 0,
-    fn_toString = {}.toString,
     re_trim = /^\s+|\s+$/g,
     re_browsers = {
         chrome: /chrome\/([\d\.]+)/,
@@ -17,7 +16,8 @@ var _uuid = 0,
         firefox: /firefox\/([\d\.]+)/,
         opera: /opera.*?version\/([\d\.]+)/,
         ie: /msie\s+([\d\.]+)/
-    };
+    },
+    fn_toString = {}.toString;
 
 /*** the so ***/
 var so = {
@@ -196,9 +196,26 @@ so.browser = function() {
             break;
         }
     }
-    browser[k] = true;
-    browser["version"] = parseFloat(re && re[1]);
-    browser["versionOrig"] = re[1];
+
+    if (re) {
+        browser[k] = true;
+        if (re[1]) {
+            var versionArray = (function() {
+                var nums = re[1].split("."), i;
+                for (i = 0; i < nums.length; i++) {
+                    nums[i] = parseInt(nums[i]);
+                }
+                return nums;
+            })();
+            var versionString = versionArray.slice(0,2).join(".");
+            browser["version"] = parseFloat(versionString);
+            browser["versionArray"] = versionArray;
+            browser["versionString"] = versionString;
+            browser["versionOrig"] = re[1];
+        }
+    }
+    log(browser)
+
     return browser;
 }();
 
