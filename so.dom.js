@@ -48,15 +48,23 @@ function RE(re, flags, x /*internal*/) {
 }
 
 function isNode(node) {
-    return node && (node.nodeType == 1 || node.nodeType == 11);
+    return node && (node.nodeType === 1 || node.nodeType == 11);
 }
 
 function isNodeElement(node) {
-    return node && node.nodeType == 1;
+    return node && node.nodeType === 1;
+}
+
+function isWindowOrDocument(x, type /*internal*/) {
+    return (type = type || $.typeOf(x)) && type == "window" || type == "document";
+}
+
+function isHtmlOrBody(x, tag /*internal*/) {
+    return (tag = tag || getTagName(x)) && tag == "html" || tag == "body";
 }
 
 function getTagName(node) {
-    return node && node.nodeName && node.nodeName.toLowerCase();
+    return node && (node.nodeName && node.nodeName.toLowerCase() || node == node.window && "#window");
 }
 
 function getByTag(root, tag, i) {
@@ -389,7 +397,7 @@ var fixedStyles = {
 if (DOC.defaultView && DOC.defaultView.getComputedStyle) {
     getStyle = function(el, key) {
         var styles;
-        return (styles = $.doc(el).defaultView.getComputedStyle(el, ""))
+        return el && (styles = $.doc(el).defaultView.getComputedStyle(el, ""))
                    ? styles[key] || styles.getPropertyValue(key) || ""
                        : "";
     };
@@ -451,9 +459,9 @@ function rgbToHex(color) {
 }
 
 function getOffset(el, rel) {
-    var tag = getTagName(el), rect = {top: 0, left: 0};
+    var rect = {top: 0, left: 0};
 
-    if (rel && (tag == "body" || tag == "html")) {
+    if (rel && isHtmlOrBody(el)) {
         return rect;
     }
 
@@ -474,12 +482,9 @@ function getOffset(el, rel) {
 }
 
 function getScroll(el, type /*internal*/) {
-    type = type || $.typeOf(el);
-
     var tag, scroll, doc, docEl, win;
 
-    if (type == "window" || type == "document" ||
-            ((tag = getTagName(el)) && tag == "html" || tag == "body")) {
+    if (isWindowOrDocument(el, type) || isHtmlOrBody(el)) {
         // ie issue: works only if `onscroll` called, does not work on `onload`
         doc = $.doc(el);
         win = $.win(doc);
@@ -491,6 +496,7 @@ function getScroll(el, type /*internal*/) {
     } else {
         scroll = {top: el.scrollTop, left: el.scrollLeft};
     }
+
     return scroll;
 }
 
@@ -500,7 +506,7 @@ function classRE(cls) {
 
 // qwery integration (for now, qwery will be removed in the future)
 function query(selector, root) {
-    return qwery(selector, root);
+    return ($.query || qwery)(selector, root);
 }
 
 function isDomInstance(x) {
@@ -514,7 +520,7 @@ function initDom(selector, root, i) {
 
     // somehow qwery does not catch iframe windows (detected while adding getWindow() method)
     var type = $.typeOf(selector);
-    if (type == "window" || type == "document") {
+    if (isWindowOrDocument(null, type)) {
         return new Dom(selector, selector);
     }
 
@@ -548,14 +554,14 @@ function initDom(selector, root, i) {
 /*** the dom ***/
 function Dom(nodes, selector) {
     // set length first
-    this.length = 0;
+    this._length = 0;
     if (nodes) {
         nodes = (!nodes.nodeType && typeof nodes.length == "number") // for node list or arrays
-                    && /*and*/ (!nodes.document || !nodes.document.nodeType)  // for window
-                        ? nodes /*get node list*/ : [nodes] /*make array*/;
+            && /*and*/ (!nodes.document || !nodes.document.nodeType) // for window
+                ? nodes /*get node list*/ : [nodes] /*make array*/;
         for (var i = 0, len = nodes.length; i < len; i++) {
             if (nodes[i]) {
-                this[this.length++] = nodes[i];
+                this[this._length++] = nodes[i];
             }
         }
     }
@@ -604,6 +610,12 @@ Dom.prototype = {
     forEach: function(fn) {
         return $.forEach(this, fn, this /*scope*/);
     },
+    length: function(){
+        return this._length;
+    },
+    isEmpty: function(){
+        return !this._length;
+    },
     map: function(fn) {
         return initDom($.array.map(this, function(_, el){
             return fn(el);
@@ -619,13 +631,16 @@ Dom.prototype = {
         return initDom(this.toArray().reverse());
     },
     get: function(i) {
-        return initDom(this[i = (i != null) ? i : 0]);
+        return this[i = (i != null) ? i : 0];
+    },
+    getItem: function(i) {
+        return initDom(this.get(i));
     },
     first: function() {
-        return this.get(0);
+        return this.getItem(0);
     },
     last: function() {
-        return this.get(this.length - 1);
+        return this.getItem(this._length - 1);
     },
     tag: function() {
         return getTagName(this[0]);
@@ -882,57 +897,58 @@ $.extend(Dom.prototype, {
         }
     },
     width: function() {
-        var el = this[0];
-        if (el && el.alert) return this.dimensions("window").width;
-        if (el && el.nodeType == 9) return this.dimensions("document").width;
-        return this.innerWidth(el) - sumComputedPixels(el, ["paddingLeft", "paddingRight"]);
+        var el = this[0], type = $.typeOf(el);
+        if (el) {
+            if (type == "window") return this.dimensions(type).width;
+            if (type == "document") return this.dimensions(type).width;
+            return this.innerWidth(el) - sumComputedPixels(el, ["paddingLeft", "paddingRight"]);
+        }
     },
     height: function() {
-        var el = this[0];
-        if (el && el.alert) return this.dimensions("window").height;
-        if (el && el.nodeType == 9) return this.dimensions("document").height;
-        return this.innerHeight(el) - sumComputedPixels(el, ["paddingTop", "paddingBottom"]);
+        var el = this[0], type = $.typeOf(el);
+        if (el) {
+            if (type == "window") return this.dimensions(type).height;
+            if (type == "document") return this.dimensions(type).height;
+            return this.innerHeight(el) - sumComputedPixels(el, ["paddingTop", "paddingBottom"]);
+        }
     },
     dimensions: function(type /*internal*/) {
         var el = this[0];
-        type = type || $.typeOf(el);
-        if (type == "window") {
-            var doc = el.document,
-                docBody = doc.body,
-                docEl = doc.documentElement,
-                css1Compat = (doc.compatMode == "CSS1Compat");
-            return {
-                width: css1Compat && docEl.clientWidth ||
-                            docBody && docBody.clientWidth || docEl.clientWidth,
-                height: css1Compat && docEl.clientHeight ||
-                            docBody && docBody.clientHeight || docEl.clientHeight
-            };
+        if (el) {
+            type = type || $.typeOf(el);
+            if (type == "window") {
+                var doc = el.document,
+                    docBody = doc.body,
+                    docEl = doc.documentElement,
+                    css1Compat = (doc.compatMode == "CSS1Compat");
+                return {
+                    width: css1Compat && docEl.clientWidth || docBody && docBody.clientWidth || docEl.clientWidth,
+                    height: css1Compat && docEl.clientHeight || docBody && docBody.clientHeight || docEl.clientHeight
+                };
+            }
+            if (type == "document") {
+                var docBody = el.body,
+                    docEl = el.documentElement,
+                    width = Math.max(docBody.scrollWidth, docBody.offsetWidth, docEl.scrollWidth, docEl.offsetWidth),
+                    height = Math.max(docBody.scrollHeight, docBody.offsetHeight, docEl.scrollHeight, docEl.offsetHeight);
+                // fix for ie
+                if (ie && docEl.clientWidth >= docEl.scrollWidth) width = docEl.clientWidth;
+                if (ie && docEl.clientHeight >= docEl.scrollHeight) height = docEl.clientHeight;
+                return {width: width, height: height};
+            }
+            return {width: this.width(), height: this.height()};
         }
-        if (type == "document") {
-            var docBody = el.body,
-                docEl = el.documentElement,
-                width = Math.max(docBody.scrollWidth, docBody.offsetWidth,
-                                 docEl.scrollWidth, docEl.offsetWidth),
-                height = Math.max(docBody.scrollHeight, docBody.offsetHeight,
-                                  docEl.scrollHeight, docEl.offsetHeight);
-            // fix for ie
-            if (ie && docEl.clientWidth >= docEl.scrollWidth) width = docEl.clientWidth;
-            if (ie && docEl.clientHeight >= docEl.scrollHeight) height = docEl.clientHeight;
-            return {width: width, height: height};
-        }
-        return {width: this.width(), height: this.height()};
     },
     viewport: function() {
-        if ($.typeOf(this[0]) != "window") {
-            throw ("so.dom.viewport(): This function only for `window`, use `so.dom.dimensions()` instead.");
+        // only for `window`, use `dimensions()` instead
+        if ($.typeOf(this[0]) == "window") {
+            return this.dimensions();
         }
-        return this.dimensions();
     },
     offset: function(rel) {
-        var el, type;
-        if (el = this[0]) {
-            type = $.typeOf(el);
-            if (type == "window" || type == "document") {
+        var el = this[0];
+        if (el) {
+            if (isWindowOrDocument(el)) {
                 return {top: 0, left: 0};
             }
             // get real & relative position
@@ -955,9 +971,9 @@ $.extend(Dom.prototype, {
         }
     },
     scroll: function(top, left) {
-        var el, type;
-        if (el = this[0]) {
-            type = $.typeOf(el);
+        var el = this[0];
+        if (el) {
+            var type = $.typeOf(el);
             // get scroll top | left
             if (typeof top == "string") {
                 return getScroll(el, type)[top];
@@ -967,8 +983,8 @@ $.extend(Dom.prototype, {
                 return getScroll(el, type);
             }
             // set scroll top & left
-            var doc, win, tag;
-            if (type == "window" || type == "document" || ((tag = getTagName(el)) && tag == "html" || tag == "body")) {
+            var doc, win;
+            if (isWindowOrDocument(null, type) || isHtmlOrBody(el)) {
                 doc = $.doc(el);
                 win = $.win(doc);
                 win.scrollTo(left, top);
@@ -1249,15 +1265,37 @@ $.extend(Dom.prototype, {
 
 // dom: iframe tools
 $.extend(Dom.prototype, {
-    getWindow: function(el /*internal*/){
-        if (el = this[0]) {
+    getWindow: function(el){
+        if (el = (el || this[0])) {
             return initDom(el.contentWindow);
         }
     },
-    getDocument: function(el /*internal*/){
-        if (el = this[0]) {
+    getDocument: function(el){
+        if (el = (el || this[0])) {
             return initDom(el.contentDocument || el.contentWindow.document);
         }
+    }
+});
+
+// dom: detection tools
+$.extend(Dom.prototype, {
+    isWindow: function(el) {
+        return $.typeOf(el || this[0]) == "window";
+    },
+    isDocument: function(el) {
+        return $.typeOf(el || this[0]) == "document";
+    },
+    isNode: function(el) {
+        return isNode(el || this[0]);
+    },
+    isNodeElement: function(el) {
+        return isNodeElement(el || this[0]);
+    },
+    isRoot: function(el) {
+        return (el = el || this[0]) && !el.parentNode && !this.isWindow(el);
+    },
+    isRootElement: function(el) {
+        return (el = el || this[0]) && isNodeElement(el) && !isNodeElement(el.parentNode);
     }
 });
 

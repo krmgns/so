@@ -1,5 +1,7 @@
 // add user defined methods to elements
 - $.dom.defineMethod(function(element){ ... })
 
-// etc shotcuts
-- $el.isChecked(), $el.isSelected()
+// etc
+- add so.query.js
+- use so.query() in so-all.js
+- remove qwery from so-all-native.js

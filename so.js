@@ -43,85 +43,96 @@ if (!sp.format) { sp.format = function() {
 
 /*** the so ***/
 var so = {
-    fun: function() { return function(){}; },
-
-    now: function() {
-        return Date.now ? Date.now() : (new Date).getTime();
+    fun: function() {
+        return function(){};
     },
-
+    now: function() {
+        return +(new Date);
+    },
     uuid: function() {
         return ++_uuid;
     },
-
     win: function(el) {
         if (!el) {
             return window;
         }
-        return (el == el.window)
-            ? el : el.nodeType === 9
-            ? (el.defaultView || el.parentWindow) : null;
+        if (el == el.window) {
+            return el;
+        }
+        return el.nodeType == 9 ? (el.defaultView || el.parentWindow) : null;
     },
-
     doc: function(el) {
-        return (el && el.ownerDocument) || window.document;
+        return el ? el.ownerDocument : window.document;
     },
-
     trim: function(s) {
         return (s != null) ? (""+ s).replace(re_trim, "") : "";
     },
-
+    dig: function(input, key) {
+        if (input && typeof input == "object") {
+            var keys = (""+ key).split("."), key = keys.shift();
+            if (!keys.length) {
+                return input[key];
+            }
+            return this.dig(input[key], keys.join("."));
+        }
+    },
     typeOf: function(x) {
         if (x === null) {
             return "null";
         }
-        if (x === undefined || typeof x === "undefined") {
+        if (typeof x == "undefined") {
             return "undefined";
         }
-        if (x.alert && x == x.window) {
+        if (x == x.window) {
             return "window";
         }
-        if (x.nodeType === 9) {
+        if (x.nodeType == 9) {
             return "document";
         }
-
         return fn_toString.call(x).slice(8, -1).toLowerCase();
     },
-
-    isSet: function(x, i) {
-        return (i == null) ? x != null : x[i] != null;
-    },
-
-    isEmpty: function(x) {
-        var type = this.typeOf(x), i;
-
-        // "", null, false, undefined, 0, NaN
-        if (!x || type === "undefined") {
-            return true;
-        }
-        if (type === "array" || typeof x.length === "number") {
-            return !x.length;
-        }
-        if (type === "object") {
-            for (i in x) {
-                return false;
+    isNone: function() {
+        if (arguments.length) {
+            for (var i = 0; i < arguments.length; i++) {
+                if (arguments[i] == null) {
+                    return true;
+                }
             }
-            return true;
+            return false;
         }
-
-        return false;
     },
-
+    isSet: function(x, i) {
+        return (i == null) ? x != null : this.dig(x, i) != null;
+    },
+    isEmpty: function(x) {
+        if (arguments.length) {
+            for (var i = 0, x; i < arguments.length; i++) {
+                x = arguments[i];
+                // "", null, undefined, false, 0, NaN
+                if (!x) {
+                    return true;
+                }
+                if (typeof x.length == "number") {
+                    return !x.length;
+                }
+                if (typeof x == "object") {
+                    for (i in x) { return false; } return true;
+                }
+            }
+            return false;
+        }
+    },
     forEach: function(input, fn, scope) {
         var len = input && input.length, i;
-        if (len !== undefined) {
-            // value => i
+        if (len != null) {
+            // array: value => i
             for (i = 0; i < len; i++) {
                 if (false === fn.call(scope || input[i], input[i], i, input)) {
                     break;
                 }
             }
         } else {
-            // key => value
+            // object: key => value
             for (i in input) {
                 if (false === fn.call(scope || input[i], i, input[i], input)) {
                     break;
@@ -130,8 +141,7 @@ var so = {
         }
         return scope || input;
     },
-
-    // note: options = $.mix({}, defaultOptions, options);
+    // notation: options = $.mix({}, defaultOptions, options);
     mix: function() {
         var args = arguments, i = 1, target, source;
         if (args.length < 2) {
@@ -140,29 +150,23 @@ var so = {
         target = args[0];
         while (source = args[i++]) {
             for (var key in source) {
-                source.hasOwnProperty(key)
-                    && (target[key] = source[key]);
+                source.hasOwnProperty(key) && (target[key] = source[key]);
             }
         }
         return target;
     },
-
     extend: function(target, source) {
         var targetType = typeof target,
             sourceType = typeof source;
 
-        if (targetType === "object" && sourceType === "undefined") {
-            // self extend
-            source = target, target = this;
-        } else if (targetType === "string") {
-            target = !this[target]
-                ? this[target] = {}
-                : this[target];
+        if (targetType == "object" && sourceType == "undefined") {
+            source = target, target = this; // self extend
+        } else if (targetType == "string") {
+            target = !this[target] ? this[target] = {} : this[target];
         }
 
         return this.mix(target, source);
     },
-
     toString: function() {
         var args = arguments;
         if (!args.length) {
@@ -185,7 +189,7 @@ function fireCallbacks() {
 
 // on ready
 so.onReady = function(callback, document) {
-    if (typeof callback === "function") {
+    if (typeof callback == "function") {
         callbacks.push(callback);
     }
 
@@ -202,7 +206,7 @@ so.onReady = function(callback, document) {
 
     // credits https://developer.mozilla.org/DOM/document.readyState
     document.onreadystatechange = function() {
-        if (this.readyState === "complete") {
+        if (this.readyState == "complete") {
             document.onreadystatechange = null;
             fireCallbacks();
         }
@@ -223,14 +227,15 @@ so.browser = function() {
         browser[k] = true;
         if (re[1]) {
             var versionArray = (function() {
-                var nums = re[1].split("."), i;
-                for (i = 0; i < nums.length; i++) {
-                    nums[i] = parseInt(nums[i]);
+                var i = 0, nums = re[1].split(".");
+                while (i < nums.length) {
+                    nums[i] = nums[i].toInt();
+                    i++;
                 }
                 return nums;
             })();
             var versionString = versionArray.slice(0,2).join(".");
-            browser["version"] = parseFloat(versionString);
+            browser["version"] = versionString.toFloat();
             browser["versionArray"] = versionArray;
             browser["versionString"] = versionString;
             browser["versionOrig"] = re[1];
@@ -240,7 +245,7 @@ so.browser = function() {
     return browser;
 }();
 
-// some more extensions..
+// some more tools..
 so.ext = {}, so.array = {}, so.object = {};
 
 // `so` to window
