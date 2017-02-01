@@ -2,54 +2,99 @@
  * @name: so
  */
 
-// simple compatibility check
-if (![].forEach) {
-    throw ('Archaic browser!');
-}
-
 // log shotcut
-function log(s) {
-    console.log.apply(console, arguments);
-}
+function log(s) { console.log.apply(console, arguments); }
 
-;(function(window) {
+;(function(window, undefined) {
 
 'use strict';
 
-// shorthand string helpers
+// simple support check
+if (!''.trim) {
+    throw ('Archaic browser!');
+}
+
+var so = {}, _uuid = 0, fn_toString = {}.toString;
+
+// base helpers
+function mix() {
+    var args = arguments, i = 1, target = args[0], source;
+    if (target) {
+        while (source = args[i++]) {
+            for (var key in source) {
+                if (source.hasOwnProperty(key)) {
+                    target[key] = source[key];
+                }
+            }
+        }
+    }
+    return target;
+}
+
+function extend(target, source) {
+    return mix(target, source);
+}
+
 function isNumeric(s) {
     return !isNaN(parseFloat(s)) && isFinite(s);
 }
 
-String.prototype.toInt = function(base) {
-    return isNumeric(this) ? parseInt(this.replace(/^-?\.(.+)/, '0.\$1'), base || 10) : null;
-}
-String.prototype.toFloat = function() {
-    return isNumeric(this) ? parseFloat(this) : null;
-}
-String.prototype.isNumeric = function() {
-    return isNumeric(this);
-}
-String.prototype.format = function() {
-    var s = this, ms = s.match(/(%s)/g) || [], i = 0, m;
-    if (ms.length > arguments.length) {
-        throw ('No arguments enough!');
-    }
-    while (m = ms.shift()) {
-        s = s.replace(/(%s)/, arguments[i++]);
-    }
-    return s;
-}
-String.prototype.toCapitalCase = function(all) {
-    var s = this.toLowerCase(), i;
-    if (all !== false) {
-        for (i = 0, s = s.split(' '); i < s.length; i++) {
-            s[i] = s[i].toCapitalCase(false);
+// shorthand string helpers
+extend(String.prototype, {
+    toInt: function(base) {
+        return isNumeric(this) ? parseInt(this.replace(/^-?\.(.+)/, '0.\$1'), base || 10) : null;
+    },
+    toFloat: function() {
+        return isNumeric(this) ? parseFloat(this) : null;
+    },
+    isNumeric: function() {
+        return isNumeric(this);
+    },
+    format: function() {
+        var s = this, ms = s.match(/(%s)/g) || [], i = 0, m;
+        if (ms.length > arguments.length) {
+            throw ('No arguments enough!');
         }
-        return s.join(' ');
+        while (m = ms.shift()) {
+            s = s.replace(/(%s)/, arguments[i++]);
+        }
+        return s;
+    },
+    trimLeft: function(cs) {
+        var s = this, cs, re = cs;
+        if (cs.trim) { // charset given
+            cs = escapeRegExpInput(cs) || '\\s', re = new RegExp('^['+ cs +']+');
+        }
+        while (re.test(s)) {
+            s = s.replace(re, '');
+        }
+        return s;
+    },
+    trimRight: function(cs) {
+        var s = this, cs, re = cs;
+        if (cs.trim) { // charset given
+            cs = escapeRegExpInput(cs) || '\\s', re = new RegExp('['+ cs +']+$');
+        }
+        log(re, re.exec(s))
+        while (re.test(s)) {
+            s = s.replace(re, '');
+        }
+        return s;
+    },
+    trim: function(cs) {
+        return this.trimLeft(cs).trimRight(cs);
+    },
+    toCapitalCase: function(all) {
+        var s = this.toLowerCase(), i;
+        if (all !== false) {
+            for (i = 0, s = s.split(' '); i < s.length; i++) {
+                s[i] = s[i].toCapitalCase(false);
+            }
+            return s.join(' ');
+        }
+        return s.charAt(0).toUpperCase() + s.slice(1);
     }
-    return s.charAt(0).toUpperCase() + s.slice(1);
-}
+});
 
 function forEach(input, fn, scope) {
     var len = input && input.length, i;
@@ -82,10 +127,16 @@ function freeze(object, deep) {
     return Object.freeze(object);
 }
 
-var uuid = 0;
+function escapeRegExpInput(input) {
+    return (''+ input).replace(/([\/\.\+\*\^\?\$\=\!\|\:\-\[\]\(\)\{\}\<\>\\])/g, '\\\$1');
+}
+
+function search(src, s) {
+    return src.indexOf(s) > -1;
+}
 
 /*** the so ***/
-var so = {
+extend(so, {
     fun: function() {
         return function(){};
     },
@@ -93,12 +144,12 @@ var so = {
         return +(new Date);
     },
     uuid: function() {
-        return ++uuid;
+        return ++_uuid;
     },
     win: function(el) {
         if (!el) return window;
         if (el == el.window) return el;
-        var elType = e.nodeType;
+        var elType = el.nodeType;
         if (elType == 1) {
             el = el.ownerDocument; // find el document
         }
@@ -107,35 +158,36 @@ var so = {
     doc: function(el) {
         return el ? el.ownerDocument : window.document;
     },
-    trim: function(s, chars) {
-        return (s != null) ? (""+ s).trim() : "";
+    trim: function(s, cs) {
+        return (s != null) ? s.trim(cs) : '';
+    },
+    trimLeft: function(s, cs) {
+        return (s != null) ? s.trimLeft(cs) : '';
+    },
+    trimRight: function(s, cs) {
+        return (s != null) ? s.trimRight(cs) : '';
     },
     dig: function(input, key) {
-        if (input && typeof input == "object") {
-            var keys = (""+ key).split("."), key = keys.shift();
+        if (input && typeof input == 'object') {
+            var keys = (''+ key).split('.'), key = keys.shift();
             if (!keys.length) {
                 return input[key];
             }
-            return this.dig(input[key], keys.join("."));
+            return this.dig(input[key], keys.join('.'));
         }
     },
     freeze: function(input, deep) {
         return freeze(input, deep);
     },
-    typeOf: function(x) {
-        if (x === null) {
-            return "null";
+    typeOf: function(x, real) {
+        if (x === null)              return 'null';
+        if (x === undefined)         return 'undefined';
+        if (real) {
+            if (isNumeric(x))        return 'numeric';
+            if (x.nodeType == 1)     return 'element';
+            if (x.nodeType == 9)     return 'document';
         }
-        if (typeof x == "undefined") {
-            return "undefined";
-        }
-        if (x == x.window) {
-            return "window";
-        }
-        if (x.nodeType == 9) {
-            return "document";
-        }
-        return {}.toString.call(x).slice(8, -1).toLowerCase();
+        return fn_toString.call(x).slice(8, -1).toLowerCase();
     },
     isNone: function() {
         if (arguments.length) {
@@ -155,9 +207,9 @@ var so = {
             for (var i = 0, key, value; i < arguments.length; i++) {
                 value = arguments[i];
                 log(value)
-                if (!value) return true; // "", null, undefined, false, 0, NaN
-                if (typeof value.length == "number") return !value.length;
-                if (typeof value == "object") { for (key in value) { return false; } return true; }
+                if (!value) return true; // '', null, undefined, false, 0, NaN
+                if (typeof value.length == 'number') return !value.length;
+                if (typeof value == 'object') { for (key in value) { return false; } return true; }
             }
             return false;
         }
@@ -172,13 +224,7 @@ var so = {
             throw ("$.mix() accepts at least 2 arguments!");
         }
 
-        while (source = args[i++]) {
-            for (var key in source) {
-                if (source.hasOwnProperty(key)) target[key] = source[key];
-            }
-        }
-
-        return target;
+        return mix.apply(null, arguments);
     },
     extend: function(target, source) {
         var targetType = typeof target,
@@ -191,7 +237,7 @@ var so = {
             target = !this[target] ? this[target] = {} : this[target];
         }
 
-        return this.mix(target, source);
+        return mix(target, source);
     },
     toString: function() {
         var args = arguments;
@@ -204,12 +250,19 @@ var so = {
             return "[object "+ args[1] +"]";
         };
     }
-};
+});
 
+// is* functions
+extend(so, {
+    isString: function(x) {},
+    // ...
+});
+
+// browser
 so.browser = (function() {
     var foo, nav = window.navigator, re, name,
         ua = nav.userAgent.toLowerCase(), uap = nav.platform.toLowerCase(),
-        browser = {}, src = /(chrome|safari|firefox|opera|msie|trident(?=\/))\/?\s*([\d.]+)/,
+        browser = {}, re_src = /(chrome|safari|firefox|opera|msie|trident(?=\/))\/?\s*([\d.]+)/,
         fns_os = ['isMac', 'isWindows', 'isLinux', 'isUnix'],
         fns_ua = ['isChrome', 'isSafari', 'isFirefox', 'isOpera', 'isIE', 'isTrident'],
         ret_isTouchDevice = nav.maxTouchPoints > 0 || 'ontouchstart' in window,
@@ -217,10 +270,6 @@ so.browser = (function() {
 
     browser.isTouchDevice = function() { return ret_isTouchDevice; };
     browser.isMobileDevice = function() { return ret_isMobileDevice; };
-
-    function search(src, s) {
-        return src.indexOf(s) > -1;
-    }
 
     // set 'is' functions for os
     fns_os.forEach(function(fn) {
@@ -239,7 +288,7 @@ so.browser = (function() {
         browser[fn] = function() { return false; };
     });
 
-    if (re = src.exec(ua)) {
+    if (re = re_src.exec(ua)) {
         if (re[1]) {
             browser['name'] = (re[1] == 'msie') ? 'ie' : re[1];
             // re-set 'is' function
