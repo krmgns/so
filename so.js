@@ -220,13 +220,13 @@ var so = {
     },
     isEmpty: function() {
         if (arguments.length) {
-            // so.isEmpty(1) == true ???
             for (var i = 0, key, value; i < arguments.length; i++) {
+                value = arguments[i];
+                log(value)
                 if (!value) return true; // "", null, undefined, false, 0, NaN
                 if (typeof value.length == "number") return !value.length;
                 if (typeof value == "object") { for (key in value) { return false; } return true; }
             }
-            log("..")
             return false;
         }
     },
