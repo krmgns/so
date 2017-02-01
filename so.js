@@ -96,13 +96,13 @@ var so = {
         return ++uuid;
     },
     win: function(el) {
-        if (!el) {
-            return window;
+        if (!el) return window;
+        if (el == el.window) return el;
+        var elType = e.nodeType;
+        if (elType == 1) {
+            el = el.ownerDocument; // find el document
         }
-        if (el == el.window) {
-            return el;
-        }
-        return el.nodeType == 9 ? (el.defaultView || el.parentWindow) : null;
+        return elType == 9 ? el.defaultView : null;
     },
     doc: function(el) {
         return el ? el.ownerDocument : window.document;
