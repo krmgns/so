@@ -190,9 +190,10 @@ extend(so, {
         return fn_toString.call(x).slice(8, -1).toLowerCase();
     },
     isNone: function() {
-        if (arguments.length) {
-            for (var i = 0; i < arguments.length; i++) {
-                if (arguments[i] == null) {
+        var args = arguments, argsLen = args.length, i = 0;
+        if (argsLen) {
+            while (i < argsLen) {
+                if (args[i++] == null) {
                     return true;
                 }
             }
@@ -203,10 +204,10 @@ extend(so, {
         return (i == null) ? x != null : this.dig(x, i) != null;
     },
     isEmpty: function() {
-        if (arguments.length) {
-            for (var i = 0, key, value; i < arguments.length; i++) {
-                value = arguments[i];
-                log(value)
+        var args = arguments, argsLen = args.length, i = 0, key, value;
+        if (argsLen) {
+            while (i < argsLen) {
+                value = args[i++];
                 if (!value) return true; // '', null, undefined, false, 0, NaN
                 if (typeof value.length == 'number') return !value.length;
                 if (typeof value == 'object') { for (key in value) { return false; } return true; }
