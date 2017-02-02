@@ -21,6 +21,6 @@ $.extend($.ext, {
 });
 
 // define exposer
-$.toString("ext", "so.ext");
+$.toString("ext");
 
 })(so);

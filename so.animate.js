@@ -152,6 +152,6 @@ $.animate = function(el, properties, duration, callback, easing) {
 };
 
 // define exposer
-$.toString("animate", "so.animate");
+$.toString("animate");
 
 })(so);

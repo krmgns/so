@@ -66,6 +66,6 @@ $.extend($.array, {
 });
 
 // define exposer
-$.toString("array", "so.array");
+$.toString("array");
 
 })(so);

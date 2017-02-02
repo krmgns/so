@@ -422,6 +422,6 @@ $.forEach(["Xml", "Json", "Html"], function(dataType){
 // $.ajax.remote = function() {};
 
 // define exposer
-$.toString("ajax", "so.ajax");
+$.toString("ajax");
 
 })(so);

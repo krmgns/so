@@ -63,6 +63,6 @@ $.extend($.object, {
 });
 
 // define exposer
-$.toString("object", "so.object");
+$.toString("object");
 
 })(so);

@@ -1442,6 +1442,6 @@ $.dom = function(selector, root, i) {
 };
 
 // define exposer
-$.toString("dom", "so.dom");
+$.toString("dom");
 
 })(so);
