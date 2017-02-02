@@ -14,9 +14,6 @@ function log(s) { console.log.apply(console, arguments); }
         throw ('Archaic browser!');
     }
 
-    var so = {ext: {}, array: {}, object: {}},
-        _uuid = 0, fn_toString = {}.toString;
-
     // base helpers
     function mix() {
         var args = arguments, i = 1, target = args[0], source;
@@ -40,7 +37,7 @@ function log(s) { console.log.apply(console, arguments); }
         return !isNaN(parseFloat(s)) && isFinite(s);
     }
 
-    // shorthand string helpers
+    // string helpers
     extend(String.prototype, {
         toInt: function(base) {
             return isNumeric(this)
@@ -121,7 +118,9 @@ function log(s) { console.log.apply(console, arguments); }
         return (''+ input).replace(/([\/\.\+\*\^\?\$\=\!\|\:\-\[\]\(\)\{\}\<\>\\])/g, '\\\$1');
     }
 
-    /*** the so ***/
+    var so = {ext: {}, array: {}, object: {}},
+        _uuid = 0, fn_toString = {}.toString;
+
     extend(so, {
         fun: function() {
             return function(){};
