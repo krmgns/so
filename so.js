@@ -43,7 +43,8 @@ function log(s) { console.log.apply(console, arguments); }
     // shorthand string helpers
     extend(String.prototype, {
         toInt: function(base) {
-            return isNumeric(this) ? parseInt(this.replace(/^-?\.(.+)/, '0.\$1'), base || 10) : null;
+            return isNumeric(this)
+                ? parseInt(this.replace(/^-?\.(.+)/, '0.\$1'), base || 10) : null;
         },
         toFloat: function() {
             return isNumeric(this) ? parseFloat(this) : null;
@@ -271,7 +272,7 @@ function log(s) { console.log.apply(console, arguments); }
         }
     }
 
-    // on ready
+    // oh baybe..
     so.onReady = function(callback, document) {
         if (typeof callback == 'function') {
             callbacks.push(callback);
@@ -280,8 +281,8 @@ function log(s) { console.log.apply(console, arguments); }
         // iframe support
         document = document || window.document;
 
-        document.addEventListener('DOMContentLoaded', function DOMContentLoaded(){
-            document.removeEventListener('DOMContentLoaded', DOMContentLoaded, false);
+        document.addEventListener('DOMContentLoaded', function _(){
+            document.removeEventListener('DOMContentLoaded', _, false);
             fireCallbacks();
         }, false);
     };
