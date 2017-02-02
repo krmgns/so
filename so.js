@@ -229,6 +229,12 @@ function log(s) { console.log.apply(console, arguments); }
         isNone: function(x) {
             return x == null;
         },
+        isNull: function(x) {
+            return x === null;
+        },
+        isUndefined: function(x) {
+            return x === undefined;
+        },
         isInt: function(x) {
             return this.isNumber(x) && x % 1 == 0 && x != 1.0;
         },
@@ -254,8 +260,10 @@ function log(s) { console.log.apply(console, arguments); }
             return x && x.constructor == Object;
         },
         isIterable: function(x) {
-            return this.isArray(x) || this.isObject(x)
-                || (Symbol && Symbol.iterator && x && typeof x[Symbol.iterator] == 'function');
+            return this.isArray(x) || this.isObject(x);
+        },
+        isTypeOf: function(x, type) {
+            return this.typeOf(x) == type;
         }
     });
 
