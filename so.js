@@ -16,12 +16,12 @@ function log(s) { console.log.apply(console, arguments); }
 
     // base helpers
     function mix() {
-        var args = arguments, i = 1, target = args[0], source;
+        var sources = arguments, source, target = sources[0], i = 1, k;
         if (target) {
-            while (source = args[i++]) {
-                for (var key in source) {
-                    if (source.hasOwnProperty(key)) {
-                        target[key] = source[key];
+            while (source = sources[i++]) {
+                for (k in source) {
+                    if (source.hasOwnProperty(k)) {
+                        target[k] = source[k];
                     }
                 }
             }
