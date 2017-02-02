@@ -182,17 +182,6 @@ function log(s) { console.log.apply(console, arguments); }
             }
             return fn_toString.call(input).slice(8, -1).toLowerCase();
         },
-        isNone: function() {
-            var args = arguments, argsLen = args.length, i = 0;
-            if (argsLen) {
-                while (i < argsLen) {
-                    if (args[i++] == null) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-        },
         isSet: function(input, opt_key) {
             return (opt_key == null) ? input != null : this.dig(input, opt_key) != null;
         },
@@ -246,9 +235,39 @@ function log(s) { console.log.apply(console, arguments); }
         }
     });
 
-    // is* functions
+    // type functions
     extend(so, {
-        isString: function(x) {},
+        isNone: function(x) {
+            return x == null;
+        },
+        isInt: function(x) {
+            return this.isNumber(x) && x % 1 == 0 && x != 1.0;
+        },
+        isFloat: function(x) {
+            return this.isNumber(x) && x % 1 != 0 || x == 1.0;
+        },
+        isString: function(x) {
+            return typeof x == 'string';
+        },
+        isBool: function(x) {
+            return x === true || x === false;
+        },
+        isNumber: function(x) {
+            return typeof x == 'number';
+        },
+        isFunction: function(x) {
+            return typeof x == 'function';
+        },
+        isArray: function(x) {
+            return x && x.constructor == Array;
+        },
+        isObject: function(x) {
+            return x && x.constructor == Object;
+        },
+        isIterable: function(x) {
+            return this.isArray(x) || this.isObject(x)
+                || (Symbol && Symbol.iterator && x && typeof x[Symbol.iterator] == 'function');
+        }
     });
 
     var callbacks = [];
