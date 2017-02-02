@@ -173,30 +173,23 @@ function log(s) { console.log.apply(console, arguments); }
             return Object.freeze(object);
         },
         typeOf: function(input, opt_real) {
-            if (input === null)              return 'null';
-            if (input === undefined)         return 'undefined';
+            if (input === null) return 'null';
+            if (input === undefined) return 'undefined';
             if (opt_real) {
-                if (isNumeric(input))        return 'numeric';
-                if (input.nodeType == 1)     return 'element';
-                if (input.nodeType == 9)     return 'document';
+                if (isNumeric(input)) return 'numeric';
+                if (input.nodeType == 1) return 'element';
+                if (input.nodeType == 9) return 'document';
             }
             return fn_toString.call(input).slice(8, -1).toLowerCase();
         },
         isSet: function(input, opt_key) {
             return (opt_key == null) ? input != null : this.dig(input, opt_key) != null;
         },
-        isEmpty: function() {
-            var args = arguments, argsLen = args.length, i = 0, value;
-            if (argsLen) {
-                while (i < argsLen) {
-                    value = args[i++];
-                    if (!value) return true; // '', null, undefined, false, 0, NaN
-                    if (typeof value.length == 'number') return !value.length;
-                    if (typeof value == 'object') { !Object.keys(value).length; }
-                    // if (typeof value == 'object') { for (key in value) { return false; } return true; }
-                }
-                return false;
-            }
+        isEmpty: function(input) {
+            if (!input) return true; // '', null, undefined, false, 0, NaN
+            if (typeof input.length == 'number') return !input.length;
+            if (typeof input == 'object') return !Object.keys(input).length;
+            return false;
         },
         forEach: function() {
             return forEach.apply(null, arguments);
