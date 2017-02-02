@@ -196,10 +196,6 @@ function log(s) { console.log.apply(console, arguments); }
         },
         // notation: options = $.mix({}, defaultOptions, options);
         mix: function() {
-            if (arguments.length < 2) {
-                throw ('$.mix() accepts at least 2 arguments!');
-            }
-
             return mix.apply(null, arguments);
         },
         extend: function(target, source) {
