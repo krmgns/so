@@ -526,7 +526,7 @@ function initDom(selector, root, i) {
 
     var nodes;
     if (type == "string") {
-        selector = $.trim(selector);
+        selector = selector.trim();
         // notation: $.dom("<span>", {id: "foo"})
         // notation: $.dom("<span id='foo'>")
         // notation: $.dom("<span id='foo'>The span!</span>")
