@@ -59,12 +59,12 @@ function log(s) { console.log.apply(console, arguments); }
             return s.charAt(0).toUpperCase() + s.slice(1);
         },
         format: function() {
-            var s = this, ms = s.match(/(%s)/g) || [], i = 0, m;
-            if (ms.length > arguments.length) {
+            var s = this, m, ms = s.match(/(%s)/g) || [], i = 0, args = arguments;
+            if (ms.length > args.length) {
                 throw ('No arguments enough!');
             }
             while (m = ms.shift()) {
-                s = s.replace(/(%s)/, arguments[i++]);
+                s = s.replace(/(%s)/, args[i++]);
             }
             return s;
         }
@@ -130,7 +130,7 @@ function log(s) { console.log.apply(console, arguments); }
             return function(){};
         },
         now: function() {
-            return +(new Date);
+            return Date.now();
         },
         uuid: function() {
             return ++_uuid;
@@ -157,7 +157,7 @@ function log(s) { console.log.apply(console, arguments); }
             return (s != null) ? s.trimRight(chars) : '';
         },
         dig: function(input, key) {
-            if (input && typeof input == 'object') {
+            if (input && typeof input == 'object' && key) {
                 var keys = (''+ key).split('.'), key = keys.shift();
                 if (!keys.length) {
                     return input[key];
@@ -187,7 +187,7 @@ function log(s) { console.log.apply(console, arguments); }
             return fn_toString.call(input).slice(8, -1).toLowerCase();
         },
         isSet: function(input, opt_key) {
-            return (opt_key == null) ? input != null : this.dig(input, opt_key) != null;
+            return null != (opt_key == null ? input : this.dig(input, opt_key));
         },
         isEmpty: function(input) {
             if (!input) return true; // '', null, undefined, false, 0, NaN
