@@ -37,17 +37,31 @@ function log(s) { console.log.apply(console, arguments); }
         return !isNaN(parseFloat(s)) && isFinite(s);
     }
 
+    function prepareTrimChars(chars) {
+        return chars ? chars.replace(/([\[\]\\])/g, '\\$1') : '\\s';
+    }
+
     // string helpers
     extend(String.prototype, {
+        isNumeric: function() {
+            return isNumeric(this);
+        },
         toInt: function(base) {
             return isNumeric(this)
-                ? parseInt(this.replace(/^-?\.(.+)/, '0.\$1'), base || 10) : null;
+                ? parseInt(this.replace(/^-?\.(.+)/, '0.$1'), base || 10) : null;
         },
         toFloat: function() {
             return isNumeric(this) ? parseFloat(this) : null;
         },
-        isNumeric: function() {
-            return isNumeric(this);
+        toCapitalCase: function(all) {
+            var s = this.toLowerCase(), i;
+            if (all !== false) {
+                for (i = 0, s = s.split(' '); i < s.length; i++) {
+                    s[i] = s[i].toCapitalCase(false);
+                }
+                return s.join(' ');
+            }
+            return s.charAt(0).toUpperCase() + s.slice(1);
         },
         format: function() {
             var s = this, ms = s.match(/(%s)/g) || [], i = 0, m;
@@ -59,64 +73,24 @@ function log(s) { console.log.apply(console, arguments); }
             }
             return s;
         },
-        trimLeft: function(cs) {
-            var s = this, cs, re = cs;
-            if (cs && cs.trim || !re) {
-                cs = escapeRegExpInput(cs) || '\\s', re = new RegExp('^['+ cs +']+');
-            }
+        trimLeft: function(chars) {
+            var s = this, re = new RegExp('^['+ prepareTrimChars(chars) +']+');;
             while (re.test(s)) {
                 s = s.replace(re, '');
             }
             return s;
         },
-        trimRight: function(cs) {
-            var s = this, cs, re = cs;
-            if (cs && cs.trim || !re) {
-                cs = escapeRegExpInput(cs) || '\\s', re = new RegExp('['+ cs +']+$');
-            }
+        trimRight: function(chars) {
+            var s = this, re = new RegExp('['+ prepareTrimChars(chars) +']+$');
             while (re.test(s)) {
                 s = s.replace(re, '');
             }
             return s;
         },
-        trim: function(cs) {
-            return this.trimLeft(cs).trimRight(cs);
-        },
-        toCapitalCase: function(all) {
-            var s = this.toLowerCase(), i;
-            if (all !== false) {
-                for (i = 0, s = s.split(' '); i < s.length; i++) {
-                    s[i] = s[i].toCapitalCase(false);
-                }
-                return s.join(' ');
-            }
-            return s.charAt(0).toUpperCase() + s.slice(1);
+        trim: function(chars) {
+            return this.trimLeft(chars).trimRight(chars);
         }
     });
-
-    function forEach(input, fn, opt_scope) {
-        var len = input && input.length, i;
-        if (len != null) { // array: value => i
-            for (i = 0; i < len; i++) {
-                if (false === fn.call(opt_scope || input[i], input[i], i, input)) {
-                    break;
-                }
-            }
-        } else { // object: key => value
-            for (i in input) {
-                if (input.hasOwnProperty(i)) {
-                    if (false === fn.call(opt_scope || input[i], i, input[i], input)) {
-                        break;
-                    }
-                }
-            }
-        }
-        return opt_scope || input;
-    }
-
-    function escapeRegExpInput(input) {
-        return (''+ input).replace(/([\/\.\+\*\^\?\$\=\!\|\:\-\[\]\(\)\{\}\<\>\\])/g, '\\\$1');
-    }
 
     var so = {ext: {}, array: {}, object: {}},
         _uuid = 0, fn_toString = {}.toString;
@@ -143,14 +117,14 @@ function log(s) { console.log.apply(console, arguments); }
         doc: function(el) {
             return el ? el.ownerDocument : window.document;
         },
-        trim: function(s, cs) {
-            return (s != null) ? s.trim(cs) : '';
+        trim: function(s, chars) {
+            return (s != null) ? s.trim(chars) : '';
         },
-        trimLeft: function(s, cs) {
-            return (s != null) ? s.trimLeft(cs) : '';
+        trimLeft: function(s, chars) {
+            return (s != null) ? s.trimLeft(chars) : '';
         },
-        trimRight: function(s, cs) {
-            return (s != null) ? s.trimRight(cs) : '';
+        trimRight: function(s, chars) {
+            return (s != null) ? s.trimRight(chars) : '';
         },
         dig: function(input, key) {
             if (input && typeof input == 'object') {
@@ -191,8 +165,24 @@ function log(s) { console.log.apply(console, arguments); }
             if (typeof input == 'object') return !Object.keys(input).length;
             return false;
         },
-        forEach: function() {
-            return forEach.apply(null, arguments);
+        forEach: function(input, fn, opt_scope) {
+            var len = input && input.length, i;
+            if (len != null) { // array: value => i
+                for (i = 0; i < len; i++) {
+                    if (false === fn.call(opt_scope || input[i], input[i], i, input)) {
+                        break;
+                    }
+                }
+            } else { // object: key => value
+                for (i in input) {
+                    if (input.hasOwnProperty(i)) {
+                        if (false === fn.call(opt_scope || input[i], i, input[i], input)) {
+                            break;
+                        }
+                    }
+                }
+            }
+            return opt_scope || input;
         },
         // notation: options = $.mix({}, defaultOptions, options);
         mix: function() {
