@@ -37,11 +37,6 @@ function log(s) { console.log.apply(console, arguments); }
         return !isNaN(parseFloat(s)) && isFinite(s);
     }
 
-    function prepareTrimChars(chars) {
-        return chars ? chars.replace(/([\[\]\\])/g, '\\$1') : '\\s';
-    }
-
-    // string helpers
     extend(String.prototype, {
         isNumeric: function() {
             return isNumeric(this);
@@ -72,7 +67,14 @@ function log(s) { console.log.apply(console, arguments); }
                 s = s.replace(/(%s)/, arguments[i++]);
             }
             return s;
-        },
+        }
+    });
+
+    function prepareTrimChars(chars) {
+        return chars ? chars.replace(/([\[\]\\])/g, '\\$1') : '\\s';
+    }
+
+    extend(String.prototype, {
         trimLeft: function(chars) {
             var s = this, re = new RegExp('^['+ prepareTrimChars(chars) +']+');;
             while (re.test(s)) {
@@ -89,6 +91,33 @@ function log(s) { console.log.apply(console, arguments); }
         },
         trim: function(chars) {
             return this.trimLeft(chars).trimRight(chars);
+        }
+    });
+
+    function prepareSearchStuff(s, search, index, opt_noCase) {
+        if (s && search) {
+            if (index === true) {
+                opt_noCase = true, index = 0;
+            }
+            if (opt_noCase) {
+                s = s.toLowerCase(), search = search.toLowerCase();
+            }
+            return {s: s, search: search, index: index};
+        }
+    }
+
+    extend(String.prototype, {
+        startsWith: function(search, index, opt_noCase) {
+            return !!((_s = prepareSearchStuff(this, search, index, opt_noCase))
+                && s.substr(index || 0, search.length) === search);
+        },
+        endsWith: function(search, index, opt_noCase, _s /* internal */) {
+            return !!((_s = prepareSearchStuff(this, search, index, opt_noCase))
+                && s.substr(0, index || search.length) === search);
+        },
+        contains: function(search, index, opt_noCase, _s /* internal */) {
+            return !!((_s = prepareSearchStuff(this, search, index, opt_noCase))
+                && _s.s !== _s.s.split(_s.search)[0]);
         }
     });
 
