@@ -282,6 +282,9 @@ function log(s) { console.log.apply(console, arguments); }
         isIterable: function(x) {
             return this.isArray(x) || this.isObject(x);
         },
+        isPrimitive: function(x) {
+            return x == null || /^(string|number|boolean|symbol)$/.test(typeof x);
+        },
         isTypeOf: function(x, type) {
             return this.typeOf(x) == type;
         }
