@@ -107,17 +107,17 @@ function log(s) { console.log.apply(console, arguments); }
     }
 
     extend(String.prototype, {
-        startsWith: function(search, index, opt_noCase) {
-            return !!((_s = prepareSearchStuff(this, search, index, opt_noCase))
-                && s.substr(index || 0, search.length) === search);
+        startsWith: function(search, index, opt_noCase, _s /* internal */) {
+            return (_s = prepareSearchStuff(this, search, index, opt_noCase))
+                && _s.s.substr(_s.index || 0, _s.search.length) === _s.search;
         },
         endsWith: function(search, index, opt_noCase, _s /* internal */) {
-            return !!((_s = prepareSearchStuff(this, search, index, opt_noCase))
-                && s.substr(0, index || search.length) === search);
+            return (_s = prepareSearchStuff(this, search, index, opt_noCase))
+                && _s.s.substr(0, _s.index || _s.search.length) === _s.search;
         },
         contains: function(search, index, opt_noCase, _s /* internal */) {
-            return !!((_s = prepareSearchStuff(this, search, index, opt_noCase))
-                && _s.s !== _s.s.split(_s.search)[0]);
+            return (_s = prepareSearchStuff(this, search, index, opt_noCase))
+                && _s.s !== _s.s.split(_s.search)[0];
         }
     });
 
