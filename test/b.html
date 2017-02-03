@@ -1,10 +1,29 @@
 <!doctype html>
 <html><head></head><body>
 
-<script src="so-all.php"></script>
+<!-- <script src="so-all.php"></script> -->
+<script src="../so.js"></script>
 <script>
 so.onReady(function($) {
-    //
+    var x;
+
+    // x = $.extend({'dom': 11});
+    // x = $.extend('dom', 1);
+    x = $.extend('dom', (function() {
+        return function dom(id) {
+            this.id = id
+        }
+    }()));
+
+    // x = $.extend({a:1}, {a:11, b:22});
+    // x = $.extend({}, {a:1}, {a:11, b:22});
+
+    log(x)
+    log(x.toString())
+
+    x = new $.dom(1)
+    log(x)
+    log(x.toString())
 });
 </script>
 

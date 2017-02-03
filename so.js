@@ -14,23 +14,16 @@ function log(s) { console.log.apply(console, arguments); }
         throw ('Archaic browser!');
     }
 
-    // base helpers
-    function mix() {
-        var sources = arguments, source, target = sources[0], i = 1, k;
-        if (target) {
-            while (source = sources[i++]) {
-                for (k in source) {
-                    if (source.hasOwnProperty(k)) {
-                        target[k] = source[k];
-                    }
+    function extend() {
+        var i = 1, key, args = arguments, source, target = args[0] || {};
+        while (source = args[i++]) {
+            for (key in source) {
+                if (source.hasOwnProperty(key)) {
+                    target[key] = source[key];
                 }
             }
         }
         return target;
-    }
-
-    function extend(target, source) {
-        return mix(target, source);
     }
 
     function isNumeric(s) {
@@ -122,7 +115,7 @@ function log(s) { console.log.apply(console, arguments); }
     });
 
     var so = {ext: {}, array: {}, object: {}},
-        _uuid = 0, fn_toString = {}.toString;
+        _uuid = 0, fn_toString = {}.toString, fn_slice = [].slice;
 
     // so: base functions
     extend(so, {
@@ -214,21 +207,30 @@ function log(s) { console.log.apply(console, arguments); }
             }
             return opt_scope || input;
         },
-        // notation: options = $.mix({}, defaultOptions, options);
-        mix: function() {
-            return mix.apply(null, arguments);
-        },
         extend: function(target, source) {
-            var targetType = typeof target, sourceType = typeof source;
+            var targetType = typeof target, sourceType = typeof source, tmp, name, method;
 
-            // self extend
+            // self extends
+            if (targetType == 'string') {
+                tmp = target.split('.'), name = tmp[0],
+                    method = tmp[0]
+                target = this[name];
+                // so.addMethod() ???
+                if (target && typeof source == 'function') {
+                    source = function() {
+                        return source.apply(target, arguments);
+                    };
+                }
+                target = {}; // ustune yazar acamassin mevcut
+                target[name] = source;
+                // target.toString = function() { return '[object so.'+ name +']'; };
+                return extend(this, target);
+            }
             if (targetType == 'object' && sourceType == 'undefined') {
-                source = target, target = this;
-            } else if (targetType == 'string') {
-                target = !this[target] ? this[target] = {} : this[target];
+                return extend(this, target);
             }
 
-            return mix(target, source);
+            return extend.apply(null, [target, source].concat(fn_slice.call(arguments, 2)));
         },
         toString: function(name, opt_object) {
             if (!name) {
