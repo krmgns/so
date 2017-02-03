@@ -94,36 +94,37 @@ function log(s) { console.log.apply(console, arguments); }
         }
     });
 
-    function prepareSearchStuff(s, search, index, opt_noCase) {
-        if (s && search) {
+    function prepareSearchStuff(string, searchString, index, opt_noCase) {
+        if (string && searchString) {
             if (index === true) {
                 opt_noCase = true, index = 0;
             }
             if (opt_noCase) {
-                s = s.toLowerCase(), search = search.toLowerCase();
+                string = s.toLowerCase(), searchString = searchString.toLowerCase();
             }
-            return {s: s, search: search, index: index};
+            return {s: string, ss: searchString, i: index};
         }
     }
 
     extend(String.prototype, {
-        startsWith: function(search, index, opt_noCase, _s /* internal */) {
-            return (_s = prepareSearchStuff(this, search, index, opt_noCase))
-                && _s.s.substr(_s.index || 0, _s.search.length) === _s.search;
+        startsWith: function(searchString, index, opt_noCase, _s /* internal */) {
+            return (_s = prepareSearchStuff(this, searchString, index, opt_noCase))
+                && _s.s.substr(_s.i || 0, _s.ss.length) === _s.ss;
         },
-        endsWith: function(search, index, opt_noCase, _s /* internal */) {
-            return (_s = prepareSearchStuff(this, search, index, opt_noCase))
-                && _s.s.substr(0, _s.index || _s.search.length) === _s.search;
+        endsWith: function(searchString, index, opt_noCase, _s /* internal */) {
+            return (_s = prepareSearchStuff(this, searchString, index, opt_noCase))
+                && _s.s.substr(0, _s.i || _s.ss.length) === _s.ss;
         },
-        contains: function(search, index, opt_noCase, _s /* internal */) {
-            return (_s = prepareSearchStuff(this, search, index, opt_noCase))
-                && _s.s !== _s.s.split(_s.search)[0];
+        contains: function(searchString, index, opt_noCase, _s /* internal */) {
+            return (_s = prepareSearchStuff(this, searchString, index, opt_noCase))
+                && _s.s !== _s.s.split(_s.ss)[0];
         }
     });
 
     var so = {ext: {}, array: {}, object: {}},
         _uuid = 0, fn_toString = {}.toString;
 
+    // so: base functions
     extend(so, {
         fun: function() {
             return function(){};
@@ -243,7 +244,7 @@ function log(s) { console.log.apply(console, arguments); }
         }
     });
 
-    // type functions
+    // so: type functions
     extend(so, {
         isNone: function(x) {
             return x == null;
