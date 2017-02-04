@@ -55,46 +55,46 @@ function log(s) { console.log.apply(console, arguments); }
             return (a == null);
         },
         isNull: function(a) {
-            return a === null;
+            return (a === null);
         },
         isNulls: function(a) {
-            return a === '';
+            return (a === '');
         },
         isUndefined: function(a) {
-            return a === undefined;
+            return (a === undefined);
         },
         isString: function(a) {
-            return typeof a === 'string';
+            return (typeof a == 'string');
         },
         isBool: function(a) {
-            return typeof a === 'boolean';
+            return (typeof a == 'boolean');
         },
         isNumber: function(a) {
-            return typeof a === 'number';
+            return (typeof a == 'number');
         },
         isNumeric: function(a) {
-            return a != null && a != '' && !isNaN(parseFloat(a)) && isFinite(a);
+            return (a != null && a != '') && !isNaN(parseFloat(a)) && isFinite(a);
         },
         isFunction: function(a) {
-            return typeof a === 'function';
+            return (typeof a == 'function');
         },
         isArray: function(a) {
-            return a && a.constructor == Array;
+            return a && (a.constructor == Array);
         },
         isObject: function(a) {
-            return a && a.constructor == Object;
+            return a && (a.constructor == Object);
         },
         isInt: function(a) {
-            return $.isNumber(a) && a % 1 == 0 && a != 1.0;
+            return $.isNumber(a) && (a % 1 == 0 && a != 1.0);
         },
         isFloat: function(a) {
-            return $.isNumber(a) && a % 1 != 0 || a == 1.0;
+            return $.isNumber(a) && (a % 1 != 0 || a == 1.0);
         },
         isIterable: function(a) {
             return $.isArray(a) || $.isObject(a) || (a && a.length && !a.nodeType); // dom, nodelist, string etc.
         },
         isPrimitive: function(a) {
-            return a == null || /^(string|number|boolean|symbol)$/.test(typeof a);
+            return (a == null) || /^(string|number|boolean|symbol)$/.test(typeof a);
         }
     });
 
