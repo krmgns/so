@@ -51,50 +51,50 @@ function log(s) { console.log.apply(console, arguments); }
 
     // so: type functions
     extend($, {
-        isNone: function(x) {
-            return x == null;
+        isNone: function(a) {
+            return (a == null);
         },
-        isNull: function(x) {
-            return x === null;
+        isNull: function(a) {
+            return a === null;
         },
-        isNulls: function(x) {
-            return x === '';
+        isNulls: function(a) {
+            return a === '';
         },
-        isUndefined: function(x) {
-            return x === undefined;
+        isUndefined: function(a) {
+            return a === undefined;
         },
-        isString: function(x) {
-            return typeof x === 'string';
+        isString: function(a) {
+            return typeof a === 'string';
         },
-        isBool: function(x) {
-            return typeof x === 'boolean';
+        isBool: function(a) {
+            return typeof a === 'boolean';
         },
-        isNumber: function(x) {
-            return typeof x === 'number';
+        isNumber: function(a) {
+            return typeof a === 'number';
         },
-        isNumeric: function(x) {
-            return x != null && x != '' && !isNaN(parseFloat(x)) && isFinite(x);
+        isNumeric: function(a) {
+            return a != null && a != '' && !isNaN(parseFloat(a)) && isFinite(a);
         },
-        isFunction: function(x) {
-            return typeof x === 'function';
+        isFunction: function(a) {
+            return typeof a === 'function';
         },
-        isArray: function(x) {
-            return x && x.constructor == Array;
+        isArray: function(a) {
+            return a && a.constructor == Array;
         },
-        isObject: function(x) {
-            return x && x.constructor == Object;
+        isObject: function(a) {
+            return a && a.constructor == Object;
         },
-        isInt: function(x) {
-            return $.isNumber(x) && x % 1 == 0 && x != 1.0;
+        isInt: function(a) {
+            return $.isNumber(a) && a % 1 == 0 && a != 1.0;
         },
-        isFloat: function(x) {
-            return $.isNumber(x) && x % 1 != 0 || x == 1.0;
+        isFloat: function(a) {
+            return $.isNumber(a) && a % 1 != 0 || a == 1.0;
         },
-        isIterable: function(x) {
-            return $.isArray(x) || $.isObject(x) || (x && x.length && !x.nodeType); // dom, nodelist, string etc.
+        isIterable: function(a) {
+            return $.isArray(a) || $.isObject(a) || (a && a.length && !a.nodeType); // dom, nodelist, string etc.
         },
-        isPrimitive: function(x) {
-            return x == null || /^(string|number|boolean|symbol)$/.test(typeof x);
+        isPrimitive: function(a) {
+            return a == null || /^(string|number|boolean|symbol)$/.test(typeof a);
         }
     });
 
