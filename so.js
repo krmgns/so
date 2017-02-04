@@ -26,20 +26,87 @@ function log(s) { console.log.apply(console, arguments); }
         return target;
     }
 
-    function isNumeric(s) {
-        return !isNaN(parseFloat(s)) && isFinite(s);
+    function forEach(input, fn, opt_scope) {
+        var len = input && input.length, i;
+        if (len != null) { // array: value => i
+            for (i = 0; i < len; i++) {
+                if (false === fn.call(opt_scope || input[i], input[i], i, input)) {
+                    break;
+                }
+            }
+        } else { // object: key => value
+            for (i in input) {
+                if (input.hasOwnProperty(i)) {
+                    if (false === fn.call(opt_scope || input[i], i, input[i], input)) {
+                        break;
+                    }
+                }
+            }
+        }
+        return opt_scope || input;
     }
+
+    /* so */
+    var $ = {};
+
+    // so: type functions
+    extend($, {
+        isNone: function(x) {
+            return x == null;
+        },
+        isNull: function(x) {
+            return x === null;
+        },
+        isNulls: function(x) {
+            return x === '';
+        },
+        isUndefined: function(x) {
+            return x === undefined;
+        },
+        isString: function(x) {
+            return typeof x === 'string';
+        },
+        isBool: function(x) {
+            return typeof x === 'boolean';
+        },
+        isNumber: function(x) {
+            return typeof x === 'number';
+        },
+        isNumeric: function(x) {
+            return x != null && x != '' && !isNaN(parseFloat(x)) && isFinite(x);
+        },
+        isFunction: function(x) {
+            return typeof x === 'function';
+        },
+        isArray: function(x) {
+            return x && x.constructor == Array;
+        },
+        isObject: function(x) {
+            return x && x.constructor == Object;
+        },
+        isInt: function(x) {
+            return $.isNumber(x) && x % 1 == 0 && x != 1.0;
+        },
+        isFloat: function(x) {
+            return $.isNumber(x) && x % 1 != 0 || x == 1.0;
+        },
+        isIterable: function(x) {
+            return $.isArray(x) || $.isObject(x) || (x && x.length && !x.nodeType); // dom, nodelist, string etc.
+        },
+        isPrimitive: function(x) {
+            return x == null || /^(string|number|boolean|symbol)$/.test(typeof x);
+        }
+    });
 
     extend(String.prototype, {
         isNumeric: function() {
-            return isNumeric(this);
+            return $.isNumeric(this);
         },
         toInt: function(base) {
-            return isNumeric(this)
-                ? parseInt(this.replace(/^-?\.(.+)/, '0.$1'), base || 10) : null;
+            return $.isNumeric(this) ? parseInt(this.replace(/^-?\.(.+)/, '0.$1'), base || 10) : null;
         },
         toFloat: function() {
-            return isNumeric(this) ? parseFloat(this) : null;
+            return $.isNumeric(this) ? parseFloat(this) : null;
         },
         toCapitalCase: function(all) {
             var s = this.toLowerCase(), i;
@@ -60,6 +127,9 @@ function log(s) { console.log.apply(console, arguments); }
                 s = s.replace(/(%s)/, args[i++]);
             }
             return s;
+        },
+        forEach: function(fn) { // @test
+            return forEach(''+ this, fn, this);
         }
     });
 
@@ -114,11 +184,16 @@ function log(s) { console.log.apply(console, arguments); }
         }
     });
 
-    var so = {ext: {}, array: {}, object: {}},
-        _uuid = 0, fn_toString = {}.toString, fn_slice = [].slice;
+    var _uuid = 0,
+        fn_slice = [].slice,
+        fn_toString = {}.toString
+    ;
 
     // so: base functions
-    extend(so, {
+    extend($, {
+        log: function() {
+            log.apply(null, ['>> so:'].concat(fn_slice.call(arguments)));
+        },
         fun: function() {
             return function(){};
         },
@@ -141,29 +216,28 @@ function log(s) { console.log.apply(console, arguments); }
             return el ? el.ownerDocument : window.document;
         },
         trim: function(s, chars) {
-            return (s != null) ? s.trim(chars) : '';
+            return s == null ? '' : s.trim(chars);
         },
         trimLeft: function(s, chars) {
-            return (s != null) ? s.trimLeft(chars) : '';
+            return s == null ? '' : s.trimLeft(chars);
         },
         trimRight: function(s, chars) {
-            return (s != null) ? s.trimRight(chars) : '';
+            return s == null ? '' : s.trimRight(chars);
         },
         dig: function(input, key) {
-            if (input && typeof input == 'object' && key) {
+            if ($.isObject(input)) {
                 var keys = (''+ key).split('.'), key = keys.shift();
                 if (!keys.length) {
                     return input[key];
                 }
-                return this.dig(input[key], keys.join('.'));
+                return $.dig(input[key], keys.join('.'));
             }
         },
         freeze: function(object, opt_deep) {
             if (opt_deep !== false) {
-                var _this = this;
                 Object.getOwnPropertyNames(object).forEach(function(name) {
-                    if (object[name] && typeof object[name] == 'object') {
-                        _this.freeze(object[name]);
+                    if ($.isObject(object[name])) {
+                        $.freeze(object[name]);
                     }
                 });
             }
@@ -173,115 +247,55 @@ function log(s) { console.log.apply(console, arguments); }
             if (input === null) return 'null';
             if (input === undefined) return 'undefined';
             if (opt_real) {
-                if (isNumeric(input)) return 'numeric';
+                if ($.isNumeric(input)) return 'numeric';
                 if (input.nodeType == 1) return 'element';
                 if (input.nodeType == 9) return 'document';
             }
             return fn_toString.call(input).slice(8, -1).toLowerCase();
         },
-        isSet: function(input, opt_key) {
-            return null != (opt_key == null ? input : this.dig(input, opt_key));
+        isSet: function(input, opt_key) { // @test
+            return ((opt_key != null) ? $.dig(input, opt_key) : input) != null;
         },
-        isEmpty: function(input) {
-            if (!input) return true; // '', null, undefined, false, 0, NaN
-            if (typeof input.length == 'number') return !input.length;
-            if (typeof input == 'object') return !Object.keys(input).length;
-            return false;
+        isEmpty: function(input) { // @test
+            return !input // '', null, undefined, false, 0, NaN
+                || ($.isNumber(input) && !input.length)
+                || ($.isObject(input) && !Object.keys(input).length);
         },
         forEach: function(input, fn, opt_scope) {
-            var len = input && input.length, i;
-            if (len != null) { // array: value => i
-                for (i = 0; i < len; i++) {
-                    if (false === fn.call(opt_scope || input[i], input[i], i, input)) {
-                        break;
-                    }
-                }
-            } else { // object: key => value
-                for (i in input) {
-                    if (input.hasOwnProperty(i)) {
-                        if (false === fn.call(opt_scope || input[i], i, input[i], input)) {
-                            break;
-                        }
-                    }
-                }
-            }
-            return opt_scope || input;
+            return forEach(input, fn, opt_scope);
         },
         mix: function() {
-            throw "@todo Remove method so.mix()!";
+            throw '@todo Remove method $.mix()!';
         },
         extend: function(target, source) {
-            var targetType = typeof target, sourceType = typeof source, tmp, name, method;
+            // self extend
+            if ($.isObject(target) && $.isUndefined(source)) {
+                return extend($, target);
+            }
 
             // self extend
-            if (targetType == 'string') {
-                tmp = target.split('.'), name = tmp[0], method = tmp[1],
-                    target = this[name] || {};
+            if ($.isString(target)) {
+                var tmp = target.split('.'), property = tmp[0], propertyProperty = tmp[1],
+                    target = $[property] || {};
 
-                if (sourceType == 'function' && method) {
-                    (target.prototype ? target.prototype : target)[method] = source;
-                } else {
-                    target[name] = source;
+                // notation: $.extend('foo', ...)
+                if (!propertyProperty) {
+                    target[property] = source;
+                }
+                // notation: $.extend('foo.bar', ...)
+                // notation: $.extend('foo.bar', function() { ... })
+                else {
+                    (target.prototype ? target.prototype : target)[propertyProperty] = source;
                 }
 
-                return extend(this, target);
+                return extend($, target);
             }
 
-            // self extend
-            if (targetType == 'object' && sourceType == 'undefined') {
-                return extend(this, target);
-            }
-
+            // any extend
             return extend.apply(null, [target, source].concat(fn_slice.call(arguments, 2)));
         },
         toString: function(name, opt_object) {
-            throw "@todo Remove method so.toString()!";
-        }
-    });
-
-    // so: type functions
-    extend(so, {
-        isNone: function(x) {
-            return x == null;
-        },
-        isNull: function(x) {
-            return x === null;
-        },
-        isUndefined: function(x) {
-            return x === undefined;
-        },
-        isInt: function(x) {
-            return this.isNumber(x) && x % 1 == 0 && x != 1.0;
-        },
-        isFloat: function(x) {
-            return this.isNumber(x) && x % 1 != 0 || x == 1.0;
-        },
-        isString: function(x) {
-            return typeof x == 'string';
-        },
-        isBool: function(x) {
-            return x === true || x === false;
-        },
-        isNumber: function(x) {
-            return typeof x == 'number';
-        },
-        isFunction: function(x) {
-            return typeof x == 'function';
-        },
-        isArray: function(x) {
-            return x && x.constructor == Array;
-        },
-        isObject: function(x) {
-            return x && x.constructor == Object;
-        },
-        isIterable: function(x) {
-            return this.isArray(x) || this.isObject(x);
-        },
-        isPrimitive: function(x) {
-            return x == null || /^(string|number|boolean|symbol)$/.test(typeof x);
-        },
-        isTypeOf: function(x, type) {
-            return this.typeOf(x) == type;
+            throw '@todo Remove method $.toString()!';
         }
     });
 
@@ -289,13 +303,13 @@ function log(s) { console.log.apply(console, arguments); }
 
     function fireCallbacks() {
         while (callbacks.length) {
-            callbacks.shift()(so);
+            callbacks.shift()($);
         }
     }
 
     // oh baybe..
-    so.onReady = function(callback, document) {
-        if (typeof callback == 'function') {
+    $.onReady = function(callback, document) {
+        if ($.isFunction(callback)) {
             callbacks.push(callback);
         }
 
@@ -308,7 +322,7 @@ function log(s) { console.log.apply(console, arguments); }
         }, false);
     };
 
-    // add global
-    window.so = so;
+    // make global
+    window.so = $;
 
 })(window);
