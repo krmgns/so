@@ -5,26 +5,27 @@
 <script src="../so.js"></script>
 <script>
 so.onReady(function($) {
-    var x;
+    var x
 
-    // x = $.extend({'dom': 11});
-    // x = $.extend('dom', 1);
-    x = $.extend('dom', (function() {
-        return function dom(id) {
-            this.id = id
-        }
-    }()));
+    // x = $.extend({a:1}, {a:11, b:22})
+    // x = $.extend({}, {a:1}, {a:11, b:22})
 
-    // x = $.extend({a:1}, {a:11, b:22});
-    // x = $.extend({}, {a:1}, {a:11, b:22});
+    // x = $.extend('dom', {id: 11})
+    // x = $.extend({'dom': 11})
+    // x = $.extend('dom', 1)
 
-    log(x)
-    log(x.toString())
+    // x = $.extend('dom', function dom(id) {
+    //     this.id = id
+    // })
+    // $.extend('dom.getId', function() {
+    //     return this.id
+    // })
 
-    x = new $.dom(1)
-    log(x)
-    log(x.toString())
-});
+    // x = new $.dom(+new Date)
+    // log(x)
+    // log("getId:", x.getId)
+    // log("getId():", x.getId())
+})
 </script>
 
 <!--  -->

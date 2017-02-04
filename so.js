@@ -207,25 +207,27 @@ function log(s) { console.log.apply(console, arguments); }
             }
             return opt_scope || input;
         },
+        mix: function() {
+            throw "@todo Remove method so.mix()!";
+        },
         extend: function(target, source) {
             var targetType = typeof target, sourceType = typeof source, tmp, name, method;
 
-            // self extends
+            // self extend
             if (targetType == 'string') {
-                tmp = target.split('.'), name = tmp[0],
-                    method = tmp[0]
-                target = this[name];
-                // so.addMethod() ???
-                if (target && typeof source == 'function') {
-                    source = function() {
-                        return source.apply(target, arguments);
-                    };
+                tmp = target.split('.'), name = tmp[0], method = tmp[1],
+                    target = this[name] || {};
+
+                if (sourceType == 'function' && method) {
+                    (target.prototype ? target.prototype : target)[method] = source;
+                } else {
+                    target[name] = source;
                 }
-                target = {}; // ustune yazar acamassin mevcut
-                target[name] = source;
-                // target.toString = function() { return '[object so.'+ name +']'; };
+
                 return extend(this, target);
             }
+
+            // self extend
             if (targetType == 'object' && sourceType == 'undefined') {
                 return extend(this, target);
             }
@@ -233,16 +235,7 @@ function log(s) { console.log.apply(console, arguments); }
             return extend.apply(null, [target, source].concat(fn_slice.call(arguments, 2)));
         },
         toString: function(name, opt_object) {
-            if (!name) {
-                return '[object so]';
-            }
-
-            var target = opt_object ? opt_object : this[name];
-
-            // define `toString` methods of modules
-            target.toString = function() {
-                return '[object so.'+ name +']';
-            };
+            throw "@todo Remove method so.toString()!";
         }
     });
 
