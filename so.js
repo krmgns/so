@@ -668,19 +668,12 @@ function log() { console.log.apply(console, arguments); }
         typeOf: function(input) {
             var type;
 
-            if ($.isNull(input)) {
-                type = 'null';
-            } else if ($.isUndefined(input)) {
-                type = 'undefined';
-            } else if ($.isWindow(input)) {
-                type = NAME_WINDOW;
-            } else if ($.isDocument(input)) {
-                type = NAME_DOCUMENT;
-            } else if ($.isNodeElement(input)) {
-                type = 'element';
-            } else {
-                type = fn_toString.call(input).slice(8, -1).toLowerCase();
-            }
+            if ($.isNull(input))             type = 'null';
+            else if ($.isUndefined(input))   type = 'undefined';
+            else if ($.isWindow(input))      type = NAME_WINDOW;
+            else if ($.isDocument(input))    type = NAME_DOCUMENT;
+            else if ($.isNodeElement(input)) type = 'element';
+            else type = fn_toString.call(input).slice(8, -1).toLowerCase();
 
             return type;
         },
