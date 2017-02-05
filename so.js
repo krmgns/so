@@ -33,6 +33,7 @@ function log() { console.log.apply(console, arguments); }
      * Value of.
      * @param  {Any} input
      * @return {Any}
+     * @private
      */
     function valueOf(input) {
         return (input && input.valueOf) ? input.valueOf() : input;
@@ -42,6 +43,7 @@ function log() { console.log.apply(console, arguments); }
      * To bool.
      * @param  {Any} input
      * @return {Bool}
+     * @private
      */
     function toBool(input) {
         return !!valueOf(input);
@@ -51,9 +53,60 @@ function log() { console.log.apply(console, arguments); }
      * To string.
      * @param  {String} input
      * @return {String}
+     * @private
      */
     function toString(input) {
         return valueOf(input).toString();
+    }
+
+    /**
+     * Extend.
+     * @param  {Object} ...arguments
+     * @return {Object}
+     * @private
+     */
+    function extend() {
+        var i = 1, key, args = arguments, source, target = args[0] || {};
+
+        while (source = args[i++]) {
+            for (key in source) {
+                if (source.hasOwnProperty(key)) {
+                    target[key] = source[key];
+                }
+            }
+        }
+
+        return target;
+    }
+
+    /**
+     * For each.
+     * @param  {Array|Object} input
+     * @param  {Function}     fn
+     * @param  {Object}       opt_scope @optional
+     * @return {Array|Object}
+     * @private
+     */
+    function forEach(input, fn, opt_scope) {
+        var len = input && input.length, i;
+
+        if (len != NULL) { // array: value => i
+            for (i = 0; i < len; i++) {
+                if (false === fn.call(opt_scope || input[i], input[i], i, input)) {
+                    break;
+                }
+            }
+        } else { // object: key => value
+            for (i in input) {
+                if (input.hasOwnProperty(i)) {
+                    if (false === fn.call(opt_scope || input[i], i, input[i], input)) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        return opt_scope || input;
     }
 
     /**
@@ -126,113 +179,85 @@ function log() { console.log.apply(console, arguments); }
     $.class.create = $.class().create;
 
     /**
-     * Extend.
-     * @return {Object}
-     */
-    function extend() {
-        var i = 1, key, args = arguments, source, target = args[0] || {};
-        while (source = args[i++]) {
-            for (key in source) {
-                if (source.hasOwnProperty(key)) {
-                    target[key] = source[key];
-                }
-            }
-        }
-        return target;
-    }
-
-    /**
-     * For each.
-     * @param  {Array|Object} input
-     * @param  {Function}     fn
-     * @param  {Object}       opt_scope @optional
-     * @return {Array|Object}
-     */
-    function forEach(input, fn, opt_scope) {
-        var len = input && input.length, i;
-        if (len != NULL) { // array: value => i
-            for (i = 0; i < len; i++) {
-                if (false === fn.call(opt_scope || input[i], input[i], i, input)) {
-                    break;
-                }
-            }
-        } else { // object: key => value
-            for (i in input) {
-                if (input.hasOwnProperty(i)) {
-                    if (false === fn.call(opt_scope || input[i], i, input[i], input)) {
-                        break;
-                    }
-                }
-            }
-        }
-
-        return opt_scope || input;
-    }
-
-    /**
-     * So: Type Functions.
-     * @param  {Any} input
-     * @return {Bool}
+     * so: type functions.
      */
     extend($, {
+        /** Is none.         @param {Any} input @return {Bool} */
         isNone: function(input) {
             return (input == NULL);
         },
+        /** Is null.         @param {Any} input @return {Bool} */
         isNull: function(input) {
             return (input === NULL);
         },
+        /** Is nulls.        @param {Any} input @return {Bool} */
         isNulls: function(input) {
             return (input === NULLS);
         },
+        /** Is undefined.    @param {Any} input @return {Bool} */
         isUndefined: function(input) {
             return (input === undefined);
         },
+        /** Is string.       @param {Any} input @return {Bool} */
         isString: function(input) {
             return (typeof input == 'string');
         },
+        /** Is bool.         @param {Any} input @return {Bool} */
         isBool: function(input) {
             return (typeof input == 'boolean');
         },
+        /** Is number.       @param {Any} input @return {Bool} */
         isNumber: function(input) {
             return (typeof input == 'number');
         },
+        /** Is numeric.      @param {Any} input @return {Bool} */
         isNumeric: function(input) {
             return !$.isNone(input) && !$.isNulls(input)
                 && isFinite(input) && !isNaN(parseFloat(input));
         },
+        /** Is function.     @param {Any} input @return {Bool} */
         isFunction: function(input) {
             return (typeof input == 'function');
         },
+        /** Is array.        @param {Any} input @return {Bool} */
         isArray: function(input) {
             return input && (input.constructor == Array);
         },
+        /** Is object.       @param {Any} input @return {Bool} */
         isObject: function(input) {
             return input && (input.constructor == Object);
         },
+        /** Is int.          @param {Any} input @return {Bool} */
         isInt: function(input) {
             return $.isNumber(input) && (input % 1 == 0 && input != 1.0);
         },
+        /** Is float.        @param {Any} input @return {Bool} */
         isFloat: function(input) {
             return $.isNumber(input) && (input % 1 != 0 || input == 1.0);
         },
+        /** Is iterable.     @param {Any} input @return {Bool} */
         isIterable: function(input) {
             return $.isArray(input) || $.isObject(input)
                 || (input && input.length && !input.nodeType); // dom, nodelist, string etc.
         },
+        /** Is primitive.    @param {Any} input @return {Bool} */
         isPrimitive: function(input) {
-            return $.isNone(input) || /^(string|number|boolean|symbol)$/.test(typeof input);
+            return $.isNone(input) || /^(string|number|boolean)$/.test(typeof input);
         },
+        /** Is window.       @param {Any} input @return {Bool} */
         isWindow: function(input) {
             return toBool(input && input == input.window
-                && input.top == input.window.top
-                && input.location == input.window.location); // more strict
+                && input.top == input.window.top && input.location == input.window.location);
         },
+        /** Is document.     @param {Any} input @return {Bool} */
         isDocument: function(input) {
             return toBool(input && input.nodeType == 9);
         },
+        /** Is node.         @param {Any} input @return {Bool} */
         isNode: function(input) {
             return toBool(input && (input.nodeType === 1 || input.nodeType == 11));
         },
+        /** Is node element. @param {Any} input @return {Bool} */
         isNodeElement: function(input) {
             return toBool(input && input.nodeType === 1);
         }
@@ -260,6 +285,41 @@ function log() { console.log.apply(console, arguments); }
             return valueOf(this);
         }
     });
+
+    /**
+     * To trim chars.
+     * @param  {String|NULL} chars
+     * @return {String}
+     * @private
+     */
+    function toTrimChars(chars) {
+        return chars ? chars.replace(/([\[\]\\])/g, '\\$1') : '\\s';
+    }
+
+    /**
+     * To search stuff.
+     * @param  {String}  str
+     * @param  {String}  search
+     * @param  {Integer} index
+     * @param  {Boolean} opt_noCase @optional
+     * @return {Object}
+     * @private
+     */
+    function toSearchStuff(str, search, index, opt_noCase) {
+        if (str && search) {
+            // swap arguments
+            if (index === true) {
+                opt_noCase = true, index = 0;
+            }
+
+            str = toString(str);
+            if (opt_noCase) {
+                str = s.toLowerCase(), search = search.toLowerCase();
+            }
+
+            return {s: str, ss: search, i: index};
+        }
+    }
 
     /**
      * String extends.
@@ -310,6 +370,7 @@ function log() { console.log.apply(console, arguments); }
         },
         /**
          * Format.
+         * @param  {Object} ...arguments
          * @return {String}
          * @throws
          */
@@ -333,56 +394,81 @@ function log() { console.log.apply(console, arguments); }
          */
         forEach: function(fn) {
             return forEach(toString(this), fn, this);
-        }
-    });
-
-    function toTrimChars(chars) {
-        return chars ? chars.replace(/([\[\]\\])/g, '\\$1') : '\\s';
-    }
-
-    extend(String.prototype, {
+        },
+        /**
+         * Trim left.
+         * @param  {String|NULL} chars
+         * @return {String}
+         * @override
+         */
         trimLeft: function(chars) {
-            var str = toString(this), re = new RegExp('^['+ toTrimChars(chars) +']+');;
+            var str = toString(this), re = new RegExp('^['+ toTrimChars(chars) +']+');
+
             while (re.test(str)) {
                 str = str.replace(re, NULLS);
             }
+
             return str;
         },
+        /**
+         * Trim right.
+         * @param  {String|NULL} chars
+         * @return {String}
+         * @override
+         */
         trimRight: function(chars) {
             var str = toString(this), re = new RegExp('['+ toTrimChars(chars) +']+$');
+
             while (re.test(str)) {
                 str = str.replace(re, NULLS);
             }
+
             return str;
         },
+        /**
+         * Trim.
+         * @param  {String|NULL} chars
+         * @return {String}
+         * @override
+         */
         trim: function(chars) {
             return this.trimLeft(chars).trimRight(chars);
-        }
-    });
-
-    function toSearchStuff(str, search, index, opt_noCase) {
-        if (str && search) {
-            if (index === true) {
-                opt_noCase = true, index = 0;
-            }
-            str = toString(str);
-            if (opt_noCase) {
-                str = s.toLowerCase(), search = search.toLowerCase();
-            }
-            return {s: str, ss: search, i: index};
-        }
-    }
-
-    extend(String.prototype, {
-        startsWith: function(search, index, opt_noCase, str /* internal */) {
+        },
+        /**
+         * Starts with.
+         * @param  {String} search
+         * @param  {Int}    index
+         * @param  {Bool}   opt_noCase @optional
+         * @param  {String} str        @internal
+         * @return {Bool}
+         * @override
+         */
+        startsWith: function(search, index, opt_noCase, str) {
             return (str = toSearchStuff(this, search, index, opt_noCase))
                 && str.ss === str.s.substr(str.i || 0, str.ss.length);
         },
-        endsWith: function(search, index, opt_noCase, str /* internal */) {
+        /**
+         * Ends with.
+         * @param  {String} search
+         * @param  {Int}    index
+         * @param  {Bool}   opt_noCase @optional
+         * @param  {String} str        @internal
+         * @return {Bool}
+         * @override
+         */
+        endsWith: function(search, index, opt_noCase, str) {
             return (str = toSearchStuff(this, search, index, opt_noCase))
                 && str.ss === str.s.substr(0, str.i || str.ss.length);
         },
-        contains: function(search, index, opt_noCase, str /* internal */) {
+        /**
+         * Contains.
+         * @param  {String} search
+         * @param  {Int}    index
+         * @param  {Bool}   opt_noCase  @optional
+         * @param  {String} str         @internal
+         * @return {Bool}
+         */
+        contains: function(search, index, opt_noCase, str) {
             return (str = toSearchStuff(this, search, index, opt_noCase))
                 && str.s !== str.s.split(str.ss)[0];
         }
@@ -393,8 +479,14 @@ function log() { console.log.apply(console, arguments); }
         fn_toString = {}.toString
     ;
 
-    // so: base functions
+    /**
+     * so: base functions.
+     */
     extend($, {
+        /**
+         * [log description]
+         * @return {[type]}
+         */
         log: function() {
             log.apply(NULL, ['>> so:'].concat(fn_slice.call(arguments)));
         },
