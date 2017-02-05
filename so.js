@@ -2,8 +2,10 @@
  * @name: so
  */
 
-// log shotcut
-function log(s) { console.log.apply(console, arguments); }
+/**
+ * Shortcut log.
+ */
+function log() { console.log.apply(console, arguments); }
 
 ;(function(window, undefined) {
     'use strict';
@@ -13,7 +15,10 @@ function log(s) { console.log.apply(console, arguments); }
         throw ('Archaic browser!');
     }
 
-    /* so */
+    /**
+     * So object.
+     * @type {Object}
+     */
     var $ = {};
 
     // globals
@@ -21,9 +26,13 @@ function log(s) { console.log.apply(console, arguments); }
     window.so.VERSION = '5.0.0';
     window.document.window = window;
 
-    // for compress advantage
+    // for minify advantages
     var NULL = null, NULLS = '';
 
+    /**
+     * Extend.
+     * @return {Object}
+     */
     function extend() {
         var i = 1, key, args = arguments, source, target = args[0] || {};
         while (source = args[i++]) {
@@ -36,6 +45,13 @@ function log(s) { console.log.apply(console, arguments); }
         return target;
     }
 
+    /**
+     * For each.
+     * @param  {Array|Object} input
+     * @param  {Function}     fn
+     * @param  {Object}       opt_scope @optional
+     * @return {Array|Object}
+     */
     function forEach(input, fn, opt_scope) {
         var len = input && input.length, i;
         if (len != NULL) { // array: value => i
@@ -53,18 +69,32 @@ function log(s) { console.log.apply(console, arguments); }
                 }
             }
         }
+
         return opt_scope || input;
     }
 
-    function toBool(a) {
-        return !!a;
+    /**
+     * To bool.
+     * @param  {Any} input
+     * @return {Boolean}
+     */
+    function toBool(input) {
+        return !!input;
+    }
+    /**
+     * To string.
+     * @param  {String} input
+     * @return {String}
+     */
+    function toString(input) {
+        return (input == NULL) ? NULLS : input.toString();
     }
 
-    function toString(a) {
-        return (a == NULL) ? NULLS : a.toString();
-    }
-
-    // so: type functions
+    /**
+     * So: Type Functions.
+     * @param  {Any} a
+     * @return {Boolean}
+     */
     extend($, {
         isNone: function(a) {
             return (a == NULL);
