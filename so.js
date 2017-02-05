@@ -770,7 +770,7 @@ function log() { console.log.apply(console, arguments); }
                 if (!propertyProperty) {
                     target[property] = source;
                 } else {
-                    (target[NAME_PROTOTYPE] ? target[NAME_PROTOTYPE] : target)[propertyProperty] = source;
+                    (target[NAME_PROTOTYPE] || target)[propertyProperty] = source;
                 }
 
                 return extend($, target);
