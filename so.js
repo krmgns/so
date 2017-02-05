@@ -245,7 +245,7 @@ function log() { console.log.apply(console, arguments); }
 
         /** Is array.        @param {Any} input @return {Bool} */
         isArray: function(input) {
-            return input && (input.constructor == Array);
+            return Array.isArray(input);
         },
 
         /** Is object.       @param {Any} input @return {Bool} */
