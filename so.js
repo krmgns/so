@@ -325,13 +325,13 @@ function log() { console.log.apply(console, arguments); }
     /**
      * To trim chars.
      * @param  {String|void} chars
-     * @param  {Boolean}     opt_isChop
+     * @param  {Boolean}     opt_isLeft
      * @param  {String}      pattern    @internal
      * @return {String}
      * @private
      */
-    function toTrimRegExp(chars, opt_isChop, pattern) {
-        return new RegExp((opt_isChop ? '[%s]+$' : '^[%s]+')
+    function toTrimRegExp(chars, opt_isLeft, pattern) {
+        return new RegExp((opt_isLeft ? '^[%s]+' : '[%s]+$')
             .format(chars ? chars.replace(/([\[\]\\])/g, '\\$1') : '\\s'));
     }
 
@@ -447,7 +447,7 @@ function log() { console.log.apply(console, arguments); }
          * @override
          */
         trimLeft: function(chars) {
-            var str = toString(this), re = toTrimRegExp(chars);
+            var str = toString(this), re = toTrimRegExp(chars, TRUE);
 
             while (re.test(str)) {
                 str = str.replace(re, NULLS);
@@ -463,7 +463,7 @@ function log() { console.log.apply(console, arguments); }
          * @override
          */
         trimRight: function(chars) {
-            var str = toString(this), re = toTrimRegExp(chars, TRUE);
+            var str = toString(this), re = toTrimRegExp(chars);
 
             while (re.test(str)) {
                 str = str.replace(re, NULLS);
