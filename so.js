@@ -703,7 +703,7 @@ function log() { console.log.apply(console, arguments); }
          * @return {Boolean}
          */
         isEmpty: function(input) {
-            return !input // '', null, undefined, false, 0, NaN
+            return !input // '', null, undefined, false, 0, -0, NaN
                 || ($.isNumber(input.length) && !input.length)
                 || ($.isObject(input) && !Object.keys(input).length);
         },
