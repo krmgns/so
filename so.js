@@ -17,7 +17,9 @@ function log() { console.log.apply(console, arguments); }
 
     // for minify advantage
     var NULL = null, NULLS = '',
-        TRUE = true, FALSE = false;
+        TRUE = true, FALSE = false,
+        PROTOTYPE = 'prototype'
+    ;
 
     /**
      * Shortcut for 'so'.
@@ -290,7 +292,7 @@ function log() { console.log.apply(console, arguments); }
 
     /**
      * To trim chars.
-     * @param  {String|null} chars
+     * @param  {String|void} chars
      * @return {String}
      * @private
      */
@@ -338,7 +340,7 @@ function log() { console.log.apply(console, arguments); }
          * To int.
          * @param  {Int}    base
          * @param  {String} str  @internal
-         * @return {Int|null}
+         * @return {Int|void}
          */
         toInt: function(base, str) {
             return $.isNumeric(str = toString(this))
@@ -347,7 +349,7 @@ function log() { console.log.apply(console, arguments); }
         /**
          * To float.
          * @param  {String} str @internal
-         * @return {Float|null}
+         * @return {Float|void}
          */
         toFloat: function(str) {
             return $.isNumeric(str = toString(this)) ? parseFloat(str) : NULL;
@@ -399,7 +401,7 @@ function log() { console.log.apply(console, arguments); }
         },
         /**
          * Trim left.
-         * @param  {String|null} chars
+         * @param  {String|void} chars @optional
          * @return {String}
          * @override
          */
@@ -414,7 +416,7 @@ function log() { console.log.apply(console, arguments); }
         },
         /**
          * Trim right.
-         * @param  {String|null} chars
+         * @param  {String|void} chars @optional
          * @return {String}
          * @override
          */
@@ -429,7 +431,7 @@ function log() { console.log.apply(console, arguments); }
         },
         /**
          * Trim.
-         * @param  {String|null} chars
+         * @param  {String|void} chars @optional
          * @return {String}
          * @override
          */
@@ -489,7 +491,7 @@ function log() { console.log.apply(console, arguments); }
     extend($, {
         /**
          * Log.
-         * @return {Void}
+         * @return {void}
          */
         log: function() {
             log.apply(NULL, ['>> so:'].concat(fn_slice.call(arguments)));
@@ -499,7 +501,7 @@ function log() { console.log.apply(console, arguments); }
          * @return {Function}
          */
         fun: function() {
-            return function(){};
+            return function() {};
         },
         /**
          * Now.
@@ -555,24 +557,39 @@ function log() { console.log.apply(console, arguments); }
 
             return ret;
         },
-        trim: function(s, chars) {
-            return s == NULL ? NULLS : s.trim(chars);
+        /**
+         * Trim.
+         * @param  {String}      str
+         * @param  {String|void} chars @optional
+         * @return {String}
+         */
+        trim: function(str, chars) {
+            return (str == NULL) ? NULLS : str.trim(chars);
         },
-        trimLeft: function(s, chars) {
-            return s == NULL ? NULLS : s.trimLeft(chars);
+        /**
+         * Trim left.
+         * @param  {String}      str
+         * @param  {String|void} chars @optional
+         * @return {String}
+         */
+        trimLeft: function(str, chars) {
+            return (str == NULL) ? NULLS : str.trimLeft(chars);
         },
-        trimRight: function(s, chars) {
-            return s == NULL ? NULLS : s.trimRight(chars);
+        /**
+         * Trim right.
+         * @param  {String}      str
+         * @param  {String|void} chars @optional
+         * @return {String}
+         */
+        trimRight: function(str, chars) {
+            return (str == NULL) ? NULLS : str.trimRight(chars);
         },
-        dig: function(input, key) {
-            if ($.isObject(input)) {
-                var keys = toString(key).split('.'), key = keys.shift();
-                if (!keys.length) {
-                    return input[key];
-                }
-                return $.dig(input[key], keys.join('.'));
-            }
-        },
+        /**
+         * Freeze.
+         * @param  {Object}  object
+         * @param  {Boolean} opt_deep @optional
+         * @return {Object}
+         */
         freeze: function(object, opt_deep) {
             if (opt_deep !== FALSE) {
                 Object.getOwnPropertyNames(object).forEach(function(name) {
@@ -583,6 +600,29 @@ function log() { console.log.apply(console, arguments); }
             }
             return Object.freeze(object);
         },
+        /**
+         * Dig.
+         * @param  {Object} input
+         * @param  {String} key
+         * @return {Any}
+         */
+        dig: function(input, key) {
+            if ($.isObject(input)) {
+                var keys = toString(key).split('.'), key = keys.shift();
+
+                if (!keys.length) {
+                    return input[key];
+                }
+
+                return $.dig(input[key], keys.join('.'));
+            }
+        },
+        /**
+         * Type of.
+         * @param  {Any}     input
+         * @param  {Boolean} opt_real @optional
+         * @return {String}
+         */
         typeOf: function(input, opt_real) {
             var type;
 
@@ -602,23 +642,55 @@ function log() { console.log.apply(console, arguments); }
 
             return type;
         },
+        /**
+         * Value of.
+         * @param  {Any} input
+         * @return {Any}
+         */
         valueOf: function(input) {
             return valueOf(input);
         },
-        isSet: function(input, opt_key) { // @test
+        /**
+         * Is set.
+         * @param  {Any}    input
+         * @param  {String} opt_key @optional
+         * @return {Boolean}
+         */
+        isSet: function(input, opt_key) {
             return ((opt_key != NULL) ? $.dig(input, opt_key) : input) != NULL;
         },
-        isEmpty: function(input) { // @test
+        /**
+         * Is empty.
+         * @param  {Any} input
+         * @return {Boolean}
+         */
+        isEmpty: function(input) {
             return !input // '', null, undefined, false, 0, NaN
-                || ($.isNumber(input) && !input.length)
+                || ($.isNumber(input.length) && !input.length)
                 || ($.isObject(input) && !Object.keys(input).length);
         },
+        /**
+         * For each.
+         * @param  {Array|Object} input
+         * @param  {Function}     fn
+         * @param  {Object}       opt_scope @optional
+         * @return {Array|Object}
+         * @private
+         */
         forEach: function(input, fn, opt_scope) {
             return forEach(input, fn, opt_scope);
         },
         mix: function() {
             throw '@todo Remove method $.mix()!';
         },
+        /**
+         * Extend.
+         * @param  {Any} target
+         * @param  {Any} source
+         * @usage  $.extend('foo', ...)
+         * @usage  $.extend('foo.bar', ...)
+         * @return {Any}
+         */
         extend: function(target, source) {
             // self extend
             if ($.isObject(target) && $.isUndefined(source)) {
@@ -630,13 +702,9 @@ function log() { console.log.apply(console, arguments); }
                 var tmp = target.split('.'), property = tmp[0], propertyProperty = tmp[1],
                     target = $[property] || {};
 
-                // notation: $.extend('foo', ...)
                 if (!propertyProperty) {
                     target[property] = source;
-                }
-                // notation: $.extend('foo.bar', ...)
-                // notation: $.extend('foo.bar', function() { ... })
-                else {
+                } else {
                     (target.prototype ? target.prototype : target)[propertyProperty] = source;
                 }
 
@@ -649,29 +717,52 @@ function log() { console.log.apply(console, arguments); }
         toString: function(name, opt_object) {
             throw '@todo Remove method $.toString()!';
         },
+        /**
+         * Is constant.
+         * @param  {String} name
+         * @return {Boolean}
+         */
         isConstant: function(name) {
             return (name in constants);
         },
+        /**
+         * Set constant.
+         * @param  {String} name
+         * @param  {Any}    value
+         * @return {void}
+         */
         setConstant: function(name, value) {
             if (!defined(name)) {
                 throw ('Constant "'+ name +'" already defined!');
             }
             constants[name] = value;
         },
+        /**
+         * Get constant.
+         * @param  {String} name
+         * @return {Any}
+         */
         getConstant: function(name) {
             return constants[name];
         }
     });
 
+    // onReady callbacks
     var callbacks = [];
 
+    // onReady callbacks fire
     function fireCallbacks() {
         while (callbacks.length) {
             callbacks.shift()($);
         }
     }
 
-    // oh baybe..
+    /**
+     * Oh baby..
+     * @param  {Function}      callback
+     * @param  {Document|void} document @optional
+     * @return {void}
+     */
     $.onReady = function(callback, document) {
         if ($.isFunction(callback)) {
             callbacks.push(callback);
@@ -680,7 +771,7 @@ function log() { console.log.apply(console, arguments); }
         // iframe support
         document = document || window.document;
 
-        document.addEventListener('DOMContentLoaded', function _(){
+        document.addEventListener('DOMContentLoaded', function _() {
             document.removeEventListener('DOMContentLoaded', _, FALSE);
             fireCallbacks();
         }, FALSE);
