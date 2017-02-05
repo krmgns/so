@@ -1,10 +1,10 @@
 /**
- * @name: so
- */
+* @name: so
+*/
 
 /**
- * Shortcut for 'console.log'.
- */
+* Shortcut for 'console.log'.
+*/
 function log() { console.log.apply(console, arguments); }
 
 ;(function(window, undefined) {
@@ -18,7 +18,17 @@ function log() { console.log.apply(console, arguments); }
     // for minify advantage
     var NULL = null, NULLS = '',
         TRUE = true, FALSE = false,
-        PROTOTYPE = 'prototype'
+
+        NAME_WINDOW = 'window',
+        NAME_DOCUMENT = 'document',
+        NAME_OWNER_DOCUMENT = 'ownerDocument',
+        NAME_DEFAULT_VIEW = 'defaultView',
+        NAME_PROTOTYPE = 'prototype',
+        NODE_TYPE = 'nodeType',
+
+        NODE_TYPE_ELEMENT = 1,
+        NODE_TYPE_DOCUMENT = 9,
+        NODE_TYPE_DOCUMENT_FRAGMENT = 11
     ;
 
     /**
@@ -31,7 +41,7 @@ function log() { console.log.apply(console, arguments); }
     // $.window = window;
     window.so = $;
     window.so.VERSION = '5.0.0';
-    window.document.window = window;
+    window[NAME_DOCUMENT][NAME_WINDOW] = window;
 
     /**
      * Value of.
@@ -143,11 +153,11 @@ function log() { console.log.apply(console, arguments); }
             );
 
             // add constructor prototype and constructor constructor
-            Constructor[PROTOTYPE] = Object.create(prototype, {
+            Constructor[NAME_PROTOTYPE] = Object.create(prototype, {
                 constructor: {value: createConstructor(
                     'var Constructor = function '+ name +'(){}; ' +
-                    'Constructor[PROTOTYPE] = prototype;' +
-                    'Constructor[PROTOTYPE].constructor = Constructor;' +
+                    'Constructor[NAME_PROTOTYPE] = prototype;' +
+                    'Constructor[NAME_PROTOTYPE].constructor = Constructor;' +
                     'return Constructor;'
                 )}
             });
@@ -164,7 +174,7 @@ function log() { console.log.apply(console, arguments); }
          */
         extends: function(supClass, prototype) {
             if (supClass) {
-                subClass[PROTOTYPE] = Object.create(supClass[PROTOTYPE], {
+                subClass[NAME_PROTOTYPE] = Object.create(supClass[NAME_PROTOTYPE], {
                     constructor: {value: subClass},
                           super: {value: supClass}
                 });
@@ -172,7 +182,7 @@ function log() { console.log.apply(console, arguments); }
 
             // add subClass prototype if provided
             prototype && forEach(prototype, function(name, value) {
-                subClass[PROTOTYPE][name] = value;
+                subClass[NAME_PROTOTYPE][name] = value;
             });
 
             return subClass;
@@ -242,7 +252,7 @@ function log() { console.log.apply(console, arguments); }
         /** Is iterable.     @param {Any} input @return {Bool} */
         isIterable: function(input) {
             return $.isArray(input) || $.isObject(input)
-                || (input && input.length && !input.nodeType); // dom, nodelist, string etc.
+                || (input && input.length && !input[NODE_TYPE]); // dom, nodelist, string etc.
         },
         /** Is primitive.    @param {Any} input @return {Bool} */
         isPrimitive: function(input) {
@@ -250,27 +260,28 @@ function log() { console.log.apply(console, arguments); }
         },
         /** Is window.       @param {Any} input @return {Bool} */
         isWindow: function(input) {
-            return toBool(input && input == input.window
-                && input.top == input.window.top && input.location == input.window.location);
+            return toBool(input && input == input[NAME_WINDOW]
+                && input.top == input[NAME_WINDOW].top && input.location == input[NAME_WINDOW].location);
         },
         /** Is document.     @param {Any} input @return {Bool} */
         isDocument: function(input) {
-            return toBool(input && input.nodeType == 9);
+            return toBool(input && input[NODE_TYPE] === NODE_TYPE_DOCUMENT);
         },
         /** Is node.         @param {Any} input @return {Bool} */
         isNode: function(input) {
-            return toBool(input && (input.nodeType === 1 || input.nodeType == 11));
+            return toBool(input && (input[NODE_TYPE] === NODE_TYPE_ELEMENT
+                                 || input[NODE_TYPE] === NODE_TYPE_DOCUMENT_FRAGMENT));
         },
         /** Is node element. @param {Any} input @return {Bool} */
         isNodeElement: function(input) {
-            return toBool(input && input.nodeType === 1);
+            return toBool(input && input[NODE_TYPE] === NODE_TYPE_ELEMENT);
         }
     });
 
     /**
      * Object extends.
      */
-    extend(Object[PROTOTYPE], {
+    extend(Object[NAME_PROTOTYPE], {
         /**
          * Object for each.
          * @param  {Function} fn
@@ -328,7 +339,7 @@ function log() { console.log.apply(console, arguments); }
     /**
      * String extends.
      */
-    extend(String[PROTOTYPE], {
+    extend(String[NAME_PROTOTYPE], {
         /**
          * Is numeric.
          * @return {Bool}
@@ -527,9 +538,11 @@ function log() { console.log.apply(console, arguments); }
 
             if (node) {
                 if ($.isNode(node)) {
-                    ret = node.ownerDocument.defaultView; // node document window
+                    ret = node[NAME_OWNER_DOCUMENT][NAME_DEFAULT_VIEW]; // node document window
                 } else if ($.isDocument(node)) {
-                    ret = node.defaultView; // document window
+                    ret = node[NAME_DEFAULT_VIEW]; // document window
+                } else if ($.isWindow(node)) {
+                    ret = node;
                 }
             } else {
                 ret = window;
@@ -546,13 +559,15 @@ function log() { console.log.apply(console, arguments); }
             var ret;
 
             if (node) {
-                if (node.ownerDocument) { // document or node
-                    ret = node.ownerDocument;
-                } else if (node.document) {
-                    ret = node.document; // window
+                if (node[NAME_OWNER_DOCUMENT]) { // document or node
+                    ret = node[NAME_OWNER_DOCUMENT];
+                } else if (node[NAME_DOCUMENT]) {
+                    ret = node[NAME_DOCUMENT]; // window
+                } else if ($.isDocument(node)) {
+                    ret = node;
                 }
             } else {
-                ret = window.document;
+                ret = window[NAME_DOCUMENT];
             }
 
             return ret;
@@ -631,9 +646,9 @@ function log() { console.log.apply(console, arguments); }
             } else if ($.isUndefined(input)) {
                 type = 'undefined';
             } else if ($.isWindow(input)) {
-                type = 'window';
+                type = NAME_WINDOW;
             } else if ($.isDocument(input)) {
-                type = 'document';
+                type = NAME_DOCUMENT;
             } else if ($.isNodeElement(input)) {
                 type = 'element';
             } else {
@@ -705,7 +720,7 @@ function log() { console.log.apply(console, arguments); }
                 if (!propertyProperty) {
                     target[property] = source;
                 } else {
-                    (target[PROTOTYPE] ? target[PROTOTYPE] : target)[propertyProperty] = source;
+                    (target[NAME_PROTOTYPE] ? target[NAME_PROTOTYPE] : target)[propertyProperty] = source;
                 }
 
                 return extend($, target);
@@ -769,7 +784,7 @@ function log() { console.log.apply(console, arguments); }
         }
 
         // iframe support
-        document = document || window.document;
+        document = document || window[NAME_DOCUMENT];
 
         var event = 'DOMContentLoaded';
         document.addEventListener(event, function _() {
