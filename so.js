@@ -643,23 +643,6 @@ function log() { console.log.apply(console, arguments); }
         },
 
         /**
-         * Freeze.
-         * @param  {Object}  object
-         * @param  {Boolean} opt_deep @optional
-         * @return {Object}
-         */
-        freeze: function(object, opt_deep) {
-            if (opt_deep !== FALSE) {
-                Object.getOwnPropertyNames(object).forEach(function(name) {
-                    if ($.isObject(object[name])) {
-                        $.freeze(object[name]);
-                    }
-                });
-            }
-            return Object.freeze(object);
-        },
-
-        /**
          * Dig.
          * @param  {Object} input
          * @param  {String} key
