@@ -143,11 +143,11 @@ function log() { console.log.apply(console, arguments); }
             );
 
             // add constructor prototype and constructor constructor
-            Constructor.prototype = Object.create(prototype, {
+            Constructor[PROTOTYPE] = Object.create(prototype, {
                 constructor: {value: createConstructor(
                     'var Constructor = function '+ name +'(){}; ' +
-                    'Constructor.prototype = prototype;' +
-                    'Constructor.prototype.constructor = Constructor;' +
+                    'Constructor[PROTOTYPE] = prototype;' +
+                    'Constructor[PROTOTYPE].constructor = Constructor;' +
                     'return Constructor;'
                 )}
             });
@@ -164,7 +164,7 @@ function log() { console.log.apply(console, arguments); }
          */
         extends: function(supClass, prototype) {
             if (supClass) {
-                subClass.prototype = Object.create(supClass.prototype, {
+                subClass[PROTOTYPE] = Object.create(supClass[PROTOTYPE], {
                     constructor: {value: subClass},
                           super: {value: supClass}
                 });
@@ -172,7 +172,7 @@ function log() { console.log.apply(console, arguments); }
 
             // add subClass prototype if provided
             prototype && forEach(prototype, function(name, value) {
-                subClass.prototype[name] = value;
+                subClass[PROTOTYPE][name] = value;
             });
 
             return subClass;
@@ -270,7 +270,7 @@ function log() { console.log.apply(console, arguments); }
     /**
      * Object extends.
      */
-    extend(Object.prototype, {
+    extend(Object[PROTOTYPE], {
         /**
          * Object for each.
          * @param  {Function} fn
@@ -328,7 +328,7 @@ function log() { console.log.apply(console, arguments); }
     /**
      * String extends.
      */
-    extend(String.prototype, {
+    extend(String[PROTOTYPE], {
         /**
          * Is numeric.
          * @return {Bool}
@@ -705,7 +705,7 @@ function log() { console.log.apply(console, arguments); }
                 if (!propertyProperty) {
                     target[property] = source;
                 } else {
-                    (target.prototype ? target.prototype : target)[propertyProperty] = source;
+                    (target[PROTOTYPE] ? target[PROTOTYPE] : target)[propertyProperty] = source;
                 }
 
                 return extend($, target);
@@ -750,7 +750,7 @@ function log() { console.log.apply(console, arguments); }
     // onReady callbacks
     var callbacks = [];
 
-    // onReady callbacks fire
+    // onReady callbacks firer
     function fireCallbacks() {
         while (callbacks.length) {
             callbacks.shift()($);
