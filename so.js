@@ -6,13 +6,23 @@
 function log(s) { console.log.apply(console, arguments); }
 
 ;(function(window, undefined) {
-
     'use strict';
 
-    // simple support check
+    // simply support check
     if (!''.trim) {
         throw ('Archaic browser!');
     }
+
+    /* so */
+    var $ = {};
+
+    // globals
+    window.so = $;
+    window.so.VERSION = '5.0.0';
+    window.document.window = window;
+
+    // for compress advantage
+    var NULL = null, NULLS = '';
 
     function extend() {
         var i = 1, key, args = arguments, source, target = args[0] || {};
@@ -28,7 +38,7 @@ function log(s) { console.log.apply(console, arguments); }
 
     function forEach(input, fn, opt_scope) {
         var len = input && input.length, i;
-        if (len != null) { // array: value => i
+        if (len != NULL) { // array: value => i
             for (i = 0; i < len; i++) {
                 if (false === fn.call(opt_scope || input[i], input[i], i, input)) {
                     break;
@@ -46,19 +56,24 @@ function log(s) { console.log.apply(console, arguments); }
         return opt_scope || input;
     }
 
-    /* so */
-    var $ = {};
+    function toBool(a) {
+        return !!a;
+    }
+
+    function toString(a) {
+        return (a == NULL) ? NULLS : a.toString();
+    }
 
     // so: type functions
     extend($, {
         isNone: function(a) {
-            return (a == null);
+            return (a == NULL);
         },
         isNull: function(a) {
-            return (a === null);
+            return (a === NULL);
         },
         isNulls: function(a) {
-            return (a === '');
+            return (a === NULLS);
         },
         isUndefined: function(a) {
             return (a === undefined);
@@ -73,7 +88,7 @@ function log(s) { console.log.apply(console, arguments); }
             return (typeof a == 'number');
         },
         isNumeric: function(a) {
-            return (a != null && a != '') && !isNaN(parseFloat(a)) && isFinite(a);
+            return !$.isNone(a) && !$.isNulls(a) && isFinite(a) && !isNaN(parseFloat(a));
         },
         isFunction: function(a) {
             return (typeof a == 'function');
@@ -91,10 +106,23 @@ function log(s) { console.log.apply(console, arguments); }
             return $.isNumber(a) && (a % 1 != 0 || a == 1.0);
         },
         isIterable: function(a) {
-            return $.isArray(a) || $.isObject(a) || (a && a.length && !a.nodeType); // dom, nodelist, string etc.
+            return $.isArray(a) || $.isObject(a)
+                || (a && a.length && !a.nodeType); // dom, nodelist, string etc.
         },
         isPrimitive: function(a) {
-            return (a == null) || /^(string|number|boolean|symbol)$/.test(typeof a);
+            return $.isNone(a) || /^(string|number|boolean|symbol)$/.test(typeof a);
+        },
+        isWindow: function(a) {
+            return toBool(a && a == a.window && a.top == a.window.top && a.location == a.window.location);
+        },
+        isDocument: function(a) {
+            return toBool(a && a.nodeType == 9);
+        },
+        isNode: function(a) {
+            return toBool(a && (a.nodeType === 1 || a.nodeType == 11));
+        },
+        isNodeElement: function(a) {
+            return toBool(a && a.nodeType === 1);
         }
     });
 
@@ -102,85 +130,87 @@ function log(s) { console.log.apply(console, arguments); }
         isNumeric: function() {
             return $.isNumeric(this);
         },
-        toInt: function(base) {
-            return $.isNumeric(this) ? parseInt(this.replace(/^-?\.(.+)/, '0.$1'), base || 10) : null;
+        toInt: function(base, str /* internal */) {
+            return $.isNumeric(str = toString(this))
+                ? parseInt(str.replace(/^-?\./, '0.'), base || 10) : NULL;
         },
-        toFloat: function() {
-            return $.isNumeric(this) ? parseFloat(this) : null;
+        toFloat: function(str /* internal */) {
+            return $.isNumeric(str = toString(this)) ? parseFloat(str) : NULL;
         },
         toCapitalCase: function(all) {
-            var s = this.toLowerCase(), i;
+            var str = toString(this).toLowerCase(), i;
             if (all !== false) {
-                for (i = 0, s = s.split(' '); i < s.length; i++) {
-                    s[i] = s[i].toCapitalCase(false);
+                for (i = 0, str = str.split(' '); i < str.length; i++) {
+                    str[i] = str[i].toCapitalCase(false);
                 }
-                return s.join(' ');
+                return str.join(' ');
             }
-            return s.charAt(0).toUpperCase() + s.slice(1);
+            return str.charAt(0).toUpperCase() + str.slice(1);
         },
         format: function() {
-            var s = this, m, ms = s.match(/(%s)/g) || [], i = 0, args = arguments;
-            if (ms.length > args.length) {
+            var str = toString(this), args = arguments, matches = str.match(/(%s)/g) || [], i = 0;
+            if (args.length < matches.length) {
                 throw ('No arguments enough!');
             }
-            while (m = ms.shift()) {
-                s = s.replace(/(%s)/, args[i++]);
+            while (matches.shift()) {
+                str = str.replace(/(%s)/, args[i++]);
             }
-            return s;
+            return str;
         },
         forEach: function(fn) { // @test
-            return forEach(''+ this, fn, this);
+            return forEach(toString(this), fn, this);
         }
     });
 
-    function prepareTrimChars(chars) {
+    function toTrimChars(chars) {
         return chars ? chars.replace(/([\[\]\\])/g, '\\$1') : '\\s';
     }
 
     extend(String.prototype, {
         trimLeft: function(chars) {
-            var s = this, re = new RegExp('^['+ prepareTrimChars(chars) +']+');;
-            while (re.test(s)) {
-                s = s.replace(re, '');
+            var str = toString(this), re = new RegExp('^['+ toTrimChars(chars) +']+');;
+            while (re.test(str)) {
+                str = str.replace(re, NULLS);
             }
-            return s;
+            return str;
         },
         trimRight: function(chars) {
-            var s = this, re = new RegExp('['+ prepareTrimChars(chars) +']+$');
-            while (re.test(s)) {
-                s = s.replace(re, '');
+            var str = toString(this), re = new RegExp('['+ toTrimChars(chars) +']+$');
+            while (re.test(str)) {
+                str = str.replace(re, NULLS);
             }
-            return s;
+            return str;
         },
         trim: function(chars) {
             return this.trimLeft(chars).trimRight(chars);
         }
     });
 
-    function prepareSearchStuff(string, searchString, index, opt_noCase) {
-        if (string && searchString) {
+    function toSearchStuff(str, search, index, opt_noCase) {
+        if (str && search) {
             if (index === true) {
                 opt_noCase = true, index = 0;
             }
+            str = toString(str);
             if (opt_noCase) {
-                string = s.toLowerCase(), searchString = searchString.toLowerCase();
+                str = s.toLowerCase(), search = search.toLowerCase();
             }
-            return {s: string, ss: searchString, i: index};
+            return {s: str, ss: search, i: index};
         }
     }
 
     extend(String.prototype, {
-        startsWith: function(searchString, index, opt_noCase, _s /* internal */) {
-            return (_s = prepareSearchStuff(this, searchString, index, opt_noCase))
-                && _s.s.substr(_s.i || 0, _s.ss.length) === _s.ss;
+        startsWith: function(search, index, opt_noCase, str /* internal */) {
+            return (str = toSearchStuff(this, search, index, opt_noCase))
+                && str.ss === str.s.substr(str.i || 0, str.ss.length);
         },
-        endsWith: function(searchString, index, opt_noCase, _s /* internal */) {
-            return (_s = prepareSearchStuff(this, searchString, index, opt_noCase))
-                && _s.s.substr(0, _s.i || _s.ss.length) === _s.ss;
+        endsWith: function(search, index, opt_noCase, str /* internal */) {
+            return (str = toSearchStuff(this, search, index, opt_noCase))
+                && str.ss === str.s.substr(0, str.i || str.ss.length);
         },
-        contains: function(searchString, index, opt_noCase, _s /* internal */) {
-            return (_s = prepareSearchStuff(this, searchString, index, opt_noCase))
-                && _s.s !== _s.s.split(_s.ss)[0];
+        contains: function(search, index, opt_noCase, str /* internal */) {
+            return (str = toSearchStuff(this, search, index, opt_noCase))
+                && str.s !== str.s.split(str.ss)[0];
         }
     });
 
@@ -192,7 +222,7 @@ function log(s) { console.log.apply(console, arguments); }
     // so: base functions
     extend($, {
         log: function() {
-            log.apply(null, ['>> so:'].concat(fn_slice.call(arguments)));
+            log.apply(NULL, ['>> so:'].concat(fn_slice.call(arguments)));
         },
         fun: function() {
             return function(){};
@@ -203,30 +233,33 @@ function log(s) { console.log.apply(console, arguments); }
         uuid: function() {
             return ++_uuid;
         },
-        win: function(el) {
-            if (!el) return window;
-            if (el == el.window) return el;
-            var elType = el.nodeType;
-            if (elType == 1) {
-                el = el.ownerDocument; // find el document
+        win: function(node) {
+            var win;
+            if (!node || $.isWindow(node)) {
+                win = window;
+            } else if ($.isDocument(node)) {
+                win = node.window; // find document window
+            } else if ($.isNode(node)) {
+                win = node.ownerDocument.window; // find node document window
             }
-            return elType == 9 ? el.defaultView : null;
+
+            return win;
         },
-        doc: function(el) {
-            return el ? el.ownerDocument : window.document;
+        doc: function(node) {
+            return node ? node.ownerDocument : window.document;
         },
         trim: function(s, chars) {
-            return s == null ? '' : s.trim(chars);
+            return s == NULL ? NULLS : s.trim(chars);
         },
         trimLeft: function(s, chars) {
-            return s == null ? '' : s.trimLeft(chars);
+            return s == NULL ? NULLS : s.trimLeft(chars);
         },
         trimRight: function(s, chars) {
-            return s == null ? '' : s.trimRight(chars);
+            return s == NULL ? NULLS : s.trimRight(chars);
         },
         dig: function(input, key) {
             if ($.isObject(input)) {
-                var keys = (''+ key).split('.'), key = keys.shift();
+                var keys = toString(key).split('.'), key = keys.shift();
                 if (!keys.length) {
                     return input[key];
                 }
@@ -244,17 +277,26 @@ function log(s) { console.log.apply(console, arguments); }
             return Object.freeze(object);
         },
         typeOf: function(input, opt_real) {
-            if (input === null) return 'null';
-            if (input === undefined) return 'undefined';
-            if (opt_real) {
-                if ($.isNumeric(input)) return 'numeric';
-                if (input.nodeType == 1) return 'element';
-                if (input.nodeType == 9) return 'document';
+            var type;
+
+            if ($.isNull(input)) {
+                type = 'null';
+            } else if ($.isUndefined(input)) {
+                type = 'undefined';
+            } else if ($.isWindow(input)) {
+                type = 'window';
+            } else if ($.isDocument(input)) {
+                type = 'document';
+            } else if ($.isNodeElement(input)) {
+                type = 'element';
+            } else {
+                type = fn_toString.call(input).slice(8, -1).toLowerCase();
             }
-            return fn_toString.call(input).slice(8, -1).toLowerCase();
+
+            return type;
         },
         isSet: function(input, opt_key) { // @test
-            return ((opt_key != null) ? $.dig(input, opt_key) : input) != null;
+            return ((opt_key != NULL) ? $.dig(input, opt_key) : input) != NULL;
         },
         isEmpty: function(input) { // @test
             return !input // '', null, undefined, false, 0, NaN
@@ -292,7 +334,7 @@ function log(s) { console.log.apply(console, arguments); }
             }
 
             // any extend
-            return extend.apply(null, [target, source].concat(fn_slice.call(arguments, 2)));
+            return extend.apply(NULL, [target, source].concat(fn_slice.call(arguments, 2)));
         },
         toString: function(name, opt_object) {
             throw '@todo Remove method $.toString()!';
@@ -321,8 +363,5 @@ function log(s) { console.log.apply(console, arguments); }
             fireCallbacks();
         }, false);
     };
-
-    // make global
-    window.so = $;
 
 })(window);
