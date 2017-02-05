@@ -56,6 +56,58 @@ function log() { console.log.apply(console, arguments); }
         return valueOf(input).toString();
     }
 
+    /**
+     * So class.
+     * @param  {Function} subClass
+     * @return {Object}
+     */
+    $.class = function(subClass) {
+        return {
+            /**
+             * Create.
+             * @param  {String} name
+             * @param  {Object} prototype
+             * @return {Function}
+             */
+            create: function(name, prototype) {
+                // @todo
+                return name
+            },
+            /**
+             * Extends.
+             * @param  {Function} supClass
+             * @param  {Object}   prototype
+             * @return {Function}
+             */
+            extends: function(supClass, prototype) {
+                if (supClass) {
+                    subClass.prototype = Object.create(supClass.prototype, {
+                        constructor: {value: subClass},
+                              super: {value: supClass}
+                    });
+                }
+
+                forEach(prototype, function(name, value) {
+                    subClass.prototype[name] = value;
+                });
+
+                return subClass;
+            }
+        };
+    }
+
+// function BoolValue(value) {
+//     log("super called!", this, "value:"+ value);
+// }
+// function Bool(value) {
+//     this.super(value);
+//     this.value = Boolean(value);
+//     this.valueOf = function() { return this.value; }
+//     this.toString = function() { return this.value.toString(); }
+// }
+// $.class(Bool).extends(BoolValue);
+// var bool = new Bool(1);
+// log(bool, bool.valueOf(), bool.toString(), bool.a)
 
     /**
      * Extend.
