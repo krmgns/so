@@ -299,6 +299,42 @@ function log() { console.log.apply(console, arguments); }
     });
 
     /**
+     * Array extends.
+     */
+    extend(Array[NAME_PROTOTYPE], {
+        /**
+         * Select.
+         * @param  {Function} fn
+         * @return {Array}
+         */
+        select: function(fn) {
+            var ret = [];
+            return this.reduce(function(ret, value) {
+                if (fn(value)) {
+                    return ret.concat([value]);
+                } else {
+                    return ret;
+                }
+            }, ret);
+        },
+
+        /**
+         * Uniq.
+         * @return {Array}
+         */
+        uniq: function() {
+            var ret = [];
+            return this.reduce(function(ret, value) {
+                if (ret.indexOf(value) < 0) {
+                    return ret.concat([value]);
+                } else {
+                    return ret;
+                }
+            }, ret);
+        }
+    });
+
+    /**
      * Object extends.
      */
     extend(Object[NAME_PROTOTYPE], {

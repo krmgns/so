@@ -22,6 +22,16 @@ so.onReady(function($) {
     // x = new $.dom(+new Date)
     // log(x)
     // log("getId():", x.getId())
+
+    var names = ['Alice', 'Bob', 'Tiff', 'Bruce', 'Alice', 'Bob'];
+
+    // names = names.select(function(name) {
+    //     return name.indexOf('Alice') > -1
+    // })
+    // log(names)
+
+    names = names.uniq()
+    log(names)
 })
 </script>
 
