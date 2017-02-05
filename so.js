@@ -289,7 +289,7 @@ function log() { console.log.apply(console, arguments); }
 
     /**
      * To trim chars.
-     * @param  {String|NULL} chars
+     * @param  {String|null} chars
      * @return {String}
      * @private
      */
@@ -337,7 +337,7 @@ function log() { console.log.apply(console, arguments); }
          * To int.
          * @param  {Int}    base
          * @param  {String} str  @internal
-         * @return {Int|NULL}
+         * @return {Int|null}
          */
         toInt: function(base, str) {
             return $.isNumeric(str = toString(this))
@@ -346,7 +346,7 @@ function log() { console.log.apply(console, arguments); }
         /**
          * To float.
          * @param  {String} str @internal
-         * @return {Float|NULL}
+         * @return {Float|null}
          */
         toFloat: function(str) {
             return $.isNumeric(str = toString(this)) ? parseFloat(str) : NULL;
@@ -398,7 +398,7 @@ function log() { console.log.apply(console, arguments); }
         },
         /**
          * Trim left.
-         * @param  {String|NULL} chars
+         * @param  {String|null} chars
          * @return {String}
          * @override
          */
@@ -413,7 +413,7 @@ function log() { console.log.apply(console, arguments); }
         },
         /**
          * Trim right.
-         * @param  {String|NULL} chars
+         * @param  {String|null} chars
          * @return {String}
          * @override
          */
@@ -428,7 +428,7 @@ function log() { console.log.apply(console, arguments); }
         },
         /**
          * Trim.
-         * @param  {String|NULL} chars
+         * @param  {String|null} chars
          * @return {String}
          * @override
          */
@@ -487,33 +487,55 @@ function log() { console.log.apply(console, arguments); }
      */
     extend($, {
         /**
-         * [log description]
-         * @return {[type]}
+         * Log.
+         * @return {Void}
          */
         log: function() {
             log.apply(NULL, ['>> so:'].concat(fn_slice.call(arguments)));
         },
+        /**
+         * Fun.
+         * @return {Function}
+         */
         fun: function() {
             return function(){};
         },
+        /**
+         * Now.
+         * @return {Int}
+         */
         now: function() {
             return Date.now();
         },
+        /**
+         * Uuid.
+         * @return {Int}
+         */
         uuid: function() {
             return ++_uuid;
         },
+        /**
+         * Win.
+         * @param  {Any} node
+         * @return {Window|undefined}
+         */
         win: function(node) {
             var win;
             if (!node || $.isWindow(node)) {
                 win = window;
             } else if ($.isDocument(node)) {
-                win = node.window; // find document window
+                win = node.defaultView; // find document window
             } else if ($.isNode(node)) {
-                win = node.ownerDocument.window; // find node document window
+                win = node.ownerDocument.defaultView; // find node document window
             }
 
             return win;
         },
+        /**
+         * Doc.
+         * @param  {[type]} node
+         * @return {[type]}
+         */
         doc: function(node) {
             return node ? node.ownerDocument : window.document;
         },
