@@ -475,9 +475,11 @@ function log() { console.log.apply(console, arguments); }
         }
     });
 
+    // internal vars
     var _uuid = 0,
         fn_slice = [].slice,
-        fn_toString = {}.toString
+        fn_toString = {}.toString,
+        constants = {}
     ;
 
     /**
@@ -608,6 +610,18 @@ function log() { console.log.apply(console, arguments); }
         },
         toString: function(name, opt_object) {
             throw '@todo Remove method $.toString()!';
+        },
+        isConstant: function(name) {
+            return (name in constants);
+        },
+        setConstant: function(name, value) {
+            if (!defined(name)) {
+                throw ('Constant "'+ name +'" already defined!');
+            }
+            constants[name] = value;
+        },
+        getConstant: function(name) {
+            return constants[name];
         }
     });
 
