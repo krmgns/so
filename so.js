@@ -190,7 +190,7 @@ function log() { console.log.apply(console, arguments); }
         }
     }};
 
-    // add shortcut for create
+    // add shortcut for create without ()'s.
     $.class.create = $.class().create;
 
     /**
