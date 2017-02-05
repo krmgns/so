@@ -3,7 +3,7 @@
  */
 
 /**
- * Shortcut log.
+ * Shortcut for 'console.log'.
  */
 function log() { console.log.apply(console, arguments); }
 
@@ -15,8 +15,11 @@ function log() { console.log.apply(console, arguments); }
         throw ('Archaic browser!');
     }
 
+    // for minify advantages
+    var NULL = null, NULLS = '';
+
     /**
-     * So object.
+     * Shortcut for 'so'.
      * @type {Object}
      */
     var $ = {};
@@ -26,8 +29,33 @@ function log() { console.log.apply(console, arguments); }
     window.so.VERSION = '5.0.0';
     window.document.window = window;
 
-    // for minify advantages
-    var NULL = null, NULLS = '';
+    /**
+     * Value of.
+     * @param  {Any} input
+     * @return {Any}
+     */
+    function valueOf(input) {
+        return (input && input.valueOf) ? input.valueOf() : input;
+    }
+
+    /**
+     * To bool.
+     * @param  {Any} input
+     * @return {Bool}
+     */
+    function toBool(input) {
+        return !!valueOf(input);
+    }
+
+    /**
+     * To string.
+     * @param  {String} input
+     * @return {String}
+     */
+    function toString(input) {
+        return valueOf(input).toString();
+    }
+
 
     /**
      * Extend.
@@ -74,92 +102,105 @@ function log() { console.log.apply(console, arguments); }
     }
 
     /**
-     * To bool.
-     * @param  {Any} input
-     * @return {Boolean}
-     */
-    function toBool(input) {
-        return !!input;
-    }
-    /**
-     * To string.
-     * @param  {String} input
-     * @return {String}
-     */
-    function toString(input) {
-        return (input == NULL) ? NULLS : input.toString();
-    }
-
-    /**
      * So: Type Functions.
-     * @param  {Any} a
-     * @return {Boolean}
+     * @param  {Any} input
+     * @return {Bool}
      */
     extend($, {
         isNone: function(input) {
             return (input == NULL);
         },
-        isNull: function(a) {
-            return (a === NULL);
+        isNull: function(input) {
+            return (input === NULL);
         },
-        isNulls: function(a) {
-            return (a === NULLS);
+        isNulls: function(input) {
+            return (input === NULLS);
         },
-        isUndefined: function(a) {
-            return (a === undefined);
+        isUndefined: function(input) {
+            return (input === undefined);
         },
-        isString: function(a) {
-            return (typeof a == 'string');
+        isString: function(input) {
+            return (typeof input == 'string');
         },
-        isBool: function(a) {
-            return (typeof a == 'boolean');
+        isBool: function(input) {
+            return (typeof input == 'boolean');
         },
-        isNumber: function(a) {
-            return (typeof a == 'number');
+        isNumber: function(input) {
+            return (typeof input == 'number');
         },
-        isNumeric: function(a) {
-            return !$.isNone(a) && !$.isNulls(a) && isFinite(a) && !isNaN(parseFloat(a));
+        isNumeric: function(input) {
+            return !$.isNone(input) && !$.isNulls(input) && isFinite(input) && !isNaN(parseFloat(input));
         },
-        isFunction: function(a) {
-            return (typeof a == 'function');
+        isFunction: function(input) {
+            return (typeof input == 'function');
         },
-        isArray: function(a) {
-            return a && (a.constructor == Array);
+        isArray: function(input) {
+            return input && (input.constructor == Array);
         },
-        isObject: function(a) {
-            return a && (a.constructor == Object);
+        isObject: function(input) {
+            return input && (input.constructor == Object);
         },
-        isInt: function(a) {
-            return $.isNumber(a) && (a % 1 == 0 && a != 1.0);
+        isInt: function(input) {
+            return $.isNumber(input) && (input % 1 == 0 && input != 1.0);
         },
-        isFloat: function(a) {
-            return $.isNumber(a) && (a % 1 != 0 || a == 1.0);
+        isFloat: function(input) {
+            return $.isNumber(input) && (input % 1 != 0 || input == 1.0);
         },
-        isIterable: function(a) {
-            return $.isArray(a) || $.isObject(a)
-                || (a && a.length && !a.nodeType); // dom, nodelist, string etc.
+        isIterable: function(input) {
+            return $.isArray(input) || $.isObject(input)
+                || (input && input.length && !input.nodeType); // dom, nodelist, string etc.
         },
-        isPrimitive: function(a) {
-            return $.isNone(a) || /^(string|number|boolean|symbol)$/.test(typeof a);
+        isPrimitive: function(input) {
+            return $.isNone(input) || /^(string|number|boolean|symbol)$/.test(typeof input);
         },
-        isWindow: function(a) {
-            return toBool(a && a == a.window && a.top == a.window.top && a.location == a.window.location);
+        isWindow: function(input) {
+            return toBool(input && input == input.window
+                && input.top == input.window.top && input.location == input.window.location); // more strict
         },
-        isDocument: function(a) {
-            return toBool(a && a.nodeType == 9);
+        isDocument: function(input) {
+            return toBool(input && input.nodeType == 9);
         },
-        isNode: function(a) {
-            return toBool(a && (a.nodeType === 1 || a.nodeType == 11));
+        isNode: function(input) {
+            return toBool(input && (input.nodeType === 1 || input.nodeType == 11));
         },
-        isNodeElement: function(a) {
-            return toBool(a && a.nodeType === 1);
+        isNodeElement: function(input) {
+            return toBool(input && input.nodeType === 1);
         }
     });
 
+    /**
+     * Object extends.
+     */
+    extend(Object.prototype, {
+        /**
+         * Object for each.
+         * @param  {Function} fn
+         * @return {Object}
+         */
+        forEach: function(fn) {
+            return forEach(this, function(key, value) {
+                return fn(key, value);
+            });
+        }
+    });
+
+    /**
+     * String extends.
+     */
     extend(String.prototype, {
+        /**
+         * Is numeric.
+         * @return {Bool}
+         */
         isNumeric: function() {
-            return $.isNumeric(this);
+            return $.isNumeric(toString(this));
         },
+        /**
+         * To int.
+         * @param  {Int}    base
+         * @param  {String} str  @internal
+         * @return {Int}
+         */
         toInt: function(base, str /* internal */) {
             return $.isNumeric(str = toString(this))
                 ? parseInt(str.replace(/^-?\./, '0.'), base || 10) : NULL;
