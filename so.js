@@ -680,11 +680,10 @@ function log() { console.log.apply(console, arguments); }
 
         /**
          * Type of.
-         * @param  {Any}     input
-         * @param  {Boolean} opt_real @optional
+         * @param  {Any} input
          * @return {String}
          */
-        typeOf: function(input, opt_real) {
+        typeOf: function(input) {
             var type;
 
             if ($.isNull(input)) {
