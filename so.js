@@ -164,6 +164,7 @@ function log() { console.log.apply(console, arguments); }
 
             return Constructor;
         },
+
         /**
          * Extends.
          * @param  {Function} supClass
@@ -200,78 +201,97 @@ function log() { console.log.apply(console, arguments); }
         isVoid: function(input) {
             return (input == NULL);
         },
+
         /** Is null.         @param {Any} input @return {Bool} */
         isNull: function(input) {
             return (input === NULL);
         },
+
         /** Is nulls.        @param {Any} input @return {Bool} */
         isNulls: function(input) {
             return (input === NULLS);
         },
+
         /** Is undefined.    @param {Any} input @return {Bool} */
         isUndefined: function(input) {
             return (input === undefined);
         },
+
         /** Is string.       @param {Any} input @return {Bool} */
         isString: function(input) {
             return (typeof input == 'string');
         },
+
         /** Is bool.         @param {Any} input @return {Bool} */
         isBool: function(input) {
             return (typeof input == 'boolean');
         },
+
         /** Is number.       @param {Any} input @return {Bool} */
         isNumber: function(input) {
             return (typeof input == 'number');
         },
+
         /** Is numeric.      @param {Any} input @return {Bool} */
         isNumeric: function(input) {
             return !$.isVoid(input) && !$.isNulls(input)
                 && isFinite(input) && !isNaN(parseFloat(input));
         },
+
         /** Is function.     @param {Any} input @return {Bool} */
         isFunction: function(input) {
             return (typeof input == 'function');
         },
+
         /** Is array.        @param {Any} input @return {Bool} */
         isArray: function(input) {
             return input && (input.constructor == Array);
         },
+
         /** Is object.       @param {Any} input @return {Bool} */
         isObject: function(input) {
             return input && (input.constructor == Object);
         },
+
         /** Is int.          @param {Any} input @return {Bool} */
         isInt: function(input) {
             return $.isNumber(input) && (input % 1 == 0 && input != 1.0);
         },
+
         /** Is float.        @param {Any} input @return {Bool} */
         isFloat: function(input) {
             return $.isNumber(input) && (input % 1 != 0 || input == 1.0);
         },
+
         /** Is iterable.     @param {Any} input @return {Bool} */
         isIterable: function(input) {
             return $.isArray(input) || $.isObject(input)
                 || (input && input.length && !input[NODE_TYPE]); // dom, nodelist, string etc.
         },
+
         /** Is primitive.    @param {Any} input @return {Bool} */
         isPrimitive: function(input) {
             return $.isVoid(input) || /^(string|number|boolean)$/.test(typeof input);
         },
+
         /** Is window.       @param {Any} input @return {Bool} */
         isWindow: function(input) {
             return toBool(input && input == input[NAME_WINDOW]
-                && input.top == input[NAME_WINDOW].top && input.location == input[NAME_WINDOW].location);
+                && input.top == input[NAME_WINDOW].top
+                && input.location == input[NAME_WINDOW].location);
         },
+
         /** Is document.     @param {Any} input @return {Bool} */
         isDocument: function(input) {
             return toBool(input && input[NODE_TYPE] === NODE_TYPE_DOCUMENT);
         },
+
         /** Is node.         @param {Any} input @return {Bool} */
         isNode: function(input) {
             return toBool(input && (input[NODE_TYPE] === NODE_TYPE_ELEMENT
                                  || input[NODE_TYPE] === NODE_TYPE_DOCUMENT_FRAGMENT));
         },
+
         /** Is node element. @param {Any} input @return {Bool} */
         isNodeElement: function(input) {
             return toBool(input && input[NODE_TYPE] === NODE_TYPE_ELEMENT);
@@ -292,6 +312,7 @@ function log() { console.log.apply(console, arguments); }
                 return fn(key, value);
             });
         },
+
         /**
          * To source.
          * @return {Any}
@@ -347,6 +368,7 @@ function log() { console.log.apply(console, arguments); }
         isNumeric: function() {
             return $.isNumeric(toString(this));
         },
+
         /**
          * To int.
          * @param  {Int}    base
@@ -357,6 +379,7 @@ function log() { console.log.apply(console, arguments); }
             return $.isNumeric(str = toString(this))
                 ? parseInt(str.replace(/^-?\./, '0.'), base || 10) : NULL;
         },
+
         /**
          * To float.
          * @param  {String} str @internal
@@ -365,6 +388,7 @@ function log() { console.log.apply(console, arguments); }
         toFloat: function(str) {
             return $.isNumeric(str = toString(this)) ? parseFloat(str) : NULL;
         },
+
         /**
          * To capital case.
          * @param  {Bool} all
@@ -383,6 +407,7 @@ function log() { console.log.apply(console, arguments); }
 
             return str.charAt(0).toUpperCase() + str.slice(1);
         },
+
         /**
          * Format.
          * @param  {Object} ...arguments
@@ -402,6 +427,7 @@ function log() { console.log.apply(console, arguments); }
 
             return str;
         },
+
         /**
          * For each.
          * @param  {Function} fn
@@ -410,6 +436,7 @@ function log() { console.log.apply(console, arguments); }
         forEach: function(fn) {
             return forEach(toString(this), fn, this);
         },
+
         /**
          * Trim left.
          * @param  {String|void} chars @optional
@@ -425,6 +452,7 @@ function log() { console.log.apply(console, arguments); }
 
             return str;
         },
+
         /**
          * Trim right.
          * @param  {String|void} chars @optional
@@ -440,6 +468,7 @@ function log() { console.log.apply(console, arguments); }
 
             return str;
         },
+
         /**
          * Trim.
          * @param  {String|void} chars @optional
@@ -449,6 +478,7 @@ function log() { console.log.apply(console, arguments); }
         trim: function(chars) {
             return this.trimLeft(chars).trimRight(chars);
         },
+
         /**
          * Starts with.
          * @param  {String} search
@@ -462,6 +492,7 @@ function log() { console.log.apply(console, arguments); }
             return (str = toSearchStuff(this, search, index, opt_noCase))
                 && str.ss === str.s.substr(str.i || 0, str.ss.length);
         },
+
         /**
          * Ends with.
          * @param  {String} search
@@ -475,6 +506,7 @@ function log() { console.log.apply(console, arguments); }
             return (str = toSearchStuff(this, search, index, opt_noCase))
                 && str.ss === str.s.substr(0, str.i || str.ss.length);
         },
+
         /**
          * Contains.
          * @param  {String} search
@@ -507,6 +539,7 @@ function log() { console.log.apply(console, arguments); }
         log: function() {
             log.apply(NULL, ['>> so:'].concat(fn_slice.call(arguments)));
         },
+
         /**
          * Fun.
          * @return {Function}
@@ -514,6 +547,7 @@ function log() { console.log.apply(console, arguments); }
         fun: function() {
             return function() {};
         },
+
         /**
          * Now.
          * @return {Int}
@@ -521,6 +555,7 @@ function log() { console.log.apply(console, arguments); }
         now: function() {
             return Date.now();
         },
+
         /**
          * Uuid.
          * @return {Int}
@@ -528,6 +563,7 @@ function log() { console.log.apply(console, arguments); }
         uuid: function() {
             return ++_uuid;
         },
+
         /**
          * Get window.
          * @param  {Any} node
@@ -550,6 +586,7 @@ function log() { console.log.apply(console, arguments); }
 
             return ret;
         },
+
         /**
          * Get document.
          * @param  {Any} node
@@ -572,6 +609,7 @@ function log() { console.log.apply(console, arguments); }
 
             return ret;
         },
+
         /**
          * Trim.
          * @param  {String}      str
@@ -581,6 +619,7 @@ function log() { console.log.apply(console, arguments); }
         trim: function(str, chars) {
             return (str == NULL) ? NULLS : str.trim(chars);
         },
+
         /**
          * Trim left.
          * @param  {String}      str
@@ -590,6 +629,7 @@ function log() { console.log.apply(console, arguments); }
         trimLeft: function(str, chars) {
             return (str == NULL) ? NULLS : str.trimLeft(chars);
         },
+
         /**
          * Trim right.
          * @param  {String}      str
@@ -599,6 +639,7 @@ function log() { console.log.apply(console, arguments); }
         trimRight: function(str, chars) {
             return (str == NULL) ? NULLS : str.trimRight(chars);
         },
+
         /**
          * Freeze.
          * @param  {Object}  object
@@ -615,6 +656,7 @@ function log() { console.log.apply(console, arguments); }
             }
             return Object.freeze(object);
         },
+
         /**
          * Dig.
          * @param  {Object} input
@@ -632,6 +674,7 @@ function log() { console.log.apply(console, arguments); }
                 return $.dig(input[key], keys.join('.'));
             }
         },
+
         /**
          * Type of.
          * @param  {Any}     input
@@ -657,6 +700,7 @@ function log() { console.log.apply(console, arguments); }
 
             return type;
         },
+
         /**
          * Value of.
          * @param  {Any} input
@@ -665,6 +709,7 @@ function log() { console.log.apply(console, arguments); }
         valueOf: function(input) {
             return valueOf(input);
         },
+
         /**
          * Is set.
          * @param  {Any}    input
@@ -674,6 +719,7 @@ function log() { console.log.apply(console, arguments); }
         isSet: function(input, opt_key) {
             return ((opt_key != NULL) ? $.dig(input, opt_key) : input) != NULL;
         },
+
         /**
          * Is empty.
          * @param  {Any} input
@@ -684,6 +730,7 @@ function log() { console.log.apply(console, arguments); }
                 || ($.isNumber(input.length) && !input.length)
                 || ($.isObject(input) && !Object.keys(input).length);
         },
+
         /**
          * For each.
          * @param  {Array|Object} input
@@ -695,9 +742,11 @@ function log() { console.log.apply(console, arguments); }
         forEach: function(input, fn, opt_scope) {
             return forEach(input, fn, opt_scope);
         },
+
         mix: function() {
             throw '@todo Remove method $.mix()!';
         },
+
         /**
          * Extend.
          * @param  {Any} target
@@ -729,9 +778,11 @@ function log() { console.log.apply(console, arguments); }
             // any extend
             return extend.apply(NULL, [target, source].concat(fn_slice.call(arguments, 2)));
         },
+
         toString: function(name, opt_object) {
             throw '@todo Remove method $.toString()!';
         },
+
         /**
          * Is constant.
          * @param  {String} name
@@ -740,6 +791,7 @@ function log() { console.log.apply(console, arguments); }
         isConstant: function(name) {
             return (name in constants);
         },
+
         /**
          * Set constant.
          * @param  {String} name
@@ -752,6 +804,7 @@ function log() { console.log.apply(console, arguments); }
             }
             constants[name] = value;
         },
+
         /**
          * Get constant.
          * @param  {String} name
