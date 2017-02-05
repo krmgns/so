@@ -96,8 +96,8 @@ function log() { console.log.apply(console, arguments); }
      * @return {Boolean}
      */
     extend($, {
-        isNone: function(a) {
-            return (a == NULL);
+        isNone: function(input) {
+            return (input == NULL);
         },
         isNull: function(a) {
             return (a === NULL);
