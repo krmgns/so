@@ -776,7 +776,7 @@ function log() { console.log.apply(console, arguments); }
          * @return {void}
          */
         setConstant: function(name, value) {
-            if (!defined(name)) {
+            if ($.isConstant(name)) {
                 throw ('Constant "'+ name +'" already defined!');
             }
             constants[name] = value;
