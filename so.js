@@ -61,41 +61,69 @@ function log() { console.log.apply(console, arguments); }
      * @param  {Function} subClass
      * @return {Object}
      */
-    $.class = function(subClass) {
-        return {
-            /**
-             * Create.
-             * @param  {String} name
-             * @param  {Object} prototype
-             * @return {Function}
-             */
-            create: function(name, prototype) {
-                // @todo
-                return name
-            },
-            /**
-             * Extends.
-             * @param  {Function} supClass
-             * @param  {Object}   prototype
-             * @return {Function}
-             */
-            extends: function(supClass, prototype) {
-                // @notation: $.class(Foo).extends(FooBase);
-                if (supClass) {
-                    subClass.prototype = Object.create(supClass.prototype, {
-                        constructor: {value: subClass},
-                              super: {value: supClass}
-                    });
-                }
+    $.class = function(subClass) { return {
+        /**
+         * Create.
+         * @param  {String} name
+         * @param  {Object} prototype
+         * @usage  $.class.create('Foo', {...})
+         * @usage  $.class.create('Foo', {init: function() {...}, ...})
+         * @return {Function}
+         */
+        create: function(name, prototype) {
+            var createConstructor = function(content) {
+                return eval('(function(){'+ content +'})()');
+            };
 
-                forEach(prototype, function(name, value) {
-                    subClass.prototype[name] = value;
+            // create a named constructor
+            var Constructor = createConstructor(
+                'var Constructor = function '+ name +'() {' +
+                '  if (this.init) {' +
+                '    this.init.apply(this, arguments);' +
+                '  }' +
+                '};' +
+                'return Constructor;'
+            );
+
+            // add constructor prototype and constructor constructor
+            Constructor.prototype = Object.create(prototype, {
+                constructor: {value: createConstructor(
+                    'var Constructor = function '+ name +'(){}; ' +
+                    'Constructor.prototype = prototype;' +
+                    'Constructor.prototype.constructor = Constructor;' +
+                    'return Constructor;'
+                )}
+            });
+
+            return Constructor;
+        },
+        /**
+         * Extends.
+         * @param  {Function} supClass
+         * @param  {Object}   prototype
+         * @usage  $.class(Foo).extends(FooBase);
+         * @usage  $.class(Foo).extends(FooBase, {...});
+         * @return {Function}
+         */
+        extends: function(supClass, prototype) {
+            if (supClass) {
+                subClass.prototype = Object.create(supClass.prototype, {
+                    constructor: {value: subClass},
+                          super: {value: supClass}
                 });
-
-                return subClass;
             }
-        };
-    }
+
+            // add subClass prototype if provided
+            prototype && forEach(prototype, function(name, value) {
+                subClass.prototype[name] = value;
+            });
+
+            return subClass;
+        }
+    }};
+
+    // add shortcut for create
+    $.class.create = $.class().create;
 
     /**
      * Extend.
