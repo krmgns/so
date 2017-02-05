@@ -26,6 +26,7 @@ function log() { console.log.apply(console, arguments); }
     var $ = {};
 
     // globals
+    // $.window = window;
     window.so = $;
     window.so.VERSION = '5.0.0';
     window.document.window = window;
@@ -515,29 +516,44 @@ function log() { console.log.apply(console, arguments); }
             return ++_uuid;
         },
         /**
-         * Win.
+         * Get window.
          * @param  {Any} node
          * @return {Window|undefined}
          */
-        win: function(node) {
-            var win;
-            if (!node || $.isWindow(node)) {
-                win = window;
-            } else if ($.isDocument(node)) {
-                win = node.defaultView; // find document window
-            } else if ($.isNode(node)) {
-                win = node.ownerDocument.defaultView; // find node document window
+        getWindow: function(node) {
+            var ret;
+
+            if (node) {
+                if ($.isNode(node)) {
+                    ret = node.ownerDocument.defaultView; // node document window
+                } else if ($.isDocument(node)) {
+                    ret = node.defaultView; // document window
+                }
+            } else {
+                ret = window;
             }
 
-            return win;
+            return ret;
         },
         /**
-         * Doc.
-         * @param  {[type]} node
-         * @return {[type]}
+         * Get document.
+         * @param  {Any} node
+         * @return {Document|undefined}
          */
-        doc: function(node) {
-            return node ? node.ownerDocument : window.document;
+        getDocument: function(node) {
+            var ret;
+
+            if (node) {
+                if (node.ownerDocument) { // document or node
+                    ret = node.ownerDocument;
+                } else if (node.document) {
+                    ret = node.document; // window
+                }
+            } else {
+                ret = window.document;
+            }
+
+            return ret;
         },
         trim: function(s, chars) {
             return s == NULL ? NULLS : s.trim(chars);

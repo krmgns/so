@@ -1257,21 +1257,7 @@ $.extend(Dom.prototype, {
     }
 });
 
-// dom: iframe tools
-$.extend(Dom.prototype, {
-    getWindow: function(el){
-        if (el = (el || this[0])) {
-            return initDom(el.contentWindow);
-        }
-    },
-    getDocument: function(el){
-        if (el = (el || this[0])) {
-            return initDom(el.contentDocument || el.contentWindow.document);
-        }
-    }
-});
-
-// dom: detection tools
+// dom: detection frame tools
 $.extend(Dom.prototype, {
     // el'ler internal, gerek yok, so'da var hepsi !!!
     isWindow: function(el) {
@@ -1280,10 +1266,10 @@ $.extend(Dom.prototype, {
     isDocument: function(el) {
         return isDocument(el || this[0]);
     },
-    fn_isNode: function(el) {
+    isNode: function(el) {
         return fn_isNode(el || this[0]);
     },
-    fn_isNodeElement: function(el) {
+    isNodeElement: function(el) {
         return fn_isNodeElement(el || this[0]);
     },
     isRoot: function(el) {
@@ -1291,6 +1277,12 @@ $.extend(Dom.prototype, {
     },
     isRootElement: function(el) {
         return (el = el || this[0]) && fn_isNodeElement(el) && !fn_isNodeElement(el.parentNode);
+    },
+    getWindow: function(el){
+        return initDom($.getWindow(el || this[0]));
+    },
+    getDocument: function(el){
+        return initDom($.getDocument(el || this[0]));
     }
 });
 
