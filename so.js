@@ -186,8 +186,8 @@ function log() { console.log.apply(console, arguments); }
      * so: type functions.
      */
     extend($, {
-        /** Is none.         @param {Any} input @return {Bool} */
-        isNone: function(input) {
+        /** Is void.         @param {Any} input @return {Bool} */
+        isVoid: function(input) {
             return (input == NULL);
         },
         /** Is null.         @param {Any} input @return {Bool} */
@@ -216,7 +216,7 @@ function log() { console.log.apply(console, arguments); }
         },
         /** Is numeric.      @param {Any} input @return {Bool} */
         isNumeric: function(input) {
-            return !$.isNone(input) && !$.isNulls(input)
+            return !$.isVoid(input) && !$.isNulls(input)
                 && isFinite(input) && !isNaN(parseFloat(input));
         },
         /** Is function.     @param {Any} input @return {Bool} */
@@ -246,7 +246,7 @@ function log() { console.log.apply(console, arguments); }
         },
         /** Is primitive.    @param {Any} input @return {Bool} */
         isPrimitive: function(input) {
-            return $.isNone(input) || /^(string|number|boolean)$/.test(typeof input);
+            return $.isVoid(input) || /^(string|number|boolean)$/.test(typeof input);
         },
         /** Is window.       @param {Any} input @return {Bool} */
         isWindow: function(input) {
