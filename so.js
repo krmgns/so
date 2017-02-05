@@ -816,9 +816,9 @@ function log() { console.log.apply(console, arguments); }
         // iframe support
         document = document || window[NAME_DOCUMENT];
 
-        var event = 'DOMContentLoaded';
-        document.addEventListener(event, function _() {
-            document.removeEventListener(event, _, FALSE);
+        var type = 'DOMContentLoaded';
+        document.addEventListener(type, function _() {
+            document.removeEventListener(type, _, FALSE);
             fireCallbacks();
         }, FALSE);
     };
