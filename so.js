@@ -223,6 +223,13 @@ function log() { console.log.apply(console, arguments); }
             return forEach(this, function(key, value) {
                 return fn(key, value);
             });
+        },
+        /**
+         * To source.
+         * @return {Any}
+         */
+        toSource: function() {
+            return valueOf(this);
         }
     });
 
@@ -296,7 +303,7 @@ function log() { console.log.apply(console, arguments); }
          * @param  {Function} fn
          * @return {String}
          */
-        forEach: function(fn) { // @test
+        forEach: function(fn) {
             return forEach(toString(this), fn, this);
         }
     });
@@ -433,6 +440,9 @@ function log() { console.log.apply(console, arguments); }
             }
 
             return type;
+        },
+        valueOf: function(input) {
+            return valueOf(input);
         },
         isSet: function(input, opt_key) { // @test
             return ((opt_key != NULL) ? $.dig(input, opt_key) : input) != NULL;
