@@ -169,7 +169,8 @@ function log() { console.log.apply(console, arguments); }
             return (typeof input == 'number');
         },
         isNumeric: function(input) {
-            return !$.isNone(input) && !$.isNulls(input) && isFinite(input) && !isNaN(parseFloat(input));
+            return !$.isNone(input) && !$.isNulls(input)
+                && isFinite(input) && !isNaN(parseFloat(input));
         },
         isFunction: function(input) {
             return (typeof input == 'function');
@@ -195,7 +196,8 @@ function log() { console.log.apply(console, arguments); }
         },
         isWindow: function(input) {
             return toBool(input && input == input.window
-                && input.top == input.window.top && input.location == input.window.location); // more strict
+                && input.top == input.window.top
+                && input.location == input.window.location); // more strict
         },
         isDocument: function(input) {
             return toBool(input && input.nodeType == 9);
@@ -239,35 +241,61 @@ function log() { console.log.apply(console, arguments); }
          * To int.
          * @param  {Int}    base
          * @param  {String} str  @internal
-         * @return {Int}
+         * @return {Int|NULL}
          */
-        toInt: function(base, str /* internal */) {
+        toInt: function(base, str) {
             return $.isNumeric(str = toString(this))
                 ? parseInt(str.replace(/^-?\./, '0.'), base || 10) : NULL;
         },
-        toFloat: function(str /* internal */) {
+        /**
+         * To float.
+         * @param  {String} str @internal
+         * @return {Float|NULL}
+         */
+        toFloat: function(str) {
             return $.isNumeric(str = toString(this)) ? parseFloat(str) : NULL;
         },
+        /**
+         * To capital case.
+         * @param  {Bool} all
+         * @return {String}
+         */
         toCapitalCase: function(all) {
             var str = toString(this).toLowerCase(), i;
+
             if (all !== false) {
                 for (i = 0, str = str.split(' '); i < str.length; i++) {
                     str[i] = str[i].toCapitalCase(false);
                 }
+
                 return str.join(' ');
             }
+
             return str.charAt(0).toUpperCase() + str.slice(1);
         },
+        /**
+         * Format.
+         * @return {String}
+         * @throws
+         */
         format: function() {
-            var str = toString(this), args = arguments, matches = str.match(/(%s)/g) || [], i = 0;
-            if (args.length < matches.length) {
+            var str = toString(this), args = arguments, match = str.match(/(%s)/g) || [], i = 0;
+
+            if (args.length < match.length) {
                 throw ('No arguments enough!');
             }
-            while (matches.shift()) {
+
+            while (match.shift()) {
                 str = str.replace(/(%s)/, args[i++]);
             }
+
             return str;
         },
+        /**
+         * For each.
+         * @param  {Function} fn
+         * @return {String}
+         */
         forEach: function(fn) { // @test
             return forEach(toString(this), fn, this);
         }
