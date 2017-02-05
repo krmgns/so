@@ -101,8 +101,8 @@ function log() { console.log.apply(console, arguments); }
          * Extends.
          * @param  {Function} supClass
          * @param  {Object}   prototype
-         * @usage  $.class(Foo).extends(FooBase);
-         * @usage  $.class(Foo).extends(FooBase, {...});
+         * @usage  $.class(Foo).extends(FooBase)
+         * @usage  $.class(Foo).extends(FooBase, {...})
          * @return {Function}
          */
         extends: function(supClass, prototype) {
