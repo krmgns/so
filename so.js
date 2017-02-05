@@ -80,6 +80,7 @@ function log() { console.log.apply(console, arguments); }
              * @return {Function}
              */
             extends: function(supClass, prototype) {
+                // @notation: $.class(Foo).extends(FooBase);
                 if (supClass) {
                     subClass.prototype = Object.create(supClass.prototype, {
                         constructor: {value: subClass},
@@ -95,19 +96,6 @@ function log() { console.log.apply(console, arguments); }
             }
         };
     }
-
-// function BoolValue(value) {
-//     log("super called!", this, "value:"+ value);
-// }
-// function Bool(value) {
-//     this.super(value);
-//     this.value = Boolean(value);
-//     this.valueOf = function() { return this.value; }
-//     this.toString = function() { return this.value.toString(); }
-// }
-// $.class(Bool).extends(BoolValue);
-// var bool = new Bool(1);
-// log(bool, bool.valueOf(), bool.toString(), bool.a)
 
     /**
      * Extend.
