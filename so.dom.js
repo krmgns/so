@@ -22,6 +22,8 @@ var DOC = $.doc(),
     re_opacity = /opacity=(.*)?\)/i,
     re_rgb = /(.*?)rgb\((\d+),\s*(\d+),\s*(\d+)\)/,
     re_htmlContent = /^<([a-z-]+).*\/?>(?:.*<\/\1>|)$/i,
+    fn_isNode = $.isNode,
+    fn_isNodeElement = $.isNodeElement,
     _re_cache = {}
 ;
 
@@ -47,14 +49,6 @@ function RE(re, flags, x /*internal*/) {
     return _re_cache[x];
 }
 
-function isNode(node) {
-    return node && (node.nodeType === 1 || node.nodeType == 11);
-}
-
-function isNodeElement(node) {
-    return node && node.nodeType === 1;
-}
-
 function isWindowOrDocument(x, type /*internal*/) {
     return (type = type || $.typeOf(x)) && type == "window" || type == "document";
 }
@@ -64,7 +58,7 @@ function isHtmlOrBody(x, tag /*internal*/) {
 }
 
 function getTagName(node) {
-    return node && (node.nodeName && node.nodeName.toLowerCase() || node == node.window && "#window");
+    return node && (node.nodeName && node.nodeName.toLowerCase() || $.isWindow(node) && "#window");
 }
 
 function getByTag(root, tag, i) {
@@ -128,7 +122,7 @@ var attrFunctions = {
 };
 
 function hasAttribute(el, key) {
-    return isNodeElement(el) && (el.hasAttribute ? el.hasAttribute(key)
+    return fn_isNodeElement(el) && (el.hasAttribute ? el.hasAttribute(key)
         : (el.attributes[key] && el.attributes[key].specified) || el[key]); // ie7
 }
 
@@ -142,7 +136,7 @@ function setAttribute(el, key, val) {
 
 function getAttribute(el, key) {
     var val, attrs;
-    if (isNodeElement(el)) {
+    if (fn_isNodeElement(el)) {
         attrs = el.attributes;
         switch (key) {
             case "class":
@@ -187,7 +181,7 @@ function getAttribute(el, key) {
 }
 
 function setAttributes(el, attrs) {
-    if (isNodeElement(el)) {
+    if (fn_isNodeElement(el)) {
         var keyFixed, keyFixedDef, key, val,
             re_true = /^(1|true)$/;
 
@@ -307,7 +301,7 @@ function createElement(content, doc) {
         return _return("Dom", content.toArray());
     }
 
-    if (isNode(content)) {
+    if (fn_isNode(content)) {
         return (tag = getTagName(content)) && _return(tag, [content], fixedNodes[tag]);
     }
 
@@ -520,7 +514,7 @@ function initDom(selector, root, i) {
 
     // somehow qwery does not catch iframe windows (detected while adding getWindow() method)
     var type = $.typeOf(selector);
-    if (isWindowOrDocument(null, type)) {
+    if (isWindowOrDocument('', type)) {
         return new Dom(selector, selector);
     }
 
@@ -745,7 +739,7 @@ $.extend(Dom.prototype, {
                 if (n == el) {
                     break;
                 }
-                if (isNodeElement(n)) els.push(n);
+                if (fn_isNodeElement(n)) els.push(n);
             }
             if (typeof src == "string") {
                 tmp = initDom(src, el.parentNode).toArray();
@@ -766,7 +760,7 @@ $.extend(Dom.prototype, {
                 if (n == el) {
                     found = true;
                 }
-                if (found && n != el && isNodeElement(n)) els.push(n);
+                if (found && n != el && fn_isNodeElement(n)) els.push(n);
             }
             if (typeof src == "string") {
                 tmp = initDom(src, el.parentNode).toArray();
@@ -787,7 +781,7 @@ $.extend(Dom.prototype, {
             } else {
                 ns = el.childNodes;
                 while (n = ns[j++]) {
-                    if (isNodeElement(n)) els.push(n);
+                    if (fn_isNodeElement(n)) els.push(n);
                 }
                 els = (type == "number") ? els[i] : els;
             }
@@ -806,7 +800,7 @@ $.extend(Dom.prototype, {
             } else {
                 ns = el.parentNode.childNodes;
                 while (n = ns[j++]) {
-                    if (n != el && isNodeElement(n)) els.push(n);
+                    if (n != el && fn_isNodeElement(n)) els.push(n);
                 }
                 els = (type == "number") ? els[i] : els;
             }
@@ -819,7 +813,7 @@ $.extend(Dom.prototype, {
     hasChild: function(){
         var child = this[0] && this[0].firstChild;
         while (child) {
-            if (isNode(child)) {
+            if (fn_isNode(child)) {
                 return true;
             }
             child = child.nextSibling;
@@ -955,7 +949,7 @@ $.extend(Dom.prototype, {
             if (rel) {
                 var offset = getOffset(el), parentEl = el.parentNode,
                     parentOffset = getOffset(parentEl, rel);
-                if (isNodeElement(parentEl)) {
+                if (fn_isNodeElement(parentEl)) {
                     parentOffset.top += parseFloat(getStyle(parentEl, "borderTopWidth")) || 0;
                     parentOffset.left += parseFloat(getStyle(parentEl, "borderLeftWidth")) || 0;
                 }
@@ -1279,23 +1273,24 @@ $.extend(Dom.prototype, {
 
 // dom: detection tools
 $.extend(Dom.prototype, {
+    // el'ler internal, gerek yok, so'da var hepsi !!!
     isWindow: function(el) {
-        return $.typeOf(el || this[0]) == "window";
+        return isWindow(el || this[0]);
     },
     isDocument: function(el) {
-        return $.typeOf(el || this[0]) == "document";
+        return isDocument(el || this[0]);
     },
-    isNode: function(el) {
-        return isNode(el || this[0]);
+    fn_isNode: function(el) {
+        return fn_isNode(el || this[0]);
     },
-    isNodeElement: function(el) {
-        return isNodeElement(el || this[0]);
+    fn_isNodeElement: function(el) {
+        return fn_isNodeElement(el || this[0]);
     },
     isRoot: function(el) {
         return (el = el || this[0]) && !el.parentNode && !this.isWindow(el);
     },
     isRootElement: function(el) {
-        return (el = el || this[0]) && isNodeElement(el) && !isNodeElement(el.parentNode);
+        return (el = el || this[0]) && fn_isNodeElement(el) && !fn_isNodeElement(el.parentNode);
     }
 });
 
