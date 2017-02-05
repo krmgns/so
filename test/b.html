@@ -1,6 +1,3 @@
-<!doctype html>
-<html><head></head><body>
-
 <!-- <script src="so-all.php"></script> -->
 
 <script src="../so.js"></script>
@@ -24,13 +21,40 @@ so.onReady(function($) {
 
     // x = new $.dom(+new Date)
     // log(x)
-    // log("getId:", x.getId)
     // log("getId():", x.getId())
-
 })
 </script>
 
-<iframe id="foo"></iframe>
+<script>
+so.onReady(function($) {
+    // function FooBase(id, name) {
+    //     this.id = id;
+    //     this.name = name;
+    // }
+    // function Foo(id, name) {
+    //     this.super(id, name);
+    // }
+    // $.class(Foo).extends(FooBase)
+    // var foo = new Foo(123, 'the foo!')
+    // log(foo)
+    // log(foo.id)
+    // log(foo.name)
+
+    // var Foo = $.class.create('Foo', {
+    //     id: null,
+    //     name: 'the foo!',
+    //     init: function(id) {
+    //         this.id = id;
+    //     }
+    // })
+    // var foo = new Foo(123)
+    // log(foo)
+    // log(foo.id)
+    // log(foo.name)
+    // if default props in {} prototype, goes to foo.__proto__.__proto__
+    // log(foo.__proto__.__proto__)
+});
+</script>
 
 <script>
 // var x = '0';
@@ -50,5 +74,3 @@ so.onReady(function($) {
 // console.log(y === x)
 // console.log(y === undefined)
 </script>
-
-</body></html>
