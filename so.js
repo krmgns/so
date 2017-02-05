@@ -15,8 +15,9 @@ function log() { console.log.apply(console, arguments); }
         throw ('Archaic browser!');
     }
 
-    // for minify advantages
-    var NULL = null, NULLS = '';
+    // for minify advantage
+    var NULL = null, NULLS = '',
+        TRUE = true, FALSE = false;
 
     /**
      * Shortcut for 'so'.
@@ -92,14 +93,14 @@ function log() { console.log.apply(console, arguments); }
 
         if (len != NULL) { // array: value => i
             for (i = 0; i < len; i++) {
-                if (false === fn.call(opt_scope || input[i], input[i], i, input)) {
+                if (FALSE === fn.call(opt_scope || input[i], input[i], i, input)) {
                     break;
                 }
             }
         } else { // object: key => value
             for (i in input) {
                 if (input.hasOwnProperty(i)) {
-                    if (false === fn.call(opt_scope || input[i], i, input[i], input)) {
+                    if (FALSE === fn.call(opt_scope || input[i], i, input[i], input)) {
                         break;
                     }
                 }
@@ -308,8 +309,8 @@ function log() { console.log.apply(console, arguments); }
     function toSearchStuff(str, search, index, opt_noCase) {
         if (str && search) {
             // swap arguments
-            if (index === true) {
-                opt_noCase = true, index = 0;
+            if (index === FALSE) {
+                opt_noCase = FALSE, index = 0;
             }
 
             str = toString(str);
@@ -358,9 +359,9 @@ function log() { console.log.apply(console, arguments); }
         toCapitalCase: function(all) {
             var str = toString(this).toLowerCase(), i;
 
-            if (all !== false) {
+            if (all !== FALSE) {
                 for (i = 0, str = str.split(' '); i < str.length; i++) {
-                    str[i] = str[i].toCapitalCase(false);
+                    str[i] = str[i].toCapitalCase(FALSE);
                 }
 
                 return str.join(' ');
@@ -533,7 +534,7 @@ function log() { console.log.apply(console, arguments); }
             }
         },
         freeze: function(object, opt_deep) {
-            if (opt_deep !== false) {
+            if (opt_deep !== FALSE) {
                 Object.getOwnPropertyNames(object).forEach(function(name) {
                     if ($.isObject(object[name])) {
                         $.freeze(object[name]);
@@ -628,9 +629,9 @@ function log() { console.log.apply(console, arguments); }
         document = document || window.document;
 
         document.addEventListener('DOMContentLoaded', function _(){
-            document.removeEventListener('DOMContentLoaded', _, false);
+            document.removeEventListener('DOMContentLoaded', _, FALSE);
             fireCallbacks();
-        }, false);
+        }, FALSE);
     };
 
 })(window);
