@@ -326,7 +326,7 @@ function log() { console.log.apply(console, arguments); }
      * To trim chars.
      * @param  {String|void} chars
      * @param  {Boolean}     opt_isChop
-     * @param  {String}      pattern @internal
+     * @param  {String}      pattern    @internal
      * @return {String}
      * @private
      */
