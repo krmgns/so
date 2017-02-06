@@ -2,9 +2,7 @@
 * @name: so
 */
 
-/**
-* Shortcut for 'console.log'.
-*/
+// shortcut for 'console.log'.
 function log() { console.log.apply(console, arguments); }
 
 ;(function(window, undefined) {
