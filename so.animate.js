@@ -11,7 +11,7 @@ var opt_fps = 60,
     opt_durations = {fast: 50, default: 350, slow: 650},
     // credits: http://easings.net/ (easeOutQuad)
     fn_easing = function(t,b,c,d) {return -c*(t/=d)*(t-2)+b},
-    fn_toStyleProperty = $.ext.camelizeStyleProperty
+    fn_toStyleProperty = $.ext.toCamelCaseFromDashCase
 ;
 
 function timer(fn) {

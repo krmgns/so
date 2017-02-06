@@ -24,7 +24,7 @@ var DOC = $.doc(),
     re_htmlContent = /^<([a-z-]+).*\/?>(?:.*<\/\1>|)$/i,
     fn_isNode = $.isNode,
     fn_isNodeElement = $.isNodeElement,
-    fn_toStyleProperty = $.ext.camelizeStyleProperty,
+    fn_toStyleProperty = $.ext.toCamelCaseFromDashCase,
     _re_cache = {}
 ;
 

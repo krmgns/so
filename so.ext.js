@@ -5,22 +5,19 @@
 
 ;(function($) {
 
-"use strict"; // @tmp
+'use strict';
 
-$.extend($.ext, {
-    camelizeStyleProperty: function(input) {
-        return (""+ input).replace(/-([a-z])/gi, function($0, $1) {
+$.extend('ext', {
+    toCamelCaseFromDashCase: function(input) {
+        return (''+ input).replace(/-([a-z])/gi, function($0, $1) {
             return $1.toUpperCase();
         });
     },
-    dasherizeStyleProperty: function(input) {
-        return (""+ input).replace(/([A-Z])/g, function($0, $1) {
-            return "-"+ $1.toLowerCase();
+    toDashCaseFromUpperCase: function(input) {
+        return (''+ input).replace(/([A-Z])/g, function($0, $1) {
+            return '-'+ $1.toLowerCase();
         });
     }
 });
-
-// define exposer
-$.toString("ext");
 
 })(so);
