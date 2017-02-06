@@ -5,8 +5,7 @@
 // shortcut for 'console.log'.
 function log() { console.log.apply(console, arguments); }
 
-;(function(window, undefined) {
-    'use strict';
+;(function(window, undefined) { 'use strict';
 
     // simply support check
     if (!''.trim) {
