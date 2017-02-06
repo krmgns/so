@@ -6,7 +6,17 @@ http://qeremy.com/sojs
 
 ```
 Desktop
-  Chrome | Firefox (Gecko) | Internet Explorer | Opera | Safari
------------------------------------------------------------------
-  5      | 4               | 9                 | 11    | 5
+-------
+
+Firefox | Chrome | Opera | Safari | IE
+--------------------------------------
+4       | 5      | 11.6  | 5      | 9
+
+
+Mobile
+------
+
+Firefox | Chrome | Opera | Safari | IE | Android
+------------------------------------------------
+4       | ✓      | 11.5  | ✓      | ✓  | ✓
 ```
