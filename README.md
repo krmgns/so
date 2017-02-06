@@ -14,5 +14,5 @@ http://qeremy.com/sojs
 **Browser Support (Mobile)**
 
 | Firefox | Chrome | Opera | Safari | IE | Android |
-| ------------------------------------------------ |
+| ------- | ------ | ----- | ------ | -- | ------- |
 | 4       | ✓      | 11.5  | ✓      | ✓  | ✓       |
