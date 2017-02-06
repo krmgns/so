@@ -1,6 +1,7 @@
 <!-- <script src="so-all.php"></script> -->
 
 <script src="../so.js"></script>
+<script src="../so_ext.js"></script>
 <script>
 so.onReady(function($) {
     var x
@@ -23,15 +24,15 @@ so.onReady(function($) {
     // log(x)
     // log("getId():", x.getId())
 
-    var names = ['Alice', 'Bob', 'Tiff', 'Bruce', 'Alice', 'Bob'];
+    // var names = ['Alice', 'Bob', 'Tiff', 'Bruce', 'Alice', 'Bob'];
 
     // names = names.select(function(name) {
-    //     return name.indexOf('Alice') > -1
+    //     return name.contains('Alice')
     // })
     // log(names)
 
-    names = names.uniq()
-    log(names)
+    // names = names.uniq()
+    // log(names)
 })
 </script>
 
