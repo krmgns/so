@@ -1,6 +1,6 @@
 /**
  * @name: so.ajax
- * @deps: so, so.array, so.object
+ * @deps: soAo.array, so.object
  */
 
 ;(function($) {
@@ -381,7 +381,7 @@ $.ajax = function(options, data, onDone, onSuccess, onFail) {
     // swap args
     if (typeof data == "function") {
         // keep arguments
-        var args = $.array.make(arguments);
+        var args = Array.make(arguments);
         // prevent re-calls
         data = onDone = onSuccess = onFail = null;
         onDone    = args[1];
