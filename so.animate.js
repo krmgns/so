@@ -10,7 +10,8 @@
 var opt_fps = 60,
     opt_durations = {fast: 50, default: 350, slow: 650},
     // credits: http://easings.net/ (easeOutQuad)
-    fn_easing = function(t,b,c,d) {return -c*(t/=d)*(t-2)+b}
+    fn_easing = function(t,b,c,d) {return -c*(t/=d)*(t-2)+b},
+    fn_toStyleProperty = $.ext.camelizeStyleProperty
 ;
 
 function timer(fn) {
@@ -33,7 +34,7 @@ function Animation(el, properties, duration, callback) {
     for (property in properties) {
         if (properties.hasOwnProperty(property)) {
             stopValue  = properties[property];
-            property   = $.ext.camelizeStyleProperty(property);
+            property   = fn_toStyleProperty(property);
             isScroll   = (property === "scrollTop" || property === "scrollLeft");
             startValue = !isScroll
                 ? parseFloat(this.$el.getStyle(property)) || 0
