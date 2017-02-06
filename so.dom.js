@@ -24,6 +24,7 @@ var DOC = $.doc(),
     re_htmlContent = /^<([a-z-]+).*\/?>(?:.*<\/\1>|)$/i,
     fn_isNode = $.isNode,
     fn_isNodeElement = $.isNodeElement,
+    fn_toStyleProperty = $.ext.camelizeStyleProperty,
     _re_cache = {}
 ;
 
@@ -417,10 +418,6 @@ function sumComputedPixels(el, props) {
         sum += parseFloat(getStyle(el, prop)) || 0;
     }
     return sum;
-}
-
-function toStyleProp(key) {
-    return $.ext.camelizeStyleProperty(key);
 }
 
 function parseStyleText(text) {
@@ -839,7 +836,7 @@ $.extend(Dom.prototype, {
 
             for (k in styles) {
                 if (styles.hasOwnProperty(k)) {
-                    v = styles[k], k = toStyleProp(k);
+                    v = styles[k], k = fn_toStyleProperty(k);
                     if (re_digit.test(v) && !(k in nonuniteStyles)) {
                         v += "px";
                     }
@@ -853,7 +850,7 @@ $.extend(Dom.prototype, {
     getStyle: function(key, hex) {
         var el = this[0], val;
         if (el) {
-            key = toStyleProp(key), val = getStyle(el, key) || "";
+            key = fn_toStyleProperty(key), val = getStyle(el, key) || "";
             if (val != null && hex === true && /color/i.test(key)) {
                 val = rgbToHex(val);
             }
@@ -864,7 +861,7 @@ $.extend(Dom.prototype, {
         return this.forEach(function(el) {
             var tmp = key.split(/,+/);
             while (tmp.length) {
-                el.style[toStyleProp(tmp.shift())] = "";
+                el.style[fn_toStyleProperty(tmp.shift())] = "";
             }
         });
     },
