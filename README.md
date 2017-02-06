@@ -1,21 +1,18 @@
+@todo Add some description..
+
 *** Documents ***
 
 http://qeremy.com/sojs
 
-**Browser Support**
+**Browser Support (Desktop)**
 
-```
-Desktop
-
-|Firefox | Chrome | Opera | Safari | IE |
-|---------------------------------------|
-|4       | 5      | 11.6  | 5      | 9  |
+| Firefox | Chrome | Opera | Safari | IE |
+| ------- | ------ | ----- | ------ | -- |
+| 4       | 5      | 11.6  | 5      | 9  |
 
 
-Mobile
-------
+**Browser Support (Mobile)**
 
-|Firefox | Chrome | Opera | Safari | IE | Android |
-|-------------------------------------------------|
-|4       | ✓      | 11.5  | ✓      | ✓  | ✓       |
-```
+| Firefox | Chrome | Opera | Safari | IE | Android |
+| ------------------------------------------------ |
+| 4       | ✓      | 11.5  | ✓      | ✓  | ✓       |
