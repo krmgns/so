@@ -24,7 +24,7 @@ function log() { console.log.apply(console, arguments); }
         NAME_OWNER_DOCUMENT = 'ownerDocument',
         NAME_DEFAULT_VIEW = 'defaultView',
         NAME_PROTOTYPE = 'prototype',
-        NODE_TYPE = 'nodeType',
+        NAME_NODE_TYPE = 'nodeType',
 
         NODE_TYPE_ELEMENT = 1,
         NODE_TYPE_DOCUMENT = 9,
@@ -266,7 +266,7 @@ function log() { console.log.apply(console, arguments); }
         /** Is iterable.     @param {Any} input @return {Bool} */
         isIterable: function(input) {
             return $.isArray(input) || $.isObject(input)
-                || (input && input.length && !input[NODE_TYPE]); // dom, nodelist, string etc.
+                || (input && input.length && !input[NAME_NODE_TYPE]); // dom, nodelist, string etc.
         },
 
         /** Is primitive.    @param {Any} input @return {Bool} */
@@ -283,24 +283,62 @@ function log() { console.log.apply(console, arguments); }
 
         /** Is document.     @param {Any} input @return {Bool} */
         isDocument: function(input) {
-            return toBool(input && input[NODE_TYPE] === NODE_TYPE_DOCUMENT);
+            return toBool(input && input[NAME_NODE_TYPE] === NODE_TYPE_DOCUMENT);
         },
 
         /** Is node.         @param {Any} input @return {Bool} */
         isNode: function(input) {
-            return toBool(input && (input[NODE_TYPE] === NODE_TYPE_ELEMENT
-                                 || input[NODE_TYPE] === NODE_TYPE_DOCUMENT_FRAGMENT));
+            return toBool(input && (input[NAME_NODE_TYPE] === NODE_TYPE_ELEMENT
+                                 || input[NAME_NODE_TYPE] === NODE_TYPE_DOCUMENT_FRAGMENT));
         },
 
         /** Is node element. @param {Any} input @return {Bool} */
         isNodeElement: function(input) {
-            return toBool(input && input[NODE_TYPE] === NODE_TYPE_ELEMENT);
+            return toBool(input && input[NAME_NODE_TYPE] === NODE_TYPE_ELEMENT);
         }
     });
 
     /**
+     * To array.
+     * @param  {Any} input
+     * @return {Array}
+     */
+    function toArray(input) {
+        var ret = [], inputType = $.typeOf(input);
+
+        if (inputType == 'array') {
+            return input;
+        }
+
+        if (!input || inputType == 'string' || inputType == 'window'
+            || input[NAME_NODE_TYPE] || $.isVoid(input.length)) {
+            ret = [input];
+        } else {
+            ret = fn_slice.call(input);
+        }
+
+        return ret;
+    }
+
+    /**
      * Array extends.
      */
+    extend(Array, {
+        /**
+         * Make.
+         * @param  {Object} ...arguments
+         * @return {Array}
+         */
+        make: function() {
+            var ret = [], args = arguments, argsLen = args.length, i = 0;
+
+            while (i < argsLen) {
+                ret = ret.concat(toArray(args[i++]));
+            }
+
+            return ret;
+        }
+    });
     extend(Array[NAME_PROTOTYPE], {
         /**
          * Select.
