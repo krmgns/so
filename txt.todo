@@ -2,6 +2,5 @@
 - $.dom.defineMethod(function(element){ ... })
 
 // etc
-- add so.query.js
-- use so.query() in so-all.js
-- remove qwery from so-all-native.js
+- add so_query.js
+- use so.query() in so_dom.js
