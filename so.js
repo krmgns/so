@@ -428,6 +428,23 @@
     });
     extend(Array[NAME_PROTOTYPE], {
         /**
+         * Reduce.
+         * @param  {Any}      inValue
+         * @param  {Function} fn
+         * @return {Any}
+         * @override For inValue position.
+         */
+        reduce: function(inValue, fn) {
+            this.forEach(function(value, key) {
+                if (fn(inValue, value, key)) {
+                    inValue = fn(value, key, inValue);
+                }
+            });
+
+            return inValue;
+        },
+
+        /**
          * Filter.
          * @param  {Function} fn
          * @return {Array}
@@ -436,9 +453,9 @@
         filter: function(fn) {
             fn = fn || function(value) { return !!value; }
 
-            return this.reduce(function(ret, value, key) {
-                return fn(value, key) ? ret.concat(value) : ret;
-            }, []);
+            return this.reduce([], function(inValue, value, key) {
+                return fn(value, key) ? inValue.concat(value) : inValue;
+            });
         },
 
         /**
@@ -446,9 +463,9 @@
          * @return {Array}
          */
         uniq: function() {
-            return this.reduce(function(ret, value) {
-                return (ret.indexOf(value) < 0) ? ret.concat([value]) : ret;
-            }, []);
+            return this.reduce([], function(inValue, value) {
+                return (inValue.indexOf(value) < 0) ? inValue.concat([value]) : inValue;
+            });
         }
     });
 
