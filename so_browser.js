@@ -3,10 +3,10 @@
  * @deps: so
  */
 
-;(function(window, $) { 'use strict';
+;(function($) { 'use strict';
 
-    $.browser = (function() {
-        var nav = window.navigator, re, name, test,
+    $.extend('@browser', (function() {
+        var window, $.getWindow(), nav = window.navigator, re, name, test,
             ua = nav.userAgent.toLowerCase(), uap = nav.platform.toLowerCase(),
             re_src = /(chrome|safari|firefox|opera|msie|trident(?=\/))\/?\s*([\d.]+)/,
             fns_os = ['isMac', 'isWindows', 'isLinux', 'isUnix'],
@@ -89,4 +89,4 @@
         return browser;
     })();
 
-})(window, so);
+})(so);
