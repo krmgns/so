@@ -733,9 +733,6 @@ function filterPrevNext(src, el, els) {
     });
 }
 
-// bunlarda $.array.index()'i kullan
-// i = index(), for (; i < childNodes.length; i++) els.push(childNodes[i])
-
 // dom: walkers
 $.extend(Dom.prototype, {
     prevAll: function(src) {
@@ -1278,10 +1275,10 @@ $.extend(Dom.prototype, {
         return (el = el || this[0]) && fn_isNodeElement(el) && !fn_isNodeElement(el.parentNode);
     },
     getWindow: function(el){
-        return initDom($.getWindow(el || this[0]));
+        return initDom($.window(el || this[0]));
     },
     getDocument: function(el){
-        return initDom($.getDocument(el || this[0]));
+        return initDom($.document(el || this[0]));
     }
 });
 

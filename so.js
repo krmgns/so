@@ -680,11 +680,11 @@ function log() { console.log.apply(console, arguments); }
         },
 
         /**
-         * Get window.
+         * Window.
          * @param  {Any} node
          * @return {Window|undefined}
          */
-        getWindow: function(input) {
+        window: function(input) {
             var ret;
 
             if (input) {
@@ -703,11 +703,11 @@ function log() { console.log.apply(console, arguments); }
         },
 
         /**
-         * Get document.
+         * Document.
          * @param  {Any} input
          * @return {Document|undefined}
          */
-        getDocument: function(input) {
+        document: function(input) {
             var ret;
 
             if (input) {
