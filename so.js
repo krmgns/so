@@ -350,7 +350,7 @@
             var _this = this, ctor = _this.constructor, ret = [], key;
 
             if (ctor != Object) {
-                throw ('Core pick() is only for Object\'s.');
+                throw ('Core values() is only for Object\'s.');
             }
 
             for (key in _this) {
@@ -400,7 +400,7 @@
                     if (keys.indexOf(key) < 0) ret[key] = value;
                 });
             } else {
-                throw ('Core pick() is only for Object\'s and Array\'s.');
+                throw ('Core copy() is only for Object\'s and Array\'s.');
             }
 
             return ret;
