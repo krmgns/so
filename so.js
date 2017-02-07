@@ -841,8 +841,8 @@ function log() { console.log.apply(console, arguments); }
          * Extend.
          * @param  {Any} target
          * @param  {Any} source
-         * @usage  $.extend('foo', ...)
-         * @usage  $.extend('foo.bar', ...)
+         * @usage  $.extend(target, source)
+         * @usage  $.extend({foo, ...}), $.extend('@foo', ...), $.extend('@foo.bar', ...) Self extend.
          * @return {Any}
          */
         extend: function(target, source) {
@@ -852,8 +852,8 @@ function log() { console.log.apply(console, arguments); }
             }
 
             // self extend
-            if ($.isString(target)) {
-                var tmp = target.split('.'), property = tmp[0], propertyProperty = tmp[1],
+            if ($.isString(target) && target.charAt(0) == '@') {
+                var tmp = target.split('.'), property = tmp[0].slice(1), propertyProperty = tmp[1],
                     target = $[property] || {};
 
                 if (!propertyProperty) {
