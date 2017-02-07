@@ -350,7 +350,7 @@
             var _this = this, ctor = _this.constructor, ret = [], key;
 
             if (ctor != Object) {
-                throw ('Core pick() is only for Object\'s.')
+                throw ('Core pick() is only for Object\'s.');
             }
 
             for (key in _this) {
@@ -373,7 +373,7 @@
             var _this = this, ctor = _this.constructor, value = opt_valueDefault;
 
             if (ctor != Object && ctor != Array) {
-                throw ('Core pick() is only for Object\'s and Array\'s.')
+                throw ('Core pick() is only for Object\'s and Array\'s.');
             }
 
             if (key in _this) {
@@ -381,6 +381,29 @@
             }
 
             return value;
+        },
+
+        /**
+         * Copy.
+         * @param  {Array} opt_excludeKeys @optional
+         * @return {Object|Array}
+         */
+        copy: function(opt_excludeKeys) {
+            var _this = this, ctor = _this.constructor, ret, keys = opt_excludeKeys || [];
+
+            if (ctor == Object) {
+                ret = {}, forEach(_this, function(key, value) {
+                    if (keys.indexOf(key) < 0) ret[key] = value;
+                });
+            } else if (ctor == Array) {
+                ret = [], forEach(_this, function(value, key) {
+                    if (keys.indexOf(key) < 0) ret[key] = value;
+                });
+            } else {
+                throw ('Core pick() is only for Object\'s and Array\'s.');
+            }
+
+            return ret;
         }
     });
 
