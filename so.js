@@ -428,19 +428,17 @@
     });
     extend(Array[NAME_PROTOTYPE], {
         /**
-         * Select.
+         * Filter.
          * @param  {Function} fn
          * @return {Array}
+         * @override For default fn.
          */
-        select: function(fn) {
-            var ret = [];
-            return this.reduce(function(ret, value) {
-                if (fn(value)) {
-                    return ret.concat([value]);
-                } else {
-                    return ret;
-                }
-            }, ret);
+        filter: function(fn) {
+            fn = fn || function(value) { return !!value; }
+
+            return this.reduce(function(ret, value, key) {
+                return fn(value, key) ? ret.concat(value) : ret;
+            }, []);
         },
 
         /**
@@ -448,14 +446,13 @@
          * @return {Array}
          */
         uniq: function() {
-            var ret = [];
             return this.reduce(function(ret, value) {
                 if (ret.indexOf(value) < 0) {
                     return ret.concat([value]);
                 } else {
                     return ret;
                 }
-            }, ret);
+            }, []);
         }
     });
 
@@ -580,7 +577,7 @@
          * Trim left.
          * @param  {String|undefined} chars @optional
          * @return {String}
-         * @override
+         * @override For chars option.
          */
         trimLeft: function(chars) {
             var str = toString(this), re = toTrimRegExp(chars, TRUE);
@@ -596,7 +593,7 @@
          * Trim right.
          * @param  {String|undefined} chars @optional
          * @return {String}
-         * @override
+         * @override For chars option.
          */
         trimRight: function(chars) {
             var str = toString(this), re = toTrimRegExp(chars);
@@ -612,7 +609,7 @@
          * Trim.
          * @param  {String|undefined} chars @optional
          * @return {String}
-         * @override
+         * @override For chars option.
          */
         trim: function(chars) {
             return this.trimLeft(chars).trimRight(chars);
@@ -625,7 +622,7 @@
          * @param  {Bool}   opt_noCase @optional
          * @param  {String} str        @internal
          * @return {Bool}
-         * @override
+         * @override For no-case option.
          */
         startsWith: function(search, index, opt_noCase, str) {
             return (str = toSearchStuff(this, search, index, opt_noCase))
@@ -639,7 +636,7 @@
          * @param  {Bool}   opt_noCase @optional
          * @param  {String} str        @internal
          * @return {Bool}
-         * @override
+         * @override For no-case option.
          */
         endsWith: function(search, index, opt_noCase, str) {
             return (str = toSearchStuff(this, search, index, opt_noCase))
