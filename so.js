@@ -447,11 +447,7 @@
          */
         uniq: function() {
             return this.reduce(function(ret, value) {
-                if (ret.indexOf(value) < 0) {
-                    return ret.concat([value]);
-                } else {
-                    return ret;
-                }
+                return (ret.indexOf(value) < 0) ? ret.concat([value]) : ret;
             }, []);
         }
     });
