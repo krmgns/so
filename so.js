@@ -94,30 +94,33 @@ function log() { console.log.apply(console, arguments); }
      * For each.
      * @param  {Array|Object} input
      * @param  {Function}     fn
-     * @param  {Object}       opt_scope @optional
+     * @param  {Object}       opt__this @optional
      * @return {Array|Object}
      * @private
      */
-    function forEach(input, fn, opt_scope) {
-        var len = input && input.length, i;
+    function forEach(input, fn, opt__this) {
+        var _this = opt__this || input, len = input && input.length, i;
 
-        if (len != NULL) { // array: value => i
+        // array: value => i
+        if (len != NULL) {
             for (i = 0; i < len; i++) {
-                if (FALSE === fn.call(opt_scope || input[i], input[i], i, input)) {
+                if (FALSE === fn.call(_this, input[i], i, input)) {
                     break;
                 }
             }
-        } else { // object: key => value
+        }
+        // object: key => value
+        else {
             for (i in input) {
                 if (input.hasOwnProperty(i)) {
-                    if (FALSE === fn.call(opt_scope || input[i], i, input[i], input)) {
+                    if (FALSE === fn.call(_this, i, input[i], input)) {
                         break;
                     }
                 }
             }
         }
 
-        return opt_scope || input;
+        return _this;
     }
 
     /**
@@ -374,29 +377,68 @@ function log() { console.log.apply(console, arguments); }
      */
     extend(Object[NAME_PROTOTYPE], {
         /**
-         * Object for each.
-         * @param  {Function} fn
-         * @return {Object}
-         */
-        forEach: function(fn) {
-            return forEach(this, function(key, value) {
-                return fn(key, value);
-            });
-        },
-
-        /**
          * To source.
          * @return {Any}
          */
         toSource: function() {
             return valueOf(this);
+        },
+
+        /**
+         * For each.
+         * @param  {Function} fn
+         * @return {Object}
+         */
+        forEach: function(fn) {
+            return $.forEach(this, fn);
+        },
+
+        /**
+         * Values.
+         * @return {Array}
+         */
+        values: function() {
+            var _this = this, ctor = _this.constructor, ret = [], key;
+
+            if (ctor != Object) {
+                throw ('Core pick() is only for Object\'s')
+            }
+
+            for (key in _this) {
+                if (_this.hasOwnProperty(key)) {
+                    ret.push(_this[key]);
+                }
+            }
+
+            return ret;
+        },
+
+        /**
+         * Pick.
+         * @param  {String} key
+         * @param  {Any}    opt_valueDefault
+         * @return {Any|undefined}
+         * @throws
+         */
+        pick: function(key, opt_valueDefault) {
+            var _this = this, ctor = _this.constructor, value = opt_valueDefault;
+
+            if (ctor != Object && ctor != Array) {
+                throw ('Core pick() is only for Object\'s and Array\'s and')
+            }
+
+            if (key in _this) {
+                value = _this[key], delete _this[key];
+            }
+
+            return value;
         }
     });
 
     /**
      * To trim chars.
-     * @param  {String|void} chars
-     * @param  {Boolean}     opt_isLeft
+     * @param  {String|undefined} chars
+     * @param  {Boolean}          opt_isLeft
      * @return {String}
      * @private
      */
@@ -446,7 +488,7 @@ function log() { console.log.apply(console, arguments); }
          * To int.
          * @param  {Int}    base
          * @param  {String} str  @internal
-         * @return {Int|void}
+         * @return {Int|null}
          */
         toInt: function(base, str) {
             return $.isNumeric(str = toString(this))
@@ -456,7 +498,7 @@ function log() { console.log.apply(console, arguments); }
         /**
          * To float.
          * @param  {String} str @internal
-         * @return {Float|void}
+         * @return {Float|null}
          */
         toFloat: function(str) {
             return $.isNumeric(str = toString(this)) ? parseFloat(str) : NULL;
@@ -512,7 +554,7 @@ function log() { console.log.apply(console, arguments); }
 
         /**
          * Trim left.
-         * @param  {String|void} chars @optional
+         * @param  {String|undefined} chars @optional
          * @return {String}
          * @override
          */
@@ -528,7 +570,7 @@ function log() { console.log.apply(console, arguments); }
 
         /**
          * Trim right.
-         * @param  {String|void} chars @optional
+         * @param  {String|undefined} chars @optional
          * @return {String}
          * @override
          */
@@ -544,7 +586,7 @@ function log() { console.log.apply(console, arguments); }
 
         /**
          * Trim.
-         * @param  {String|void} chars @optional
+         * @param  {String|undefined} chars @optional
          * @return {String}
          * @override
          */
@@ -685,8 +727,8 @@ function log() { console.log.apply(console, arguments); }
 
         /**
          * Trim.
-         * @param  {String}      str
-         * @param  {String|void} chars @optional
+         * @param  {String}           str
+         * @param  {String|undefined} chars @optional
          * @return {String}
          */
         trim: function(str, chars) {
@@ -695,8 +737,8 @@ function log() { console.log.apply(console, arguments); }
 
         /**
          * Trim left.
-         * @param  {String}      str
-         * @param  {String|void} chars @optional
+         * @param  {String}           str
+         * @param  {String|undefined} chars @optional
          * @return {String}
          */
         trimLeft: function(str, chars) {
@@ -705,8 +747,8 @@ function log() { console.log.apply(console, arguments); }
 
         /**
          * Trim right.
-         * @param  {String}      str
-         * @param  {String|void} chars @optional
+         * @param  {String}           str
+         * @param  {String|undefined} chars @optional
          * @return {String}
          */
         trimRight: function(str, chars) {
@@ -783,12 +825,12 @@ function log() { console.log.apply(console, arguments); }
          * For each.
          * @param  {Array|Object} input
          * @param  {Function}     fn
-         * @param  {Object}       opt_scope @optional
+         * @param  {Object}       opt__this @optional
          * @return {Array|Object}
          * @private
          */
-        forEach: function(input, fn, opt_scope) {
-            return forEach(input, fn, opt_scope);
+        forEach: function(input, fn, opt__this) {
+            return forEach(input, fn, opt__this);
         },
 
         mix: function() {
@@ -875,9 +917,9 @@ function log() { console.log.apply(console, arguments); }
 
     /**
      * Oh baby..
-     * @param  {Function}      callback
-     * @param  {Document|void} document @optional
-     * @return {void}
+     * @param  {Function}           callback
+     * @param  {Document|undefined} document @optional
+     * @return {none}
      */
     $.onReady = function(callback, document) {
         if ($.isFunction(callback)) {
