@@ -112,7 +112,7 @@
         // object: key => value
         else {
             for (key in input) {
-                if (input.hasOwnProperty(i)) {
+                if (input.hasOwnProperty(key)) {
                     if (FALSE === fn.call(_this, key, input[key], input)) {
                         break;
                     }
@@ -350,7 +350,7 @@
             var _this = this, ctor = _this.constructor, ret = [], key;
 
             if (ctor != Object) {
-                throw ('Core pick() is only for Object\'s')
+                throw ('Core pick() is only for Object\'s.')
             }
 
             for (key in _this) {
@@ -373,7 +373,7 @@
             var _this = this, ctor = _this.constructor, value = opt_valueDefault;
 
             if (ctor != Object && ctor != Array) {
-                throw ('Core pick() is only for Object\'s and Array\'s and')
+                throw ('Core pick() is only for Object\'s and Array\'s.')
             }
 
             if (key in _this) {
