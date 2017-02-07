@@ -344,6 +344,7 @@
         /**
          * Values.
          * @return {Array}
+         * @throws
          */
         values: function() {
             var _this = this, ctor = _this.constructor, ret = [], key;
@@ -887,6 +888,7 @@
          * @param  {String} name
          * @param  {Any}    value
          * @return {void}
+         * @throws
          */
         setConstant: function(name, value) {
             if ($.isConstant(name)) {
