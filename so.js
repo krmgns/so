@@ -850,7 +850,7 @@ function log() { console.log.apply(console, arguments); }
             if ($.isString(target) && target.charAt(0) == '@') {
                 var tmp = target.split('.'), property = tmp[0].slice(1), propertyProperty = tmp[1];
 
-                // ('@', ...)
+                // ('@', {x: ...})
                 if (!property) {
                     return $.extend($, source);
                 }
