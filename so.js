@@ -684,16 +684,16 @@ function log() { console.log.apply(console, arguments); }
          * @param  {Any} node
          * @return {Window|undefined}
          */
-        getWindow: function(node) {
+        getWindow: function(input) {
             var ret;
 
-            if (node) {
-                if ($.isNode(node)) {
-                    ret = node[NAME_OWNER_DOCUMENT][NAME_DEFAULT_VIEW]; // node document window
-                } else if ($.isDocument(node)) {
-                    ret = node[NAME_DEFAULT_VIEW]; // document window
-                } else if ($.isWindow(node)) {
-                    ret = node;
+            if (input) {
+                if ($.isNode(input)) {
+                    ret = input[NAME_OWNER_DOCUMENT][NAME_DEFAULT_VIEW]; // node document window
+                } else if ($.isDocument(input)) {
+                    ret = input[NAME_DEFAULT_VIEW]; // document window
+                } else if ($.isWindow(input)) {
+                    ret = input;
                 }
             } else {
                 ret = window;
@@ -704,19 +704,19 @@ function log() { console.log.apply(console, arguments); }
 
         /**
          * Get document.
-         * @param  {Any} node
+         * @param  {Any} input
          * @return {Document|undefined}
          */
-        getDocument: function(node) {
+        getDocument: function(input) {
             var ret;
 
-            if (node) {
-                if (node[NAME_OWNER_DOCUMENT]) { // document or node
-                    ret = node[NAME_OWNER_DOCUMENT];
-                } else if (node[NAME_DOCUMENT]) {
-                    ret = node[NAME_DOCUMENT]; // window
-                } else if ($.isDocument(node)) {
-                    ret = node;
+            if (input) {
+                if (input[NAME_OWNER_DOCUMENT]) { // document or node
+                    ret = input[NAME_OWNER_DOCUMENT];
+                } else if (input[NAME_DOCUMENT]) {
+                    ret = input[NAME_DOCUMENT]; // window
+                } else if ($.isDocument(input)) {
+                    ret = input;
                 }
             } else {
                 ret = window[NAME_DOCUMENT];
