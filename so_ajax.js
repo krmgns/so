@@ -1,6 +1,6 @@
 /**
  * @name: so.ajax
- * @deps: soAo.array, so.object
+ * @deps: so.object
  */
 
 ;(function($) {
