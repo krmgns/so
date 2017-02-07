@@ -1,12 +1,14 @@
-/**
- * @name: so.browser
- * @deps: so
- */
-
 ;(function($) { 'use strict';
 
+    /**
+     * @package so
+     * @object  so.browser
+     * @depends so
+     * @author  Kerem Güneş <k-gun@mail.com>
+     * @license The MIT License <https://opensource.org/licenses/MIT>
+     */
     $.extend('@browser', (function() {
-        var window, $.getWindow(), nav = window.navigator, re, name, test,
+        var window = $.window(), nav = window.navigator, re, name, test,
             ua = nav.userAgent.toLowerCase(), uap = nav.platform.toLowerCase(),
             re_src = /(chrome|safari|firefox|opera|msie|trident(?=\/))\/?\s*([\d.]+)/,
             fns_os = ['isMac', 'isWindows', 'isLinux', 'isUnix'],
@@ -87,6 +89,6 @@
         };
 
         return browser;
-    })();
+    })());
 
 })(so);
