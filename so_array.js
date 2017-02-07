@@ -2,7 +2,7 @@
 
     /**
      * @package so
-     * @object  so.browser
+     * @object  so.array
      * @depends so
      * @author  Kerem Güneş <k-gun@mail.com>
      * @license The MIT License <https://opensource.org/licenses/MIT>
