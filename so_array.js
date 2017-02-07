@@ -16,12 +16,15 @@
          * @return {Boolean}
          */
         has: function(array, search, strict) {
-            for (var i = 0, len = array.length; i < len; i++) {
-                if (!strict ? search == array[i] : search === array[i]) {
-                    return true;
+            var ret = false;
+
+            array.forEach(function(value) {
+                if (!strict ? value == search : value === search) {
+                    ret = true; return 0; // break
                 }
-            }
-            return false;
+            });
+
+            return ret;
         },
 
         /**
@@ -34,10 +37,9 @@
         find: function(array, fn, opt_retDefault) {
             var ret = opt_retDefault;
 
-            $.forEach(array, function(value) {
+            array.forEach(function(value) {
                 if (fn(value)) {
-                    ret = value;
-                    return false; // break
+                    ret = value; return 0; // break
                 }
             });
 
@@ -54,10 +56,9 @@
         findIndex: function(array, fn, opt_retDefault) {
             var ret = opt_retDefault;
 
-            $.forEach(array, function(value, key) {
+            array.forEach(function(value, key) {
                 if (fn(value)) {
-                    ret = key;
-                    return false; // break
+                    ret = key; return 0; // break
                 }
             });
 
