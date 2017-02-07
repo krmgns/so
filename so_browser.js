@@ -1,6 +1,6 @@
 /**
  * @name: so.browser
- * @depends: so
+ * @deps: so
  */
 
 ;(function($) {
@@ -72,9 +72,6 @@
                 browser['osBit'] = 32;
             }
         }
-
-        // define exposer
-        $.toString('browser', browser);
 
         return $.freeze(browser);
     })();
