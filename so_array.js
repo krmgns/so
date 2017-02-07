@@ -10,14 +10,14 @@
     $.extend('@array', {
         /**
          * Has.
-         * @param  {Array}   input
+         * @param  {Array}   array
          * @param  {Any}     search
          * @param  {Boolean} strict
          * @return {Boolean}
          */
-        has: function(input, search, strict) {
-            for (var i = 0, len = input.length; i < len; i++) {
-                if (!strict ? search == input[i] : search === input[i]) {
+        has: function(array, search, strict) {
+            for (var i = 0, len = array.length; i < len; i++) {
+                if (!strict ? search == array[i] : search === array[i]) {
                     return true;
                 }
             }
@@ -26,15 +26,15 @@
 
         /**
          * Find.
-         * @param  {Array}    input
+         * @param  {Array}    array
          * @param  {Function} fn
          * @param  {Any}      opt_retDefault
          * @return {Any|undefined}
          */
-        find: function(input, fn, opt_retDefault) {
+        find: function(array, fn, opt_retDefault) {
             var ret = opt_retDefault;
 
-            $.forEach(input, function(value) {
+            $.forEach(array, function(value) {
                 if (fn(value)) {
                     ret = value;
                     return false; // break
@@ -46,15 +46,15 @@
 
         /**
          * Find.
-         * @param  {Array}    input
+         * @param  {Array}    array
          * @param  {Function} fn
          * @param  {Any}      opt_retDefault
          * @return {Int|undefined}
          */
-        findIndex: function(input, fn, opt_retDefault) {
+        findIndex: function(array, fn, opt_retDefault) {
             var ret = opt_retDefault;
 
-            $.forEach(input, function(value, key) {
+            $.forEach(array, function(value, key) {
                 if (fn(value)) {
                     ret = key;
                     return false; // break
