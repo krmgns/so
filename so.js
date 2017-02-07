@@ -842,20 +842,20 @@ function log() { console.log.apply(console, arguments); }
          * @param  {Any} target
          * @param  {Any} source
          * @usage  $.extend(target, source)
-         * @usage  $.extend({foo, ...}), $.extend('@foo', ...), $.extend('@foo.bar', ...) Self extend.
+         * @usage  $.extend('@', {x: ...}), $.extend('@x', ...), $.extend('@x.foo', ...) @self
          * @return {Any}
          */
         extend: function(target, source) {
             // self extend
-            if ($.isObject(target) && $.isUndefined(source)) {
-                return extend($, target);
-            }
-
-            // self extend
             if ($.isString(target) && target.charAt(0) == '@') {
-                var tmp = target.split('.'), property = tmp[0].slice(1), propertyProperty = tmp[1],
-                    target = $[property] || {};
+                var tmp = target.split('.'), property = tmp[0].slice(1), propertyProperty = tmp[1];
 
+                // ('@', ...)
+                if (!property) {
+                    return $.extend($, source);
+                }
+
+                target = $[property] || {};
                 if (!propertyProperty) {
                     target[property] = source;
                 } else {
