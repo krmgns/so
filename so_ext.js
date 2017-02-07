@@ -5,7 +5,7 @@
 
 ;(function($) { 'use strict';
 
-    $.extend('ext', {
+    $.extend('@ext', {
         toCamelCaseFromDashCase: function(input) {
             return (''+ input).replace(/-([a-z])/gi, function($0, $1) {
                 return $1.toUpperCase();
