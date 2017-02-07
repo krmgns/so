@@ -99,7 +99,7 @@
      * @private
      */
     function forEach(input, fn, opt__this) {
-        var _this = opt__this || input, len = input && input.length, i;
+        var _this = opt__this || input, len = input && input.length, i, key;
 
         // array: value => i
         if (len != NULL) {
@@ -111,9 +111,9 @@
         }
         // object: key => value
         else {
-            for (i in input) {
+            for (key in input) {
                 if (input.hasOwnProperty(i)) {
-                    if (FALSE === fn.call(_this, i, input[i], input)) {
+                    if (FALSE === fn.call(_this, key, input[key], input)) {
                         break;
                     }
                 }
