@@ -436,9 +436,7 @@
          */
         reduce: function(inValue, fn) {
             this.forEach(function(value, key) {
-                if (fn(inValue, value, key)) {
-                    inValue = fn(value, key, inValue);
-                }
+                inValue = fn(value, key, inValue);
             });
 
             return inValue;
@@ -453,7 +451,7 @@
         filter: function(fn) {
             fn = fn || function(value) { return !!value; }
 
-            return this.reduce([], function(inValue, value, key) {
+            return this.reduce([], function(value, key, inValue) {
                 return fn(value, key) ? inValue.concat(value) : inValue;
             });
         },
@@ -463,8 +461,8 @@
          * @return {Array}
          */
         uniq: function() {
-            return this.reduce([], function(inValue, value) {
-                return (inValue.indexOf(value) < 0) ? inValue.concat([value]) : inValue;
+            return this.reduce([], function(value, key, inValue) {
+                return inValue.indexOf(value) < 0 ? inValue.concat(value) : inValue;
             });
         }
     });
