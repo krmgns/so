@@ -598,7 +598,7 @@ Dom.prototype = {
     toArray: function() {
         return Array.make(this);
     },
-    forEach: function(fn) { // silinebilir??
+    forEach: function(fn) { // silinebilir?? Object.forEach eklendi cunku
         return $.forEach(this, fn);
     },
     length: function(){
@@ -608,12 +608,12 @@ Dom.prototype = {
         return !this._length;
     },
     map: function(fn) {
-        return initDom($.array.map(this, function(_, el){
+        return initDom(this.toArray().map(function(el){
             return fn(el);
         }));
     },
     filter: function(fn) {
-        return initDom($.array.filter(this, function(_, el){
+        return initDom(this.toArray().filter(function(el){
             return fn(el);
         }));
     },
@@ -705,7 +705,6 @@ $.forEach({setHtml: "innerHTML", setText: textProp}, function(fn, prop) {
         });
     };
 });
-
 $.forEach({getHtml: "innerHTML", getText: textProp}, function(fn, prop) {
     Dom.prototype[fn] = function(outer) {
         if (outer && fn == "getHtml") { // outerHTML requested
@@ -726,10 +725,18 @@ $.forEach({parent: "parentNode", prev: "previousSibling", next: "nextSibling"}, 
     };
 });
 
+function filterPrevNext(src, el, els) {
+    return initDom(src, el.parentNode).toArray().filter(function(e) {
+        for (var i = 0, len = els.length; i < len; i++) {
+            if (els[i] == e) return true;
+        }
+    });
+}
+
 // dom: walkers
 $.extend(Dom.prototype, {
     prevAll: function(src) {
-        var el = this[0], els = [], j = 0, n, ns, tmp;
+        var el = this[0], els = [], j = 0, n, ns;
         if (el && el.parentNode) {
             ns = el.parentNode.childNodes;
             while (n = ns[j++]) {
@@ -738,19 +745,15 @@ $.extend(Dom.prototype, {
                 }
                 if (fn_isNodeElement(n)) els.push(n);
             }
-            if (typeof src == "string") {
-                tmp = initDom(src, el.parentNode).toArray();
-                els = $.array.filter(tmp, function(_, e) {
-                    for (var i = 0, len = els.length; i < len; i++) {
-                        if (els[i] == e) return true;
-                    }
-                });
+
+            if (src && typeof src == "string") {
+                els = filterPrevNext(src, el, els)
             }
         }
         return initDom(els);
     },
     nextAll: function(src) {
-        var el = this[0], els = [], j = 0, n, ns, tmp, found;
+        var el = this[0], els = [], j = 0, n, ns, found;
         if (el && el.parentNode) {
             ns = el.parentNode.childNodes;
             while (n = ns[j++]) {
@@ -759,13 +762,9 @@ $.extend(Dom.prototype, {
                 }
                 if (found && n != el && fn_isNodeElement(n)) els.push(n);
             }
-            if (typeof src == "string") {
-                tmp = initDom(src, el.parentNode).toArray();
-                els = $.array.filter(tmp, function(_, e) {
-                    for (var i = 0, len = els.length; i < len; i++) {
-                        if (els[i] == e) return true;
-                    }
-                });
+
+            if (src && typeof src == "string") {
+                els = filterPrevNext(src, el, els)
             }
         }
         return initDom(els);
@@ -1201,9 +1200,9 @@ $.extend(Dom.prototype, {
                     continue;
                 }
 
-                if ($.array.has(["select", "textarea", "button"], getTagName(el))) {
+                if (/^select|textarea|button$/.test(getTagName(el))) {
                     data.push(encodeURIComponent(elName) +"="+ encodeURIComponent(el.value));
-                } else if ($.array.has(["radio", "checkbox"]) && el.checked) {
+                } else if (/^radio|checkbox$/.test(elType) && el.checked) {
                     data.push(encodeURIComponent(elName) +"="+
                         (elType == "checkbox" ? (el.value != null ? el.value : "on") : encodeURIComponent(el.value)));
                 } else {
