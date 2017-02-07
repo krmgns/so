@@ -261,7 +261,7 @@ function cleanElement(el, child /*internal*/) {
 }
 
 function create(tag, attrs, doc) {
-    return setAttributes(createElementSafe(tag, doc, $.object.pick(attrs, "name")), attrs);
+    return setAttributes(createElementSafe(tag, doc, attrs.pick("name")), attrs);
 }
 
 function createFragment(content, doc) {
