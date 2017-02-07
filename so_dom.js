@@ -64,7 +64,7 @@ function getTagName(node) {
 
 function getByTag(root, tag, i) {
     var els = root.getElementsByTagName(tag);
-    return (i === true) ? $.array.make(els) : isNaN(i) ? els : els[i];
+    return (i === true) ? Array.make(els) : isNaN(i) ? els : els[i];
 }
 
 function fixTable(table, doc) {
@@ -324,7 +324,7 @@ function createElement(content, doc) {
         frg = createFragment(content, doc);
     }
 
-    return _return(tag, $.array.make(frg.childNodes), !!fix);
+    return _return(tag, Array.make(frg.childNodes), !!fix);
 }
 
 function insert(fn, target, contents, reverse) {
@@ -584,7 +584,7 @@ Dom.prototype = {
 
         // notation: $.dom("p").not(0) or $.dom("p").not([0,1])
         if (type == "number" || type == "array") {
-            selector = $.array.make(selector);
+            selector = Array.make(selector);
             this.forEach(function(el, i){
                 if (!$.array.has(selector, i)) {
                     els.push(el);
@@ -596,10 +596,10 @@ Dom.prototype = {
         return this;
     },
     toArray: function() {
-        return $.array.make(this);
+        return Array.make(this);
     },
-    forEach: function(fn) {
-        return $.forEach(this, fn, this /*scope*/);
+    forEach: function(fn) { // silinebilir??
+        return $.forEach(this, fn);
     },
     length: function(){
         return this._length;
