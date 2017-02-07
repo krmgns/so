@@ -104,7 +104,7 @@
         // array: value => i
         if (len != NULL) {
             for (i = 0; i < len; i++) {
-                if (fn.call(_this, input[i], i, input) == -0) {
+                if (fn.call(_this, input[i], i, input) === 0) {
                     break;
                 }
             }
@@ -113,7 +113,7 @@
         else {
             for (key in input) {
                 if (input.hasOwnProperty(key)) {
-                    if (fn.call(_this, key, input[key], input) == -0) {
+                    if (fn.call(_this, key, input[key], input) === 0) {
                         break;
                     }
                 }
