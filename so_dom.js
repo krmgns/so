@@ -733,6 +733,9 @@ function filterPrevNext(src, el, els) {
     });
 }
 
+// bunlarda $.array.index()'i kullan
+// i = index(), for (; i < childNodes.length; i++) els.push(childNodes[i])
+
 // dom: walkers
 $.extend(Dom.prototype, {
     prevAll: function(src) {
