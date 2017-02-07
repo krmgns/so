@@ -22,28 +22,6 @@ $.extend($.object, {
         }
         return input;
     },
-    pick: function(input, key, valueDefault) {
-        var value = valueDefault;
-        if (key in input) {
-            value = input[key];
-            delete input[key];
-        }
-        return value;
-    },
-    keys: function(input) {
-        var i, result = [];
-        for (i in input) {
-            result.push(i);
-        }
-        return result;
-    },
-    values: function(input) {
-        var i, result = [];
-        for (i in input) {
-            result.push(input[i]);
-        }
-        return result;
-    },
     hasKey: function(input, search, strict) {
         for (var i in input) {
             if (!strict ? search == i : search === i) {
