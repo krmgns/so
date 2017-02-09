@@ -2,12 +2,12 @@
 
     /**
      * @package so
-     * @object  so.ext
+     * @object  so.util
      * @depends so
      * @author  Kerem Güneş <k-gun@mail.com>
      * @license The MIT License <https://opensource.org/licenses/MIT>
      */
-    $.extend('@ext', {
+    $.extend('@util', {
         /**
          * toCamelCaseFromDashCase.
          * @param  {String} input
