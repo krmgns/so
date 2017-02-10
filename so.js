@@ -162,8 +162,7 @@
 
         /** Is numeric.      @param {Any} input @return {Bool} */
         isNumeric: function(input) {
-            return !$.isVoid(input) && !$.isNulls(input)
-                && isFinite(input) && !isNaN(parseFloat(input));
+            return !$.isVoid(input) && !$.isNulls(input) && isFinite(input) && !isNaN(parseFloat(input));
         },
 
         /** Is function.     @param {Any} input @return {Bool} */
@@ -459,24 +458,6 @@
     }
 
     /**
-     * Pick.
-     * @param  {Array|Object} input
-     * @param  {String}       key
-     * @param  {Any}          opt_defaultValue
-     * @return {Any|undefined}
-     * @throws
-     */
-    function fn_pick(input, key, opt_defaultValue) {
-        var value = opt_defaultValue;
-
-        if (key in input) {
-            value = input[key]; delete input[key];
-        }
-
-        return value;
-    }
-
-    /**
      * so: base functions.
      */
     extend($, {
@@ -768,7 +749,7 @@
         },
 
         /**
-         * Array pick.
+         * Pick.
          * @param  {Array|Object} input
          * @param  {String}       key
          * @param  {Any}          opt_defaultValue
@@ -776,7 +757,18 @@
          * @throws
          */
         pick: function(input, key, opt_defaultValue) {
-            return fn_pick(input, key, opt_defaultValue);
+            var value = opt_defaultValue;
+
+            if (key in input) {
+                value = input[key];
+                delete input[key];
+
+                if ($.isArray(input)) {
+                    input.sort(); // fix keys
+                }
+            }
+
+            return value;
         },
 
         toString: function(name, opt_object) {
@@ -1003,11 +995,25 @@
         remove: function(key) {
             var _this = this;
 
-            delete _this.data[key];
+            $.pick(_this.data, key);
 
-            if (_this.isListArray()) {
-                _this.data.sort(); // fix keys
-            }
+            return _this;
+        },
+
+        /**
+         * Replace.
+         * @param  {Any} searchValue
+         * @param  {Any} replaceValue
+         * @return {this}
+         */
+        replace: function(searchValue, replaceValue) {
+            var _this = this;
+
+            forEach(_this.data, function(value, key) {
+                if (value === searchValue) {
+                    _this.data[key] = replaceValue;
+                }
+            });
 
             return _this;
         },
@@ -1167,37 +1173,13 @@
         },
 
         /**
-         * Replace.
-         * @param  {Any} searchValue
-         * @param  {Any} replaceValue
-         * @return {this}
-         */
-        replace: function(searchValue, replaceValue) {
-            var _this = this;
-
-            forEach(_this.data, function(value, key) {
-                if (value === searchValue) {
-                    _this.data[key] = replaceValue;
-                }
-            });
-
-            return _this;
-        },
-
-        /**
          * Pick.
          * @param  {Any} key
          * @param  {Any} opt_defaultValue
          * @return {this}
          */
         pick: function(key, opt_defaultValue) {
-            var _this = this, ret = $.pick(_this.data, key, opt_defaultValue);
-
-            if (_this.isListArray()) {
-                _this.data.sort(); // fix keys
-            }
-
-            return ret;
+            return $.pick(_this.data, key, opt_defaultValue);
         },
 
         /**
