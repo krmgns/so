@@ -440,7 +440,7 @@
      * @param  {Any} input
      * @return {Array}
      */
-    function fn_array(input) {
+    function makeArray(input) {
         var ret = [], inputType = $.typeOf(input);
 
         if (inputType == 'array') {
@@ -712,7 +712,7 @@
             var ret = [], args = arguments, argsLen = args.length, i = 0;
 
             while (i < argsLen) {
-                ret = ret.concat(fn_array(args[i++]));
+                ret = ret.concat(makeArray(args[i++]));
             }
 
             return ret;
