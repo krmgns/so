@@ -48,11 +48,17 @@
         function addEventOnce(el, type, callback, options) {
             var event = new Event(type, function(e) {
                 event.remove(el);
-                callback.apply(el, arguments);
+                callback.call(el, e);
             }).add(el);
         }
 
         // function addCustomEvent(el, type, callback, options) {}
+        // function removeCustomEvent(el, type, callback, options) {}
+
+        // function fire(el, type) {
+        //     if (custom...) {
+        //     }
+        }
 
         // test
         $.onReady(function() {
@@ -66,6 +72,7 @@
             addEventOnce(el, 'click', function(e) {
                 log("log..")
                 log(this)
+                log(e)
             });
 
             log(el)
