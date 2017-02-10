@@ -617,6 +617,7 @@ Dom.prototype = {
             return fn(el);
         }));
     },
+    // reduce: function() {}, @todo
     reverse: function() {
         // "clone" needs this sometimes (multiple clones)
         return initDom(this.toArray().reverse());
