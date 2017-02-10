@@ -1,157 +1,174 @@
-/**
- * @name: so.event
- * @deps: so
- */
+;(function($) { 'use strict';
 
-;(function($) {
+    var i = 0;
 
-"use strict"; // @tmp
+    // custom event key
+    // function cek(type) {
+    //     return 'so.cek.'+ type;
+    // }
 
-// credits https://gist.github.com/1000988 & http://dean.edwards.name/my/events.js
-$.event = (function() {
-    var _i = 0,
-        preventDefault = function() { this.returnValue = false; },
-        stopPropagation = function() { this.cancelBubble = true; };
+    // function prepareElementEvents(el, callback) {
+    //     el.__events = el.__events || {};
+    //     el.__events[type] = el.__events[type] || [];
+    //     if (callback) {
+    //         el.__events[type][(callback.i = callback.i || i++)] = callback;
+    //         el.__events[type].push(callback); ?
+    //     }
+    //     return el;
+    // }
 
-    function _ek(type) {
-        return "so.event.custom."+ type;
-    }
+    $.extend('@event', (function() {
+        var id = 0, defaultOptions = {useCapture: false};
 
-    function _fix(e) {
-        e.preventDefault = preventDefault;
-        e.stopPropagation = stopPropagation;
-        e.target = e.srcElement;
-        e.relatedTarget = e.fromElement;
-        e.keyCode = e.which;
-        return e;
-    }
-
-    function handleEvent(e) {
-        e = e || _fix(((this.ownerDocument || this.document || this).parentWindow || window).event);
-        var result = true, callbacks = this.$events[e.type], callback, i;
-        for (i in callbacks) {
-            callback = callbacks[i];
-            // unable to get property 'call' of undefined or null reference
-            if (callback && callback.call(this, e) === false) {
-                result = false;
-            }
-        }
-        return result;
-    }
-
-    function addEvent(el, type, callback) {
-        el.$events = el.$events || {};
-        if (!el.$events[type]) {
-            el.$events[type] = {};
-            if (el["on" + type]) {
-                el.$events[type][0] = el["on" + type];
-            }
+        function Event(type, callback, options) {
+            this.type = type;
+            this.callback = callback;
+            this.options = $.extend({}, defaultOptions, options);
+            // return this;
         }
 
-        callback.$i = callback.$i || _i++;
-        el.$events[type][callback.$i] = callback;
-
-        if (el.addEventListener) {
-            el.addEventListener(type, callback, false);
-        } else {
-            el["on" + type] = handleEvent;
-        }
-    }
-
-    function removeEvent(el, type, callback) {
-        if (el.removeEventListener) {
-            el.removeEventListener(type, callback, false);
-        } else {
-            if (el.$events && el.$events[type]) {
-                delete el.$events[type][callback.$i];
-            }
-        }
-    }
-
-    function once(el, type, callback) {
-        var _callback;
-        // doesn't work with cloned elements, sorry :(
-        addEvent(el, type, _callback = function(){
-            removeEvent(el, type, _callback);
-            return callback.apply(el, arguments);
+        $.extend(Event.prototype, {
+            add: function(el) {
+                el.addEventListener(this.type, this.callback, this.options.useCapture);
+                return this;
+            },
+            remove: function(el) {
+                el.removeEventListener(this.type, this.callback, this.options.useCapture);
+                return this;
+            },
         });
-    }
 
-    function fire(el, type) {
-        // default events like form.submit() etc.
-        if (typeof el[type] == "function") {
-            return el[type].call(el);
+        function addEvent(el, type, callback, options) {
+            new Event(type, callback, options).add(el);
+        }
+        function removeEvent(el, type, callback, options) {
+            new Event(type, callback, options).remove(el);
         }
 
-        var e;
-        // custom?
-        if (e = el[_ek(type)]) {
-            return invokeCustomEvent(el, type, e);
+        function addEventOnce(el, type, callback, options) {
+            var event = new Event(type, function(e) {
+                event.remove(el);
+                callback.apply(el, arguments);
+            }).add(el);
         }
 
-        if (document.createEventObject) {
-            e = document.createEventObject();
-            e.type = type;
-            return el.fireEvent("on"+ e.type, e);
-        } else {
-            e = document.createEvent("Event");
-            e.initEvent(type, true, true);
-            return !el.dispatchEvent(e);
-        }
-    }
+        // function addCustomEvent(el, type, callback, options) {}
 
-    function addCustomEvent(el, type, fn) {
-        var key = _ek(type), e;
-        if (document.createEventObject) {
-            // create for ie
-            e = document.createEventObject();
-            e.type = type;
-            if (!el[key]) {
-                addEvent(el, type, fn);
-            }
-        } else {
-            // create for firefox & others
-            e = document.createEvent("Event");
-            e.initEvent(type, true, true); // type, bubbling, cancelable
-            if (!el[key]) {
-                addEvent(el, type, fn);
-            }
-        }
-        el[key] = e;
-    }
+        // test
+        $.onReady(function() {
+            var el = document.body, event;
 
-    function removeCustomEvent(el, type) {
-        el[_ek(type)] = -1;
-    }
+            // event = new Event('click', function(e) {
+            //     event.remove(el);
+            //     log(e)
+            // }).add(el);
 
-    function invokeCustomEvent(el, type, e /*internal*/) {
-        e = e || el[_ek(type)];
-        if (e && e !== -1) {
-            return el.fireEvent
-                // dispatch for ie
-                ? el.fireEvent("on"+ type, e)
-                // dispatch for firefox & others
-                : !el.dispatchEvent(e);
-        }
-    }
+            addEventOnce(el, 'click', function(e) {
+                log("log..")
+                log(this)
+            });
 
-    return {
-        on: addEvent,
-        off: removeEvent,
-        once: once,
-        fire: fire,
-        // regular events
-        addEvent: addEvent,
-        removeEvent: removeEvent,
-        invokeEvent: fire,
-        // custom events
-        addCustomEvent: addCustomEvent,
-        removeCustomEvent: removeCustomEvent,
-        invokeCustomEvent: invokeCustomEvent
-    };
-})();
+            log(el)
+        });
 
-// define exposer
-$.toString("event");
+        return Event;
+    })());
+
+
+    // $.event = (function() {
+    //     function addEvent(el, type, callback) {
+    //         el = prepareElementEvents(el, type, callback);
+    //         el.addEventListener(type, callback, false);
+    //     }
+
+    //     function removeEvent(el, type, callback) {
+    //         el = prepareElementEvents(el, type, callback);
+    //         el.removeEventListener(type, callback, false);
+    //         if (el.__events && el.__events[type]) {
+    //             delete el.__events[type][callback.i];
+    //         }
+    //     }
+
+    //     function once(el, type, callback) {
+    //         var _callback;
+    //         addEvent(el, type, _callback = function(){
+    //             removeEvent(el, type, _callback);
+    //             return callback.apply(el, arguments);
+    //         });
+    //     }
+
+    //     function fire(el, type) {
+    //         // default events like form.submit() etc.
+    //         if (typeof el[type] == 'function') {
+    //             return el[type].call(el);
+    //         }
+
+    //         var e;
+    //         // custom?
+    //         if (e = el[cek(type)]) {
+    //             return invokeCustomEvent(el, type, e);
+    //         }
+
+    //         if (document.createEventObject) {
+    //             e = document.createEventObject();
+    //             e.type = type;
+    //             return el.fireEvent('on'+ e.type, e);
+    //         } else {
+    //             e = document.createEvent('Event');
+    //             e.initEvent(type, true, true);
+    //             return !el.dispatchEvent(e);
+    //         }
+    //     }
+
+    //     function addCustomEvent(el, type, fn) {
+    //         var key = cek(type), e;
+    //         if (document.createEventObject) {
+    //             // create for ie
+    //             e = document.createEventObject();
+    //             e.type = type;
+    //             if (!el[key]) {
+    //                 addEvent(el, type, fn);
+    //             }
+    //         } else {
+    //             // create for firefox & others
+    //             e = document.createEvent('Event');
+    //             e.initEvent(type, true, true); // type, bubbling, cancelable
+    //             if (!el[key]) {
+    //                 addEvent(el, type, fn);
+    //             }
+    //         }
+    //         el[key] = e;
+    //     }
+
+    //     function removeCustomEvent(el, type) {
+    //         el[cek(type)] = -1;
+    //     }
+
+    //     function invokeCustomEvent(el, type, e /*internal*/) {
+    //         e = e || el[cek(type)];
+    //         if (e && e !== -1) {
+    //             return el.fireEvent
+    //                 // dispatch for ie
+    //                 ? el.fireEvent('on'+ type, e)
+    //                 // dispatch for firefox & others
+    //                 : !el.dispatchEvent(e);
+    //         }
+    //     }
+
+    //     return {
+    //         on: addEvent,
+    //         off: removeEvent,
+    //         once: once,
+    //         fire: fire,
+    //         // regular events
+    //         addEvent: addEvent,
+    //         removeEvent: removeEvent,
+    //         invokeEvent: fire,
+    //         // custom events
+    //         addCustomEvent: addCustomEvent,
+    //         removeCustomEvent: removeCustomEvent,
+    //         invokeCustomEvent: invokeCustomEvent
+    //     };
+    // })();
 
 })(so);
