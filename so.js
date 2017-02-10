@@ -47,7 +47,7 @@
      * @private
      */
     function valueOf(input) {
-        return (input && input.valueOf) ? input.valueOf() : input;
+        return (input != NULL && input.valueOf) ? input.valueOf() : input;
     }
 
     /**
@@ -67,7 +67,7 @@
      * @private
      */
     function toString(input) {
-        return valueOf(input).toString();
+        return (input != NULL && input.toString) ? input.toString() : (''+ input);
     }
 
     /**
@@ -77,7 +77,7 @@
      * @private
      */
     function extend() {
-        var i = 1, key, args = arguments, source, target = args[0] || {};
+        var i = 1, key, value, args = arguments, source, target = args[0] || {};
 
         while (source = args[i++]) {
             for (key in source) {
@@ -99,21 +99,18 @@
      * @private
      */
     function forEach(input, fn, opt__this) {
-        var _this = opt__this || input, len = input && input.length, i, key;
+        var _this = opt__this || input, len = input && input.length, i = 0, key;
 
-        // array: value => i
         if (len != NULL) {
-            for (i = 0; i < len; i++) {
-                if (fn.call(_this, input[i], i, input) === 0) {
+            for (; i < len; i++) {
+                if (fn.call(_this, input[i], i, i) === 0) {
                     break;
                 }
             }
-        }
-        // object: key => value
-        else {
+        } else {
             for (key in input) {
                 if (input.hasOwnProperty(key)) {
-                    if (fn.call(_this, key, input[key], input) === 0) {
+                    if (fn.call(_this, input[key], key, i++) === 0) {
                         break;
                     }
                 }
@@ -122,76 +119,6 @@
 
         return _this;
     }
-
-    /**
-     * So class.
-     * @param  {Function} subClass
-     * @return {Object}
-     */
-    $.class = function(subClass) { return {
-        /**
-         * Create.
-         * @param  {String} name
-         * @param  {Object} prototype
-         * @usage  $.class.create('Foo', {...})
-         * @usage  $.class.create('Foo', {init: function() {...}, ...})
-         * @return {Function}
-         */
-        create: function(name, prototype) {
-            var createConstructor = function(content) {
-                return eval('(function(){'+ content +'})()');
-            };
-
-            // create a named constructor
-            var Constructor = createConstructor(
-                'var Constructor = function '+ name +'() {' +
-                '  if (this.init) {' +
-                '    this.init.apply(this, arguments);' +
-                '  }' +
-                '};' +
-                'return Constructor;'
-            );
-
-            // add constructor prototype and constructor constructor
-            Constructor[NAME_PROTOTYPE] = Object.create(prototype, {
-                constructor: {value: createConstructor(
-                    'var Constructor = function '+ name +'(){}; ' +
-                    'Constructor[NAME_PROTOTYPE] = prototype;' +
-                    'Constructor[NAME_PROTOTYPE].constructor = Constructor;' +
-                    'return Constructor;'
-                )}
-            });
-
-            return Constructor;
-        },
-
-        /**
-         * Extends.
-         * @param  {Function} supClass
-         * @param  {Object}   prototype
-         * @usage  $.class(Foo).extends(FooBase)
-         * @usage  $.class(Foo).extends(FooBase, {...})
-         * @return {Function}
-         */
-        extends: function(supClass, prototype) {
-            if (supClass) {
-                subClass[NAME_PROTOTYPE] = Object.create(supClass[NAME_PROTOTYPE], {
-                    constructor: {value: subClass},
-                          super: {value: supClass}
-                });
-            }
-
-            // add subClass prototype if provided
-            prototype && forEach(prototype, function(name, value) {
-                subClass[NAME_PROTOTYPE][name] = value;
-            });
-
-            return subClass;
-        }
-    }};
-
-    // add shortcut for create without ()'s.
-    $.class.create = $.class().create;
 
     /**
      * so: type functions.
@@ -265,8 +192,10 @@
 
         /** Is iterable.     @param {Any} input @return {Bool} */
         isIterable: function(input) {
-            return $.isArray(input) || $.isObject(input)
-                || (input && input.length && !input[NAME_NODE_TYPE]); // dom, nodelist, string etc.
+            return $.isArray(input) || $.isObject(input) || (input &&
+                    (input.length && !input[NAME_NODE_TYPE]) // dom, nodelist, string etc.
+                 || (input.constructor && input.constructor.name == 'List') // list
+            );
         },
 
         /** Is primitive.    @param {Any} input @return {Bool} */
@@ -295,175 +224,6 @@
         /** Is node element. @param {Any} input @return {Bool} */
         isNodeElement: function(input) {
             return toBool(input && input[NAME_NODE_TYPE] === NODE_TYPE_ELEMENT);
-        }
-    });
-
-    /**
-     * To array.
-     * @param  {Any} input
-     * @return {Array}
-     */
-    function toArray(input) {
-        var ret = [], inputType = $.typeOf(input);
-
-        if (inputType == 'array') {
-            return input;
-        }
-
-        if (!input || inputType == 'string' || inputType == 'window'
-            || input[NAME_NODE_TYPE] || $.isVoid(input.length)) {
-            ret = [input];
-        } else {
-            ret = fn_slice.call(input);
-        }
-
-        return ret;
-    }
-
-    /**
-     * Object extends.
-     */
-    extend(Object[NAME_PROTOTYPE], {
-        /**
-         * To source.
-         * @return {Any}
-         */
-        toSource: function() {
-            return valueOf(this);
-        },
-
-        /**
-         * For each.
-         * @param  {Function} fn
-         * @return {Object}
-         */
-        forEach: function(fn) {
-            return $.forEach(this, fn);
-        },
-
-        /**
-         * Values.
-         * @return {Array}
-         * @throws
-         */
-        values: function() {
-            var _this = this, ctor = _this.constructor, ret = [], key;
-
-            if (ctor != Object) {
-                throw ('Core values() is only for Object\'s.');
-            }
-
-            for (key in _this) {
-                if (_this.hasOwnProperty(key)) {
-                    ret.push(_this[key]);
-                }
-            }
-
-            return ret;
-        },
-
-        /**
-         * Pick.
-         * @param  {String} key
-         * @param  {Any}    opt_valueDefault
-         * @return {Any|undefined}
-         * @throws
-         */
-        pick: function(key, opt_valueDefault) {
-            var _this = this, ctor = _this.constructor, value = opt_valueDefault;
-
-            if (ctor != Object && ctor != Array) {
-                throw ('Core pick() is only for Object\'s and Array\'s.');
-            }
-
-            if (key in _this) {
-                value = _this[key], delete _this[key];
-            }
-
-            return value;
-        },
-
-        /**
-         * Copy.
-         * @param  {Array} opt_excludeKeys @optional
-         * @return {Object|Array}
-         */
-        copy: function(opt_excludeKeys) {
-            var _this = this, ctor = _this.constructor, ret, keys = opt_excludeKeys || [];
-
-            if (ctor == Object) {
-                ret = {}, forEach(_this, function(key, value) {
-                    if (keys.indexOf(key) < 0) ret[key] = value;
-                });
-            } else if (ctor == Array) {
-                ret = [], forEach(_this, function(value, key) {
-                    if (keys.indexOf(key) < 0) ret[key] = value;
-                });
-            } else {
-                throw ('Core copy() is only for Object\'s and Array\'s.');
-            }
-
-            return ret;
-        }
-    });
-
-    /**
-     * Array extends.
-     */
-    extend(Array, {
-        /**
-         * Make.
-         * @param  {Object} ...arguments
-         * @return {Array}
-         */
-        make: function() {
-            var ret = [], args = arguments, argsLen = args.length, i = 0;
-
-            while (i < argsLen) {
-                ret = ret.concat(toArray(args[i++]));
-            }
-
-            return ret;
-        }
-    });
-    extend(Array[NAME_PROTOTYPE], {
-        /**
-         * Reduce.
-         * @param  {Any}      inValue
-         * @param  {Function} fn
-         * @return {Any}
-         * @override For inValue position.
-         */
-        reduce: function(inValue, fn) {
-            this.forEach(function(value, key) {
-                inValue = fn(value, key, inValue);
-            });
-
-            return inValue;
-        },
-
-        /**
-         * Filter.
-         * @param  {Function} fn
-         * @return {Array}
-         * @override For default fn.
-         */
-        filter: function(fn) {
-            fn = fn || function(value) { return !!value; }
-
-            return this.reduce([], function(value, key, inValue) {
-                return fn(value, key) ? inValue.concat(value) : inValue;
-            });
-        },
-
-        /**
-         * Uniq.
-         * @return {Array}
-         */
-        uniq: function() {
-            return this.reduce([], function(value, key, inValue) {
-                return inValue.indexOf(value) < 0 ? inValue.concat(value) : inValue;
-            });
         }
     });
 
@@ -676,6 +436,46 @@
     ;
 
     /**
+     * Array.
+     * @param  {Any} input
+     * @return {Array}
+     */
+    function fn_array(input) {
+        var ret = [], inputType = $.typeOf(input);
+
+        if (inputType == 'array') {
+            return input;
+        }
+
+        if (!input || inputType == 'string' || inputType == 'window'
+            || input[NAME_NODE_TYPE] || $.isVoid(input.length)) {
+            ret = [input];
+        } else {
+            ret = fn_slice.call(input);
+        }
+
+        return ret;
+    }
+
+    /**
+     * Pick.
+     * @param  {Array|Object} input
+     * @param  {String}       key
+     * @param  {Any}          opt_defaultValue
+     * @return {Any|undefined}
+     * @throws
+     */
+    function fn_pick(input, key, opt_defaultValue) {
+        var value = opt_defaultValue;
+
+        if (key in input) {
+            value = input[key]; delete input[key];
+        }
+
+        return value;
+    }
+
+    /**
      * so: base functions.
      */
     extend($, {
@@ -794,7 +594,7 @@
          * @return {Any}
          */
         dig: function(input, key) {
-            if ($.isObject(input)) {
+            if ($.isArray(input) || $.isObject(input)) {
                 var keys = toString(key).split('.'), key = keys.shift();
 
                 if (!keys.length) {
@@ -870,35 +670,112 @@
         },
 
         /**
+         * Copy.
+         * @param  {Array|Object} input
+         * @param  {Array}        opt_keysExclude @optional
+         * @return {Array|Object}
+         */
+        copy: function(input, opt_keysExclude) {
+            var ret = $.isArray(input) ? [] : {}, keys = opt_keysExclude || [];
+
+            forEach(input, function(value, key) {
+                if (keys.indexOf(key) < 0) {
+                    ret[key] = value;
+                }
+            });
+
+            return ret;
+        },
+
+        /**
          * Extend.
          * @param  {Any} target
          * @param  {Any} source
          * @usage  $.extend(target, source)
-         * @usage  $.extend('@', {x: ...}), $.extend('@x', ...), $.extend('@x.foo', ...) @self
+         * @usage  $.extend('@x', ...), $.extend('@', {x: ...}) @self
          * @return {Any}
          */
         extend: function(target, source) {
             // self extend
             if ($.isString(target) && target.charAt(0) == '@') {
-                var tmp = target.split('.'), property = tmp[0].slice(1), propertyProperty = tmp[1];
+                var targetName = target.slice(1), tmpSource;
 
-                // ('@', {x: ...})
-                if (!property) {
-                    return $.extend($, source);
+                // $.extend('@x', ...)
+                if (targetName) {
+                    target = $;
+                    if ($[targetName]) {
+                        target = $[targetName][NAME_PROTOTYPE] || $[targetName];
+                    } else {
+                        tmpSource = {};
+                        tmpSource[targetName] = source;
+                        source = tmpSource;
+                    }
+                    return extend(target, source);
                 }
 
-                target = $[property] || {};
-                if (!propertyProperty) {
-                    target[property] = source;
-                } else {
-                    (target[NAME_PROTOTYPE] || target)[propertyProperty] = source;
-                }
-
-                return extend($, target);
+                // $.extend('@', {x: ...})
+                return extend($, source);
             }
 
             // any extend
             return extend.apply(NULL, [target, source].concat(fn_slice.call(arguments, 2)));
+        },
+
+        /**
+         * Array.
+         * @param  {Object} ...arguments
+         * @return {Array}
+         */
+        array: function() {
+            var ret = [], args = arguments, argsLen = args.length, i = 0;
+
+            while (i < argsLen) {
+                ret = ret.concat(fn_array(args[i++]));
+            }
+
+            return ret;
+        },
+
+        /**
+         * List
+         * @param  {Array|Object} data
+         * @param  {Object}       options
+         * @return {List}
+         */
+        list: function(data, options) {
+            return new List(data, options);
+        },
+
+        /**
+         * Alist.
+         * @param  {Array}  data
+         * @param  {Object} options
+         * @return {ListArray}
+         */
+        alist: function(data, options) {
+            return new ListArray(data, options);
+        },
+
+        /**
+         * Olist.
+         * @param  {Object} data
+         * @param  {Object} options
+         * @return {ListObject}
+         */
+        olist: function(data, options) {
+            return new ListObject(data, options);
+        },
+
+        /**
+         * Array pick.
+         * @param  {Array|Object} input
+         * @param  {String}       key
+         * @param  {Any}          opt_defaultValue
+         * @return {Any|undefined}
+         * @throws
+         */
+        pick: function(input, key, opt_defaultValue) {
+            return fn_pick(input, key, opt_defaultValue);
         },
 
         toString: function(name, opt_object) {
@@ -938,6 +815,593 @@
         }
     });
 
+    /**
+     * So class.
+     * @param  {Function} subClass For $.class.extends()
+     * @return {Object}
+     */
+    $.class = function(subClass) { return {
+        /**
+         * Create.
+         * @param  {String} name
+         * @param  {Object} prototype
+         * @usage  $.class.create('Foo', {...})
+         * @usage  $.class.create('Foo', {init: function() {...}, ...})
+         * @return {Function}
+         */
+        create: function(name, prototype) {
+            // create constructor
+            function createConstructor(contents) {
+                return window.eval('(function(){'+ contents +'})()'); // direct eval breaks compress tool
+            }
+
+            // create a named constructor
+            var Constructor = createConstructor(
+                'var Constructor = function '+ name +'() {' +
+                ' if (this.init) {' +
+                '   this.init.apply(this, arguments);' +
+                ' }' +
+                '};' +
+                'return Constructor;'
+            );
+
+            // add constructor prototype and constructor constructor
+            if (prototype) {
+                Constructor[NAME_PROTOTYPE] = Object.create(prototype, {
+                    constructor: {value: createConstructor(
+                        'var Constructor = function '+ name +'(){};' +
+                        'Constructor.prototype = prototype;' +
+                        'Constructor.prototype.constructor = Constructor;' +
+                        'return Constructor;'
+                    )}
+                });
+            }
+
+            return Constructor;
+        },
+
+        /**
+         * Extend.
+         * @param  {Function} targetClass
+         * @param  {Object}   prototype
+         * @return {Function}
+         */
+        extend: function(targetClass, prototype) {
+            forEach(prototype, function(value, name) {
+                targetClass[NAME_PROTOTYPE][name] = value;
+            });
+
+            return targetClass
+        },
+
+        /**
+         * Extends.
+         * @param  {Function} supClass
+         * @param  {Function} subClass  From $.class(subClass)
+         * @usage  $.class(Foo).extends(FooBase)
+         * @return {Function}
+         */
+        extends: function(supClass) {
+            // subClass[NAME_PROTOTYPE] = Object.create(supClass[NAME_PROTOTYPE], {
+            //     constructor: {value: subClass},
+            //           super: {value: supClass}
+            // });
+
+            var prototype = extend({
+                constructor: subClass,
+                      super: supClass
+              }, supClass[NAME_PROTOTYPE], subClass[NAME_PROTOTYPE]);
+
+            forEach(prototype, function(value, name) {
+                subClass[NAME_PROTOTYPE][name] = value;
+            });
+
+            return subClass;
+        }
+    }};
+
+    // add shortcuts for without ()'s.
+    $.class.create = $.class().create;
+    $.class.extend = $.class().extend;
+
+    // list types
+    var TYPE_LIST_ARRAY = 'ListArray',
+        TYPE_LIST_OBJECT = 'ListObject';
+
+    /**
+     * List.
+     * @param {Array|Object|undefined} data
+     * @param {Object|undefined}       options @optional
+     * @private
+     */
+    function List(data, options) {
+        var _this = this;
+        _this.options = extend({type: undefined, weak: TRUE /* @todo */}, options);
+
+        if (data == NULL) {
+            if (_this.options.type  == TYPE_LIST_ARRAY) {
+                data = [];
+            } else if (_this.options.type == TYPE_LIST_OBJECT) {
+                data = {};
+            }
+        }
+
+        _this.setData(data);
+    }
+
+    extend(List[NAME_PROTOTYPE], {
+        /**
+         * Set data.
+         * @param {Array|Object} data
+         */
+        setData: function(data) {
+            var _this = this;
+
+            if ($.isArray(data)) {
+                _this.type = TYPE_LIST_ARRAY;
+            } else if ($.isObject(data)) {
+                _this.type = TYPE_LIST_OBJECT;
+            } else {
+                throw ('Only Array\'s or Object\'s accepted for List.');
+            }
+
+            _this.data = $.copy(data);
+            _this.dataSize = 0;
+            // update size
+            forEach(data, function() { _this.dataSize++; });
+
+            return _this;
+        },
+
+        /**
+         * Get data.
+         * @return {Array|Object}
+         */
+        getData: function() {
+            return this.data;
+        },
+
+        /**
+         * Size.
+         * @return {Int}
+         */
+        size: function() {
+            return this.dataSize;
+        },
+
+        /**
+         * Set.
+         * @param {Int|String} key
+         * @param {Any} value
+         */
+        set: function(key, value) {
+            var _this = this;
+
+            _this.data[((key != NULL) ? key : _this.dataSize++)] = value;
+
+            return _this;
+        },
+
+        /**
+         * Get.
+         * @param  {Int|String} key
+         * @param  {Any}        opt_defaultValue @optional
+         * @return {Any}
+         */
+        get: function(key, opt_defaultValue) {
+            var _this = this;
+
+            return _this.hasKey(key) ? _this.data[key] : opt_defaultValue;
+        },
+
+        /**
+         * Remove.
+         * @param  {Int|String} key
+         * @return {this}
+         */
+        remove: function(key) {
+            var _this = this;
+
+            delete _this.data[key];
+
+            if (_this.isListArray()) {
+                _this.data.sort(); // fix keys
+            }
+
+            return _this;
+        },
+
+        /**
+         * Empty.
+         * @return {this}
+         */
+        empty: function() {
+            var _this = this;
+
+            _this.data = _this.isListArray() ? [] : {};
+            _this.dataSize = 0;
+
+            return _this;
+        },
+
+        /**
+         * Keys.
+         * @return {Array}
+         */
+        keys: function() {
+            return this.reduce([], function(_, key, __, ret) {
+                return ret.concat(key);
+            });
+        },
+
+        /**
+         * Values.
+         * @return {Array}
+         */
+        values: function() {
+            return this.reduce([], function(value, _, __, ret) {
+                return ret.concat(value);
+            });
+        },
+
+        /**
+         * Has.
+         * @param  {Any}      searchValue
+         * @param  {Boolean}  strict @default=true
+         * @return {Boolean}
+         */
+        has: function(searchValue, strict) {
+            var ret = FALSE;
+
+            forEach(this.data, function(value) {
+                if (strict !== FALSE ? value === searchValue : value == searchValue) {
+                    ret = TRUE; return 0; // break
+                }
+            });
+
+            return ret;
+        },
+
+        /**
+         * Has key.
+         * @param  {Int|String} key
+         * @return {Boolean}
+         */
+        hasKey: function(key) {
+            return (key in this.data);
+        },
+
+        /**
+         * Index.
+         * @param  {Int|String} searchKey
+         * @return {Int}
+         */
+        index: function(searchKey) {
+            if (this.isListArray()) {
+                return searchKey;
+            }
+
+            var ret = -1;
+            forEach(this.data, function(_, key, i) {
+                if (key === searchKey) {
+                    ret = i; return 0; // break
+                }
+            });
+
+            return ret;
+        },
+
+        /**
+         * Append.
+         * @param  {Any}    value
+         * @param  {String} opt_key @optional For objects.
+         * @return {this}
+         */
+        append: function(value, opt_key) {
+            return this.set(opt_key, value);
+        },
+
+        /**
+         * Prepend.
+         * @param  {Any}    value
+         * @param  {String} opt_key @optional For objects.
+         * @return {this}
+         */
+        prepend: function(value, opt_key) {
+            return this.set((this.isListArray() ? NULL : opt_key), value);
+        },
+
+        /**
+         * Pop.
+         * @return {Any}
+         */
+        pop: function() {
+            var _this = this;
+
+            return _this.isListArray() ? _this.data.pop() : _this.pick(_this.keys().pop());
+        },
+
+        /**
+         * Top.
+         * @return {any}
+         */
+        top: function() {
+            var _this = this;
+
+            return _this.isListArray() ? _this.data.shift() : _this.pick(_this.keys().shift());
+        },
+
+        /**
+         * Find.
+         * @param  {Any}     searchValue
+         * @param  {Any}     opt_defaultValue
+         * @param  {Boolean} opt_returnIndex
+         * @return {Any}
+         */
+        find: function(searchValue, opt_defaultValue, opt_returnIndex) {
+            var _this = this, test = searchValue, ret = opt_defaultValue;
+
+            // make test function
+            if (!$.isFunction(searchValue)) {
+                test = function(value) { return value === searchValue; };
+            }
+
+            forEach(_this.data, function(value, _, i) {
+                if (test(value)) {
+                    ret = opt_returnIndex ? i : value; return 0; // break
+                }
+            });
+
+            return ret;
+        },
+
+        /**
+         * Find index.
+         * @param  {Any} searchValue
+         * @param  {Any} opt_defaultValue
+         * @return {Any}
+         */
+        findIndex: function(searchValue, opt_defaultValue) {
+            return this.find(searchValue, opt_defaultValue, TRUE)
+        },
+
+        /**
+         * Replace.
+         * @param  {Any} searchValue
+         * @param  {Any} replaceValue
+         * @return {this}
+         */
+        replace: function(searchValue, replaceValue) {
+            var _this = this;
+
+            forEach(_this.data, function(value, key) {
+                if (value === searchValue) {
+                    _this.data[key] = replaceValue;
+                }
+            });
+
+            return _this;
+        },
+
+        /**
+         * Pick.
+         * @param  {Any} key
+         * @param  {Any} opt_defaultValue
+         * @return {this}
+         */
+        pick: function(key, opt_defaultValue) {
+            var _this = this, ret = $.pick(_this.data, key, opt_defaultValue);
+
+            if (_this.isListArray()) {
+                _this.data.sort(); // fix keys
+            }
+
+            return ret;
+        },
+
+        /**
+         * Copy.
+         * @return {List}
+         */
+        copy: function() {
+            return new List(this.data);
+        },
+
+        /**
+         * For.
+         * @param  {Function} fn
+         * @return {this}
+         */
+        for: function(fn) {
+            return forEach(this.data, fn, this);
+        },
+
+        /**
+         * For each.
+         * @param  {Function} fn
+         * @return {this}
+         */
+        forEach: function(fn) {
+            var _this = this, i = 0, key;
+
+            for (key in _this.data) {
+                if (_this.data.hasOwnProperty(key)) {
+                    if (fn.call(_this, key, _this.data[key], i++) === 0) {
+                        break;
+                    }
+                }
+            }
+
+            return _this;
+        },
+
+        /**
+         * Map.
+         * @param  {Function} fn
+         * @return {this}
+         */
+        map: function(fn) {
+            var _this = this;
+
+            return _this.for(function(value, key, i) {
+                _this.data[key] = fn(value, key, i);
+            });
+        },
+
+        /**
+         * Reduce.
+         * @param  {Any}      inValue
+         * @param  {Function} fn
+         * @return {Any}
+         */
+        reduce: function(inValue, fn) {
+            this.for(function(value, key, i) {
+                inValue = fn(value, key, i, inValue);
+            });
+
+            return inValue;
+        },
+
+        /**
+         * Filter.
+         * @param  {Function} fn
+         * @return {this}
+         */
+        filter: function(fn) {
+            var _this = this;
+
+            // set default
+            fn = fn || function(value) { return !!value; };
+
+            _this.for(function(value, key, i) {
+                if (!fn(value, key, i)) {
+                    _this.remove(key);
+                }
+            });
+
+            return _this;
+        },
+
+        /**
+         * Uniq.
+         * @return {this}
+         */
+        uniq: function() {
+            var _this = this, list = new List();
+
+            _this.for(function(value, key) {
+                if (!list.has(value)) {
+                    list.set(key, value);
+                }
+            });
+
+            return _this.setData(list.data);
+        },
+
+        /**
+         * Revers.
+         * @return {this}
+         */
+        reverse: function() {
+            var _this = this, data, keys;
+
+            if (_this.isListArray()) {
+                data = _this.data.reverse();
+            } else {
+                data = {}, keys = _this.keys().reverse();
+                forEach(keys, function(key) {
+                    data[key] = _this.data[key];
+                });
+            }
+
+            return _this.setData(data);
+        },
+
+        /**
+         * First.
+         * @param  {Any} opt_defaultValue @optional
+         * @return {Any}
+         */
+        first: function(opt_defaultValue) {
+            this.for(function(value) {
+                opt_defaultValue = value; return 0; //break
+            });
+
+            return opt_defaultValue;
+        },
+
+        /**
+         * Last.
+         * @param  {Any} opt_defaultValue
+         * @return {Any}
+         */
+        last: function(opt_defaultValue) {
+            this.copy().reverse().for(function(value, key) {
+                opt_defaultValue = value; return 0; //break
+            });
+
+            return opt_defaultValue;
+        },
+
+        /**
+         * Is list array.
+         * @return {Boolean}
+         */
+        isListArray: function() { return this.type == TYPE_LIST_ARRAY; },
+
+        /**
+         * Is list object.
+         * @return {Boolean}
+         */
+        isListObject: function() { return this.type == TYPE_LIST_OBJECT; },
+
+        /**
+         * Is empty.
+         * @return {Boolean}
+         */
+        isEmpty: function() { return !this.dataSize; },
+
+        /**
+         * To string
+         * @return {String}
+         */
+        toString: function() { return JSON.stringify(this.data); }
+    });
+
+    /**
+     * List Array.
+     * @param {Array|Object|undefined} data
+     * @param {Object|undefined}       options @optional
+     * @throws
+     * @private
+     */
+    function ListArray(data, options) {
+        if (!$.isArray(data)) {
+            throw ('Only Array\'s accepted for ListArray.');
+        }
+
+        this.super(data, options);
+    }
+
+    /**
+     * List Object.
+     * @param {Array|Object|undefined} data
+     * @param {Object|undefined}       options @optional
+     * @throws
+     * @private
+     */
+    function ListObject(data, options) {
+        if (!$.isObject(data)) {
+            throw ('Only Object\'s accepted for ListObject.');
+        }
+
+        this.super(data, options);
+    }
+
+    // extend lists
+    $.class(ListArray).extends(List);
+    $.class(ListObject).extends(List);
+
     // onReady callbacks
     var callbacks = [];
 
@@ -971,5 +1435,10 @@
 
 })(window);
 
-// shortcut for 'console.log'.
+/**
+ * Shortcut for 'console.log'.
+ * @param  {Object} ...arguments
+ * @return {void}
+ * @public
+ */
 function log() { console.log.apply(console, arguments); }
