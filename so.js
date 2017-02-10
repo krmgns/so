@@ -732,20 +732,20 @@
          * Alist.
          * @param  {Array}  data
          * @param  {Object} options
-         * @return {ListArray}
+         * @return {ArrayList}
          */
         alist: function(data, options) {
-            return new ListArray(data, options);
+            return new ArrayList(data, options);
         },
 
         /**
          * Olist.
          * @param  {Object} data
          * @param  {Object} options
-         * @return {ListObject}
+         * @return {ObjectList}
          */
         olist: function(data, options) {
-            return new ListObject(data, options);
+            return new ObjectList(data, options);
         },
 
         /**
@@ -898,13 +898,14 @@
     $.class.extend = $.class().extend;
 
     // list types
-    var TYPE_LIST_ARRAY = 'ListArray',
-        TYPE_LIST_OBJECT = 'ListObject';
+    var TYPE_ARRAY_LIST = 'ArrayList',
+        TYPE_OBJECT_LIST = 'ObjectList';
 
     /**
      * List.
-     * @param {Array|Object|undefined} data
-     * @param {Object|undefined}       options @optional
+     * @param  {Array|Object|undefined} data
+     * @param  {Object|undefined}       options @optional
+     * @return {List}
      * @private
      */
     function List(data, options) {
@@ -912,9 +913,9 @@
         _this.options = extend({type: undefined, weak: TRUE /* @todo */}, options);
 
         if (data == NULL) {
-            if (_this.options.type  == TYPE_LIST_ARRAY) {
+            if (_this.options.type == TYPE_ARRAY_LIST) {
                 data = [];
-            } else if (_this.options.type == TYPE_LIST_OBJECT) {
+            } else if (_this.options.type == TYPE_OBJECT_LIST) {
                 data = {};
             }
         }
@@ -931,9 +932,9 @@
             var _this = this;
 
             if ($.isArray(data)) {
-                _this.type = TYPE_LIST_ARRAY;
+                _this.type = TYPE_ARRAY_LIST;
             } else if ($.isObject(data)) {
-                _this.type = TYPE_LIST_OBJECT;
+                _this.type = TYPE_OBJECT_LIST;
             } else {
                 throw ('Only Array\'s or Object\'s accepted for List.');
             }
@@ -970,7 +971,7 @@
         set: function(key, value) {
             var _this = this;
 
-            _this.data[((key != NULL) ? key : _this.dataSize++)] = value;
+            _this.data[(key != NULL ? key : _this.dataSize++)] = value;
 
             return _this;
         },
@@ -1025,7 +1026,7 @@
         empty: function() {
             var _this = this;
 
-            _this.data = _this.isListArray() ? [] : {};
+            _this.data = _this.isArrayList() ? [] : {};
             _this.dataSize = 0;
 
             return _this;
@@ -1084,7 +1085,7 @@
          * @return {Int}
          */
         index: function(searchKey) {
-            if (this.isListArray()) {
+            if (this.isArrayList()) {
                 return searchKey;
             }
 
@@ -1115,7 +1116,7 @@
          * @return {this}
          */
         prepend: function(value, opt_key) {
-            return this.set((this.isListArray() ? NULL : opt_key), value);
+            return this.set(this.isArrayList() ? NULL : opt_key, value);
         },
 
         /**
@@ -1125,7 +1126,7 @@
         pop: function() {
             var _this = this;
 
-            return _this.isListArray() ? _this.data.pop() : _this.pick(_this.keys().pop());
+            return _this.isArrayList() ? _this.data.pop() : _this.pick(_this.keys().pop());
         },
 
         /**
@@ -1135,7 +1136,7 @@
         top: function() {
             var _this = this;
 
-            return _this.isListArray() ? _this.data.shift() : _this.pick(_this.keys().shift());
+            return _this.isArrayList() ? _this.data.shift() : _this.pick(_this.keys().shift());
         },
 
         /**
@@ -1288,7 +1289,7 @@
         reverse: function() {
             var _this = this, data, keys;
 
-            if (_this.isListArray()) {
+            if (_this.isArrayList()) {
                 data = _this.data.reverse();
             } else {
                 data = {}, keys = _this.keys().reverse();
@@ -1327,22 +1328,22 @@
         },
 
         /**
+         * Is empty.
+         * @return {Boolean}
+         */
+        isEmpty: function() { return !this.dataSize; },
+
+        /**
          * Is list array.
          * @return {Boolean}
          */
-        isListArray: function() { return this.type == TYPE_LIST_ARRAY; },
+        isArrayList: function() { return this.type == TYPE_ARRAY_LIST; },
 
         /**
          * Is list object.
          * @return {Boolean}
          */
-        isListObject: function() { return this.type == TYPE_LIST_OBJECT; },
-
-        /**
-         * Is empty.
-         * @return {Boolean}
-         */
-        isEmpty: function() { return !this.dataSize; },
+        isObjectList: function() { return this.type == TYPE_OBJECT_LIST; },
 
         /**
          * To string
@@ -1358,9 +1359,11 @@
      * @throws
      * @private
      */
-    function ListArray(data, options) {
+    function ArrayList(data, options) {
+        data = data || [];
+
         if (!$.isArray(data)) {
-            throw ('Only Array\'s accepted for ListArray.');
+            throw ('Only Array\'s accepted for ArrayList.');
         }
 
         this.super(data, options);
@@ -1373,17 +1376,19 @@
      * @throws
      * @private
      */
-    function ListObject(data, options) {
+    function ObjectList(data, options) {
+        data = data || {};
+
         if (!$.isObject(data)) {
-            throw ('Only Object\'s accepted for ListObject.');
+            throw ('Only Object\'s accepted for ObjectList.');
         }
 
         this.super(data, options);
     }
 
     // extend lists
-    $.class(ListArray).extends(List);
-    $.class(ListObject).extends(List);
+    $.class(ArrayList).extends(List);
+    $.class(ObjectList).extends(List);
 
     // onReady callbacks
     var callbacks = [];
