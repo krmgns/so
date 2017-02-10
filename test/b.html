@@ -1,28 +1,53 @@
 <!-- <script src="so-all.php"></script> -->
 
 <script src="../so.js"></script>
-<script src="../so_ext.js"></script>
+<script src="../so_util.js"></script>
+<!-- <script src="../so_browser.js"></script> -->
+<!-- <script src="../so_array.js"></script> -->
+<!-- <script src="../so_object.js"></script> -->
 <script>
 so.onReady(function($) {
-    var x
+    var a, b, c,
+        // list = [1,2,3]
+        list = {a:1,b:2,c:3}
 
-    // x = $.extend({a:1}, {a:11, b:22})
-    // x = $.extend({}, {a:1}, {a:11, b:22})
+    a = $.olist(list)
+    log(a)
 
-    // x = $.extend('dom', {id: 11})
-    // x = $.extend({'dom': 11})
-    // x = $.extend('dom', 1)
+    // log(list.filter())
+    // log(list.filter((r, v) => {return r > 1}))
 
-    // x = $.extend('dom', function dom(id) {
+    // log(list.uniq())
+
+    // a = {"a":undefined,"b":Infinity,"c":3, d:"ddd"}
+    // // b = $.object.has(a, "dddd")
+    // b = $.object.filter(a)
+    // // b = $.object.filter(a, (k,v) => {
+    // //     return $.isIterable(v);
+    // // })
+    // log(a, b)
+
+
+    // a = ["a","2","b"]
+    // log($.array.find(a, (v) => { log(this) }))
+    // log($.array.findIndex(a, (v) => { return v > 111 }))
+
+    // a = $.extend({a:1}, {a:11, b:22})
+    // a = $.extend({}, {a:1}, {a:11, b:22})
+
+    // a = $.extend('@dom', {id: 11})
+    // a = $.extend({'dom': 11})
+
+    // a = $.extend('@dom', function dom(id) {
     //     this.id = id
     // })
-    // $.extend('dom.getId', function() {
+    // $.extend('@dom.getId', function() {
     //     return this.id
     // })
 
-    // x = new $.dom(+new Date)
-    // log(x)
-    // log("getId():", x.getId())
+    // a = new $.dom(+new Date)
+    // log(a)
+    // log("getId():", a.getId())
 
     // var names = ['Alice', 'Bob', 'Tiff', 'Bruce', 'Alice', 'Bob'];
 
@@ -42,14 +67,19 @@ so.onReady(function($) {
     //     this.id = id;
     //     this.name = name;
     // }
+    // FooBase.prototype.x = function() {return "xx"}
+
     // function Foo(id, name) {
     //     this.super(id, name);
     // }
+    // Foo.prototype.x = function() {return "x"}
+
     // $.class(Foo).extends(FooBase)
+
     // var foo = new Foo(123, 'the foo!')
     // log(foo)
     // log(foo.id)
-    // log(foo.name)
+    // log(foo.x())
 
     // var Foo = $.class.create('Foo', {
     //     id: null,
@@ -65,23 +95,4 @@ so.onReady(function($) {
     // if default props in {} prototype, goes to foo.__proto__.__proto__
     // log(foo.__proto__.__proto__)
 });
-</script>
-
-<script>
-// var x = '0';
-// console.log(x == '')
-// console.log(x == null)
-// console.log(x == undefined)
-// console.log(x == false)
-// console.log(!!x)
-// console.log(!!0)
-
-// var x, y = undefined;
-// console.log(typeof x === 'undefined')
-// console.log(x === y)
-// console.log(x === undefined)
-
-// console.log(typeof y === 'undefined')
-// console.log(y === x)
-// console.log(y === undefined)
 </script>
