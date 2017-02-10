@@ -832,7 +832,7 @@
         create: function(name, prototype) {
             // create constructor
             function createConstructor(contents) {
-                return window.eval('(function(){'+ contents +'})()'); // direct eval breaks compress tool
+                return window.eval('(function(){'+ contents +'})()'); // direct eval breaks minify tool
             }
 
             // create a named constructor
