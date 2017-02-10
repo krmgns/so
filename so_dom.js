@@ -64,7 +64,7 @@ function getTagName(node) {
 
 function getByTag(root, tag, i) {
     var els = root.getElementsByTagName(tag);
-    return (i === true) ? Array.make(els) : isNaN(i) ? els : els[i];
+    return (i === true) ? $.array(els) : isNaN(i) ? els : els[i];
 }
 
 function fixTable(table, doc) {
@@ -324,7 +324,7 @@ function createElement(content, doc) {
         frg = createFragment(content, doc);
     }
 
-    return _return(tag, Array.make(frg.childNodes), !!fix);
+    return _return(tag, $.array(frg.childNodes), !!fix);
 }
 
 function insert(fn, target, contents, reverse) {
@@ -584,7 +584,7 @@ Dom.prototype = {
 
         // notation: $.dom("p").not(0) or $.dom("p").not([0,1])
         if (type == "number" || type == "array") {
-            selector = Array.make(selector);
+            selector = $.array(selector);
             this.forEach(function(el, i){
                 if (!$.array.has(selector, i)) {
                     els.push(el);
@@ -596,7 +596,7 @@ Dom.prototype = {
         return this;
     },
     toArray: function() {
-        return Array.make(this);
+        return $.array(this);
     },
     forEach: function(fn) { // silinebilir?? Object.forEach eklendi cunku
         return $.forEach(this, fn);

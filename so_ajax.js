@@ -380,7 +380,7 @@ $.ajax = function(options, data, onDone, onSuccess, onFail) {
     // swap args
     if (typeof data == "function") {
         // keep arguments
-        var args = Array.make(arguments);
+        var args = $.array(arguments);
         // prevent re-calls
         data = onDone = onSuccess = onFail = null;
         onDone    = args[1];
