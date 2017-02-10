@@ -31,6 +31,7 @@
     /**
      * Shortcut for 'so'.
      * @type {Object}
+     * @private
      */
     var $ = {};
 
