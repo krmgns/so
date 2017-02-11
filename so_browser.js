@@ -1,4 +1,4 @@
-;(function($) { 'use strict';
+;(function(window, $) { 'use strict';
 
     /**
      * @package so
@@ -8,7 +8,7 @@
      * @license The MIT License <https://opensource.org/licenses/MIT>
      */
     $.extend('@browser', (function() {
-        var window = $.window(), nav = window.navigator, re, name, test,
+        var nav = window.navigator, re, name, test,
             ua = nav.userAgent.toLowerCase(), uap = nav.platform.toLowerCase(),
             re_src = /(chrome|safari|firefox|opera|msie|trident(?=\/))\/?\s*([\d.]+)/,
             fns_os = ['isMac', 'isWindows', 'isLinux', 'isUnix'],
@@ -91,4 +91,4 @@
         return browser;
     })());
 
-})(so);
+})(window, so);
