@@ -108,10 +108,6 @@
             // }
         });
 
-        function isEvent(input) {
-            return input instanceof Event;
-        }
-
         function create(type, callback, options) {
             return new Event(type, callback, options);
         }
