@@ -1,86 +1,180 @@
-;(function($) { 'use strict';
-
-    var i = 0;
-
-    // custom event key
-    // function cek(type) {
-    //     return 'so.cek.'+ type;
-    // }
-
-    // function prepareElementEvents(el, callback) {
-    //     el.__events = el.__events || {};
-    //     el.__events[type] = el.__events[type] || [];
-    //     if (callback) {
-    //         el.__events[type][(callback.i = callback.i || i++)] = callback;
-    //         el.__events[type].push(callback); ?
-    //     }
-    //     return el;
-    // }
+;(function(window, $) { 'use strict';
 
     $.extend('@event', (function() {
-        var id = 0, defaultOptions = {useCapture: false};
+        var id = 0,
+            optionsDefault = {once: false, useCapture: false},
+            optionsDefaultEvent = {bubbles: true, cancelable: true, scoped: false, composed: false,
+                detail: null};
 
-        function Event(type, callback, options) {
-            this.type = type;
+        function setEventOf(el, name, event) {
+            if (el) {
+                el._events = el._events || {};
+                el._events[name] = el._events[name] || [];
+                if (event == null) {
+                    // el._events[name] = null;
+                }
+                el._events[name].push(event);
+            }
+        }
+        function getEventOf(el, name) {
+            var event;
+            if (el && el._events && el._events[name]) {
+                $.forEach(el._events[name], function(value) {
+                    if (value && value.name == name) {
+                        event = value;
+                        return 0; // break
+                    }
+                })
+            }
+            return event;
+        }
+        function delEventOf(el, name, event, callback) {
+            if (el && el._events && el._events[name]) {
+                $.forEach(el._events[name], function(value, key) {
+                    if (value.name == name /* && value.callback == callback */) {
+                        el._events[name][key] = null;
+                        return 0; // break
+                    }
+                })
+            }
+        }
+
+        // $.class.create ...
+        function Event(name, callback, options, isCustom) {
+            options = $.extend({}, optionsDefault, optionsDefaultEvent, options);
+            this.name = name.toLowerCase();
             this.callback = callback;
-            this.options = $.extend({}, defaultOptions, options);
-            // return this;
+            this.options = options;
+            try {
+                this.event = new window.Event(name, options);
+            } catch (e) {
+                this.event = window.document.createEvent('Event');
+                this.event.initEvent(name, options.bubbles, options.cancelable);
+            }
+            // this.isCustom = !!isCustom;
+            // if (this.isCustom) {
+            //     // create custom event.. ?
+            // }
         }
 
         $.extend(Event.prototype, {
-            add: function(el) {
-                el.addEventListener(this.type, this.callback, this.options.useCapture);
+            add: function(el, once) {
+                // el._events.append(...) or push(...)
+                setEventOf(el, this.name, this);
+                el.addEventListener(this.name, this.callback, this.options.useCapture);
                 return this;
             },
             remove: function(el) {
-                el.removeEventListener(this.type, this.callback, this.options.useCapture);
+                // el._events.remove(...)
+                el.removeEventListener(this.name, this.callback, this.options.useCapture);
                 return this;
-            },
+            }
         });
 
-        function addEvent(el, type, callback, options) {
-            new Event(type, callback, options).add(el);
+        // $.extend(Event, {add: ...})
+        function addEvent(el, name, callback, options) {
+            return new Event(name, callback, options).add(el);
         }
-        function removeEvent(el, type, callback, options) {
-            new Event(type, callback, options).remove(el);
+        function removeEvent(el, name, callback, options) {
+            $.forEach(el._events, function(events, name) {
+                $.forEach(events, function(event, i) {
+                    if (event.callback == callback) {
+                        el._events[name][i] = null;
+                    }
+                });
+            });
+            return new Event(name, callback, options).remove(el);
         }
 
-        function addEventOnce(el, type, callback, options) {
-            var event = new Event(type, function(e) {
-                event.remove(el);
-                callback.call(el, e);
-            }).add(el);
-        }
+        function fire(el, name) { // names.split(/,\s+/) multiple event call için, add remove için de olucak
+            // default events like form.submit() etc.
+            if ($.isFunction(el[name])) {
+                return el[name].call(el);
+            }
 
-        // function addCustomEvent(el, type, callback, options) {}
-        // function removeCustomEvent(el, type, callback, options) {}
+            var event = getEventOf(el, name);
+            if (event) {
+                el.dispatchEvent(event.event);
+                if (event.options.once) {
+                    removeEvent(el, name, event.callback)
+                }
+                return true;
+            }
 
-        // function fire(el, type) {
-        //     if (custom...) {
-        //     }
+            return false;
         }
 
         // test
         $.onReady(function() {
             var el = document.body, event;
 
+            addEvent(el, "click1", function() {
+                log("click1:", $.now())
+            }, {once: true});
+            addEvent(el, "click1", function() {
+                log("click2:", $.now())
+            }, {once: false});
+
+            addEvent(el, "dblclick", function() {
+                fire(el, "click1")
+                fire(el, "click2")
+            })
+
+            // var click1, click2
+            // addEvent(el, "click", click1 = function() {
+            //     log("click1")
+            // }, {once: true});
+            // addEvent(el, "click", click2 = function() {
+            //     log("click2")
+            // }, {once: false});
+
+            // $.forEach(el._events, function(value, key) {
+            //     $.forEach(value, function(event) {
+            //         log(event.callback == click1)
+            //     })
+            // })
+
+            // var name = 'foo';
+            // addEvent(el, name, log, {once: true})
+            // log(el)
+
+            // addEvent(el, 'click', function() {
+            //     fire(el, name)
+            // })
+
             // event = new Event('click', function(e) {
-            //     event.remove(el);
+            //     // event.remove(el);
             //     log(e)
+            //     log(event)
+            //     log(this)
             // }).add(el);
 
-            addEventOnce(el, 'click', function(e) {
-                log("log..")
-                log(this)
-                log(e)
-            });
+            // event = new Event('foo', function(e) {
+            //     log(e)
+            // });
 
-            log(el)
+            // event = createEvent('foo')
+            // log(event)
+            // log(el)
+
+            // var event = new window.Event('click');
+            // // Dispatch the event.
+            // el.dispatchEvent(event);
+            // // Listen for the event.
+            // el.addEventListener('click', function (e) { log(e) }, false);
         });
 
         return Event;
     })());
 
+
+        // function addEventOnce(el, name, callback, options) {
+        //     var event = new Event(name, function(e) {
+        //         event.remove(el);
+        //         callback.call(el, e);
+        //     }).add(el);
+        //     return event;
+        // }
 
     // $.event = (function() {
     //     function addEvent(el, type, callback) {
@@ -178,4 +272,4 @@
     //     };
     // })();
 
-})(so);
+})(window, window.so);
