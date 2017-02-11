@@ -1276,9 +1276,11 @@ $.extend(Dom.prototype, {
         return (el = el || this[0]) && fn_isNodeElement(el) && !fn_isNodeElement(el.parentNode);
     },
     getWindow: function(el){
+        // iframes?
         return initDom($.window(el || this[0]));
     },
     getDocument: function(el){
+        // iframes?
         return initDom($.document(el || this[0]));
     }
 });
