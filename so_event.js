@@ -1,56 +1,94 @@
 ;(function(window, $) { 'use strict';
 
+    var TRUE = true, FALSE = false, NULL = null,
+        optionsDefault = {bubbles: FALSE, cancelable: FALSE, detail: NULL};
+
+    function createEvent(type, options) {
+        try {
+            return new Event(type, options);
+        } catch (e) {
+            var event;
+            event = document.createEvent('Event');
+            event.initEvent(type, options.bubbles, options.cancelable);
+            return event;
+        }
+    }
+
+    function createCustomEvent(type, options) {
+        try {
+            return new CustomEvent(type, options);
+        } catch (e) {
+            var event = document.createEvent('CustomEvent');
+            event.initCustomEvent(type, options.bubbles, options.cancelable, options.detail);
+            return event;
+        }
+    }
+
     $.extend('@event', (function() {
         var id = 0,
-            optionsDefault = {once: false, useCapture: false},
+            optionsDefault = {once: false, useCapture: false, data: {}, id: null},
             optionsDefaultEvent = {bubbles: true, cancelable: true, scoped: false, composed: false,
                 detail: null};
 
-        function setEventOf(el, name, event) {
+        function splitTypes(types) {
+            return types.split(/,\s*/);
+        }
+
+        function setEventOf(el, type, event) {
             if (el) {
                 el._events = el._events || {};
-                el._events[name] = el._events[name] || [];
-                if (event == null) {
-                    // el._events[name] = null;
+                el._events[type] = el._events[type] || [];
+                el._events[type].push(event);
+            }
+        }
+        function getEventOf(el, type) {
+            var ret;
+            if (el && el._events && el._events[type]) {
+                $.forEach(el._events[type], function(event) {
+                    if (event && event.type == type) {
+                        ret = event;
+                        return 0; // break
+                    }
+                })
+            }
+            return ret;
+        }
+        function removeEventOf(el, type, callback) {
+            if (el && el._events) {
+                if (type == '*') {
+                    el._events = {};
+                } else if (type == '**') {
+                    // sonra burdan ..
+                } else if (el._events[type]) {
+                    $.forEach(el._events[type], function(event, i) {
+                        if (event && event.callback == callback) {
+                            el._events[type][i] = null;
+                        }
+                    });
                 }
-                el._events[name].push(event);
-            }
-        }
-        function getEventOf(el, name) {
-            var event;
-            if (el && el._events && el._events[name]) {
-                $.forEach(el._events[name], function(value) {
-                    if (value && value.name == name) {
-                        event = value;
-                        return 0; // break
-                    }
-                })
-            }
-            return event;
-        }
-        function delEventOf(el, name, event, callback) {
-            if (el && el._events && el._events[name]) {
-                $.forEach(el._events[name], function(value, key) {
-                    if (value.name == name /* && value.callback == callback */) {
-                        el._events[name][key] = null;
-                        return 0; // break
-                    }
-                })
             }
         }
 
+        // shortcut methods for event
+        function createCallback(callback) {
+            return function(e) {
+                e.stop = function() { e.preventDefault(); e.stopPropagation(); };
+                e.stopDefault = function() { e.preventDefault(); }
+                return callback.call(e.target, e);
+            };
+        }
+
         // $.class.create ...
-        function Event(name, callback, options, isCustom) {
+        function Event(type, callback, options, isCustom) {
             options = $.extend({}, optionsDefault, optionsDefaultEvent, options);
-            this.name = name.toLowerCase();
-            this.callback = callback;
+            this.type = type.toLowerCase();
+            this.callback = createCallback(callback);
             this.options = options;
-            try {
-                this.event = new window.Event(name, options);
-            } catch (e) {
-                this.event = window.document.createEvent('Event');
-                this.event.initEvent(name, options.bubbles, options.cancelable);
-            }
+            this.event = createEvent(this.type, options);
+
+            this.isFired = FALSE;
+            this.isCancelled = FALSE;
+
             // this.isCustom = !!isCustom;
             // if (this.isCustom) {
             //     // create custom event.. ?
@@ -58,67 +96,132 @@
         }
 
         $.extend(Event.prototype, {
-            add: function(el, once) {
-                // el._events.append(...) or push(...)
-                setEventOf(el, this.name, this);
-                el.addEventListener(this.name, this.callback, this.options.useCapture);
+            add: function(el) {
+                setEventOf(el, this.type, this);
+                el.addEventListener(this.type, this.callback, this.options.useCapture);
                 return this;
             },
-            remove: function(el) {
-                // el._events.remove(...)
-                el.removeEventListener(this.name, this.callback, this.options.useCapture);
-                return this;
-            }
+            // remove: function(el, type) {
+            //     removeEventOf(el, this.type, this.callback);
+            //     el.removeEventListener(this.type, this.callback, this.options.useCapture);
+            //     return this;
+            // }
         });
 
-        // $.extend(Event, {add: ...})
-        function addEvent(el, name, callback, options) {
-            return new Event(name, callback, options).add(el);
+        function isEvent(input) {
+            return input instanceof Event;
         }
-        function removeEvent(el, name, callback, options) {
-            $.forEach(el._events, function(events, name) {
-                $.forEach(events, function(event, i) {
-                    if (event.callback == callback) {
-                        el._events[name][i] = null;
-                    }
+
+        function create(type, callback, options) {
+            return new Event(type, callback, options);
+        }
+
+        // .on( types, callback, options { [, id ] [, data ], ...} ) <<
+        // .on( types [, id ] [, data ], callback )
+        // .on( types [, id ] [, data ] )
+        // .on( event )
+
+        // .off( types, callback, options { [, id ] [, data ], ...} ) <<
+        // .off( types [, id ] [, callback ] )
+        // .off( types [, id ] )
+        // .off( event )
+        // .off( '*' )  // all
+        // .off( '**' ) // all isFired
+
+        function on(el, types, callback, options) {
+            if ($.isString(types)) {
+                splitTypes(types).forEach(function(type) {
+                    create(type, callback, options).add(el);
                 });
-            });
-            return new Event(name, callback, options).remove(el);
+            } else if ($.isObject(types)) {
+                create(types.type, types.callback, types.options).add(el);
+            } else if (types instanceof Event) {
+                types.add(el);
+            }
+        }
+        function once(el, types, callback, options) {
+            once(el, types, callback, $.extend({}, options, {once: true}));
         }
 
-        function fire(el, name) { // names.split(/,\s+/) multiple event call için, add remove için de olucak
-            // default events like form.submit() etc.
-            if ($.isFunction(el[name])) {
-                return el[name].call(el);
-            }
-
-            var event = getEventOf(el, name);
-            if (event) {
-                el.dispatchEvent(event.event);
-                if (event.options.once) {
-                    removeEvent(el, name, event.callback)
+        function off(el, types, callback, options) {
+            if ($.isString(types)) {
+                if (types == '*' || types == '**') {
+                    // removeEventOf
                 }
-                return true;
+            }
+        }
+
+        // function addEvent(el, type, callback, options) {
+        //     return new Event(type, callback, options).add(el);
+        // }
+        // function removeEvent(el, type, callback, options) {
+        //     // return new Event(type, callback, options).remove(el);
+        //     return new Event(type, callback, options).remove(el);
+        // }
+
+        function fire(el, type, opt_native) {
+            // default events like form.submit() etc.
+            if (opt_native && $.isFunction(el[type])) {
+                return el[type].call(el);
             }
 
-            return false;
+            var event = getEventOf(el, type);
+            // log(event);
+            if (event) {
+                event.isFired = TRUE; // burdan cikti gecikme '**' ler için
+                event.isCancelled = !el.dispatchEvent(event.event);
+                if (event.options.once) {
+                    removeEvent(el, type, event.callback);
+                }
+            }
+
+            return el;
+        }
+        function fireEvent(el, type) {
+            fire(el, type, true);
         }
 
         // test
         $.onReady(function() {
             var el = document.body, event;
 
-            addEvent(el, "click1", function() {
-                log("click1:", $.now())
-            }, {once: true});
-            addEvent(el, "click1", function() {
-                log("click2:", $.now())
-            }, {once: false});
+            el = document.querySelector('#form');
 
-            addEvent(el, "dblclick", function() {
-                fire(el, "click1")
-                fire(el, "click2")
+            on(el, 'submit', function(e) {
+                e.stopDefault();
+                log("submit", e, e.stop, this)
             })
+
+            return;
+
+            // on(el, "click", function() {
+            //     log("click")
+            // });
+
+            // var event = {type: "click", callback: function() {
+            //     log("click")
+            // }};
+            // var event = new Event("change", function(e) {
+            //     log(e)
+            // });
+
+            // on(el, event);
+
+            // el.fireEvent("change")
+            // el.submit()
+            // fire(el, "submit")
+
+            // addEvent(el, "click1", function() {
+            //     log("click1:", $.now())
+            // }, {once: true});
+            // addEvent(el, "click1", function() {
+            //     log("click2:", $.now())
+            // }, {once: false});
+
+            // addEvent(el, "click", function() {
+            //     fire(el, "click1")
+            //     fire(el, "click2")
+            // })
 
             // var click1, click2
             // addEvent(el, "click", click1 = function() {
@@ -134,12 +237,12 @@
             //     })
             // })
 
-            // var name = 'foo';
-            // addEvent(el, name, log, {once: true})
+            // var type = 'foo';
+            // addEvent(el, type, log, {once: true})
             // log(el)
 
             // addEvent(el, 'click', function() {
-            //     fire(el, name)
+            //     fire(el, type)
             // })
 
             // event = new Event('click', function(e) {
@@ -164,12 +267,20 @@
             // el.addEventListener('click', function (e) { log(e) }, false);
         });
 
-        return Event;
+        // return Event;
+
+        return {
+            Event: Event,
+            // on: on,
+            // off: off,
+            // once: once,
+            // fire: fire
+        };
     })());
 
 
-        // function addEventOnce(el, name, callback, options) {
-        //     var event = new Event(name, function(e) {
+        // function addEventOnce(el, type, callback, options) {
+        //     var event = new Event(type, function(e) {
         //         event.remove(el);
         //         callback.call(el, e);
         //     }).add(el);
@@ -271,5 +382,29 @@
     //         invokeCustomEvent: invokeCustomEvent
     //     };
     // })();
+
+var keys = {
+    BACKSPACE: 8,
+    TAB:       9,
+    RETURN:   13,
+    ESC:      27,
+    LEFT:     37,
+    UP:       38,
+    RIGHT:    39,
+    DOWN:     40,
+    DELETE:   46,
+    HOME:     36,
+    END:      35,
+    PAGEUP:   33,
+    PAGEDOWN: 34,
+    INSERT:   45,
+};
+
+function stop(event) {
+    // $.extend(event);
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopped = true;
+}
 
 })(window, window.so);
