@@ -853,6 +853,44 @@
          */
         getConstant: function(name) {
             return constants[name];
+        },
+
+        /**
+         * Define property.
+         * @param  {Object}  object
+         * @param  {String}  name
+         * @param  {Any}     value
+         * @param  {Boolean} enumerable
+         * @param  {Boolean} writable
+         * @param  {Boolean} configurable
+         * @return {Object}
+         */
+        defineProperty: function(object, name, value, enumerable, writable, configurable) {
+            if ($.isVoid(enumerable)) {
+                enumerable = TRUE; // always visible
+            }
+
+            return Object.defineProperty(object, name, {
+                value: value,
+                writable: !!writable,
+                configurable: !!configurable,
+                enumerable: !!enumerable
+            });
+        },
+
+        /**
+         * Define property all.
+         * @param  {Object}  object
+         * @param  {Object}  properties
+         * @param  {Boolean} enumerable
+         * @param  {Boolean} writable
+         * @param  {Boolean} configurable
+         * @return {Object}
+         */
+        definePropertyAll: function(object, properties, enumerable, writable, configurable) {
+            return $.forEach(properties, function(value, name) {
+                $.defineProperty(object, name, value, enumerable, writable, configurable);
+            });
         }
     });
 
