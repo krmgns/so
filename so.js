@@ -657,15 +657,39 @@
          * @return {Array|Object}
          */
         copy: function(input, opt_keysExclude) {
-            var ret = $.isArray(input) ? [] : {}, keys = opt_keysExclude || [];
+            return $.copyTo($.isArray(input) ? [] : {}, input, opt_keysExclude, true);
 
-            forEach(input, function(value, key) {
+            // var ret = $.isArray(input) ? [] : {}, keys = opt_keysExclude || [];
+
+            // forEach(input, function(value, key) {
+            //     if (keys.indexOf(key) < 0) {
+            //         ret[key] = value;
+            //     }
+            // });
+
+            // return ret;
+        },
+
+        /**
+         * Copy to.
+         * @param  {Array|Object} inputTo
+         * @param  {Array|Object} inputFrom
+         * @param  {Array}        opt_keysExclude
+         * @param  {Boolean}      opt_overwrite @default=true
+         * @return {Array|Object}
+         */
+        copyTo: function(inputTo, inputFrom, opt_keysExclude, opt_overwrite) {
+            var keys = opt_keysExclude || [], key;
+            for (var key in inputFrom) {
                 if (keys.indexOf(key) < 0) {
-                    ret[key] = value;
+                    if (opt_overwrite !== false && key in inputTo) {
+                        continue;
+                    }
+                    inputTo['_'+key] = inputFrom[key];
                 }
-            });
+            };
 
-            return ret;
+            return inputTo;
         },
 
         /**
@@ -779,6 +803,7 @@
         pickAll: function(input, keys) {
             var values = {}, value;
 
+            // splice()
             forEach(input, function(value, key) {
                 if (keys.indexOf(key) > -1) {
                     values[key] = value, delete input[key];
