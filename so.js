@@ -759,11 +759,9 @@
             var value = opt_defaultValue;
 
             if (key in input) {
-                value = input[key];
-                delete input[key];
-
+                value = input[key], delete input[key];
+                // fix keys & length
                 if ($.isArray(input)) {
-                    // fix keys & length
                     input.sort();
                     input.length--;
                 }
@@ -779,19 +777,18 @@
          * @return {Array}
          */
         pickAll: function(input, keys) {
-            var values = [];
+            var values = {}, value;
 
-            keys.forEach(function(key) {
-                if (key in input) {
-                    values.push(input[key]);
-                    delete input[key];
+            forEach(input, function(value, key) {
+                if (keys.indexOf(key) > -1) {
+                    values[key] = value, delete input[key];
                 }
             });
 
-            if (values.length && $.isArray(input)) {
-                // fix keys & length
+            // fix stupid keys & length
+            if (!$.isEmpty(values) && $.isArray(input)) {
                 input.sort();
-                input.length -= values.length;
+                forEach(values, function() { input.length--; });
             }
 
             return values;
@@ -1187,7 +1184,7 @@
             var _this = this, ret = $.pick(_this.data, key, opt_defaultValue);
 
             if (ret !== opt_defaultValue) {
-                _this.length--;
+                _this.length = 0, _this.for(function() { _this.length++; });
             }
 
             return ret;
@@ -1201,8 +1198,9 @@
         pickAll: function(keys) {
             var _this = this, ret = $.pickAll(_this.data, keys);
 
-            if (ret.length) {
-                _this.length -= ret.length;
+            // update length;
+            if (!$.isEmpty(ret)) {
+                _this.length = 0, _this.for(function() { _this.length++; });
             }
 
             return ret;
