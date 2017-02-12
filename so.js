@@ -763,11 +763,39 @@
                 delete input[key];
 
                 if ($.isArray(input)) {
-                    input.sort(); // fix keys
+                    // fix keys & length
+                    input.sort();
+                    input.length--;
                 }
             }
 
             return value;
+        },
+
+        /**
+         * Pick all
+         * @param  {Array|Object} input
+         * @param  {Array}        keys
+         * @return {Array}
+         */
+        pickAll: function(input, keys) {
+            var values = [];
+
+            keys.forEach(function(key) {
+                // values.push($.pick(input, key, opt_defaultValue));
+                if (key in input) {
+                    values.push(input[key]);
+                    delete input[key];
+                }
+            });
+
+            if (values.length && $.isArray(input)) {
+                // fix keys & length
+                input.sort();
+                input.length -= values.length;
+            }
+
+            return values;
         },
 
         toString: function(name, opt_object) {
@@ -939,9 +967,9 @@
             }
 
             _this.data = $.copy(data);
-            _this.dataSize = 0;
+            _this.length = 0;
             // update size
-            forEach(data, function() { _this.dataSize++; });
+            forEach(data, function() { _this.length++; });
 
             return _this;
         },
@@ -955,14 +983,6 @@
         },
 
         /**
-         * Size.
-         * @return {Int}
-         */
-        size: function() {
-            return this.dataSize;
-        },
-
-        /**
          * Set.
          * @param {Int|String} key
          * @param {Any} value
@@ -970,7 +990,7 @@
         set: function(key, value) {
             var _this = this;
 
-            _this.data[(key != NULL ? key : _this.dataSize++)] = value;
+            _this.data[(key != NULL ? key : _this.length++)] = value;
 
             return _this;
         },
@@ -992,13 +1012,7 @@
          * @param  {Int|String} key
          * @return {this}
          */
-        remove: function(key) {
-            var _this = this;
-
-            $.pick(_this.data, key);
-
-            return _this;
-        },
+        remove: function(key) { this.pick(key); return this; },
 
         /**
          * Replace.
@@ -1026,7 +1040,7 @@
             var _this = this;
 
             _this.data = _this.isArrayList() ? [] : {};
-            _this.dataSize = 0;
+            _this.length = 0;
 
             return _this;
         },
@@ -1122,21 +1136,13 @@
          * Pop.
          * @return {Any}
          */
-        pop: function() {
-            var _this = this;
-
-            return _this.isArrayList() ? _this.data.pop() : _this.pick(_this.keys().pop());
-        },
+        pop: function() { return this.pick(this.keys().pop()); },
 
         /**
          * Top.
          * @return {any}
          */
-        top: function() {
-            var _this = this;
-
-            return _this.isArrayList() ? _this.data.shift() : _this.pick(_this.keys().shift());
-        },
+        top: function() { return  this.pick(this.keys().shift()); },
 
         /**
          * Find.
@@ -1176,10 +1182,31 @@
          * Pick.
          * @param  {Any} key
          * @param  {Any} opt_defaultValue
-         * @return {this}
+         * @return {Any}
          */
         pick: function(key, opt_defaultValue) {
-            return $.pick(_this.data, key, opt_defaultValue);
+            var _this = this, ret = $.pick(_this.data, key, opt_defaultValue);
+
+            if (ret !== opt_defaultValue) {
+                _this.length--;
+            }
+
+            return ret;
+        },
+
+        /**
+         * Pick all.
+         * @param  {Array} keys
+         * @return {Array}
+         */
+        pickAll: function(keys) {
+            var _this = this, ret = $.pickAll(_this.data, keys);
+
+            if (ret.length) {
+                _this.length -= ret.length;
+            }
+
+            return ret;
         },
 
         /**
@@ -1330,7 +1357,7 @@
          * Is empty.
          * @return {Boolean}
          */
-        isEmpty: function() { return !this.dataSize; },
+        isEmpty: function() { return !this.length; },
 
         /**
          * Is list array.
