@@ -782,7 +782,6 @@
             var values = [];
 
             keys.forEach(function(key) {
-                // values.push($.pick(input, key, opt_defaultValue));
                 if (key in input) {
                     values.push(input[key]);
                     delete input[key];
