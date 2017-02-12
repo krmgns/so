@@ -680,7 +680,7 @@
          */
         copyTo: function(inputTo, inputFrom, opt_keysExclude, opt_overwrite) {
             var keys = opt_keysExclude || [], key;
-            for (var key in inputFrom) {
+            for (key in inputFrom) {
                 if (keys.indexOf(key) < 0) {
                     if (opt_overwrite !== false && key in inputTo) {
                         continue;
