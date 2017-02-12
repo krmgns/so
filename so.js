@@ -685,7 +685,7 @@
                     if (opt_overwrite !== false && key in inputTo) {
                         continue;
                     }
-                    inputTo['_'+key] = inputFrom[key];
+                    inputTo[key] = inputFrom[key];
                 }
             };
 
