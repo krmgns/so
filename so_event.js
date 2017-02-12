@@ -84,23 +84,28 @@
         return event;
     }
 
-    // shortcut methods for event
     function extendFn(fn, event) {
         return function(e) {
-            event.event = e; // overwrite
+            var target = e.target;
+            // for auto-fired stuff (using fire(), fireEvent())
+            if (!target && this.constructor.name == 'EventTarget') {
+                target = this.target;
+            }
+
+            event.target
+            event.event = e; // overwrite on initial
             event.fired = true;
+            if (event.once) { // remove if 'once'
+                event.remove(target);
+            }
+
             e.stop = function() { e.preventDefault(), e.stopPropagation(), e.stopImmediatePropagation() };
             e.stopDefault = function() { e.preventDefault(); }
-            var ret = fn.apply(e.target, [e, event]);
-            if (event.once) {
-                event.remove(e.target);
-            }
-            return ret;
+            return fn.call(target, e, event);
         };
     }
 
     $.extend('@event', (function() {
-
         function Event(type, fn, options) {
             this.type = type.toLowerCase();
             this.options = $.extend({}, optionsDefault, options);
@@ -110,44 +115,57 @@
             this.fnId = fnId++;
             this.fired = false;
             options = $.pickAll(this.options, ['once', 'passive', 'useCapture']);
-            log(options)
             this.once = options[0];
             this.passive = options[1];
             this.useCapture = options[2];
+            this.target = options.target || null; // @todo
         }
-        // log(Event.prototype)
+
         $.extend(Event.prototype, {
-            add: function(el) {
-                var eventTarget = new EventTarget(el);
+            add: function(target) {
+                var eventTarget = new EventTarget(target);
                 eventTarget.addEvent(this);
             },
-            remove: function(el) {
-                var eventTarget = new EventTarget(el);
+            remove: function(target) {
+                var eventTarget = new EventTarget(target);
                 eventTarget.removeEvent(this);
+            },
+            fire: function(target) {
+                var eventTarget = new EventTarget(target);
+                eventTarget.fireEvent(this);
             }
         });
 
-        function EventTarget(el) {
-            this.el = el;
-            if (!this.el._events) {
-                this.el._events = {};
+        function checkTarget(target) {
+            if (!target || !target.target) throw ('No target given.');
+        }
+
+        function EventTarget(target) {
+            checkTarget(target);
+            this.target = target;
+            if (!this.target._events) {
+                this.target._events = {};
             }
         }
+
         $.extend(EventTarget.prototype, {
             addEvent: function(event) {
-                if (!this.el._events[event.type]) {
-                    this.el._events[event.type] = [];
+                checkTarget(this);
+                if (!this.target._events[event.type]) {
+                    this.target._events[event.type] = [];
                 }
+                event.target = this.target;
                 event.eventTarget = this;
-                this.el._events[event.type].push(event);
-                this.el.addEventListener(event.type, event.fn, event.useCapture);
+                this.target._events[event.type].push(event);
+                this.target.addEventListener(event.type, event.fn, event.useCapture);
             },
             removeEvent: function(event) {
-                if (this.el._events[event.type]) {
-                    var events = this.el._events[event.type], eventsLength = events.length, i = 0;
-                    while (i < eventsLength) {
+                checkTarget(this);
+                if (this.target._events[event.type]) {
+                    var events = this.target._events[event.type], i = 0;
+                    while (i < events.length) {
                         if (events[i].fn === event.fn) {
-                            this.el.removeEventListener(event.type, event.fn, event.useCapture);
+                            this.target.removeEventListener(event.type, event.fn, event.useCapture);
                             events.splice(i, 1);
                             break;
                         }
@@ -156,11 +174,11 @@
                 }
             },
             fireEvent: function(event) {
-                if (this.el._events[event.type]) {
-                    var events = this.el._events[event.type], eventsLength = events.length, i = 0;
-                    while (i < eventsLength) {
-                        events[i].fired = true;
-                        events[i].fn.call(this, event);
+                checkTarget(this);
+                if (this.target._events[event.type]) {
+                    var events = this.target._events[event.type], i = 0;
+                    while (i < events.length) {
+                        events[i].fn.call(this, event.event, event);
                         i++;
                     }
                 }
@@ -169,13 +187,17 @@
 
         $.onReady(function() {
             var el = document.body, event, f1, f2;
-            event = new Event('click', function(e, ev) {
-                // log('click1', e, ev, this)
-                log('click1')
-            }, {once: true});
+            event = new Event('click', function(e, event) {
+                log(this, e.target, event.target)
+                // log(this, this == el)
+                e.stop()
+            }, {once: !true});
+
             event.add(el)
 
-            log(event)
+            event.fire()
+
+            // log(event)
         });
 
         return {
