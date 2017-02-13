@@ -228,6 +228,27 @@
     });
 
     /**
+     * Object extends.
+     */
+    extend(Object, {
+        /**
+         * Values
+         * @param  {Object} object
+         * @return {Array}
+         * @override For Opera, Safari, Internet Explorer.
+         */
+        values: function(object) {
+            var ret = [];
+
+            forEach(object, function(value) {
+                ret.push(value);
+            });
+
+            return ret;
+        }
+    });
+
+    /**
      * To trim chars.
      * @param  {String|undefined} chars
      * @param  {Boolean}          opt_isLeft
@@ -658,7 +679,7 @@
          * @return {Array|Object}
          */
         copy: function(input, opt_keysExclude) {
-            return $.copyTo($.isArray(input) ? [] : {}, input, opt_keysExclude, true);
+            return $.copyTo($.isArray(input) ? [] : {}, input, opt_keysExclude, TRUE);
 
             // var ret = $.isArray(input) ? [] : {}, keys = opt_keysExclude || [];
 
@@ -683,7 +704,7 @@
             var keys = opt_keysExclude || [], key;
             for (key in inputFrom) {
                 if (keys.indexOf(key) < 0) {
-                    if (opt_overwrite !== false && key in inputTo) {
+                    if (opt_overwrite !== FALSE && key in inputTo) {
                         continue;
                     }
                     inputTo[key] = inputFrom[key];
@@ -970,7 +991,7 @@
             var prototype = extend({
                 constructor: subClass,
                       super: supClass
-              }, supClass[NAME_PROTOTYPE], subClass[NAME_PROTOTYPE]);
+            }, supClass[NAME_PROTOTYPE], subClass[NAME_PROTOTYPE]);
 
             forEach(prototype, function(value, name) {
                 subClass[NAME_PROTOTYPE][name] = value;
