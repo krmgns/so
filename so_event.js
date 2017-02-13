@@ -92,8 +92,8 @@
         return function(e) {
             var target = e.target, properties;
             // for auto-fired stuff (using fire(), fireEvent())
-            if (!target && this.constructor.name == 'EventTarget') {
-                target = this.target;
+            if (!target && event.eventTarget.constructor.name == 'EventTarget') {
+                target = event.eventTarget.target;
             }
 
             event.event = e; // overwrite on initial
@@ -232,7 +232,7 @@
 
             // event.fire()
 
-            el.addEventListener("click", function() {
+            el.addEventListener("click", function(e) {
                 event.fire()
             }, false)
         });
@@ -244,7 +244,14 @@
             // fire: fire,
             create: createEvent,
             Event: Event,
-            EventTarget: EventTarget
+            EventTarget: EventTarget,
+            keyCode: {
+                BACKSPACE:  8, TAB:      9, ENTER:      13, ESC:       27,  LEFT:     37,
+                UP:        38, RIGHT:   39, DOWN:       40, DELETE:    46,  HOME:     36,
+                END:       35, PAGEUP:  33, PAGEDOWN:   34, INSERT:    45,  CAPSLOCK: 20,
+                ARROWLEFT: 37, ARROWUP: 38, ARROWRIGHT: 39, ARROWDOWN: 40,
+                SHIFT:     16, CONTROL: 17, ALT:        18, ALTGRAPH:  225
+            }
         };
     })());
 
