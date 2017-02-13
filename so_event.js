@@ -19,125 +19,163 @@
             CompositionEvent: 'composition(end|start|update)',
             DeviceMotionEvent: 'devicemotion', DeviceOrientationEvent: 'deviceorientation'
         },
+        re_typesStandard = new RegExp(Object.values(re_types).join('|'), 'i'),
         optionsDefault = {
-            once: false, useCapture: false, passive: false, data: null,
+            once: false, useCapture: false, passive: false, data: null, custom: false,
             bubbles: true, cancelable: true, // common
             view: window, detail: null, // ui
             relatedNode: null, prevValue: '', newValue: '', attrName: '', attrChange: 0, // mutation
             screenX: 0, screenY: 0, clientX: 0, clientY: 0, ctrlKey: false, altKey: false,
             shiftKey: false, metaKey: false, button: 1, relatedTarget: null // mouse
         },
-        DOMLevel = document.adoptNode ? 3 : 2,
         fnId = 0
     ;
 
-    function createEvent(cType, eType, options) {
-        var event, cTypeOrig;
-        if (!cType && eType) { // autodetect
-            $.forEach(re_types, function(re, _cType) {
+    function createEvent(eventClass, eventType, options) {
+        if (!eventType) {
+            throw ('Type required.');
+        }
+
+        var event, eventClass, eventClassOrig;
+        options = $.extend({}, optionsDefault, options);
+
+        if (!eventClass) { // autodetect
+            $.forEach(re_types, function(re, _eventClass) {
                 re = new RegExp('^('+ re +')$', 'i');
-                if (re.test(eType)) {
-                    cType = cTypeOrig = _cType;
+                if (re.test(eventType)) {
+                    eventClass = eventClassOrig = _eventClass;
                     return 0;
                 }
             });
         }
 
-        // @defaults
-        cType = cTypeOrig = cType || 'Event';
-        eType = eType || '';
-        options = $.extend({}, optionsDefault, options);
 
-        if ($.isFunction(window[cType])) {
-            return new window[cType](eType, options);
+        eventClass = eventClassOrig = eventClass || 'Event'; // @default
+        if ($.isFunction(window[eventClass])) {
+            event = new window[eventClass](eventType, options);
+        } else {
+            // add 's' if needed
+            if ($.DOMLevel < 3 && re_typesFix.test(eventClass)) {
+                eventClass += 's';
+            }
+
+            event = document.createEvent(eventClass);
+            switch (eventClassOrig) {
+                case 'UIEvent':
+                    event.initUIEvent(eventType, options.bubbles, options.cancelable, options.view, options.detail);
+                    break;
+                case 'MouseEvent':
+                case 'DragEvent':
+                case 'WheelEvent':
+                    event.initMouseEvent(eventType, options.bubbles, options.cancelable, options.view, options.detail,
+                        options.screenX, options.screenY, options.clientX, options.clientY,
+                        options.ctrlKey, options.altKey, options.shiftKey, options.metaKey,
+                        options.button, options.relatedTarget);
+                    break;
+                case 'MutationEvent':
+                    event.initMutationEvent(eventType, options.bubbles, options.cancelable, options.relatedNode,
+                        options.prevValue, options.newValue, options.attrName, options.attrChange);
+                    break;
+                default:
+                    if (eventClass == 'CustomEvent') {
+                        event.initCustomEvent(eventType, options.bubbles, options.cancelable, options.detail);
+                    } else {
+                        event.initEvent(eventType, options.bubbles, options.cancelable); // all others
+                    }
+            }
         }
 
-        if (DOMLevel < 3 && re_typesFix.test(cType)) {
-            cType += 's';
-        }
-
-        event = document.createEvent(cType);
-        switch (cTypeOrig) {
-            case 'UIEvent':
-                event.initUIEvent(eType, options.bubbles, options.cancelable, options.view, options.detail);
-                break;
-            case 'MouseEvent':
-            case 'DragEvent':
-            case 'WheelEvent':
-                event.initMouseEvent(eType, options.bubbles, options.cancelable, options.view, options.detail,
-                    options.screenX, options.screenY, options.clientX, options.clientY,
-                    options.ctrlKey, options.altKey, options.shiftKey, options.metaKey,
-                    options.button, options.relatedTarget
-                );
-            case 'MutationEvent':
-                event.initMutationEvent(eType, options.bubbles, options.cancelable, options.relatedNode,
-                    options.prevValue, options.newValue, options.attrName, options.attrChange)
-                break;
-            default:
-                if (cType == 'CustomEvent') {
-                    event.initCustomEvent(eType, options.bubbles, options.cancelable, options.detail);
-                } else {
-                    event.initEvent(eType, options.bubbles, options.cancelable); // all others
-                }
-        }
-
-        return event;
+        return {event: event, eventClass: (eventClass in re_types) ? eventClass : 'CustomEvent'};
     }
 
     function extendFn(fn, event) {
         return function(e) {
-            var target = e.target;
+            var target = e.target, properties;
             // for auto-fired stuff (using fire(), fireEvent())
             if (!target && this.constructor.name == 'EventTarget') {
                 target = this.target;
             }
 
-            event.target
             event.event = e; // overwrite on initial
             event.fired = true;
-            if (event.once) { // remove if 'once'
-                event.remove(target);
+            if (event.once) {
+                event.unbind(target);
             }
 
-            e.stop = function() { e.preventDefault(), e.stopPropagation(), e.stopImmediatePropagation() };
-            e.stopDefault = function() { e.preventDefault(); }
-            return fn.call(target, e, event);
+            // overwrite !no
+            // e = Object.create(e, {
+            //     target: {value: target}
+            // });
+
+            e.event = event;
+            e.eventTarget = event.eventTarget;
+            e.originalTarget = event.target;
+            // shotcuts
+            e.stop = function() {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+            },
+            e.stopDefault = function() {
+                e.preventDefault();
+            }
+
+            return fn.call(target, e);
         };
     }
 
     $.extend('@event', (function() {
         function Event(type, fn, options) {
+            var _this = this, event;
             this.type = type.toLowerCase();
             this.options = $.extend({}, optionsDefault, options);
-            this.event = createEvent(null, this.type, this.options);
+            this.data = this.options.data;
+
+            event = createEvent(null, this.type, this.options);
+            this.event = event.event;
+            this.eventClass = event.eventClass;
             this.eventTarget = null;
+
             this.fn = extendFn(fn, this);
             this.fnId = fnId++;
+            this.fnOrig = fn;
+
+            options = $.pickAll(this.options, ['once', 'passive', 'useCapture', 'target', 'custom']);
+            this.once = options.once;
+            this.passive = options.passive;
+            this.useCapture = options.useCapture;
+            this.target = options.target || null;
+
             this.fired = false;
-            options = $.pickAll(this.options, ['once', 'passive', 'useCapture']);
-            this.once = options[0];
-            this.passive = options[1];
-            this.useCapture = options[2];
-            this.target = options.target || null; // @todo
+            this.cancalled = false;
+            this.custom = !!(options.custom || event.eventClass == 'CustomEvent' || !re_typesStandard.test(type));
+        }
+
+        function newEventTarget(event, target) {
+            return new EventTarget(target || event.target);
         }
 
         $.extend(Event.prototype, {
-            add: function(target) {
-                var eventTarget = new EventTarget(target);
-                eventTarget.addEvent(this);
+            bind: function() {
+                newEventTarget(this).addEvent(this);
+                return this;
             },
-            remove: function(target) {
-                var eventTarget = new EventTarget(target);
-                eventTarget.removeEvent(this);
+            bindTo: function(target) {
+                newEventTarget(null, target).addEvent(this);
+                return this;
+            },
+            unbind: function(target) {
+                newEventTarget(this, target).removeEvent(this);
+                return this;
             },
             fire: function(target) {
-                var eventTarget = new EventTarget(target);
-                eventTarget.fireEvent(this);
+                newEventTarget(this, target).fireEvent(this);
+                return this;
             }
         });
 
         function checkTarget(target) {
-            if (!target || !target.target) throw ('No target given.');
+            if (!target) throw ('No target given.');
         }
 
         function EventTarget(target) {
@@ -150,7 +188,7 @@
 
         $.extend(EventTarget.prototype, {
             addEvent: function(event) {
-                checkTarget(this);
+                checkTarget(this.target);
                 if (!this.target._events[event.type]) {
                     this.target._events[event.type] = [];
                 }
@@ -160,7 +198,7 @@
                 this.target.addEventListener(event.type, event.fn, event.useCapture);
             },
             removeEvent: function(event) {
-                checkTarget(this);
+                checkTarget(this.target);
                 if (this.target._events[event.type]) {
                     var events = this.target._events[event.type], i = 0;
                     while (i < events.length) {
@@ -174,7 +212,7 @@
                 }
             },
             fireEvent: function(event) {
-                checkTarget(this);
+                checkTarget(this.target);
                 if (this.target._events[event.type]) {
                     var events = this.target._events[event.type], i = 0;
                     while (i < events.length) {
@@ -187,17 +225,16 @@
 
         $.onReady(function() {
             var el = document.body, event, f1, f2;
-            event = new Event('click', function(e, event) {
-                log(this, e.target, event.target)
-                // log(this, this == el)
-                e.stop()
-            }, {once: !true});
+            event = new Event('foo', function(e) {
+                log(e)
+                // log(e.event, e.eventTarget, e.targetObject)
+            }, {once: !true, target: !el}).bindTo(el)
 
-            event.add(el)
+            // event.fire()
 
-            event.fire()
-
-            // log(event)
+            el.addEventListener("click", function() {
+                event.fire()
+            }, false)
         });
 
         return {
