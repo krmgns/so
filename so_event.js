@@ -88,7 +88,7 @@
         return {event: event, eventClass: (eventClass in re_types) ? eventClass : 'CustomEvent'};
     }
 
-    function extendFn(fn, event) {
+    function extendFn(event, fn) {
         return function(e) {
             var target = e.target, properties;
             // for auto-fired stuff (using fire(), fireEvent())
@@ -98,27 +98,49 @@
 
             event.event = e; // overwrite on initial
             event.fired = true;
-            if (event.once) {
+            if (event.once) { // remember once
                 event.unbind(target);
             }
 
-            // overwrite !no
+            // overwrite nö!
             // e = Object.create(e, {
             //     target: {value: target}
             // });
 
-            e.event = event;
-            e.eventTarget = event.eventTarget;
-            e.originalTarget = event.target;
-            // shotcuts
-            e.stop = function() {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-            },
-            e.stopDefault = function() {
-                e.preventDefault();
-            }
+            // sugars..
+            $.extend(e, {
+                event: event,
+                eventTarget: event.eventTarget,
+                originalTarget: event.target,
+                stopped: false,
+                stoppedAll: false,
+                stoppedDefault: false,
+                stoppedBubble: false,
+                stoppedBubbleAll: false,
+                stop: function() {
+                    e.stopDefault();
+                    e.stopBubble();
+                    e.stopped = true;
+                },
+                stopAll: function() {
+                    e.stopDefault();
+                    e.stopBubble();
+                    e.stopBubbleAll();
+                    e.stoppedAll = true;
+                },
+                stopDefault: function() {
+                    e.preventDefault();
+                    e.stoppedDefault = true;
+                },
+                stopBubble: function() {
+                    e.stopPropagation();
+                    e.stoppedBubble = true;
+                },
+                stopBubbleAll: function() {
+                    e.stopImmediatePropagation();
+                    e.stoppedBubbleAll = true;
+                }
+            });
 
             return fn.call(target, e);
         };
@@ -136,7 +158,7 @@
             this.eventClass = event.eventClass;
             this.eventTarget = null;
 
-            this.fn = extendFn(fn, this);
+            this.fn = extendFn(this, fn);
             this.fnId = fnId++;
             this.fnOrig = fn;
 
@@ -216,7 +238,7 @@
                 if (this.target._events[event.type]) {
                     var events = this.target._events[event.type], i = 0;
                     while (i < events.length) {
-                        events[i].fn.call(this, event.event, event);
+                        events[i].fn(event.event, event);
                         i++;
                     }
                 }
@@ -225,8 +247,8 @@
 
         $.onReady(function() {
             var el = document.body, event, f1, f2;
-            event = new Event('foo', function(e) {
-                log(e)
+            event = new Event('load', function(e) { // data >> ( [ "Custom", "Event" ] );
+                log(e, e.event.fired)
                 // log(e.event, e.eventTarget, e.targetObject)
             }, {once: !true, target: !el}).bindTo(el)
 
@@ -239,9 +261,12 @@
 
         return {
             // on: on,
+            // onTo: onTo,
             // off: off,
             // once: once,
             // fire: fire,
+            // bind: bind,
+            // unbind: unbind,
             create: createEvent,
             Event: Event,
             EventTarget: EventTarget,
