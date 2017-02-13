@@ -91,7 +91,7 @@
     function extendFn(event, fn) {
         return function(e) {
             var target = e.target;
-            // for auto-fired stuff (using fire(), fireEvent())
+            // for auto-fired stuff (using fire() in other location)
             if (!target) {
                 target = event.eventTarget.target;
             }
@@ -152,6 +152,11 @@
 
     $.extend('@event', (function() {
         function Event(type, fn, options) {
+            if ($.isObject(fn)) {
+                options = fn;
+                fn = options.fn;
+            }
+
             if (!type || !fn) {
                 throw ('Type and Function required.');
             }
@@ -182,7 +187,10 @@
         }
 
         function newEventTarget(target, event) {
-            return new EventTarget(target || event && event.target);
+            if (!(target instanceof EventTarget)) {
+                target = new EventTarget(target || (event && event.target));
+            }
+            return target;
         }
 
         $.extend(Event.prototype, {
@@ -199,7 +207,7 @@
                 return this;
             },
             fire: function(target) {
-                newEventTarget(target, this).fireEvent(this);
+                newEventTarget(target, this).fireEvents(this);
                 return this;
             }
         });
@@ -232,6 +240,7 @@
                 if (this.target._events[event.type]) {
                     var events = this.target._events[event.type], i = 0;
                     while (i < events.length) {
+                        log(events[i].fnOrig === event.fnOrig)
                         if (events[i].fn === event.fn) {
                             this.target.removeEventListener(event.type, event.fn, event.useCapture);
                             events.splice(i, 1);
@@ -241,7 +250,7 @@
                     }
                 }
             },
-            fireEvent: function(event) {
+            fireEvents: function(event) {
                 checkTarget(this.target);
                 if (this.target._events[event.type]) {
                     var events = this.target._events[event.type], i = 0;
@@ -253,32 +262,80 @@
             }
         });
 
+        Element.prototype.on = function(type, fn, options) { return on(this, type, fn, options); };
+        Element.prototype.off = function(type, fn, options) { return off(this, type, fn, options); };
+        Element.prototype.once = function(type, fn, options) { return once(this, type, fn, options); };
+
         $.onReady(function() {
-            setTimeout(function() { console.clear(); }, 100);
+            var el = document.body, event, f1, f2
 
-            var el = document.body, event, f1, f2;
-            event = new Event('load', function(e) {
-                log(e, e.data)
-            }, {once: !true, target: !el, data: 111}).bindTo(el)
+            // event = on(el, 'click', (e) => log(e)).unbind()
+            event = el.on('click', f1 = function(e) {
+                log(this)
+                this.off('click', f1)
+            })
 
-            // event.fire()
+            log(event)
 
-            el.addEventListener("click", function(e) {
-                event.fire() //.unbind()
-            }, false)
+
+            // event = $.event.Event('click', function(e) { log(e) }, {once: true})
+            // event.bindTo(el)
+            // log(event)
+
+            // event = new Event('load', function(e) {
+            //     log(e, e.data)
+            // }, {once: !true, target: !el, data: 111}).bindTo(el)
+
+            // // event.fire()
+
+            // el.addEventListener("click", function(e) {
+            //     event.fire() //.unbind()
+            // }, false)
         });
+
+        var prepareArgs = function(fn, options, target, once) {
+            if ($.isObject(fn)) {
+                options = fn;
+                fn = options.fn;
+            }
+            return {fn: fn, options: $.extend(options, {target: target, once: !!once})};
+        }, args;
+
+        function initEvent(type, fn, options) {
+            return new Event(type, fn, options);
+        }
+        function initEventTarget(target) {
+            return new EventTarget(target);
+        }
+
+        function on(target, type, fn, options) {
+            args = prepareArgs(fn, options, target);
+            return initEvent(type, args.fn, args.options).bind();
+        }
+        function once(target, type, fn, options) {
+            args = prepareArgs(fn, options, target, true);
+            return initEvent(type, args.fn, args.options).bind();
+        }
+        function off(target, type, fn, options) {
+            args = prepareArgs(fn, options, target);
+            if (arg.fn == '') args.fn = '*'; // remove all 'x' type events
+            if (type == '*') {
+                //
+            } else if (type == '**') {
+                //
+            }
+            return initEvent(type, args.fn, args.options).unbind();
+        }
+
 
         return {
             // on: on,
-            // onTo: onTo,
             // off: off,
             // once: once,
             // fire: fire,
-            // bind: bind,
-            // unbind: unbind,
             create: createEvent,
-            Event: Event,
-            EventTarget: EventTarget,
+            Event: initEvent,
+            EventTarget: initEventTarget,
             keyCode: {
                 BACKSPACE:  8, TAB:      9, ENTER:      13, ESC:       27,  LEFT:     37,
                 UP:        38, RIGHT:   39, DOWN:       40, DELETE:    46,  HOME:     36,
