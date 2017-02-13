@@ -1,23 +1,42 @@
 <!-- <script src="so-all.php"></script> -->
 
 <script src="../so.js"></script>
-<script src="../so_util.js"></script>
+<!-- <script src="../so_util.js"></script> -->
 <!-- <script src="../so_browser.js"></script> -->
-<!-- <script src="../so_array.js"></script> -->
-<!-- <script src="../so_object.js"></script> -->
+<script src="../so_event.js"></script>
+
+<iframe id="iframe"></iframe>
+
+<form id="form">
+    <input id="form_i">
+    <select id="form_s">
+        <option value="1">1</option>
+        <option value="2">2</option>
+    </select>
+    <input type="submit" name="">
+</form>
+
+<p>Lorem ipsum dolor sit amet.</p>
+
+<script>
+so.onReady(function($) {
+    //
+});
+</script>
+
 <script>
 so.onReady(function($) {
     var a, b, c,
-        // list = [1,2,3]
+        list = [1,2,33]
         list = {a:1,b:2,c:3}
 
-    a = $.olist(list)
-    log(a)
+    // list = $.list(list)
 
-    // log(list.filter())
-    // log(list.filter((r, v) => {return r > 1}))
+    // log($.pick(list, 0))
+    // log(list.pickAll([0,1,2,3]))
+    // log(list.pickAll(["a","b","c"]))
+    // log(list)
 
-    // log(list.uniq())
 
     // a = {"a":undefined,"b":Infinity,"c":3, d:"ddd"}
     // // b = $.object.has(a, "dddd")

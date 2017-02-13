@@ -21,7 +21,7 @@
         },
         re_typesStandard = new RegExp(Object.values(re_types).join('|'), 'i'),
         optionsDefault = {
-            once: false, useCapture: false, passive: false, data: null, custom: false,
+            once: false, useCapture: false, passive: false, data: {}, custom: false,
             bubbles: true, cancelable: true, // common
             view: window, detail: null, // ui
             relatedNode: null, prevValue: '', newValue: '', attrName: '', attrChange: 0, // mutation
@@ -90,7 +90,7 @@
 
     function extendFn(event, fn) {
         return function(e) {
-            var target = e.target, properties;
+            var target = e.target;
             // for auto-fired stuff (using fire(), fireEvent())
             if (!target) {
                 target = event.eventTarget.target;
@@ -100,6 +100,10 @@
             event.fired = true;
             if (event.once) { // remember once
                 event.unbind(target);
+            }
+
+            if (!e.data) {
+                e.data = event.data;
             }
 
             // overwrite nö!
@@ -148,6 +152,10 @@
 
     $.extend('@event', (function() {
         function Event(type, fn, options) {
+            if (!type || !fn) {
+                throw ('Type and Function required.');
+            }
+
             var _this = this, event;
             this.type = type.toLowerCase();
             this.options = $.extend({}, optionsDefault, options);
@@ -173,25 +181,25 @@
             this.custom = !!(options.custom || event.eventClass == 'CustomEvent' || !re_typesStandard.test(type));
         }
 
-        function newEventTarget(event, target) {
-            return new EventTarget(target || event.target);
+        function newEventTarget(target, event) {
+            return new EventTarget(target || event && event.target);
         }
 
         $.extend(Event.prototype, {
             bind: function() {
-                newEventTarget(this).addEvent(this);
+                newEventTarget(null, this).addEvent(this);
                 return this;
             },
             bindTo: function(target) {
-                newEventTarget(null, target).addEvent(this);
+                newEventTarget(target).addEvent(this);
                 return this;
             },
             unbind: function(target) {
-                newEventTarget(this, target).removeEvent(this);
+                newEventTarget(target, this).removeEvent(this);
                 return this;
             },
             fire: function(target) {
-                newEventTarget(this, target).fireEvent(this);
+                newEventTarget(target, this).fireEvent(this);
                 return this;
             }
         });
@@ -238,7 +246,7 @@
                 if (this.target._events[event.type]) {
                     var events = this.target._events[event.type], i = 0;
                     while (i < events.length) {
-                        events[i].fn(event.event, event);
+                        events[i].fn(event.event);
                         i++;
                     }
                 }
@@ -246,16 +254,17 @@
         });
 
         $.onReady(function() {
+            setTimeout(function() { console.clear(); }, 100);
+
             var el = document.body, event, f1, f2;
-            event = new Event('load', function(e) { // data >> ( [ "Custom", "Event" ] );
-                log(e, e.event.fired)
-                // log(e.event, e.eventTarget, e.targetObject)
-            }, {once: !true, target: !el}).bindTo(el)
+            event = new Event('load', function(e) {
+                log(e, e.data)
+            }, {once: !true, target: !el, data: 111}).bindTo(el)
 
             // event.fire()
 
             el.addEventListener("click", function(e) {
-                event.fire()
+                event.fire() //.unbind()
             }, false)
         });
 
