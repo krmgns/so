@@ -357,6 +357,49 @@
         },
 
         /**
+         * Append.
+         * @param  {String} input
+         * @return {String}
+         */
+        append: function(input) {
+            return toString(this) + toString(input);
+        },
+
+        /**
+         * Prepen.
+         * @param  {String} input
+         * @return {String}
+         */
+        prepend: function(input) {
+            return toString(input) + toString(this);
+        },
+
+        /**
+         * Wrap.
+         * @param  {String} input
+         * @return {String}
+         */
+        wrap: function(input) {
+            input = toString(input);  return input + toString(this) + input;
+        },
+
+        /**
+         * Unwrap.
+         * @param  {String} input
+         * @return {String}
+         */
+        unwrap: function(input) {
+            var str = toString(this);
+            input = toString(input);
+
+            if (str.indexOf(input) > -1) {
+                return str.substr(input.length).substr(-input.length);
+            }
+
+            return str;
+        },
+
+        /**
          * For each.
          * @param  {Function} fn
          * @return {String}
