@@ -38,6 +38,7 @@
     // globals
     window.so = $;
     window.so.VERSION = '5.0.0';
+    window.so.DOMLevel = document.adoptNode ? 3 : 2;
     window[NAME_DOCUMENT][NAME_WINDOW] = window;
 
     /**
