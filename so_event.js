@@ -92,7 +92,7 @@
         return function(e) {
             var target = e.target, properties;
             // for auto-fired stuff (using fire(), fireEvent())
-            if (!target && event.eventTarget.constructor.name == 'EventTarget') {
+            if (!target) {
                 target = event.eventTarget.target;
             }
 
