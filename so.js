@@ -1511,18 +1511,6 @@
         isEmpty: function() { return !this.length; },
 
         /**
-         * Is list array.
-         * @return {Boolean}
-         */
-        isArrayList: function() { return this.type == TYPE_ARRAY_LIST; },
-
-        /**
-         * Is list object.
-         * @return {Boolean}
-         */
-        isObjectList: function() { return this.type == TYPE_OBJECT_LIST; },
-
-        /**
          * To string
          * @return {String}
          */
