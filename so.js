@@ -52,16 +52,6 @@
     }
 
     /**
-     * To bool.
-     * @param  {Any} input
-     * @return {Bool}
-     * @private
-     */
-    function toBool(input) {
-        return !!valueOf(input);
-    }
-
-    /**
      * To string.
      * @param  {String} input
      * @return {String}
@@ -69,6 +59,16 @@
      */
     function toString(input) {
         return (input != NULL && input.toString) ? input.toString() : (''+ input);
+    }
+
+    /**
+     * To bool.
+     * @param  {Any} input
+     * @return {Bool}
+     * @private
+     */
+    function toBool(input) {
+        return !!valueOf(input);
     }
 
     /**
