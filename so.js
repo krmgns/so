@@ -1442,7 +1442,7 @@
          * Select all.
          * @param  {Array|Object} data
          * @param  {Function}     fn
-         * @return {[type]}
+         * @return {List}
          */
         selectAll: function(data, fn) {
             var _this = this, list = new List(data)
