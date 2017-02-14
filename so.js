@@ -695,6 +695,7 @@
          */
         isEmpty: function(input) {
             return !input // '', null, undefined, false, 0, -0, NaN
+                || ($.isArray(input) && !Object.keys(input).length)
                 || ($.isNumber(input.length) && !input.length)
                 || ($.isObject(input) && !Object.keys(input).length);
         },
