@@ -505,7 +505,7 @@
      * @return {Array}
      */
     function makeArray(input) {
-        var ret = [], inputType = $.typeOf(input);
+        var ret = [], inputType = $.type(input);
 
         if (inputType == 'array') {
             return input;
@@ -656,7 +656,7 @@
          * @param  {Any} input
          * @return {String}
          */
-        typeOf: function(input) {
+        type: function(input) {
             var type;
 
             if ($.isNull(input))             type = 'null';
