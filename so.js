@@ -174,12 +174,12 @@
 
         /** Is int.          @param {Any} input @return {Bool} */
         isInt: function(input) {
-            return $.isNumber(input) && (input % 1 == 0 && input != 1.0);
+            return $.isNumber(input) && input == (input | 0);
         },
 
         /** Is float.        @param {Any} input @return {Bool} */
         isFloat: function(input) {
-            return $.isNumber(input) && (input % 1 != 0 || input == 1.0);
+            return $.isNumber(input) && input != (input | 0);
         },
 
         /** Is iterable.     @param {Any} input @return {Bool} */
@@ -1072,7 +1072,6 @@
             }
 
             options = $.extend({type: $.type(data)}, options);
-            log(options)
 
             this.type = options.type;
             this.data = {};
@@ -1430,8 +1429,8 @@
          * @return {String}
          */
         toString: function() {
-            return (this.type == 'string') ? this.values().join('')
-                : $.jsonEncode(this.type == 'array' ? this.values() : this.data);
+            return !this.isEmpty() ? ((this.type == 'string') ? this.values().join('')
+                : $.jsonEncode(this.type == 'array' ? this.values() : this.data)) : '';
         }
     });
 
