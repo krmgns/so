@@ -810,31 +810,10 @@
         /**
          * List
          * @param  {Array|Object} data
-         * @param  {Object}       options
          * @return {List}
          */
-        list: function(data, options) {
-            return new List(data, options);
-        },
-
-        /**
-         * Alist.
-         * @param  {Array}  data
-         * @param  {Object} options
-         * @return {ArrayList}
-         */
-        alist: function(data, options) {
-            return new ArrayList(data, options);
-        },
-
-        /**
-         * Olist.
-         * @param  {Object} data
-         * @param  {Object} options
-         * @return {ObjectList}
-         */
-        olist: function(data, options) {
-            return new ObjectList(data, options);
+        list: function(data) {
+            return new List(data);
         },
 
         /**
@@ -1549,40 +1528,6 @@
          */
         toString: function() { return JSON.stringify(this.data); }
     });
-
-    /**
-     * List Array.
-     * @param {Array|Object|undefined} data
-     * @param {Object|undefined}       options @optional
-     * @throws
-     * @private
-     */
-    function ArrayList(data, options) {
-        data = data || [];
-
-        if (!$.isArray(data)) {
-            throw ('Only Array\'s accepted for ArrayList.');
-        }
-
-        this.super(data, options);
-    }
-
-    /**
-     * List Object.
-     * @param {Array|Object|undefined} data
-     * @param {Object|undefined}       options @optional
-     * @throws
-     * @private
-     */
-    function ObjectList(data, options) {
-        data = data || {};
-
-        if (!$.isObject(data)) {
-            throw ('Only Object\'s accepted for ObjectList.');
-        }
-
-        this.super(data, options);
-    }
 
     // extend lists
     $.class(ArrayList).extends(List);
