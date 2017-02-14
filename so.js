@@ -1119,6 +1119,8 @@
 
             if (_this.isArrayList()) {
                 _this.data[_this.length++] = value;
+            } else if (key == NULL) {
+                _this.data[_this.length++] = value;
             } else {
                 _this.data[key] = value;
                 _this.length++;
@@ -1441,6 +1443,8 @@
 
             return list;
         },
+
+
 
         /**
          * Uniq.
