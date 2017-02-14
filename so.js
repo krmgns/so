@@ -1117,14 +1117,8 @@
         set: function(key, value) {
             var _this = this;
 
-            if (_this.isArrayList()) {
-                _this.data[_this.length++] = value;
-            } else if (key == NULL) {
-                _this.data[_this.length++] = value;
-            } else {
-                _this.data[key] = value;
-                _this.length++;
-            }
+            _this.data[key != NULL ? key : _this.length] = value;
+            _this.length++;
 
             return _this;
         },
