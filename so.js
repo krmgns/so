@@ -42,33 +42,25 @@
     window[NAME_DOCUMENT][NAME_WINDOW] = window;
 
     /**
-     * Value of.
+     * To value, int, float, bool, string, json.
      * @param  {Any} input
-     * @return {Any}
+     * @return {Int|Float|Bool|String}
      * @private
      */
-    function valueOf(input) {
+    function toValue(input) {
         return (input != NULL && input.valueOf) ? input.valueOf() : input;
     }
-
-    /**
-     * To string.
-     * @param  {String} input
-     * @return {String}
-     * @private
-     */
+    function toInt(input) {
+        return !$.isNumeric(input = toString(input)) ? NULL : parseInt(input.replace(/^-?\./, '0.'), 10);
+    }
+    function toFloat(input) {
+        return !$.isNumeric(input = toString(input)) ? NULL : parseFloat(input);
+    }
     function toString(input) {
         return (input != NULL && input.toString) ? input.toString() : (''+ input);
     }
-
-    /**
-     * To bool.
-     * @param  {Any} input
-     * @return {Bool}
-     * @private
-     */
     function toBool(input) {
-        return !!valueOf(input);
+        return !!toValue(input);
     }
 
     /**
@@ -95,7 +87,7 @@
      * For each.
      * @param  {Array|Object} input
      * @param  {Function}     fn
-     * @param  {Object}       opt__this @optional
+     * @param  {Object}       opt__this
      * @return {Array|Object}
      * @private
      */
@@ -192,10 +184,10 @@
 
         /** Is iterable.     @param {Any} input @return {Bool} */
         isIterable: function(input) {
-            return $.isArray(input) || $.isObject(input) || (input &&
-                    (input.length && !input[NAME_NODE_TYPE]) // dom, nodelist, string etc.
-                 || (input.constructor && input.constructor.name == 'List') // list
-            );
+            return $.isArray(input) || $.isObject(input) || (input && (
+                (input.length && !input[NAME_NODE_TYPE]) || // dom, nodelist, string etc.
+                (input.constructor && input.constructor.name == 'List') // list
+            ));
         },
 
         /** Is primitive.    @param {Any} input @return {Bool} */
@@ -232,19 +224,40 @@
      */
     extend(Object, {
         /**
-         * Values
+         * Keys.
          * @param  {Object} object
+         * @param  @internal ret
          * @return {Array}
-         * @override For Opera, Safari, Internet Explorer.
+         * @override
          */
-        values: function(object) {
-            var ret = [];
+        keys: function(object, ret) {
+            return ret = [], forEach(object, function(_, key) { ret.push(key); }), ret;
+        },
+        /**
+         * Values.
+         * @param  {Object} object
+         * @param  @internal ret
+         * @return {Array}
+         * @override
+         */
+        values: function(object, ret) {
+            return ret = [], forEach(object, function(value) { ret.push(value); }), ret;
+        }
+    });
 
-            forEach(object, function(value) {
-                ret.push(value);
-            });
-
-            return ret;
+    /**
+     * Array extends.
+     */
+    extend(Array[NAME_PROTOTYPE], {
+        keys: function() { return Object.keys(this); },
+        /**
+         * Get.
+         * @param  {Int} key
+         * @param  {Any} opt_value
+         * @return {Any}
+         */
+        get: function(key, opt_value) {
+            return (key in this) ? this[key] : opt_value;
         }
     });
 
@@ -265,7 +278,7 @@
      * @param  {String}  str
      * @param  {String}  search
      * @param  {Integer} index
-     * @param  {Boolean} opt_noCase @optional
+     * @param  {Boolean} opt_noCase
      * @return {Object}
      * @private
      */
@@ -294,28 +307,21 @@
          * @return {Bool}
          */
         isNumeric: function() {
-            return $.isNumeric(toString(this));
+            return $.isNumeric(this);
         },
 
         /**
          * To int.
-         * @param  {Int}    base
-         * @param  {String} str  @internal
          * @return {Int|null}
          */
-        toInt: function(base, str) {
-            return $.isNumeric(str = toString(this))
-                ? parseInt(str.replace(/^-?\./, '0.'), base || 10) : NULL;
-        },
+        toInt: function() { return toInt(this); },
 
         /**
          * To float.
-         * @param  {String} str @internal
+         * @param  @internal str
          * @return {Float|null}
          */
-        toFloat: function(str) {
-            return $.isNumeric(str = toString(this)) ? parseFloat(str) : NULL;
-        },
+        toFloat: function(str) { return toFloat(this); },
 
         /**
          * To capital case.
@@ -409,6 +415,16 @@
         },
 
         /**
+         * Trim.
+         * @param  {String|undefined} chars @optional
+         * @return {String}
+         * @override For chars option.
+         */
+        trim: function(chars) {
+            return this.trimLeft(chars).trimRight(chars);
+        },
+
+        /**
          * Trim left.
          * @param  {String|undefined} chars @optional
          * @return {String}
@@ -441,21 +457,11 @@
         },
 
         /**
-         * Trim.
-         * @param  {String|undefined} chars @optional
-         * @return {String}
-         * @override For chars option.
-         */
-        trim: function(chars) {
-            return this.trimLeft(chars).trimRight(chars);
-        },
-
-        /**
          * Starts with.
-         * @param  {String} search
-         * @param  {Int}    index
-         * @param  {Bool}   opt_noCase @optional
-         * @param  {String} str        @internal
+         * @param  {String}  search
+         * @param  {Int}     index
+         * @param  {Bool}    opt_noCase
+         * @param  @internal str
          * @return {Bool}
          * @override For no-case option.
          */
@@ -466,10 +472,10 @@
 
         /**
          * Ends with.
-         * @param  {String} search
-         * @param  {Int}    index
-         * @param  {Bool}   opt_noCase @optional
-         * @param  {String} str        @internal
+         * @param  {String}  search
+         * @param  {Int}     index
+         * @param  {Bool}    opt_noCase
+         * @param  @internal str
          * @return {Bool}
          * @override For no-case option.
          */
@@ -480,10 +486,10 @@
 
         /**
          * Contains.
-         * @param  {String} search
-         * @param  {Int}    index
-         * @param  {Bool}   opt_noCase  @optional
-         * @param  {String} str         @internal
+         * @param  {String}  search
+         * @param  {Int}     index
+         * @param  {Bool}    opt_noCase
+         * @param  @internal str
          * @return {Bool}
          */
         contains: function(search, index, opt_noCase, str) {
@@ -610,7 +616,7 @@
          * @return {String}
          */
         trim: function(str, chars) {
-            return (str == NULL) ? NULLS : str.trim(chars);
+            return (str == NULL) ? NULLS : (''+ str).trim(chars);
         },
 
         /**
@@ -620,7 +626,7 @@
          * @return {String}
          */
         trimLeft: function(str, chars) {
-            return (str == NULL) ? NULLS : str.trimLeft(chars);
+            return (str == NULL) ? NULLS : (''+ str).trimLeft(chars);
         },
 
         /**
@@ -630,7 +636,7 @@
          * @return {String}
          */
         trimRight: function(str, chars) {
-            return (str == NULL) ? NULLS : str.trimRight(chars);
+            return (str == NULL) ? NULLS : (''+ str).trimRight(chars);
         },
 
         /**
@@ -670,18 +676,34 @@
         },
 
         /**
-         * Value of.
+         * To value, int, float, string, bool
          * @param  {Any} input
          * @return {Any}
          */
-        valueOf: function(input) {
-            return valueOf(input);
-        },
+        value: function(input) { return toValue(input); },
+        int: function(input) { return toInt(input); },
+        float: function(input) { return toInt(input); },
+        string: function(input) { return toString(input); },
+        bool: function(input) { return toBool(input); },
+
+        /**
+         * Json encode.
+         * @param  {Any} input
+         * @return {String}
+         */
+        jsonEncode: function(input) { return JSON.stringify(input); },
+
+        /**
+         * Json decode.
+         * @param  {String} input
+         * @return {Any}
+         */
+        jsonDecode: function(input) { return JSON.parse(input); },
 
         /**
          * Is set.
          * @param  {Any}    input
-         * @param  {String} opt_key @optional
+         * @param  {String} opt_key
          * @return {Boolean}
          */
         isSet: function(input, opt_key) {
@@ -704,7 +726,7 @@
          * For each.
          * @param  {Array|Object} input
          * @param  {Function}     fn
-         * @param  {Object}       opt__this @optional
+         * @param  {Object}       opt__this
          * @return {Array|Object}
          * @private
          */
@@ -719,7 +741,7 @@
         /**
          * Copy.
          * @param  {Array|Object} input
-         * @param  {Array}        opt_keysExclude @optional
+         * @param  {Array}        opt_keysExclude
          * @return {Array|Object}
          */
         copy: function(input, opt_keysExclude) {
@@ -820,19 +842,19 @@
          * Pick.
          * @param  {Array|Object} input
          * @param  {String}       key
-         * @param  {Any}          opt_defaultValue
+         * @param  {Any}          opt_value
          * @return {Any|undefined}
          * @throws
          */
-        pick: function(input, key, opt_defaultValue) {
-            var value = opt_defaultValue;
+        pick: function(input, key, opt_value) {
+            var value = opt_value;
 
             if (key in input) {
-                value = input[key], delete input[key];
-                // fix keys & length
                 if ($.isArray(input)) {
-                    input.sort();
-                    input.length--;
+                    value = input.splice(key, 1)[0];
+                } else {
+                    value = input[key], delete input[key];
+                    if (input.length) input.length--; // fix keys & length
                 }
             }
 
@@ -842,23 +864,21 @@
         /**
          * Pick all
          * @param  {Array|Object} input
-         * @param  {Array}        keys
-         * @return {Array}
+         * @param  {Object}       ...arguments
+         * @return {Object}
          */
-        pickAll: function(input, keys) {
-            var values = {}, value;
+        pickAll: function(input) {
+            var keys = fn_slice.call(arguments, 1), values = {};
 
-            // splice()
             forEach(input, function(value, key) {
+                // if ($.isNumeric(key)) key *= 1; // fix for indexOf
                 if (keys.indexOf(key) > -1) {
                     values[key] = value, delete input[key];
                 }
             });
 
-            // fix stupid keys & length
-            if (!$.isEmpty(values) && $.isArray(input)) {
-                input.sort();
-                forEach(values, function() { input.length--; });
+            if (input.length && !$.isEmpty(values)) {
+                input.length -= values.length; // fix keys & length
             }
 
             return values;
@@ -1034,58 +1054,44 @@
 
     /**
      * List.
-     * @param  {Array|Object|undefined} data
-     * @param  {Object|undefined}       options @optional
+     * @param  {Iterable} data
      * @return {List}
      * @private
      */
-    function List(data, options) {
-        var _this = this;
-        _this.options = extend({type: undefined, weak: TRUE /* @todo */}, options);
-
-        if (data == NULL) {
-            if (_this.options.type == TYPE_ARRAY_LIST) {
-                data = [];
-            } else if (_this.options.type == TYPE_OBJECT_LIST) {
-                data = {};
-            }
-        }
-
-        _this.setData(data);
+    function List(data) {
+        this.init(data || {});
     }
 
     extend(List[NAME_PROTOTYPE], {
         /**
-         * Set data.
-         * @param {Array|Object} data
+         * Init.
+         * @param  {Iterable} data
+         * @return {List}
          */
-        setData: function(data) {
-            var _this = this;
-
-            if ($.isArray(data)) {
-                _this.type = TYPE_ARRAY_LIST;
-            } else if ($.isObject(data)) {
-                _this.type = TYPE_OBJECT_LIST;
-            } else if (data instanceof List) {
-                _this.type = data.type, data = data.data;
-            } else {
-                throw ('Only Array\'s or Object\'s accepted for List.');
+        init: function(data) {
+            if (!$.isIterable(data)) {
+                throw ('Only iterable objects accepted for List.');
             }
 
-            _this.data = $.copy(data);
-            _this.length = 0;
-            // update size
-            forEach(data, function() { _this.length++; });
+            this.type = $.type(data);
+            this.data = {};
+            this.size = 0;
 
-            return _this;
+            $.forEach(data, function(value, key) {
+                this.data[key] = value;
+                this.size++; // why 'length' sucks?!
+            }, this);
+
+            return this;
         },
 
         /**
-         * Get data.
-         * @return {Array|Object}
+         * For each.
+         * @param  {Function} fn
+         * @return {this}
          */
-        getData: function() {
-            return this.data;
+        forEach: function(fn) {
+            return $.forEach(this.data, fn, this);
         },
 
         /**
@@ -1094,30 +1100,17 @@
          * @param {Any} value
          */
         set: function(key, value) {
-            var _this = this;
-
-            if (_this.isArrayList()) {
-                _this.data[_this.length++] = value;
-            } else if (key == NULL) {
-                _this.data[_this.length++] = value;
-            } else {
-                _this.data[key] = value;
-                _this.length++;
-            }
-
-            return _this;
+            return this.data[key != NULL ? key : this.size] = value, this.size++, this;
         },
 
         /**
          * Get.
          * @param  {Int|String} key
-         * @param  {Any}        opt_defaultValue @optional
+         * @param  {Any}        opt_defaultValue
          * @return {Any}
          */
         get: function(key, opt_defaultValue) {
-            var _this = this;
-
-            return _this.hasKey(key) ? _this.data[key] : opt_defaultValue;
+            return this.hasKey(key) ? this.data[key] : opt_defaultValue;
         },
 
         /**
@@ -1125,7 +1118,9 @@
          * @param  {Int|String} key
          * @return {this}
          */
-        remove: function(key) { this.pick(key); return this; },
+        remove: function(key) {
+            return this.pick(key), this;
+        },
 
         /**
          * Replace.
@@ -1134,15 +1129,11 @@
          * @return {this}
          */
         replace: function(searchValue, replaceValue) {
-            var _this = this;
-
-            forEach(_this.data, function(value, key) {
+            return this.forEach(function(value, key) {
                 if (value === searchValue) {
-                    _this.data[key] = replaceValue;
+                    this.data[key] = replaceValue;
                 }
             });
-
-            return _this;
         },
 
         /**
@@ -1150,50 +1141,33 @@
          * @return {this}
          */
         empty: function() {
-            var _this = this;
-
-            _this.data = _this.isArrayList() ? [] : {};
-            _this.length = 0;
-
-            return _this;
+            return this.data = {}, this.size = 0, this;
         },
 
         /**
          * Keys.
          * @return {Array}
          */
-        keys: function() {
-            return this.reduce([], function(_, key, __, ret) {
-                return ret.concat(key);
-            });
-        },
+        keys: function() { return Object.keys(this.data); },
 
         /**
          * Values.
          * @return {Array}
          */
-        values: function() {
-            return this.reduce([], function(value, _, __, ret) {
-                return ret.concat(value);
-            });
-        },
+        values: function() { return Object.values(this.data); },
 
         /**
          * Has.
-         * @param  {Any}      searchValue
-         * @param  {Boolean}  strict @default=true
+         * @param  {Any}     searchValue
+         * @param  {Boolean} strict @default=true
          * @return {Boolean}
          */
-        has: function(searchValue, strict) {
-            var ret = FALSE;
-
-            forEach(this.data, function(value) {
-                if (strict !== FALSE ? value === searchValue : value == searchValue) {
+        has: function(searchValue, strict, ret /* @internal */) {
+            return ret = FALSE, this.forEach(function(value) {
+                if (strict ? value === searchValue : value == searchValue) {
                     ret = TRUE; return 0; // break
                 }
-            });
-
-            return ret;
+            }), !!ret;
         },
 
         /**
@@ -1206,43 +1180,28 @@
         },
 
         /**
-         * Index.
-         * @param  {Int|String} searchKey
-         * @return {Int}
-         */
-        index: function(searchKey) {
-            if (this.isArrayList()) {
-                return searchKey;
-            }
-
-            var ret = -1;
-            forEach(this.data, function(_, key, i) {
-                if (key === searchKey) {
-                    ret = i; return 0; // break
-                }
-            });
-
-            return ret;
-        },
-
-        /**
          * Append.
-         * @param  {Any}    value
-         * @param  {String} opt_key @optional For objects.
+         * @param  {Any} value
          * @return {this}
          */
-        append: function(value, opt_key) {
-            return this.set(opt_key, value);
+        append: function(value) {
+            return this.set(null, value);
         },
 
         /**
          * Prepend.
-         * @param  {Any}    value
-         * @param  {String} opt_key @optional For objects.
+         * @param  {Any} value
          * @return {this}
          */
-        prepend: function(value, opt_key) {
-            return this.set(this.isArrayList() ? NULL : opt_key, value);
+        prepend: function(value) {
+            var data = {0: value};
+
+            this.forEach(function(value, key) {
+                $.isNumeric(key) && key++; // push key
+                data[key] = value;
+            });
+
+            return this.data = data, this.size++, this;
         },
 
         /**
@@ -1265,14 +1224,14 @@
          * @return {Any}
          */
         find: function(searchValue, opt_defaultValue, opt_returnIndex) {
-            var _this = this, test = searchValue, ret = opt_defaultValue;
+            var test = searchValue, ret = opt_defaultValue;
 
             // make test function
             if (!$.isFunction(searchValue)) {
                 test = function(value) { return value === searchValue; };
             }
 
-            forEach(_this.data, function(value, _, i) {
+            this.forEach(function(value, _, i) {
                 if (test(value)) {
                     ret = opt_returnIndex ? i : value; return 0; // break
                 }
@@ -1284,11 +1243,10 @@
         /**
          * Find index.
          * @param  {Any} searchValue
-         * @param  {Any} opt_defaultValue
          * @return {Any}
          */
-        findIndex: function(searchValue, opt_defaultValue) {
-            return this.find(searchValue, opt_defaultValue, TRUE)
+        findIndex: function(searchValue) {
+            return this.find(searchValue, -1, TRUE)
         },
 
         /**
@@ -1298,10 +1256,10 @@
          * @return {Any}
          */
         pick: function(key, opt_defaultValue) {
-            var _this = this, ret = $.pick(_this.data, key, opt_defaultValue);
+            var ret = opt_defaultValue;
 
-            if (ret !== opt_defaultValue) {
-                _this.length = 0, _this.for(function() { _this.length++; });
+            if (key in this.data) {
+                ret = this.data[key], delete this.data[key], this.size--;
             }
 
             return ret;
@@ -1309,16 +1267,17 @@
 
         /**
          * Pick all.
-         * @param  {Array} keys
-         * @return {Array}
+         * @param  {Object} ...arguments
+         * @return {Object}
          */
-        pickAll: function(keys) {
-            var _this = this, ret = $.pickAll(_this.data, keys);
+        pickAll: function() {
+            var ret = {};
 
-            // update length;
-            if (!$.isEmpty(ret)) {
-                _this.length = 0, _this.for(function() { _this.length++; });
-            }
+            $.forEach(fn_slice.call(arguments), function(key) {
+                if (key in this.data) {
+                    ret[key] = this.data[key], delete this.data[key], this.size--;
+                }
+            }, this);
 
             return ret;
         },
@@ -1332,43 +1291,13 @@
         },
 
         /**
-         * For.
-         * @param  {Function} fn
-         * @return {this}
-         */
-        for: function(fn) {
-            return forEach(this.data, fn, this);
-        },
-
-        /**
-         * For each.
-         * @param  {Function} fn
-         * @return {this}
-         */
-        forEach: function(fn) {
-            var _this = this, i = 0, key;
-
-            for (key in _this.data) {
-                if (_this.data.hasOwnProperty(key)) {
-                    if (fn.call(_this, key, _this.data[key], i++) === 0) {
-                        break;
-                    }
-                }
-            }
-
-            return _this;
-        },
-
-        /**
          * Map.
          * @param  {Function} fn
          * @return {this}
          */
         map: function(fn) {
-            var _this = this;
-
-            return _this.for(function(value, key, i) {
-                _this.data[key] = fn(value, key, i);
+            return this.forEach(function(value, key, i) {
+                this.data[key] = fn(value, key, i);
             });
         },
 
@@ -1379,11 +1308,9 @@
          * @return {Any}
          */
         reduce: function(inValue, fn) {
-            this.for(function(value, key, i) {
+            return this.forEach(function(value, key, i) {
                 inValue = fn(value, key, i, inValue);
-            });
-
-            return inValue;
+            }), inValue;
         },
 
         /**
@@ -1392,18 +1319,14 @@
          * @return {this}
          */
         filter: function(fn) {
-            var _this = this, list = new List(NULL, {type: _this.type});
+            var list = new List();
+            fn = fn || function(value) { return !!value; }; // set default tester
 
-            // set default
-            fn = fn || function(value) { return !!value; };
-
-            _this.for(function(value, key, i) {
+            return this.forEach(function(value, key, i) {
                 if (fn(value, key, i)) {
                     list.set(key, value);
                 }
-            });
-
-            return _this.setData(list.data);
+            }), this.data = list.data;
         },
 
         /**
@@ -1412,15 +1335,13 @@
          * @return {List}
          */
         select: function(fn) {
-            var _this = this, list = new List(NULL, {type: _this.type});
+            var list = new List();
 
-            _this.for(function(value, key, i) {
+            return this.forEach(function(value, key, i) {
                 if (fn(value, key, i)) {
                     list.set(key, value);
                 }
-            });
-
-            return list;
+            }), list;
         },
 
         /**
@@ -1430,17 +1351,15 @@
          * @return {List}
          */
         selectAll: function(data, fn) {
-            var _this = this, list = new List(data)
+            var list = new List(data)
 
-            forEach(_this.data, function(value) {
-                forEach(value, function(value, key, i) {
+            return this.forEach(function(value) {
+                $.forEach(value, function(value, key, i) {
                     if (fn(value, key, i)) {
                         list.append(value);
                     }
                 });
-            });
-
-            return list;
+            }), list;
         },
 
         /**
@@ -1448,15 +1367,13 @@
          * @return {this}
          */
         uniq: function() {
-            var _this = this, list = new List(NULL, {type: _this.type});
+            var list = new List();
 
-            _this.for(function(value, key) {
+            return this.forEach(function(value, key) {
                 if (!list.has(value)) {
                     list.set(key, value);
                 }
-            });
-
-            return _this.setData(list.data);
+            }), this.data = list.data;
         },
 
         /**
@@ -1464,31 +1381,28 @@
          * @return {this}
          */
         reverse: function() {
-            var _this = this, data, keys;
+            var data = {};
 
-            if (_this.isArrayList()) {
-                data = _this.data.reverse();
+            if (this.type == 'array' || this.type == 'string') {
+                data = this.values().reverse();
             } else {
-                data = {}, keys = _this.keys().reverse();
-                forEach(keys, function(key) {
-                    data[key] = _this.data[key];
-                });
+                $.forEach(this.keys().reverse(), function(key) {
+                    data[key] = this.data[key];
+                }, this);
             }
 
-            return _this.setData(data);
+            return this.data = data;
         },
 
         /**
          * First.
-         * @param  {Any} opt_defaultValue @optional
+         * @param  {Any} opt_defaultValue
          * @return {Any}
          */
         first: function(opt_defaultValue) {
-            this.for(function(value) {
+            return this.forEach(function(value) {
                 opt_defaultValue = value; return 0; //break
-            });
-
-            return opt_defaultValue;
+            }), opt_defaultValue;
         },
 
         /**
@@ -1497,29 +1411,28 @@
          * @return {Any}
          */
         last: function(opt_defaultValue) {
-            this.copy().reverse().for(function(value, key) {
-                opt_defaultValue = value; return 0; //break
-            });
-
-            return opt_defaultValue;
+            return this.forEach(function(value, key, i) {
+                opt_defaultValue = value;
+            }), opt_defaultValue;
         },
 
         /**
          * Is empty.
          * @return {Boolean}
          */
-        isEmpty: function() { return !this.length; },
+        isEmpty: function() {
+            return !this.size;
+        },
 
         /**
          * To string
          * @return {String}
          */
-        toString: function() { return JSON.stringify(this.data); }
+        toString: function() {
+            return (this.type == 'string') ? this.values().join('')
+                : $.jsonEncode(this.type == 'array' ? this.values() : this.data);
+        }
     });
-
-    // extend lists
-    $.class(ArrayList).extends(List);
-    $.class(ObjectList).extends(List);
 
     // onReady callbacks
     var callbacks = [];
@@ -1534,7 +1447,7 @@
     /**
      * Oh baby..
      * @param  {Function}           callback
-     * @param  {Document|undefined} document @optional
+     * @param  {Document|undefined} document
      * @return {none}
      */
     $.onReady = function(callback, document) {
