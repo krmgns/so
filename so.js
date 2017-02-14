@@ -1426,6 +1426,23 @@
         },
 
         /**
+         * Select.
+         * @param  {Function} fn
+         * @return {List}
+         */
+        select: function(fn) {
+            var _this = this, list = new List(NULL, {type: _this.type});
+
+            _this.for(function(value, key, i) {
+                if (fn(value, key, i)) {
+                    list.set(key, value);
+                }
+            });
+
+            return list;
+        },
+
+        /**
          * Uniq.
          * @return {this}
          */
