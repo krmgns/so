@@ -27,16 +27,27 @@ so.onReady(function($) {
 <script>
 so.onReady(function($) {
     var a, b, c,
-        list = [1,2,33]
-        list = {a:1,b:2,c:3}
+        list = 'list'
+        // list = [1,2,'last']
+        list = {a:.1,b:2,c:'last'}
 
     // list = $.list(list)
+
+    // log(list.filter(function(v,k,i) {return log(v), $.isInt(v)}))
+    // log(list.filter(function(v,k,i) {return $.isFloat(v)}))
+    // log(list.append(10))
+    // log(list)
+    // log(list.data)
+    // log(list.toString())
 
     // log($.pick(list, 0))
     // log(list.pickAll([0,1,2,3]))
     // log(list.pickAll(["a","b","c"]))
-    // log(list)
 
+    // log($.list([1,2,33]).selectAll([], function(v,k) { return v>2 }))
+
+    // log($.list([1,2,33]).select(function(v,k) { return v>2 }))
+    // log($.list({a:1,b:2,c:3}).select(function(v,k) { return v>2 }))
 
     // a = {"a":undefined,"b":Infinity,"c":3, d:"ddd"}
     // // b = $.object.has(a, "dddd")
