@@ -1051,25 +1051,30 @@
     /**
      * List.
      * @param  {Iterable} data
+     * @param  {Object}   options
      * @return {List}
      * @private
      */
-    function List(data) {
-        this.init(data || {});
+    function List(data, options) {
+        this.init(data || {}, options);
     }
 
     extend(List[NAME_PROTOTYPE], {
         /**
          * Init.
          * @param  {Iterable} data
+         * @param  {Object}   options
          * @return {List}
          */
-        init: function(data) {
+        init: function(data, options) {
             if (!$.isIterable(data)) {
                 throw ('Only iterable objects accepted for List.');
             }
 
-            this.type = $.type(data);
+            options = $.extend({type: $.type(data)}, options);
+            log(options)
+
+            this.type = options.type;
             this.data = {};
             this.size = 0;
 
@@ -1197,7 +1202,7 @@
                 data[key] = value;
             });
 
-            return this.data = data, this.size++, this;
+            return this.init(data);
         },
 
         /**
@@ -1315,14 +1320,14 @@
          * @return {this}
          */
         filter: function(fn) {
-            var list = new List();
+            var _this = this, list = new List();
             fn = fn || function(value) { return !!value; }; // set default tester
 
             return this.forEach(function(value, key, i) {
                 if (fn(value, key, i)) {
                     list.set(key, value);
                 }
-            }), this.data = list.data;
+            }), this.init(list.data, {type: _this.type});
         },
 
         /**
@@ -1347,7 +1352,7 @@
          * @return {List}
          */
         selectAll: function(data, fn) {
-            var list = new List(data)
+            var list = new List(data);
 
             return this.forEach(function(value) {
                 $.forEach(value, function(value, key, i) {
@@ -1363,13 +1368,13 @@
          * @return {this}
          */
         uniq: function() {
-            var list = new List();
+            var _this = this, list = new List();
 
             return this.forEach(function(value, key) {
                 if (!list.has(value)) {
                     list.set(key, value);
                 }
-            }), this.data = list.data;
+            }), this.init(list.data, {type: _this.type});
         },
 
         /**
@@ -1377,7 +1382,7 @@
          * @return {this}
          */
         reverse: function() {
-            var data = {};
+            var _this = this, data = {};
 
             if (this.type == 'array' || this.type == 'string') {
                 data = this.values().reverse();
@@ -1387,7 +1392,7 @@
                 }, this);
             }
 
-            return this.data = data;
+            return this.init(data, {type: _this.type});
         },
 
         /**
