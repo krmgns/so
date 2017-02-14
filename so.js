@@ -1411,18 +1411,18 @@
          * @return {this}
          */
         filter: function(fn) {
-            var _this = this;
+            var _this = this, list = new List(NULL, {type: _this.type});
 
             // set default
             fn = fn || function(value) { return !!value; };
 
             _this.for(function(value, key, i) {
-                if (!fn(value, key, i)) {
-                    _this.remove(key);
+                if (fn(value, key, i)) {
+                    list.set(key, value);
                 }
             });
 
-            return _this;
+            return _this.setData(list.data);
         },
 
         /**
@@ -1430,7 +1430,7 @@
          * @return {this}
          */
         uniq: function() {
-            var _this = this, list = new List(_this.isArrayList() ? [] : {});
+            var _this = this, list = new List(NULL, {type: _this.type});
 
             _this.for(function(value, key) {
                 if (!list.has(value)) {
