@@ -1117,7 +1117,7 @@
         set: function(key, value) {
             var _this = this;
 
-            if (_this.isArrayList) {
+            if (_this.isArrayList()) {
                 _this.data[_this.length++] = value;
             } else {
                 _this.data[key] = value;
