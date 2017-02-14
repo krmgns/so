@@ -1048,10 +1048,6 @@
     $.class.create = $.class().create;
     $.class.extend = $.class().extend;
 
-    // list types
-    var TYPE_ARRAY_LIST = 'ArrayList',
-        TYPE_OBJECT_LIST = 'ObjectList';
-
     /**
      * List.
      * @param  {Iterable} data
