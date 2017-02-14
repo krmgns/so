@@ -222,42 +222,31 @@
     /**
      * Object extends.
      */
-    extend(Object, {
-        /**
-         * Keys.
-         * @param  {Object} object
-         * @param  @internal ret
-         * @return {Array}
-         * @override
-         */
-        keys: function(object, ret) {
-            return ret = [], forEach(object, function(_, key) { ret.push(key); }), ret;
-        },
-        /**
-         * Values.
-         * @param  {Object} object
-         * @param  @internal ret
-         * @return {Array}
-         * @override
-         */
-        values: function(object, ret) {
-            return ret = [], forEach(object, function(value) { ret.push(value); }), ret;
-        }
-    });
+    /**
+     * Keys & values.
+     * @param  {Object} object
+     * @param  @internal ret
+     * @return {Array}
+     */
+    Object.keys = Object.keys || function(object, ret) {
+        return ret = [], forEach(object, function(_, key) { ret.push(key); }), ret;
+    };
+    Object.values = Object.values || function(object, ret) {
+        return ret = [], forEach(object, function(value) { ret.push(value); }), ret;
+    };
 
     /**
      * Array extends.
      */
     extend(Array[NAME_PROTOTYPE], {
-        keys: function() { return Object.keys(this); },
         /**
          * Get.
          * @param  {Int} key
-         * @param  {Any} opt_value
+         * @param  {Any} valueDefault
          * @return {Any}
          */
-        get: function(key, opt_value) {
-            return (key in this) ? this[key] : opt_value;
+        get: function(key, valueDefault) {
+            return (key in this) ? this[key] : valueDefault;
         }
     });
 
