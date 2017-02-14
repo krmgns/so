@@ -1444,7 +1444,25 @@
             return list;
         },
 
+        /**
+         * Select all.
+         * @param  {Array|Object} data
+         * @param  {Function}     fn
+         * @return {[type]}
+         */
+        selectAll: function(data, fn) {
+            var _this = this, list = new List(data)
 
+            forEach(_this.data, function(value) {
+                forEach(value, function(value, key, i) {
+                    if (fn(value, key, i)) {
+                        list.append(value);
+                    }
+                });
+            });
+
+            return list;
+        },
 
         /**
          * Uniq.
