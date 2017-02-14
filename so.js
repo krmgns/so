@@ -1087,6 +1087,8 @@
                 _this.type = TYPE_ARRAY_LIST;
             } else if ($.isObject(data)) {
                 _this.type = TYPE_OBJECT_LIST;
+            } else if (data instanceof List) {
+                _this.type = data.type, data = data.data;
             } else {
                 throw ('Only Array\'s or Object\'s accepted for List.');
             }
@@ -1109,13 +1111,18 @@
 
         /**
          * Set.
-         * @param {Int|String} key
+         * @param {Int|String|undefined} key
          * @param {Any} value
          */
         set: function(key, value) {
             var _this = this;
 
-            _this.data[(key != NULL ? key : _this.length++)] = value;
+            if (_this.isArrayList) {
+                _this.data[_this.length++] = value;
+            } else {
+                _this.data[key] = value;
+                _this.length++;
+            }
 
             return _this;
         },
@@ -1423,7 +1430,7 @@
          * @return {this}
          */
         uniq: function() {
-            var _this = this, list = new List();
+            var _this = this, list = new List(_this.isArrayList() ? [] : {});
 
             _this.for(function(value, key) {
                 if (!list.has(value)) {
