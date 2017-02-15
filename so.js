@@ -540,7 +540,7 @@
 
     // shortcut
     function _log(fn, args) {
-        console[fn || 'log'].apply(NULL, ['>> so:'].concat(makeArray(args)));
+        console[fn].apply(NULL, ['>> so:'].concat(makeArray(args)));
     }
 
     /**
