@@ -1288,10 +1288,31 @@
 
         /**
          * Copy.
+         * @param  {Object} options
          * @return {List}
          */
-        copy: function() {
-            return new List(this);
+        copy: function(options) {
+            return new List(this, options);
+        },
+
+        /**
+         * Copy to.
+         * @param  {List} list
+         * @param  {Object} options
+         * @return {List}
+         */
+        copyTo: function(list, options) {
+            return list.init(this.data, options);
+        },
+
+        /**
+         * Copy with.
+         * @param  {Object} data
+         * @param  {Object} options
+         * @return {[type]}
+         */
+        copyWith: function(list, options) {
+            return list.init($.extend({}, this.data, list.data), options);
         },
 
         /**
