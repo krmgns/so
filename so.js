@@ -235,10 +235,23 @@
         return ret = [], forEach(object, function(value) { ret.push(value); }), ret;
     };
 
+    // shortcut
+    function index(input, search) {
+        return input.indexOf(search) > -1;
+    }
+
     /**
      * Array extends.
      */
     extend(Array[NAME_PROTOTYPE], {
+        /**
+         * Index.
+         * @param  {Any} search
+         * @return {Int|undefined}
+         */
+        index: function(search) {
+            return index(this, search);
+        },
         /**
          * Get.
          * @param  {Int} key
@@ -291,6 +304,14 @@
      * String extends.
      */
     extend(String[NAME_PROTOTYPE], {
+        /**
+         * Index.
+         * @param  {Any} search
+         * @return {Int|undefined}
+         */
+        index: function(search) {
+            return index(this, search);
+        },
         /**
          * Is numeric.
          * @return {Bool}
@@ -387,7 +408,7 @@
             var str = toString(this);
             input = toString(input);
 
-            if (str.indexOf(input) > -1) {
+            if (str.index(input)) {
                 return str.substr(input.length).substr(-input.length);
             }
 
@@ -476,13 +497,12 @@
         /**
          * Contains.
          * @param  {String}  search
-         * @param  {Int}     index
          * @param  {Bool}    opt_noCase
          * @param  @internal str
          * @return {Bool}
          */
-        contains: function(search, index, opt_noCase, str) {
-            return (str = toSearchStuff(this, search, index, opt_noCase))
+        contains: function(search, opt_noCase, str) {
+            return (str = toSearchStuff(this, search, opt_noCase))
                 && str.s !== str.s.split(str.ss)[0];
         }
     });
@@ -744,16 +764,6 @@
          */
         copy: function(input, opt_keysExclude) {
             return $.copyTo($.isArray(input) ? [] : {}, input, opt_keysExclude, TRUE);
-
-            // var ret = $.isArray(input) ? [] : {}, keys = opt_keysExclude || [];
-
-            // forEach(input, function(value, key) {
-            //     if (keys.indexOf(key) < 0) {
-            //         ret[key] = value;
-            //     }
-            // });
-
-            // return ret;
         },
 
         /**
@@ -767,7 +777,7 @@
         copyTo: function(inputTo, inputFrom, opt_keysExclude, opt_overwrite) {
             var keys = opt_keysExclude || [], key;
             for (key in inputFrom) {
-                if (keys.indexOf(key) < 0) {
+                if (!keys.index(key)) {
                     if (opt_overwrite !== FALSE && key in inputTo) {
                         continue;
                     }
@@ -869,8 +879,8 @@
             var keys = makeArray(arguments, 1), values = {};
 
             forEach(input, function(value, key) {
-                // if ($.isNumeric(key)) key *= 1; // fix for indexOf
-                if (keys.indexOf(key) > -1) {
+                // if ($.isNumeric(key)) key *= 1; // fix for index
+                if (keys.index(key)) {
                     values[key] = value, delete input[key];
                 }
             });
