@@ -1060,7 +1060,13 @@
                 throw ('Only iterable objects accepted for List.');
             }
 
-            options = $.extend({type: $.type(data)}, options);
+            var type = $.type(data);
+            if (data instanceof List) {
+                type = data.type;
+                data = data.data;
+            }
+
+            options = $.extend({type: type}, options);
 
             this.type = options.type;
             this.data = {};
@@ -1068,7 +1074,7 @@
 
             $.forEach(data, function(value, key) {
                 this.data[key] = value;
-                this.size++; // why 'length' sucks?!
+                this.size++; // why naming as 'length' sucks?!
             }, this);
 
             return this;
