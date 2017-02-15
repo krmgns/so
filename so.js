@@ -931,39 +931,33 @@
 
         /**
          * Define property.
-         * @param  {Object}  object
-         * @param  {String}  name
-         * @param  {Any}     value
-         * @param  {Boolean} enumerable
-         * @param  {Boolean} writable
-         * @param  {Boolean} configurable
+         * @param  {Object} object
+         * @param  {String} name
+         * @param  {Object} property
          * @return {Object}
          */
-        defineProperty: function(object, name, value, enumerable, writable, configurable) {
-            if ($.isVoid(enumerable)) {
-                enumerable = TRUE; // always visible
+        defineProperty: function(object, name, property) {
+            if ($.isVoid(property[2])) {
+                property[2] = TRUE; // always visible
             }
 
             return Object.defineProperty(object, name, {
-                value: value,
-                writable: !!writable,
-                configurable: !!configurable,
-                enumerable: !!enumerable
+                value: property[0],
+                writable: property[1] != NULL ? !!property[1] : TRUE,
+                enumerable: property[2] != NULL ? !!property[2] : TRUE,
+                configurable: property[3] != NULL ? !!property[3] : FALSE
             });
         },
 
         /**
          * Define property all.
-         * @param  {Object}  object
-         * @param  {Object}  properties
-         * @param  {Boolean} enumerable
-         * @param  {Boolean} writable
-         * @param  {Boolean} configurable
+         * @param  {Object} object
+         * @param  {Object} properties
          * @return {Object}
          */
-        definePropertyAll: function(object, properties, enumerable, writable, configurable) {
-            return $.forEach(properties, function(value, name) {
-                $.defineProperty(object, name, value, enumerable, writable, configurable);
+        definePropertyAll: function(object, properties) {
+            return $.forEach(properties, function(property) {
+                $.defineProperty(object, name, property);
             });
         }
     });
@@ -1239,7 +1233,7 @@
          * @return {this}
          */
         append: function(value) {
-            return this.set(null, value);
+            return this.set(NULL, value);
         },
 
         /**
