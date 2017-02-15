@@ -840,10 +840,11 @@
         /**
          * List
          * @param  {Array|Object} data
+         * @param  {Object}       options
          * @return {List}
          */
-        list: function(data) {
-            return new List(data);
+        list: function(data, options) {
+            return new List(data, options);
         },
 
         /**
