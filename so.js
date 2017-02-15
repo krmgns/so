@@ -1291,7 +1291,7 @@
          * @return {List}
          */
         copy: function() {
-            return new List(this.data);
+            return new List(this);
         },
 
         /**
