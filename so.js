@@ -838,6 +838,24 @@
         },
 
         /**
+         * Object.
+         * @param  {Object} object
+         * @param  {Object} properties
+         * @return {Object}
+         */
+        object: function(object, properties) {
+            $.forEach(properties, function(value, key) {
+                properties[key] = {
+                    value: value[0],
+                    writable: value[1] != NULL ? !!value[1] : TRUE,
+                    enumerable: value[2] != NULL ? !!value[2] : TRUE,
+                    configurable: value[3] != NULL ? !!value[3] : FALSE
+                }
+            });
+            return Object.create(object, properties);
+        }
+
+        /**
          * List
          * @param  {Array|Object} data
          * @param  {Object}       options
