@@ -30,9 +30,7 @@
     ;
 
     function createEvent(eventClass, eventType, options) { // temizle
-        if (!eventType) {
-            $.throw('Type required.');
-        }
+        if (!eventType) $.throw('Type required.');
 
         var event, eventClassOrig;
         options = $.extend({}, optionsDefault, options);
@@ -320,7 +318,7 @@
                 // el.off('**')
                 // el.off('click')
                 // el.off('click**')
-                // el.off('click', f1)
+                el.off('click', f1)
                 // log(this._events)
             })
             // event.unbind()
