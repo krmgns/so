@@ -1116,6 +1116,7 @@
          */
         forEachAll: function(fn) {
             var key, value, i = 0;
+
             return this.forEach(function(list) {
                 for (key in list.data) {
                     value = list.data[key];
@@ -1426,12 +1427,10 @@
         selectAll: function(fn) {
             var list = new List();
 
-            return this.forEach(function(value) {
-                $.forEach(value, function(value, key, i) {
-                    if (fn(value, key, i)) {
-                        list.append(value);
-                    }
-                });
+            return this.forEachAll(function(value, key, i) {
+                if (fn(value, key, i)) {
+                    list.append(value);
+                }
             }), list;
         },
 
