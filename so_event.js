@@ -1,7 +1,6 @@
 ;(function(window, $) { 'use strict';
 
-    var re_typesFix = /^(UI|Mouse|Mutation|HTML)Event/i,
-        re_types = {
+    var re_types = {
             UIEvent: 'resize|scroll|select|(un)?load|DOMActivate',
             MouseEvent: '(dbl)?click|mouse(up|down|enter|leave|in|out|over|move|wheel)|show|contextmenu|DOMMouseScroll',
             FocusEvent: 'blur|focus(in|out)?|DOMFocus(In|Out)',
@@ -19,6 +18,7 @@
             CompositionEvent: 'composition(end|start|update)',
             DeviceMotionEvent: 'devicemotion', DeviceOrientationEvent: 'deviceorientation'
         },
+        re_typesFix = /^(UI|Mouse|Mutation|HTML)Event/i,
         re_typesStandard = new RegExp(Object.values(re_types).join('|'), 'i'),
         optionsDefault = {
             bubbles: true, cancelable: true, scoped: false, composed: false, // all
