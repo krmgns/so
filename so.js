@@ -1154,7 +1154,7 @@
          * @return {this}
          */
         remove: function(value) {
-            return this.pick(this.findIndex(value)), this;
+            return this.pick(this.findKey(value)), this;
         },
 
         /**
@@ -1272,12 +1272,12 @@
 
         /**
          * Find.
-         * @param  {Any}     searchValue
-         * @param  {Any}     opt_defaultValue
-         * @param  {Boolean} opt_returnIndex
+         * @param  {Any} searchValue
+         * @param  {Any} opt_defaultValue
+         * @param  {Int} opt_return
          * @return {Any}
          */
-        find: function(searchValue, opt_defaultValue, opt_returnIndex) {
+        find: function(searchValue, opt_defaultValue, opt_return) {
             var test = searchValue, ret = opt_defaultValue;
 
             // make test function
@@ -1285,9 +1285,10 @@
                 test = function(value) { return value === searchValue; };
             }
 
-            this.forEach(function(value, _, i) {
+            this.forEach(function(value, key, i) {
                 if (test(value)) {
-                    ret = opt_returnIndex ? i : value; return 0; // break
+                    ret = opt_return == NULL ? value : opt_return == 0 ? key : i;
+                    return 0; // break
                 }
             });
 
@@ -1297,10 +1298,19 @@
         /**
          * Find index.
          * @param  {Any} searchValue
-         * @return {Any}
+         * @return {String|null}
+         */
+        findKey: function(searchValue) {
+            return this.find(searchValue, NULL, 0);
+        },
+
+        /**
+         * Find index.
+         * @param  {Any} searchValue
+         * @return {Int|null}
          */
         findIndex: function(searchValue) {
-            return this.find(searchValue, -1, TRUE)
+            return this.find(searchValue, NULL, 1);
         },
 
         /**

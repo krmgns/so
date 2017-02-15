@@ -20,8 +20,6 @@
             DeviceMotionEvent: 'devicemotion', DeviceOrientationEvent: 'deviceorientation'
         },
         re_typesStandard = new RegExp(Object.values(re_types).join('|'), 'i'),
-        fn_warn = function(message) { console.warn(message) },
-        fn_throw = function(message) { throw (message); },
         optionsDefault = {
             once: false, useCapture: false, passive: false, data: {}, custom: false,
             bubbles: true, cancelable: true, composed: false, // common
@@ -34,7 +32,7 @@
 
     function createEvent(eventClass, eventType, options) { // temizle
         if (!eventType) {
-            fn_throw('Type required.');
+            $.throw('Type required.');
         }
 
         var event, eventClass, eventClassOrig;
@@ -160,12 +158,19 @@
         function initEventTarget(target) {
             return new EventTarget(target);
         }
-        function checkTarget(target) {
-            if (!target) fn_throw('No target given.');
+        function checkTarget(target, eventType) {
+            if (!target) $.throw('No target given.');
+            if (!target.Events) {
+                target.Events = $.list();
+            }
+            if (eventType && !target.Events.get(eventType)) {
+                target.Events.set(eventType, $.list());
+            }
+            return target;
         }
 
         function Event(type, fn, options) {
-            if (!type) fn_throw('Type required.');
+            if (!type) $.throw('Type required.');
 
             if ($.isObject(fn)) {
                 options = fn, fn = options.fn;
@@ -205,90 +210,148 @@
                 initEventTarget(target).addEvent(this);
                 return this;
             },
-            unbind: function() {
-                initEventTarget(this.target).removeEvent(this);
+            unbind: function(type) {
+                if (!type) {
+                    initEventTarget(this.target).removeEvent(this);
+                } else {
+                    var _this = this;
+                    type.split(/,\s*/).forEach(function(type) {
+                        _this.type = type;
+                        initEventTarget(_this.target).removeEvent(_this);
+                    });
+                }
                 return this;
             },
-            fire: function() {
-                initEventTarget(this.target).fireEvents(this);
+            fire: function(type) {
+                if (!type) {
+                    initEventTarget(this.target).fireEvent(this);
+                } else {
+                    var _this = this;
+                    type.split(/,\s*/).forEach(function(type) {
+                        _this.type = type;
+                        initEventTarget(_this.target).fireEvent(_this);
+                    });
+                }
                 return this;
-            }
+            },
+            // for chaining >> el.on(...).fire().off()
+            off: function(type) { return this.unbind(type); }
         });
 
         function EventTarget(target) {
-            checkTarget(target);
-            this.target = target;
-            if (!this.target._events) {
-                this.target._events = {};
-            }
+            this.target = checkTarget(target);
         }
 
         $.extend(EventTarget.prototype, {
             addEvent: function(event) {
-                var _this = this;
-                checkTarget(this.target);
-                if (!this.target._events[event.type]) {
-                    this.target._events[event.type] = [];
-                }
-                event.target = this.target;
+                var target = checkTarget(this.target, event.type);
+                event.target = target;
                 event.eventTarget = this;
-                event.i += this.target._events[event.type].push(event);
-                this.target.addEventListener(event.type, event.fn, event.useCapture);
+                event.i = target.Events.get(event.type).append(event).size - 1;
+                // target.addEventListener(event.type, event.fn, event.useCapture); // ?
             },
             removeEvent: function(event) {
-                var _this = this, events = _this.target._events, toRemoveEvents = [];
-                checkTarget(_this.target);
+                var target = checkTarget(this.target),
+                    events = target.Events, eventsRemove, type = event.type;
 
-                if (events[event.type]) {
-                    if (!event.fn) { // all 'x' types
-                        toRemoveEvents = $.copy(events[event.type]);
-                    } else { // all matched fn's
-                        toRemoveEvents = $.list(events[event.type]).select(function(_event) {
-                            return _event && _event.fnOrig == event.fnOrig;
-                        }).data;
-                    }
-                } else if (event.type == '*') { // all
-                    toRemoveEvents = $.list(events).selectAll([], function(_event) {
-                        return !!_event;
-                    }).data;
-                } else if (event.type == '**') { // all fired
-                    toRemoveEvents = $.list(events).selectAll([], function(_event) {
-                        return _event && _event.fired;
-                    }).data;
-                } else if (event.type.indexOf('**')) { // all fired 'x' types (i.e: click**)
-                    var type = event.type.slice(0, -2);
-                    if (events[type]) {
-                        toRemoveEvents = $.list(events[type]).select(function(_event) {
+                if (events) {
+                    eventsRemove = $.list();
+                    if (type == '*') { // all
+                        eventsRemove = events.selectAll();
+                    } else if (type == '**') { // all fired 'x' types, eg: .off('**')
+                        eventsRemove = events.selectAll(function(_event) {
                             return _event && _event.fired;
-                        }).data;
+                        });
+                    } else if (type.index('**')) { // all fired 'x' types, eg: .off('click**')
+                        type = type.slice(0, -2);
+                        eventsRemove = events.selectAll(function(_event) {
+                            return _event.type == type && _event && _event.fired;
+                        });
+                    } else if (events.data[type]) {
+                        events = events.data[type];
+                        if (event.fn) { // all matched fn's, eg: .off('x', fn)
+                            eventsRemove = events.select(function(_event) {
+                                return _event && _event.fnOrig === event.fnOrig;
+                            });
+                        } else { // all 'x' types, eg: .off('x')
+                            eventsRemove = events;
+                        }
                     }
+                } else $.logWarn('No `%s` type events found to fire.'.format(event.type));
+
+                log("eventsRemove:", eventsRemove)
+
+                events = target.Events;
+                if (eventsRemove) {
+                    eventsRemove.forEach(function(event) {
+                        events.data[event.type].removeAt(event.i);
+                    });
                 }
 
-                $.forEach(toRemoveEvents, function(e) {
-                    if (!e) return;
-                    var type = e.type;
-                    delete events[type][e.i]; // splice sucks..
-
-                    events[type].length--; // think memory
-                    if (!events[type].length) {
-                        events[type] = null;
+                // think memory!
+                events.forEach(function(list, i) {
+                    if (!list.size) {
+                        events.replace(list, null);
                     }
-
-                    _this.target.removeEventListener(type, e.fn, e.useCapture);
                 });
+
+                log("events:", events)
             },
-            fireEvents: function(event) {
-                var _this = this, events = this.target._events, i;
-                checkTarget(this.target);
-                if (events[event.type]) {
-                    events = events[event.type], i = 0;
-                    while (i < events.length) {
-                        events[i].fn(event.event);
-                        i++;
-                    }
-                } else fn_warn('No `%s` type event found.'.format(event.type));
+            fireEvent: function(event) {
+                var target = checkTarget(this.target),
+                    events = target.Events.get(event.type);
+                if (events) {
+                    events.forEach(function(event) {
+                        event.fn(event.event);
+                    });
+                } else $.logWarn('No `%s` type events found to fire.'.format(event.type));
             }
         });
+
+        $.onReady(function() {
+            var el = document.body, event, f0, f1
+
+            el.on('a1', function(e) { log('a1') })
+            el.on('a2', function(e) { log('a2') }) .fire() //.off()
+
+            el.on('click', f0 = function(e) { log('click 0', e) }) .fire() //.unbind()
+
+            el.on('click', f1 = function(e) { log('click 1', e)
+                // el.fire('aaa')
+                // el.off('*')
+                // el.off('**')
+                // el.off('click')
+                // el.off('click**')
+                // el.off('click', f0)
+                // log(this._events)
+            })
+            // event.unbind()
+
+            // el.off('*') // all dönüyor
+            // el.off('**')
+            // el.off('click')
+            // el.off('click**')
+            el.off('click', f0)
+
+            // el.fire('click')
+
+            // el.on('a3', function(e) { log('a3') }).fire()
+
+            // event = $.event.Event('click', function(e) { log(e) }, {once: true})
+            // event.bindTo(el)
+
+            // event = new Event('load', function(e) {
+            //     log(e, e.data)
+            // }, {once: !true, target: !el, data: 111}).bindTo(el)
+
+            // // event.fire()
+
+            // el.addEventListener("click", function(e) {
+            //     event.fire() //.unbind()
+            // }, false)
+        });
+
+
 
         function prepareArgs(fn, options, target, once) {
             if ($.isObject(fn)) {
@@ -307,54 +370,17 @@
         }
         function off(target, type, fn, options, args /* @internal */) {
             args = prepareArgs(fn, options, target);
-            return initEvent(type, args.fn, args.options).unbind();
+            return initEvent(type, args.fn, args.options).unbind(type);
         }
         function fire(target, type, fn, options, args /* @internal */) {
             args = prepareArgs(fn, options, target);
-            return initEvent(type, args.fn, args.options).fire();
+            return initEvent(type, args.fn, args.options).fire(type);
         }
 
         Element.prototype.on = function(type, fn, options) { return on(this, type, fn, options); };
         Element.prototype.off = function(type, fn, options) { return off(this, type, fn, options); };
         Element.prototype.once = function(type, fn, options) { return once(this, type, fn, options); };
         Element.prototype.fire = function(type, fn, options) { return fire(this, type, fn, options); };
-
-        $.onReady(function() {
-            var el = document.body, event, f1, f2
-
-            event = el.on('aaa', function(e) { log('aaa') })
-
-            event = el.on('click', f1 = function(e) { log('click 1') })//.unbind()
-
-            event = el.on('click', f2 = function(e) {
-                log('click 2')
-                // el.fire('aaa')
-                // el.off('*')
-                // el.off('**')
-                // el.off('click')
-                // el.off('click**')
-                el.off('click', f1)
-            })
-            // el.off('click')
-            // event.unbind()
-
-            // log(event)
-
-
-            // event = $.event.Event('click', function(e) { log(e) }, {once: true})
-            // event.bindTo(el)
-
-            // event = new Event('load', function(e) {
-            //     log(e, e.data)
-            // }, {once: !true, target: !el, data: 111}).bindTo(el)
-
-            // // event.fire()
-
-            // el.addEventListener("click", function(e) {
-            //     event.fire() //.unbind()
-            // }, false)
-        });
-
 
         return {
             on: on,
