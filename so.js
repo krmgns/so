@@ -1099,6 +1099,23 @@
         },
 
         /**
+         * For each all.
+         * @param  {Function} fn
+         * @return {this}
+         */
+        forEachAll: function(fn) {
+            var key, value, i = 0;
+            return this.forEach(function(list) {
+                for (key in list.data) {
+                    value = list.data[key];
+                    if (fn(value, key, i++) === 0) {
+                        return 0; // break;
+                    }
+                }
+            });
+        },
+
+        /**
          * Set.
          * @param {Int|String|undefined} key
          * @param {Any} value
