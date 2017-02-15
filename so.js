@@ -1108,7 +1108,7 @@
             return this.forEach(function(list) {
                 for (key in list.data) {
                     value = list.data[key];
-                    if (fn(value, key, i++) === 0) {
+                    if (fn.call(this, value, key, i++) === 0) {
                         return 0; // break;
                     }
                 }
