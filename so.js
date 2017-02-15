@@ -1420,12 +1420,11 @@
 
         /**
          * Select all.
-         * @param  {Array|Object} data
-         * @param  {Function}     fn
+         * @param  {Function} fn
          * @return {List}
          */
-        selectAll: function(data, fn) {
-            var list = new List(data);
+        selectAll: function(fn) {
+            var list = new List();
 
             return this.forEach(function(value) {
                 $.forEach(value, function(value, key, i) {
