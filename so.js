@@ -1131,7 +1131,9 @@
          * @param {Any} value
          */
         set: function(key, value) {
-            return this.data[key != NULL ? key : this.size] = value, this.size++, this;
+            // return this.data[key != NULL ? key : this.size] = value, this.size++, this;
+            return key = key != NULL ? key : this.size, !(key in this.data) && this.size++,
+                this.data[key] = value, this;
         },
 
         /**
