@@ -1179,6 +1179,16 @@
         },
 
         /**
+         * Replace at.
+         * @param  {Int|String} key
+         * @param  {Any}        replaceValue
+         * @return {this}
+         */
+        replaceAt: function(key, replaceValue) {
+            return this.data[key] = replaceValue, this;
+        },
+
+        /**
          * Empty.
          * @return {this}
          */
