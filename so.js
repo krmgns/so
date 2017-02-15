@@ -528,13 +528,14 @@
      */
     extend($, {
         /**
-         * Log tools.
+         * Debug tools.
          * @return {void}
          */
         log: function() { _log('log', arguments); },
         logInfo: function() { _log('info', arguments); },
         logWarn: function() { _log('warn', arguments); },
         logError: function() { _log('error', arguments); },
+        throw: function(message) { throw (message); },
 
         /**
          * Fun.
