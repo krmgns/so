@@ -18,7 +18,7 @@
             CompositionEvent: 'composition(end|start|update)',
             DeviceMotionEvent: 'devicemotion', DeviceOrientationEvent: 'deviceorientation'
         },
-        re_typesFix = /^(UI|Mouse|Mutation|HTML)Event/i,
+        re_typesFix = /^(UI|Mouse|Mutation|HTML)Event$/i,
         re_typesStandard = new RegExp(Object.values(re_types).join('|'), 'i'),
         optionsDefault = {
             bubbles: true, cancelable: true, scoped: false, composed: false, // all
