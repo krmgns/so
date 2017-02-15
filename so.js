@@ -853,7 +853,7 @@
                 }
             });
             return Object.create(object, properties);
-        }
+        },
 
         /**
          * List
