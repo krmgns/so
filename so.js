@@ -497,9 +497,11 @@
     /**
      * Array.
      * @param  {Any} input
+     * @param  {Int} begin
+     * @param  {Int} end
      * @return {Array}
      */
-    function makeArray(input) {
+    function makeArray(input, begin, end) {
         var ret = [], inputType = $.type(input);
 
         if (inputType == 'array') {
@@ -510,10 +512,15 @@
             || input[NAME_NODE_TYPE] || $.isVoid(input.length)) {
             ret = [input];
         } else {
-            ret = fn_slice.call(input);
+            ret = fn_slice.call(input, begin, end);
         }
 
         return ret;
+    }
+
+    // shortcut
+    function _log(fn, args) {
+        console[fn || 'log'].apply(NULL, ['>> so:'].concat(makeArray(args)));
     }
 
     /**
@@ -521,12 +528,13 @@
      */
     extend($, {
         /**
-         * Log.
+         * Log tools.
          * @return {void}
          */
-        log: function() {
-            log.apply(NULL, ['>> so:'].concat(fn_slice.call(arguments)));
-        },
+        log: function() { _log('log', arguments); },
+        logInfo: function() { _log('info', arguments); },
+        logWarn: function() { _log('warn', arguments); },
+        logError: function() { _log('error', arguments); },
 
         /**
          * Fun.
@@ -800,7 +808,7 @@
             }
 
             // any extend
-            return extend.apply(NULL, [target, source].concat(fn_slice.call(arguments, 2)));
+            return extend.apply(NULL, [target, source].concat(makeArray(arguments, 2)));
         },
 
         /**
@@ -857,7 +865,7 @@
          * @return {Object}
          */
         pickAll: function(input) {
-            var keys = fn_slice.call(arguments, 1), values = {};
+            var keys = makeArray(arguments, 1), values = {};
 
             forEach(input, function(value, key) {
                 // if ($.isNumeric(key)) key *= 1; // fix for indexOf
@@ -1277,7 +1285,7 @@
         pickAll: function() {
             var ret = {};
 
-            $.forEach(fn_slice.call(arguments), function(key) {
+            $.forEach(makeArray(arguments), function(key) {
                 if (key in this.data) {
                     ret[key] = this.data[key], delete this.data[key], this.size--;
                 }
