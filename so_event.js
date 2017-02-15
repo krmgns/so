@@ -21,12 +21,11 @@
         },
         re_typesStandard = new RegExp(Object.values(re_types).join('|'), 'i'),
         optionsDefault = {
-            once: false, useCapture: false, passive: false, data: {}, custom: false,
-            bubbles: true, cancelable: true, composed: false, // common
-            view: window, detail: null, // ui
+            bubbles: true, cancelable: true, scoped: false, composed: false, // all
+            view: window, detail: null, // ui, mouse, custom
             relatedNode: null, prevValue: '', newValue: '', attrName: '', attrChange: 0, // mutation
-            screenX: 0, screenY: 0, clientX: 0, clientY: 0, ctrlKey: false, altKey: false,
-            shiftKey: false, metaKey: false, button: 1, relatedTarget: null // mouse
+            screenX: 0, screenY: 0, clientX: 0, clientY: 0, ctrlKey: false, altKey: true, shiftKey: false, metaKey: false, button: 1, relatedTarget: null, // mouse
+            useCapture: false, once: false, passive: false, data: {}
         }
     ;
 
@@ -35,7 +34,7 @@
             $.throw('Type required.');
         }
 
-        var event, eventClass, eventClassOrig;
+        var event, eventClassOrig;
         options = $.extend({}, optionsDefault, options);
 
         if (!eventClass) { // autodetect
@@ -47,7 +46,6 @@
                 }
             });
         }
-
 
         eventClass = eventClassOrig = eventClass || 'Event'; // @default
         if ($.isFunction(window[eventClass])) {
@@ -176,12 +174,17 @@
                 options = fn, fn = options.fn;
             }
 
-            var _this = this, event;
-            this.type = type.toLowerCase();
-            this.options = $.extend({}, optionsDefault, options);
-            this.data = this.options.data;
+            options = $.extend({}, optionsDefault, options);
 
-            event = createEvent(null, this.type, this.options);
+            this.type = type.toLowerCase();
+            this.options = options;
+            this.data = options.data;
+
+            options = $.pickAll(options, 'target', 'useCapture');
+            this.target = options.target;
+            this.useCapture = options.useCapture;
+
+            var event = createEvent(options.eventClass, this.type, options);
             this.event = event.event;
             this.eventClass = event.eventClass;
             this.eventTarget = null;
@@ -189,16 +192,14 @@
             this.fn = extendFn(this, fn);
             this.fnOrig = fn;
 
-            options = $.pickAll(this.options, 'once', 'passive', 'useCapture', 'target', 'custom');
+            options = $.pickAll(options, 'once', 'passive');
             this.once = options.once;
             this.passive = options.passive;
-            this.useCapture = options.useCapture;
-            this.target = options.target || null;
 
-            this.i = -1;
+            this.i = -1; // no bind yet
             this.fired = false;
             this.cancalled = false;
-            this.custom = !!(options.custom || event.eventClass == 'CustomEvent' || !re_typesStandard.test(type));
+            this.custom = event.eventClass == 'CustomEvent' || !re_typesStandard.test(type);
         }
 
         $.extend(Event.prototype, {
@@ -224,12 +225,12 @@
             },
             fire: function(type) {
                 if (!type) {
-                    initEventTarget(this.target).fireEvent(this);
+                    initEventTarget(this.target).dispatch(this);
                 } else {
                     var _this = this;
                     type.split(/,\s*/).forEach(function(type) {
                         _this.type = type;
-                        initEventTarget(_this.target).fireEvent(_this);
+                        initEventTarget(_this.target).dispatch(_this);
                     });
                 }
                 return this;
@@ -248,7 +249,7 @@
                 event.target = target;
                 event.eventTarget = this;
                 event.i = target.Events.get(event.type).append(event).size - 1;
-                // target.addEventListener(event.type, event.fn, event.useCapture); // ?
+                target.addEventListener(event.type, event.fn, event.useCapture);
             },
             removeEvent: function(event) {
                 var target = checkTarget(this.target),
@@ -283,6 +284,7 @@
                     events = target.Events;
                     eventsRemove.forEach(function(event) {
                         events.data[event.type].removeAt(event.i);
+                        target.removeEventListener(event.type, event.fn, event.useCapture);
                     });
 
                     // think memory!
@@ -293,7 +295,7 @@
                     });
                 }
             },
-            fireEvent: function(event) {
+            dispatch: function(event) {
                 var target = checkTarget(this.target),
                     events = target.Events.get(event.type);
                 if (events) {
@@ -318,7 +320,7 @@
                 // el.off('**')
                 // el.off('click')
                 // el.off('click**')
-                // el.off('click', f0)
+                // el.off('click', f1)
                 // log(this._events)
             })
             // event.unbind()
@@ -327,7 +329,7 @@
             // el.off('**')
             // el.off('click')
             // el.off('click**')
-            el.off('click', f0)
+            // el.off('click', f0)
 
             // el.fire('click')
 
