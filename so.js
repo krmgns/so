@@ -1390,7 +1390,7 @@
 
         /**
          * Filter.
-         * @param  {Function} fn
+         * @param  {Function|undefined} fn
          * @return {this}
          */
         filter: function(fn) {
@@ -1421,11 +1421,12 @@
 
         /**
          * Select all.
-         * @param  {Function} fn
+         * @param  {Function|undefined} fn
          * @return {List}
          */
         selectAll: function(fn) {
             var list = new List();
+            fn = fn || function() { return TRUE; }; // set default tester
 
             return this.forEachAll(function(value, key, i) {
                 if (fn(value, key, i)) {
