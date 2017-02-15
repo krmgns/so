@@ -852,6 +852,7 @@
                     configurable: value[3] != NULL ? !!value[3] : FALSE
                 }
             });
+
             return Object.create(object, properties);
         },
 
