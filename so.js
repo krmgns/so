@@ -1104,10 +1104,19 @@
 
         /**
          * Remove.
+         * @param  {Any} value
+         * @return {this}
+         */
+        remove: function(value) {
+            return this.pick(this.findIndex(value)), this;
+        },
+
+        /**
+         * Remove at.
          * @param  {Int|String} key
          * @return {this}
          */
-        remove: function(key) {
+        removeAt: function(key) {
             return this.pick(key), this;
         },
 
