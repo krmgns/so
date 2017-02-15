@@ -279,23 +279,19 @@
                     }
                 } else $.logWarn('No `%s` type events found to fire.'.format(event.type));
 
-                log("eventsRemove:", eventsRemove)
-
-                events = target.Events;
                 if (eventsRemove) {
+                    events = target.Events;
                     eventsRemove.forEach(function(event) {
                         events.data[event.type].removeAt(event.i);
                     });
+
+                    // think memory!
+                    events.forEach(function(list, i) {
+                        if (!list.size) {
+                            events.replaceAt(i, null);
+                        }
+                    });
                 }
-
-                // think memory!
-                events.forEach(function(list, i) {
-                    if (!list.size) {
-                        events.replace(list, null);
-                    }
-                });
-
-                log("events:", events)
             },
             fireEvent: function(event) {
                 var target = checkTarget(this.target),
@@ -327,7 +323,7 @@
             })
             // event.unbind()
 
-            // el.off('*') // all dönüyor
+            // el.off('*')
             // el.off('**')
             // el.off('click')
             // el.off('click**')
