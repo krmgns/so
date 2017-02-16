@@ -1,3 +1,10 @@
+/**
+ * @package so
+ * @object  so.event
+ * @depends so
+ * @author  Kerem Güneş <k-gun@mail.com>
+ * @license The MIT License <https://opensource.org/licenses/MIT>
+ */
 ;(function(window, $) { 'use strict';
 
     var re_types = {
