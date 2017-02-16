@@ -204,30 +204,32 @@
                 options = fn, fn = options.fn;
             }
 
-            this.type = type.toLowerCase();
-            this.options = $.extend({}, optionsDefault, options);
-            this.data = options.data;
+            var _this = this, event;
 
-            options = $.pickAll(this.options, 'target', 'useCapture');
-            this.target = options.target;
-            this.useCapture = !!options.useCapture;
+            _this.type = type.toLowerCase();
+            _this.options = $.extend({}, optionsDefault, options);
+            _this.data = options.data;
 
-            var event = createEvent(options.eventClass, this.type, this.options);
-            this.event = event.event;
-            this.eventClass = event.eventClass;
-            this.eventTarget = NULL;
+            options = $.pickAll(_this.options, 'target', 'useCapture');
+            _this.target = options.target;
+            _this.useCapture = !!options.useCapture;
 
-            this.fn = extendFn(this, fn);
-            this.fnOrig = fn;
+            var event = createEvent(options.eventClass, _this.type, _this.options);
+            _this.event = event.event;
+            _this.eventClass = event.eventClass;
+            _this.eventTarget = NULL;
 
-            options = $.pickAll(this.options, 'once', 'passive');
-            this.once = !!options.once;
-            this.passive = !!options.passive;
+            _this.fn = extendFn(_this, fn);
+            _this.fnOrig = fn;
 
-            this.i = -1; // no bind yet
-            this.fired = 0;
-            this.cancalled = FALSE;
-            this.custom = event.eventClass == 'CustomEvent' || !re_typesStandard.test(type);
+            options = $.pickAll(_this.options, 'once', 'passive');
+            _this.once = !!options.once;
+            _this.passive = !!options.passive;
+
+            _this.i = -1; // no bind yet
+            _this.fired = 0;
+            _this.cancalled = FALSE;
+            _this.custom = event.eventClass == 'CustomEvent' || !re_typesStandard.test(type);
 
         }
 
