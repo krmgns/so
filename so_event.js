@@ -108,17 +108,17 @@
         if (!fn) return;
 
         return function(e) {
+            if (event.once) { // once?
+                event.unbind();
+            }
+
             var target = e.target;
-            // for auto-fired stuff (using fire() in other location)
-            if (!target) {
+            if (!target) { // for auto-fired stuff (using fire() in other location)
                 target = event.eventTarget.target;
             }
 
             event.event = e; // overwrite on initial
-            event.fired = true;
-            if (event.once) { // remember once
-                event.unbind();
-            }
+            event.fired++;
 
             if (!e.data) {
                 e.data = event.data;
@@ -220,9 +220,10 @@
             this.passive = !!options.passive;
 
             this.i = -1; // no bind yet
-            this.fired = false;
+            this.fired = 0;
             this.cancalled = false;
             this.custom = event.eventClass == 'CustomEvent' || !re_typesStandard.test(type);
+
         }
 
         $.extend(Event.prototype, {
@@ -279,6 +280,14 @@
                 }
 
                 return this;
+            },
+
+            /**
+             * Is fired.
+             * @return {Boolean}
+             */
+            isFired: function() {
+                return !!this.fired;
             },
 
             // for chaining >> el.on(...).fire().off()
