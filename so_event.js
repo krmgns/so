@@ -45,7 +45,7 @@
      * @return {Object}
      */
     function createEvent(eventClass, eventType, options) {
-        if (!eventType) $.throw('Type required.');
+        if (!eventType) throw ('Type required.');
 
         var event, eventClassOrig;
         options = $.extend({}, optionsDefault, options);
@@ -172,7 +172,7 @@
             return new EventTarget(target);
         }
         function checkTarget(target, eventType) {
-            if (!target) $.throw('No target given.');
+            if (!target) throw ('No target given.');
 
             if (!target.Events) {
                 target.Events = $.list();
@@ -192,7 +192,7 @@
          * @param {Object}   options
          */
         function Event(type, fn, options) {
-            if (!type) $.throw('Type required.');
+            if (!type) throw ('Type required.');
 
             // ..('click', {fn: function(){...}})
             if ($.isObject(fn)) {
