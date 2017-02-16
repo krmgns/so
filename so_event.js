@@ -348,7 +348,7 @@
                             eventsRemove = events;
                         }
                     }
-                } else $.logWarn('No `%s` type events found to fire.'.format(event.type));
+                } else $.logWarn('No `%s` events found to fire.'.format(event.type));
 
                 if (eventsRemove) {
                     events = target.Events;
