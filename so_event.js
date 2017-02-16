@@ -257,17 +257,18 @@
              * @return {this}
              */
             unbind: function(type) {
+                var _this = this;
+
                 if (!type) {
-                    initEventTarget(this.target).removeEvent(this);
+                    initEventTarget(_this.target).removeEvent(_this);
                 } else {
-                    var _this = this;
                     type.split(/,\s*/).forEach(function(type) {
                         _this.type = type;
                         initEventTarget(_this.target).removeEvent(_this);
                     });
                 }
 
-                return this;
+                return _this;
             },
 
             /**
@@ -276,17 +277,18 @@
              * @return {this}
              */
             fire: function(type) {
+                var _this = this;
+
                 if (!type) {
-                    initEventTarget(this.target).dispatch(this);
+                    initEventTarget(_this.target).dispatch(_this);
                 } else {
-                    var _this = this;
                     type.split(/,\s*/).forEach(function(type) {
                         _this.type = type;
                         initEventTarget(_this.target).dispatch(_this);
                     });
                 }
 
-                return this;
+                return _this;
             },
 
             /**
