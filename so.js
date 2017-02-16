@@ -396,7 +396,7 @@
          * @return {String}
          */
         wrap: function(input) {
-            input = toString(input);  return input + toString(this) + input;
+            return input = toString(input), input + toString(this) + input;
         },
 
         /**
