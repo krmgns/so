@@ -20,16 +20,18 @@
 
 <script>
 so.onReady(function($) {
-    //
+    var els, el = document.body
+    el.once('click', () => log(0)).fire()
+    el.once('click', () => log(1))
 });
 </script>
 
 <script>
 so.onReady(function($) {
-    var a, b, c,
-        list = 'list'
-        // list = [1,2,'last']
-        list = {a:.1,b:2,c:'last'}
+    // var a, b, c,
+    //     list = 'list'
+    //     // list = [1,2,'last']
+    //     list = {a:.1,b:2,c:'last'}
 
     // list = $.list(list)
 
