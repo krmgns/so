@@ -95,16 +95,12 @@
 
         if (len != NULL) {
             for (; i < len; i++) {
-                if (fn.call(_this, input[i], i, i) === 0) {
-                    break;
-                }
+                if (fn.call(_this, input[i], i, i) === 0) break;
             }
         } else {
             for (key in input) {
                 if (input.hasOwnProperty(key)) {
-                    if (fn.call(_this, input[key], key, i++) === 0) {
-                        break;
-                    }
+                    if (fn.call(_this, input[key], key, i++) === 0) break;
                 }
             }
         }
@@ -116,67 +112,67 @@
      * so: type functions.
      */
     extend($, {
-        /** Is void.         @param {Any} input @return {Bool} */
+        /** Is void. @param {Any} input @return {Bool} */
         isVoid: function(input) {
             return (input == NULL);
         },
 
-        /** Is null.         @param {Any} input @return {Bool} */
+        /** Is null. @param {Any} input @return {Bool} */
         isNull: function(input) {
             return (input === NULL);
         },
 
-        /** Is nulls.        @param {Any} input @return {Bool} */
+        /** Is nulls. @param {Any} input @return {Bool} */
         isNulls: function(input) {
             return (input === NULLS);
         },
 
-        /** Is undefined.    @param {Any} input @return {Bool} */
+        /** Is undefined. @param {Any} input @return {Bool} */
         isUndefined: function(input) {
             return (input === undefined);
         },
 
-        /** Is string.       @param {Any} input @return {Bool} */
+        /** Is string. @param {Any} input @return {Bool} */
         isString: function(input) {
             return (typeof input == 'string');
         },
 
-        /** Is bool.         @param {Any} input @return {Bool} */
+        /** Is bool. @param {Any} input @return {Bool} */
         isBool: function(input) {
             return (typeof input == 'boolean');
         },
 
-        /** Is number.       @param {Any} input @return {Bool} */
+        /** Is number. @param {Any} input @return {Bool} */
         isNumber: function(input) {
             return (typeof input == 'number');
         },
 
-        /** Is numeric.      @param {Any} input @return {Bool} */
+        /** Is numeric. @param {Any} input @return {Bool} */
         isNumeric: function(input) {
             return !$.isVoid(input) && !$.isNulls(input) && isFinite(input) && !isNaN(parseFloat(input));
         },
 
-        /** Is function.     @param {Any} input @return {Bool} */
+        /** Is function. @param {Any} input @return {Bool} */
         isFunction: function(input) {
             return (typeof input == 'function');
         },
 
-        /** Is array.        @param {Any} input @return {Bool} */
+        /** Is array.@param {Any} input @return {Bool} */
         isArray: function(input) {
             return Array.isArray(input);
         },
 
-        /** Is object.       @param {Any} input @return {Bool} */
+        /** Is object. @param {Any} input @return {Bool} */
         isObject: function(input) {
             return input && (input.constructor == Object);
         },
 
-        /** Is int.          @param {Any} input @return {Bool} */
+        /** Is int. @param {Any} input @return {Bool} */
         isInt: function(input) {
             return $.isNumber(input) && input == (input | 0);
         },
 
-        /** Is float.        @param {Any} input @return {Bool} */
+        /** Is float. @param {Any} input @return {Bool} */
         isFloat: function(input) {
             return $.isNumber(input) && input != (input | 0);
         },
@@ -184,29 +180,29 @@
         /** Is iterable.     @param {Any} input @return {Bool} */
         isIterable: function(input) {
             return $.isArray(input) || $.isObject(input) || (input && (
-                (input.length && !input[NAME_NODE_TYPE]) || // dom, nodelist, string etc.
+                (input.length != NULL && !input[NAME_NODE_TYPE]) || // dom, nodelist, string etc.
                 (input.constructor && input.constructor.name == 'List') // list
             ));
         },
 
-        /** Is primitive.    @param {Any} input @return {Bool} */
+        /** Is primitive. @param {Any} input @return {Bool} */
         isPrimitive: function(input) {
             return $.isVoid(input) || /^(string|number|boolean)$/.test(typeof input);
         },
 
-        /** Is window.       @param {Any} input @return {Bool} */
+        /** Is window. @param {Any} input @return {Bool} */
         isWindow: function(input) {
             return toBool(input && input == input[NAME_WINDOW]
                 && input.top == input[NAME_WINDOW].top
                 && input.location == input[NAME_WINDOW].location);
         },
 
-        /** Is document.     @param {Any} input @return {Bool} */
+        /** Is document. @param {Any} input @return {Bool} */
         isDocument: function(input) {
             return toBool(input && input[NAME_NODE_TYPE] === NODE_TYPE_DOCUMENT);
         },
 
-        /** Is node.         @param {Any} input @return {Bool} */
+        /** Is node. @param {Any} input @return {Bool} */
         isNode: function(input) {
             return toBool(input && (input[NAME_NODE_TYPE] === NODE_TYPE_ELEMENT
                                  || input[NAME_NODE_TYPE] === NODE_TYPE_DOCUMENT_FRAGMENT));
@@ -219,10 +215,7 @@
     });
 
     /**
-     * Object extends.
-     */
-    /**
-     * Keys & values.
+     * Object keys & values.
      * @param  {Object} object
      * @param  @internal ret
      * @return {Array}
@@ -246,7 +239,7 @@
         /**
          * Index.
          * @param  {Any} search
-         * @return {Int|undefined}
+         * @return {Boolean}
          */
         index: function(search) {
             return index(this, search);
@@ -271,7 +264,7 @@
      */
     function toTrimRegExp(chars, opt_isLeft) {
         return new RegExp((opt_isLeft ? '^[%s]+' : '[%s]+$')
-            .format(chars ? chars.replace(/([\[\]\\])/g, '\\$1') : '\\s'));
+            .format(chars ? chars.replace(/([\[\]\\])/g, '$1') : '\\s'));
     }
 
     /**
@@ -306,7 +299,7 @@
         /**
          * Index.
          * @param  {Any} search
-         * @return {Int|undefined}
+         * @return {Boolean}
          */
         index: function(search) {
             return index(this, search);
@@ -334,7 +327,7 @@
 
         /**
          * To capital case.
-         * @param  {Bool} all
+         * @param  {Bool} all @default=true
          * @return {String}
          */
         toCapitalCase: function(all) {
@@ -360,8 +353,8 @@
         format: function() {
             var str = toString(this), args = arguments, match = str.match(/(%s)/g) || [], i = 0;
 
-            if (args.length < match.length) {
-                throw ('No arguments enough!');
+            if (args.length != match.length) {
+                throw ('Arguments and match length must be equal!');
             }
 
             while (match.shift()) {
