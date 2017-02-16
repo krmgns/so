@@ -233,7 +233,7 @@
 
         }
 
-        $.extend(Event[NAME_PROTOTYPE], {
+        $.extend(Event.prototype, {
             /**
              * Bind.
              * @return {this}
@@ -309,7 +309,7 @@
             this.target = checkTarget(target);
         }
 
-        $.extend(EventTarget[NAME_PROTOTYPE], {
+        $.extend(EventTarget.prototype, {
             /**
              * Add event.
              * @param  {Event} event
@@ -423,7 +423,7 @@
         }
 
         // shortcuts for element
-        $.extend(Element[NAME_PROTOTYPE], {
+        $.extend(Element.prototype, {
             on: function(type, fn, options) { return on(this, type, fn, options); },
             off: function(type, fn, options) { return off(this, type, fn, options); },
             once: function(type, fn, options) { return once(this, type, fn, options); },
