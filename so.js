@@ -11,7 +11,7 @@
         throw ('Archaic browser!');
     }
 
-    // for minify advantage
+    // minify tools
     var NULL = null, NULLS = '',
         TRUE = true, FALSE = false,
 
