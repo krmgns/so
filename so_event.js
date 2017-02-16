@@ -7,6 +7,11 @@
  */
 ;(function(window, $) { 'use strict';
 
+    // minify tools
+    var NULL = null, NULLS = '',
+        TRUE = true, FALSE = false
+    ;
+
     var re_types = {
             UIEvent: 'resize|scroll|select|(un)?load|DOMActivate',
             MouseEvent: '(dbl)?click|mouse(up|down|enter|leave|in|out|over|move|wheel)|show|contextmenu|DOMMouseScroll',
@@ -28,12 +33,12 @@
         re_typesFix = /^(UI|Mouse|Mutation|HTML)Event$/i,
         re_typesStandard = new RegExp(Object.values(re_types).join('|'), 'i'),
         optionsDefault = {
-            bubbles: true, cancelable: true, scoped: false, composed: false, // all
-            view: window, detail: null, // ui, mouse, custom
-            relatedNode: null, prevValue: '', newValue: '', attrName: '', attrChange: 0, // mutation
-            screenX: 0, screenY: 0, clientX: 0, clientY: 0, ctrlKey: false, altKey: true, shiftKey: false,
-                metaKey: false, button: 1, relatedTarget: null, // mouse
-            useCapture: false, once: false, passive: false, data: {}
+            bubbles: TRUE, cancelable: TRUE, scoped: FALSE, composed: FALSE, // all
+            view: window, detail: NULL, // ui, mouse, custom
+            relatedNode: NULL, prevValue: NULLS, newValue: NULLS, attrName: NULLS, attrChange: 0, // mutation
+            screenX: 0, screenY: 0, clientX: 0, clientY: 0, ctrlKey: FALSE, altKey: TRUE, shiftKey: FALSE,
+                metaKey: FALSE, button: 1, relatedTarget: NULL, // mouse
+            useCapture: FALSE, once: FALSE, passive: FALSE, data: {}
         }
     ;
 
@@ -129,33 +134,33 @@
                 event: event,
                 eventTarget: event.eventTarget,
                 originalTarget: event.target,
-                stopped: false,
-                stoppedAll: false,
-                stoppedDefault: false,
-                stoppedBubble: false,
-                stoppedBubbleAll: false,
+                stopped: FALSE,
+                stoppedAll: FALSE,
+                stoppedDefault: FALSE,
+                stoppedBubble: FALSE,
+                stoppedBubbleAll: FALSE,
                 stop: function() {
                     e.stopDefault();
                     e.stopBubble();
-                    e.stopped = true;
+                    e.stopped = TRUE;
                 },
                 stopAll: function() {
                     e.stopDefault();
                     e.stopBubble();
                     e.stopBubbleAll();
-                    e.stoppedAll = true;
+                    e.stoppedAll = TRUE;
                 },
                 stopDefault: function() {
                     e.preventDefault();
-                    e.stoppedDefault = true;
+                    e.stoppedDefault = TRUE;
                 },
                 stopBubble: function() {
                     e.stopPropagation();
-                    e.stoppedBubble = true;
+                    e.stoppedBubble = TRUE;
                 },
                 stopBubbleAll: function() {
                     e.stopImmediatePropagation();
-                    e.stoppedBubbleAll = true;
+                    e.stoppedBubbleAll = TRUE;
                 }
             });
 
@@ -210,7 +215,7 @@
             var event = createEvent(options.eventClass, this.type, this.options);
             this.event = event.event;
             this.eventClass = event.eventClass;
-            this.eventTarget = null;
+            this.eventTarget = NULL;
 
             this.fn = extendFn(this, fn);
             this.fnOrig = fn;
@@ -221,12 +226,12 @@
 
             this.i = -1; // no bind yet
             this.fired = 0;
-            this.cancalled = false;
+            this.cancalled = FALSE;
             this.custom = event.eventClass == 'CustomEvent' || !re_typesStandard.test(type);
 
         }
 
-        $.extend(Event.prototype, {
+        $.extend(Event[NAME_PROTOTYPE], {
             /**
              * Bind.
              * @return {this}
@@ -302,7 +307,7 @@
             this.target = checkTarget(target);
         }
 
-        $.extend(EventTarget.prototype, {
+        $.extend(EventTarget[NAME_PROTOTYPE], {
             /**
              * Add event.
              * @param  {Event} event
@@ -360,7 +365,7 @@
                     // think memory!
                     events.forEach(function(list, i) {
                         if (!list.size) {
-                            events.replaceAt(i, null);
+                            events.replaceAt(i, NULL);
                         }
                     });
                 }
@@ -403,7 +408,7 @@
             return initEvent(type, args.fn, args.options).bind();
         }
         function once(target, type, fn, options, args /* @internal */) {
-            args = prepareArgs(fn, options, target, true);
+            args = prepareArgs(fn, options, target, TRUE);
             return initEvent(type, args.fn, args.options).bind();
         }
         function off(target, type, fn, options, args /* @internal */) {
@@ -416,7 +421,7 @@
         }
 
         // shortcuts for element
-        $.extend(Element.prototype, {
+        $.extend(Element[NAME_PROTOTYPE], {
             on: function(type, fn, options) { return on(this, type, fn, options); },
             off: function(type, fn, options) { return off(this, type, fn, options); },
             once: function(type, fn, options) { return once(this, type, fn, options); },
