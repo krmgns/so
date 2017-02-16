@@ -1,11 +1,10 @@
+/**
+ * @package so
+ * @object  so
+ * @author  Kerem Güneş <k-gun@mail.com>
+ * @license The MIT License <https://opensource.org/licenses/MIT>
+ */
 ;(function(window, undefined) { 'use strict';
-
-    /**
-     * @package so
-     * @object  so
-     * @author  Kerem Güneş <k-gun@mail.com>
-     * @license The MIT License <https://opensource.org/licenses/MIT>
-     */
 
     // simply support check
     if (!''.trim) {

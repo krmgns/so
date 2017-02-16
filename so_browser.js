@@ -1,12 +1,12 @@
+/**
+ * @package so
+ * @object  so.browser
+ * @depends so
+ * @author  Kerem Güneş <k-gun@mail.com>
+ * @license The MIT License <https://opensource.org/licenses/MIT>
+ */
 ;(function(window, $) { 'use strict';
 
-    /**
-     * @package so
-     * @object  so.browser
-     * @depends so
-     * @author  Kerem Güneş <k-gun@mail.com>
-     * @license The MIT License <https://opensource.org/licenses/MIT>
-     */
     $.extend('@browser', (function() {
         var nav = window.navigator, re, name, test,
             ua = nav.userAgent.toLowerCase(), uap = nav.platform.toLowerCase(),

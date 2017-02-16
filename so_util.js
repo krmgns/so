@@ -1,12 +1,12 @@
+/**
+ * @package so
+ * @object  so.util
+ * @depends so
+ * @author  Kerem Güneş <k-gun@mail.com>
+ * @license The MIT License <https://opensource.org/licenses/MIT>
+ */
 ;(function($) { 'use strict';
 
-    /**
-     * @package so
-     * @object  so.util
-     * @depends so
-     * @author  Kerem Güneş <k-gun@mail.com>
-     * @license The MIT License <https://opensource.org/licenses/MIT>
-     */
     $.extend('@util', {
         /**
          * toCamelCaseFromDashCase.
