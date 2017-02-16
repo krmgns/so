@@ -502,8 +502,7 @@
     // internal vars
     var _uuid = 0,
         fn_slice = [].slice,
-        fn_toString = {}.toString,
-        constants = {}
+        fn_toString = {}.toString
     ;
 
     /**
@@ -906,38 +905,6 @@
 
         toString: function(name, opt_object) {
             throw '@todo Remove method $.toString()!';
-        },
-
-        /**
-         * Is constant.
-         * @param  {String} name
-         * @return {Boolean}
-         */
-        isConstant: function(name) {
-            return (name in constants);
-        },
-
-        /**
-         * Set constant.
-         * @param  {String} name
-         * @param  {Any}    value
-         * @return {void}
-         * @throws
-         */
-        setConstant: function(name, value) {
-            if ($.isConstant(name)) {
-                throw ('Constant "'+ name +'" already defined!');
-            }
-            constants[name] = value;
-        },
-
-        /**
-         * Get constant.
-         * @param  {String} name
-         * @return {Any}
-         */
-        getConstant: function(name) {
-            return constants[name];
         },
 
         /**
