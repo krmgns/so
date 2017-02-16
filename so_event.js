@@ -117,7 +117,7 @@
             event.event = e; // overwrite on initial
             event.fired = true;
             if (event.once) { // remember once
-                event.unbind(target);
+                event.unbind();
             }
 
             if (!e.data) {
@@ -199,17 +199,15 @@
                 options = fn, fn = options.fn;
             }
 
-            options = $.extend({}, optionsDefault, options);
-
             this.type = type.toLowerCase();
-            this.options = options;
+            this.options = $.extend({}, optionsDefault, options);
             this.data = options.data;
 
-            options = $.pickAll(options, 'target', 'useCapture');
+            options = $.pickAll(this.options, 'target', 'useCapture');
             this.target = options.target;
-            this.useCapture = options.useCapture;
+            this.useCapture = !!options.useCapture;
 
-            var event = createEvent(options.eventClass, this.type, options);
+            var event = createEvent(options.eventClass, this.type, this.options);
             this.event = event.event;
             this.eventClass = event.eventClass;
             this.eventTarget = null;
@@ -217,9 +215,9 @@
             this.fn = extendFn(this, fn);
             this.fnOrig = fn;
 
-            options = $.pickAll(options, 'once', 'passive');
-            this.once = options.once;
-            this.passive = options.passive;
+            options = $.pickAll(this.options, 'once', 'passive');
+            this.once = !!options.once;
+            this.passive = !!options.passive;
 
             this.i = -1; // no bind yet
             this.fired = false;
@@ -329,13 +327,13 @@
                     } else if (type.index('**')) { // all fired 'x' types, eg: .off('click**')
                         type = type.slice(0, -2);
                         eventsRemove = events.selectAll(function(_event) {
-                            return _event.type == type && _event && _event.fired;
+                            return _event && _event.type == type && _event.fired;
                         });
                     } else if (events.data[type]) {
                         events = events.data[type];
                         if (event.fn) { // all matched fn's, eg: .off('x', fn)
                             eventsRemove = events.select(function(_event) {
-                                return _event && _event.fnOrig === event.fnOrig;
+                                return _event && _event.fnOrig == event.fnOrig;
                             });
                         } else { // all 'x' types, eg: .off('x')
                             eventsRemove = events;
