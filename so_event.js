@@ -117,11 +117,6 @@
                 event.unbind();
             }
 
-            var target = e.target;
-            if (!target) { // for auto-fired stuff (using fire() in other location)
-                target = event.eventTarget.target;
-            }
-
             event.event = e; // overwrite on initial
             event.fired++;
 
@@ -164,7 +159,7 @@
                 }
             });
 
-            return fn.call(target, e);
+            return fn.call(event.target, e);
         };
     }
 
