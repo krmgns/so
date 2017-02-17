@@ -279,7 +279,7 @@
      * @return {Object}
      * @private
      */
-    function toSearchStuff(str, search, index, opt_noCase) {
+    function prepareSearchStuff(str, search, index, opt_noCase) {
         if (str && search) {
             // swap arguments
             if (index === FALSE) {
@@ -471,7 +471,7 @@
          * @override For no-case option.
          */
         startsWith: function(search, index, opt_noCase, str) {
-            return (str = toSearchStuff(this, search, index, opt_noCase))
+            return (str = prepareSearchStuff(this, search, index, opt_noCase))
                 && str.ss === str.s.substr(str.i || 0, str.ss.length);
         },
 
@@ -485,7 +485,7 @@
          * @override For no-case option.
          */
         endsWith: function(search, index, opt_noCase, str) {
-            return (str = toSearchStuff(this, search, index, opt_noCase))
+            return (str = prepareSearchStuff(this, search, index, opt_noCase))
                 && str.ss === str.s.substr(0, str.i || str.ss.length);
         },
 
@@ -497,7 +497,7 @@
          * @return {Bool}
          */
         contains: function(search, opt_noCase, str) {
-            return (str = toSearchStuff(this, search, opt_noCase))
+            return (str = prepareSearchStuff(this, search, opt_noCase))
                 && str.s !== str.s.split(str.ss)[0];
         }
     });
