@@ -972,7 +972,7 @@
          * @return {Object}
          */
         definePropertyAll: function(object, properties) {
-            return $.forEach(properties, function(property) {
+            return $.forEach(properties, function(property, name) {
                 $.defineProperty(object, name, property);
             });
         }
