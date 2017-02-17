@@ -192,9 +192,7 @@
 
         /** Is window. @param {Any} input @return {Bool} */
         isWindow: function(input) {
-            return toBool(input && input == input[NAME_WINDOW]
-                && input.top == input[NAME_WINDOW].top
-                && input.location == input[NAME_WINDOW].location);
+            return toBool(input && input == input[NAME_WINDOW] && input == input[NAME_WINDOW].window);
         },
 
         /** Is document. @param {Any} input @return {Bool} */
@@ -205,7 +203,7 @@
         /** Is node. @param {Any} input @return {Bool} */
         isNode: function(input) {
             return toBool(input && (input[NAME_NODE_TYPE] === NODE_TYPE_ELEMENT
-                                 || input[NAME_NODE_TYPE] === NODE_TYPE_DOCUMENT_FRAGMENT));
+                || input[NAME_NODE_TYPE] === NODE_TYPE_DOCUMENT_FRAGMENT));
         },
 
         /** Is node element. @param {Any} input @return {Bool} */
