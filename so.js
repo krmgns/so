@@ -820,16 +820,23 @@
                 return extend($, source);
             }
 
-            var args = makeArray(arguments);
-            if (source == NULL) { // prototype
-                source = prototype;
-                target = target[NAME_PROTOTYPE];
-                args = args.slice(3);
+            if ($.isArray(target)) {
+                while (target.length) {
+                    $.extend(target.shift(), source, prototype);
+                }
             } else {
-                args = args.slice(2);
-            }
+                var args = makeArray(arguments);
 
-            return extend.apply(NULL, [target, source].concat(args));
+                if (source == NULL) { // prototype
+                    source = prototype;
+                    target = target[NAME_PROTOTYPE];
+                    args = args.slice(3);
+                } else {
+                    args = args.slice(2);
+                }
+
+                return extend.apply(NULL, [target, source].concat(args));
+            }
         },
 
         /**
