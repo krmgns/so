@@ -420,7 +420,7 @@
         }
 
         // shortcuts for element
-        $.extendPrototype(Element, {
+        $.extendPrototype([Window, Document, Element], {
             on: function(type, fn, options) { return on(this, type, fn, options); },
             off: function(type, fn, options) { return off(this, type, fn, options); },
             once: function(type, fn, options) { return once(this, type, fn, options); },
