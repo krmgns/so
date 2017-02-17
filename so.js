@@ -1012,11 +1012,9 @@
          * @return {Function}
          */
         extend: function(targetClass, prototype) {
-            forEach(prototype, function(value, name) {
+            return forEach(prototype, function(value, name) {
                 targetClass[NAME_PROTOTYPE][name] = value;
-            });
-
-            return targetClass
+            }), targetClass;
         },
 
         /**
