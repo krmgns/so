@@ -85,6 +85,18 @@
             });
         };
 
+        // beacon (navigator.sendBeacon() not supported by all browsers)
+        browser.sendBeacon = function(url, data) {
+            if (navigator.sendBeacon) {
+                return navigator.sendBeacon(url, data);
+            }
+
+            var request = new XMLHttpRequest();
+            request.open('POST', url, false);
+            request.setRequestHeader('Content-Type', 'text/plain; charset=utf-8');
+            request.send(data);
+        };
+
         return browser;
     })());
 
