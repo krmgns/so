@@ -7,31 +7,28 @@
  */
 ;(function(window, $) { 'use strict';
 
+    var navigator = window.navigator,
+        re_src = /(chrome|safari|firefox|opera|msie|trident(?=\/))\/?\s*([\d.]+)/,
+        fns_os = ['isMac', 'isWindows', 'isLinux', 'isUnix'],
+        fns_ua = ['isChrome', 'isSafari', 'isFirefox', 'isOpera', 'isIE', 'isTrident'],
+        ret_isTouchDevice = navigator.maxTouchPoints > 0 || 'ontouchstart' in window,
+        ret_isMobileDevice = /android|ip(hone|od|ad)|opera *mini|webos|blackberry|mobile|windows *phone/i.test(navigator)
+    ;
+
     $.extend('@browser', (function() {
-        var nav = window.navigator, re, name, test,
-            ua = nav.userAgent.toLowerCase(), uap = nav.platform.toLowerCase(),
-            re_src = /(chrome|safari|firefox|opera|msie|trident(?=\/))\/?\s*([\d.]+)/,
-            fns_os = ['isMac', 'isWindows', 'isLinux', 'isUnix'],
-            fns_ua = ['isChrome', 'isSafari', 'isFirefox', 'isOpera', 'isIE', 'isTrident'],
-            ret_isTouchDevice = nav.maxTouchPoints > 0 || 'ontouchstart' in window,
-            ret_isMobileDevice = /android|ip(hone|od|ad)|opera *mini|webos|blackberry|mobile|windows *phone/.test(ua),
-            browser = {}
-        ;
+        var ua = navigator.userAgent.toLowerCase(), uap = navigator.platform.toLowerCase(),
+            re, name, test, browser = {};
 
         browser.isTouchDevice = function() { return ret_isTouchDevice; };
         browser.isMobileDevice = function() { return ret_isMobileDevice; };
-
-        function search(src, s) {
-            return src.indexOf(s) > -1;
-        }
 
         // set 'is' functions for os
         fns_os.forEach(function(fn) {
             var osName = fn.slice(2).toLowerCase();
 
             browser[fn] = (fn == 'isUnix')
-                ? function() { return search(ua, 'x11') && !search(ua, 'linux'); }
-                : function() { return search(ua, osName); };
+                ? function() { return ua.index('x11') && !ua.index('linux'); }
+                : function() { return ua.index(osName); };
 
             // set os name testing
             if (browser[fn]()) {
@@ -83,7 +80,7 @@
                 enableHighAccuracy: true
             }, options);
 
-            nav.geolocation.getCurrentPosition(function(position, onFail, options){
+            navigator.geolocation.getCurrentPosition(function(position, onFail, options){
                 onDone(position, position.coords.latitude, position.coords.longitude);
             });
         };
