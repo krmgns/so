@@ -37,8 +37,9 @@
     // globals
     window.so = $;
     window.so.VERSION = '5.0.0';
-    window.so.DOMLevel = document.adoptNode ? 3 : 2;
-    window[NAME_DOCUMENT][NAME_WINDOW] = window;
+    window.so[NAME_WINDOW] = window;
+    window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
+    window.so.DOMLevel = window[NAME_DOCUMENT].adoptNode ? 3 : 2;
 
     /**
      * To value, int, float, bool, string, json.
@@ -548,7 +549,6 @@
         logInfo: function() { _log('info', arguments); },
         logWarn: function() { _log('warn', arguments); },
         logError: function() { _log('error', arguments); },
-        throw: function(message) { throw (message); },
 
         /**
          * Fun.
@@ -575,11 +575,11 @@
         },
 
         /**
-         * Window.
+         * Get window.
          * @param  {Any} node
          * @return {Window|undefined}
          */
-        window: function(input) {
+        getWindow: function(input) {
             var ret;
 
             if (input) {
@@ -598,11 +598,11 @@
         },
 
         /**
-         * Document.
+         * Get document.
          * @param  {Any} input
          * @return {Document|undefined}
          */
-        document: function(input) {
+        getDocument: function(input) {
             var ret;
 
             if (input) {
