@@ -504,6 +504,7 @@
 
     // internal vars
     var _uuid = 0,
+        fn_eval = window.eval, // direct eval breaks minify tool
         fn_slice = [].slice,
         fn_toString = {}.toString
     ;
@@ -994,7 +995,7 @@
         create: function(name, prototype) {
             // create constructor
             function createConstructor(contents) {
-                return window.eval('(function(){'+ contents +'})()'); // direct eval breaks minify tool
+                return fn_eval('(function(){'+ contents +'})()');
             }
 
             // create a named constructor
