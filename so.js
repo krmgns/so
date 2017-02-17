@@ -794,7 +794,7 @@
          * @param  {Any}     source
          * @param  {Object}  prototype
          * @usage  $.extend(target, source)
-         * @usage  $.extend(target, true, prototype)
+         * @usage  $.extend(target, null, prototype)
          * @usage  $.extend('@x', ...), $.extend('@', {x: ...}) @self
          * @return {Any}
          */
