@@ -369,11 +369,13 @@
 
         /**
          * Append.
-         * @param  {String} input
+         * @param  {String} ...arguments
          * @return {String}
          */
-        append: function(input) {
-            return toString(this) + toString(input);
+        append: function() {
+            var str = toString(this); return $.forEach(arguments, function(value) {
+                str = str + value;
+            }), str;
         },
 
         /**
@@ -382,7 +384,9 @@
          * @return {String}
          */
         prepend: function(input) {
-            return toString(input) + toString(this);
+            var str = toString(this); return $.forEach(arguments, function(value) {
+                str = value + str;
+            }), str;
         },
 
         /**
