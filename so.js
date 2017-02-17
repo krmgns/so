@@ -790,13 +790,15 @@
 
         /**
          * Extend.
-         * @param  {Any} target
-         * @param  {Any} source
+         * @param  {Any}     target
+         * @param  {Any}     source
+         * @param  {Boolean} isPrototype
          * @usage  $.extend(target, source)
+         * @usage  $.extend(target, source, true)
          * @usage  $.extend('@x', ...), $.extend('@', {x: ...}) @self
          * @return {Any}
          */
-        extend: function(target, source) {
+        extend: function(target, source, isPrototype) {
             // self extend
             if ($.isString(target) && target.charAt(0) == '@') {
                 var targetName = target.slice(1), tmpSource;
@@ -816,6 +818,10 @@
 
                 // $.extend('@', {x: ...})
                 return extend($, source);
+            }
+
+            if (isPrototype) {
+                target = target.prototype;
             }
 
             // any extend
