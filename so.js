@@ -167,6 +167,11 @@
             return input && (input.constructor == Object);
         },
 
+        /** Is list. @param {Any} input @return {Bool} */
+        isList: function(input) {
+            return input && (input.constructor && input.constructor.name == 'List');
+        },
+
         /** Is int. @param {Any} input @return {Bool} */
         isInt: function(input) {
             return $.isNumber(input) && input == (input | 0);
@@ -179,9 +184,8 @@
 
         /** Is iterable.     @param {Any} input @return {Bool} */
         isIterable: function(input) {
-            return $.isArray(input) || $.isObject(input) || (input && (
-                (input.length != NULL && !input[NAME_NODE_TYPE]) || // dom, nodelist, string etc.
-                (input.constructor && input.constructor.name == 'List') // list
+            return $.isArray(input) || $.isObject(input) || $.isList(input) || (input && (
+                (input.length != NULL && !input[NAME_NODE_TYPE]) // dom, nodelist, string etc.
             ));
         },
 
