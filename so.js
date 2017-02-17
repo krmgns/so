@@ -822,7 +822,7 @@
 
             var args = makeArray(arguments);
             if (source == NULL) { // prototype
-                source = prototype
+                source = prototype;
                 target = target[NAME_PROTOTYPE];
                 args = args.slice(3);
             } else {
