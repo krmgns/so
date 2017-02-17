@@ -695,17 +695,24 @@
 
         /**
          * Json encode.
-         * @param  {Any} input
+         * @param  {Any}      input
+         * @param  {Function} inputReplacer
+         * @param  {String}   space
          * @return {String}
          */
-        jsonEncode: function(input) { return JSON.stringify(input); },
+        jsonEncode: function(input, inputReplacer, space) {
+            return JSON.stringify(input, inputReplacer, space);
+        },
 
         /**
          * Json decode.
-         * @param  {String} input
+         * @param  {String}   input
+         * @param  {Function} inputReviver
          * @return {Any}
          */
-        jsonDecode: function(input) { return JSON.parse(input); },
+        jsonDecode: function(input, inputReviver) {
+            return JSON.parse(input, inputReviver);
+        },
 
         /**
          * Is set.
