@@ -829,8 +829,17 @@
                 args = args.slice(2);
             }
 
-            // any extend
             return extend.apply(NULL, [target, source].concat(args));
+        },
+
+        /**
+         * Extend.
+         * @param  {Function} target
+         * @param  {Object}   prototype
+         * @return {Function}
+         */
+        extendPrototype: function(target, prototype) {
+            return $.extend(target, NULL, prototype);
         },
 
         /**
@@ -1007,14 +1016,12 @@
 
         /**
          * Extend.
-         * @param  {Function} targetClass
+         * @param  {Function} target
          * @param  {Object}   prototype
          * @return {Function}
          */
-        extend: function(targetClass, prototype) {
-            return forEach(prototype, function(value, name) {
-                targetClass[NAME_PROTOTYPE][name] = value;
-            }), targetClass;
+        extend: function(target, prototype) {
+            return $.extend(target, NULL, prototype);
         },
 
         /**
