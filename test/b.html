@@ -4,8 +4,7 @@
 <!-- <script src="../so_util.js"></script> -->
 <!-- <script src="../so_browser.js"></script> -->
 <script src="../so_event.js"></script>
-
-<iframe id="iframe"></iframe>
+<script src="../so_http.js"></script>
 
 <form id="form">
     <input id="form_i">
@@ -20,14 +19,29 @@
 
 <script>
 so.onReady(function($) {
-    var els, el = document.body
-    el.once('click', () => log(0)).fire()
-    el.once('click', () => log(1))
+    var url = 'http://localhost/.dev/so/test/ajax.php';
+
+    // $.http.get(url, function(request, response, client) {
+    //     log(request, response, client)
+    // });
+
+    // var request = new XMLHttpRequest();
+    // request.open('HEAD', url, true);
+    // request.onreadystatechange = function(e) {
+    //     if (request.readyState != 4) return;
+    //     log(request)
+    //     log(request.getAllResponseHeaders())
+    // };
+    // request.send(null);
 });
 </script>
 
 <script>
 so.onReady(function($) {
+    // var els, el = document.body
+    // el.once('click', () => log(0)).fire()
+    // el.once('click', () => log(1))
+
     // var a, b, c,
     //     list = 'list'
     //     // list = [1,2,'last']
