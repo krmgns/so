@@ -813,6 +813,7 @@
                         tmpSource[targetName] = source;
                         source = tmpSource;
                     }
+
                     return extend(target, source);
                 }
 
