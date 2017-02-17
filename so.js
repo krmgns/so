@@ -792,13 +792,13 @@
          * Extend.
          * @param  {Any}     target
          * @param  {Any}     source
-         * @param  {Boolean} isPrototype
+         * @param  {Object}  prototype
          * @usage  $.extend(target, source)
-         * @usage  $.extend(target, source, true)
+         * @usage  $.extend(target, true, prototype)
          * @usage  $.extend('@x', ...), $.extend('@', {x: ...}) @self
          * @return {Any}
          */
-        extend: function(target, source, isPrototype) {
+        extend: function(target, source, prototype) {
             // self extend
             if ($.isString(target) && target.charAt(0) == '@') {
                 var targetName = target.slice(1), tmpSource;
@@ -820,12 +820,17 @@
                 return extend($, source);
             }
 
-            if (isPrototype) {
-                target = target.prototype;
+            var args = makeArray(arguments);
+            if (source == NULL) { // prototype
+                source = prototype
+                target = target[NAME_PROTOTYPE];
+                args = args.slice(3);
+            } else {
+                args = args.slice(2);
             }
 
             // any extend
-            return extend.apply(NULL, [target, source].concat(makeArray(arguments, 2)));
+            return extend.apply(NULL, [target, source].concat(args));
         },
 
         /**
