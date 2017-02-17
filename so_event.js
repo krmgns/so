@@ -179,12 +179,12 @@
         function checkTarget(target, eventType) {
             if (!target) throw ('No target given.');
 
-            if (!target.Events) {
-                target.Events = $.list();
+            if (!target.$events) {
+                target.$events = $.list();
             }
 
-            if (eventType && !target.Events.get(eventType)) {
-                target.Events.set(eventType, $.list());
+            if (eventType && !target.$events.get(eventType)) {
+                target.$events.set(eventType, $.list());
             }
 
             return target;
@@ -321,7 +321,7 @@
                 var target = checkTarget(this.target, event.type);
                 event.target = target;
                 event.eventTarget = this;
-                event.i = target.Events.get(event.type).append(event).size - 1;
+                event.i = target.$events.get(event.type).append(event).size - 1;
                 target.addEventListener(event.type, event.fn, event.useCapture);
             },
 
@@ -332,7 +332,7 @@
              */
             removeEvent: function(event) {
                 var target = checkTarget(this.target),
-                    events = target.Events, eventsRemove, type = event.type;
+                    events = target.$events, eventsRemove, type = event.type;
 
                 if (events) {
                     eventsRemove = $.list();
@@ -360,7 +360,7 @@
                 } else $.logWarn('No `%s` events found to fire.'.format(event.type));
 
                 if (eventsRemove) {
-                    events = target.Events;
+                    events = target.$events;
                     eventsRemove.forEach(function(event) {
                         events.data[event.type].removeAt(event.i);
                         target.removeEventListener(event.type, event.fn, event.useCapture);
@@ -382,7 +382,7 @@
              */
             dispatch: function(event) {
                 var target = checkTarget(this.target),
-                    events = target.Events.get(event.type);
+                    events = target.$events.get(event.type);
                 if (events) {
                     events.forEach(function(event) {
                         event.fn(event.event);
