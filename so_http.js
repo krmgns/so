@@ -259,7 +259,7 @@
         if ($.isObject(uri)) {
             options = uri, uri = options.uri;
         } else if ($.isFunction(options)) {
-            var args = $.array(arguments);
+            var args = arguments;
             options = {onDone: args[1], onSuccess: args[2], onFailure: args[3]};
         }
         return {uri: uri, options: $.extend(options || {}, {method: method, uri: uri})};
@@ -286,8 +286,11 @@
 
     var uri = 'http://localhost/.dev/so/test/ajax.php';
 
-    $.http.get(uri);
-    // $.http.get(uri).on('done',);
+    $.http.get(uri, null, function() {});
+    $.http.get(uri, {data: 123}, function() {});
+    $.http.get({uri: uri, data: 123}, function() {});
+
+    // $.http.get(uri).on('done', function() {});
 
     // var a = new Client(uri, {
     //     data: {a:1},
