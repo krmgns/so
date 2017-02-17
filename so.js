@@ -1138,11 +1138,11 @@
         /**
          * Get.
          * @param  {Int|String} key
-         * @param  {Any}        opt_defaultValue
+         * @param  {Any}        valueDefault
          * @return {Any}
          */
-        get: function(key, opt_defaultValue) {
-            return this.hasKey(key) ? this.data[key] : opt_defaultValue;
+        get: function(key, valueDefault) {
+            return this.hasKey(key) ? this.data[key] : valueDefault;
         },
 
         /**
@@ -1270,12 +1270,12 @@
         /**
          * Find.
          * @param  {Any} searchValue
-         * @param  {Any} opt_defaultValue
+         * @param  {Any} valueDefault
          * @param  {Int} opt_return
          * @return {Any}
          */
-        find: function(searchValue, opt_defaultValue, opt_return) {
-            var test = searchValue, ret = opt_defaultValue;
+        find: function(searchValue, valueDefault, opt_return) {
+            var test = searchValue, ret = valueDefault;
 
             // make test function
             if (!$.isFunction(searchValue)) {
@@ -1313,11 +1313,11 @@
         /**
          * Pick.
          * @param  {Any} key
-         * @param  {Any} opt_defaultValue
+         * @param  {Any} valueDefault
          * @return {Any}
          */
-        pick: function(key, opt_defaultValue) {
-            var ret = opt_defaultValue;
+        pick: function(key, valueDefault) {
+            var ret = valueDefault;
 
             if (key in this.data) {
                 ret = this.data[key], delete this.data[key], this.size--;
@@ -1476,24 +1476,24 @@
 
         /**
          * First.
-         * @param  {Any} opt_defaultValue
+         * @param  {Any} valueDefault
          * @return {Any}
          */
-        first: function(opt_defaultValue) {
+        first: function(valueDefault) {
             return this.forEach(function(value) {
-                opt_defaultValue = value; return 0; //break
-            }), opt_defaultValue;
+                valueDefault = value; return 0; //break
+            }), valueDefault;
         },
 
         /**
          * Last.
-         * @param  {Any} opt_defaultValue
+         * @param  {Any} valueDefault
          * @return {Any}
          */
-        last: function(opt_defaultValue) {
+        last: function(valueDefault) {
             return this.forEach(function(value, key, i) {
-                opt_defaultValue = value;
-            }), opt_defaultValue;
+                valueDefault = value;
+            }), valueDefault;
         },
 
         /**
