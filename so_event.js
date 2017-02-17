@@ -208,7 +208,7 @@
 
             _this.type = type.toLowerCase();
             _this.options = $.extend({}, optionsDefault, options);
-            _this.data = options.data;
+            _this.data = _this.options.data;
 
             options = $.pickAll(_this.options, 'target', 'useCapture');
             _this.target = options.target;
