@@ -882,7 +882,7 @@
                     value = input.splice(key, 1)[0];
                 } else {
                     value = input[key], delete input[key];
-                    if (input.length) input.length--; // fix keys & length
+                    if (input.length) input.length--; // fix length
                 }
             }
 
