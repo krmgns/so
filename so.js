@@ -356,7 +356,7 @@
             var str = toString(this), args = arguments, match = str.match(/(%s)/g) || [], i = 0;
 
             if (args.length != match.length) {
-                throw ('Arguments and match length must be equal!');
+                throw ('Arguments and matches length must be equal!');
             }
 
             while (match.shift()) {
