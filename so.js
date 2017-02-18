@@ -336,6 +336,7 @@
          */
         toCapitalCase: function(all, lower) {
             var str = toString(this), i;
+
             if (lower) str = str.toLowerCase();
 
             if (all !== FALSE) {
