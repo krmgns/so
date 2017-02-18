@@ -11,7 +11,7 @@
         throw ('Archaic browser!');
     }
 
-    // minify tools
+    // minify sugars
     var NULL = null, NULLS = '',
         TRUE = true, FALSE = false,
 
