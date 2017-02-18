@@ -330,11 +330,13 @@
 
         /**
          * To capital case.
-         * @param  {Bool} all @default=true
+         * @param  {Bool} all   @default=true
+         * @param  {Bool} lower @default=false
          * @return {String}
          */
-        toCapitalCase: function(all) {
+        toCapitalCase: function(all, lower) {
             var str = toString(this), i;
+            if (lower) str = str.toLowerCase();
 
             if (all !== FALSE) {
                 for (i = 0, str = str.split(' '); i < str.length; i++) {
