@@ -3,8 +3,8 @@
 // sleep(3);
 
 $response = rand() * 1.01;
-$response = '"'. rand() .'.1"';
-// $response = json_encode(["name" => "php"]);
+// $response = '"'. rand() .'.1"';
+$response = json_encode(["name" => "php"]);
 // $response = json_encode([["name" => "php"]]);
 // $response = json_encode(null);
 
@@ -13,7 +13,7 @@ $response = '"'. rand() .'.1"';
 
 
 // header("Content-Type: text/plain");
-header("Content-Type: text/xml");
+// header("Content-Type: text/xml");
 // header("Content-Type: application/json");
 
 // header("HTTP/1.0 200 OK");

@@ -335,6 +335,7 @@
         end: function(fn) {
             var _this = this, i;
 
+            // actually just calls onDone
             i = setInterval(function() {
                 if (_this.done) {
                     _this.fire(fn);

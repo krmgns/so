@@ -19,18 +19,59 @@
 
 <script>
 so.onReady(function($) {
-    var url = 'http://localhost/.dev/so/test/ajax.php';
+    // dom!
+})
+</script>
 
-    // $.http.get(url, function(request, response, client) {
+<script>
+so.onReady(function($) {
+    // var url = '/.dev/so/test/ajax.php';
+    // var uri = '/.dev/so/test/ajax.php', a
+    // var onDone = function onDone() { log('done', arguments) },
+    //     onSuccess = function onSuccess() { log('success') },
+    //     onFailure = function onFailure() { log('failure') }
+
+    // a = $.http.get(uri, onDone, onSuccess, onFailure);
+    // a = $.http.get(uri, {200:onSuccess, 404:onFailure});
+    // a = $.http.get(uri, {uriParams:{a:1/* ,b:[1,2,3],c:{1:1,2:2,3:3} */}}, onDone, onSuccess, onFailure);
+    // a = $.http.get(uri, {dataType:'html', onDone:onDone, onSuccess:onSuccess, onFailure:onFailure});
+    // a = $.http.post(uri, onDone);
+    // a = $.http.post(uri, {data:{id:123}, dataType:'html'}, onDone);
+    // a = $.http.request('/foo', onDone);
+    // a = $.http.request('/foo @html', onDone);
+    // a = $.http.request('post /foo', onDone);
+    // a = $.http.request('post /foo @html', onDone);
+    // a = $.http.request('/foo', {method:'post', data:{id:123}, dataType:'html'}, onDone);
+    a = $.http.get(uri, {autoSend:false})
+    // a.on('done', function() {
+    //     log('done!')
+    // }).end(function() {
+    //     log("end")
+    // }).send()
+    // log("a:",a)
+
+    // var a = new Client(uri, {
+    //     data: {a:1},
+    //     method: 'POST',
+    //     // onDone: function(request, response, client) {
+    //     //     log(request, response, client)
+    //     // }
+    //     headers: {'X-foo': 'foo'}
+    // })
+    // .send().end(function(request, response, client) {
     //     log(request, response, client)
+    // })
+
+    // $.http.get(url, function(request, response, client, api) {
+    //     log(request, response, client)
+    //     log(response.headers['content-type'])
     // });
 
     // var request = new XMLHttpRequest();
     // request.open('HEAD', url, true);
     // request.onreadystatechange = function(e) {
-    //     if (request.readyState != 4) return;
-    //     log(request)
-    //     log(request.getAllResponseHeaders())
+    //     // if (request.readyState != 4) return;
+    //     // log(request)
     // };
     // request.send(null);
 });
