@@ -16,7 +16,8 @@
             async: TRUE, noCache: TRUE, autoSend: TRUE, headers: {},
             onStart: NULL, onStop: NULL, /* @todo: queue */ onProgress: NULL, onHeaders: NULL,
             onDone: NULL, onSuccess: NULL, onFailure: NULL,
-            onAbort: NULL, onTimeout: NULL, onBeforeSend: NULL, onAfterSend: NULL
+            onAbort: NULL, onTimeout: NULL, onBeforeSend: NULL, onAfterSend: NULL,
+            ons: {} // all other on.. stuff
         },
         STATE_OPENED = 1, STATE_HEADERS_RECEIVED = 2, STATE_LOADING = 3, STATE_DONE = 4
     ;
@@ -259,6 +260,7 @@
 
         this.api.client = this;
 
+        // sen if auto-send
         if (options.autoSend) {
             this.send();
         }
@@ -297,12 +299,15 @@
 
         /**
          * Fire.
-         * @param  {Function} fn
+         * @param  {String|Function} fn
          * @param  {Int}      fnCode
          * @return {void}
          */
         fire: function(fn, fnCode) {
-            if (!$.isFunction(fn)) {
+            // check 'ons'
+            if (this.options.ons[fn]) {
+                fn = this.options.ons[fn];
+            } else if (!$.isFunction(fn)) {
                 fn = fn ? 'on'+ fn.toCapitalCase() : fnCode;
                 if (this.options[fn]) {
                     fn = this.options[fn];
@@ -338,6 +343,16 @@
             }, 1);
 
             return this;
+        },
+
+        /**
+         * On.
+         * @param  {String}   name
+         * @param  {Function} callback
+         * @return {this}
+         */
+        on: function(name, callback) {
+            return this.options.ons[name] = callback, this;
         }
     });
 
