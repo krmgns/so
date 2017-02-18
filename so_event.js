@@ -402,21 +402,21 @@
          * @param  {Object}   options
          * @return {Event}
          */
-        function on(target, type, fn, options, args /* @internal */) {
-            return args = prepareArgs(fn, options, target),
-                initEvent(type, args.fn, args.options).bind();
+        function on(target, type, fn, options) {
+            var args = prepareArgs(fn, options, target);
+            return initEvent(type, args.fn, args.options).bind();
         }
-        function once(target, type, fn, options, args /* @internal */) {
-            return args = prepareArgs(fn, options, target, TRUE),
-                initEvent(type, args.fn, args.options).bind();
+        function once(target, type, fn, options) {
+            var args = prepareArgs(fn, options, target, TRUE);
+            return initEvent(type, args.fn, args.options).bind();
         }
-        function off(target, type, fn, options, args /* @internal */) {
-            return args = prepareArgs(fn, options, target),
-                initEvent(type, args.fn, args.options).unbind(type);
+        function off(target, type, fn, options) {
+            var args = prepareArgs(fn, options, target);
+            return initEvent(type, args.fn, args.options).unbind(type);
         }
-        function fire(target, type, fn, options, args /* @internal */) {
-            return args = prepareArgs(fn, options, target),
-                initEvent(type, args.fn, args.options).fire(type);
+        function fire(target, type, fn, options) {
+            var args = prepareArgs(fn, options, target);
+            return initEvent(type, args.fn, args.options).fire(type);
         }
 
         // shortcuts for element
