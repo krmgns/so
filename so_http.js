@@ -390,7 +390,7 @@
             throw ('URI must be string!');
         }
 
-        var re, _options = options;
+        var re, _options = options = options || {};
         uri = uri.trim();
         if (uri.index(' ')) {
             // <method> <uri> @<data type>, eg: '/foo', '/foo @json', 'GET /foo', 'GET /foo @json'
@@ -402,8 +402,7 @@
 
         if ($.isFunction(_options)) {
             // eg: '/foo', function() {...}
-            options = $.extend(options,
-                {onDone: _options, onSuccess: onDone, onFailure: onSuccess});
+            options = $.extend(options, {onDone: _options, onSuccess: onDone, onFailure: onSuccess});
         } else if ($.isObject(_options)) {
             // eg: '/foo', {...}
             options = $.extend(options,
