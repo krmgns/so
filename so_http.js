@@ -12,8 +12,8 @@
         re_dataTypes = /\/(json|xml|html|plain)(?:[; ])?/i,
         fn_encode = encodeURIComponent,
         optionsDefault = {
-            method: 'GET', uri: NULLS, uriParams: NULL, data: NULL, dataType: 'json', headers: {},
-            async: TRUE, noCache: TRUE, autoSend: TRUE,
+            method: 'GET', uri: NULLS, uriParams: NULL, data: NULL, dataType: 'json',
+            async: TRUE, noCache: TRUE, autoSend: TRUE, headers: {},
             onStart: NULL, onStop: NULL, /* @todo: queue */ onProgress: NULL, onHeaders: NULL,
             onDone: NULL, onSuccess: NULL, onFailure: NULL,
             onAbort: NULL, onTimeout: NULL, onBeforeSend: NULL, onAfterSend: NULL
@@ -21,27 +21,78 @@
         STATE_OPENED = 1, STATE_HEADERS_RECEIVED = 2, STATE_LOADING = 3, STATE_DONE = 4
     ;
 
+    /**
+     * Base methods.
+     */
     $.extend('@http', {
+        /**
+         * Parse XML.
+         * @param  {Any}    input
+         * @param  {String} inputType
+         * @return {Document}
+         */
         parseXml: function(input, inputType) {
-            if ($.isDocument(input)) { return input; }
-            if (!$.isString(input)) { return NULL; }
+            if ($.isDocument(input)) {
+                return input;
+            }
+
+            if (!$.isString(input)) {
+                return NULL;
+            }
+
             return new DOMParser.parseFromString(input, inputType || 'text/xml');
         },
+
+        /**
+         * Parse JSON.
+         * @param  {String} input
+         * @return {Any}
+         */
         parseJson: function(input) {
             input = $.trim(input);
-            if (!re_json.test(input)) { return input; }
+
+            if (!re_json.test(input)) {
+                return input;
+            }
+
             return JSON.parse(input);
         },
-        // only two-dimensionals
+
+        /**
+         * Parse headers.
+         * @param  {String} headers
+         * @return {Object}
+         */
+        parseHeaders: function(headers) {
+            var ret = {};
+
+            if ($.isString(headers)) {
+                headers.trim().split('\r\n').forEach(function(header) {
+                    header = header.split(':', 2),
+                        ret[$.trim(header[0]).toLowerCase()] = $.trim(header[1]);
+                });
+            }
+
+            return ret;
+        },
+
+        /**
+         * Serialize.
+         * @param  {Any} data
+         * @return {String}
+         */
         serialize: function(data) {
             if (!$.isIterable(data)) {
                 return data;
             }
+
             if ($.isList(data)) {
                 data = data.data;
             }
+
             var ret = [];
-            $.forEach(data, function(value, key) {
+
+            $.forEach(data, function(value, key) { // only two-dimensionals
                 key = fn_encode(key);
                 if ($.isArray(value)) {
                     if (value.length) {
@@ -57,17 +108,8 @@
                     ret.push('%s=%s'.format(key, fn_encode(value)));
                 }
             });
+
             return ret.join('&').replace(/%20/g, '+');
-        },
-        parseHeaders: function(headers) {
-            var ret = {};
-            if ($.isString(headers)) {
-                headers.trim().split('\r\n').forEach(function(header) {
-                    header = header.split(':', 2),
-                        ret[$.trim(header[0]).toLowerCase()] = $.trim(header[1]);
-                });
-            }
-            return ret;
         }
     });
 
