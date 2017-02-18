@@ -3,14 +3,14 @@
     var re_query = /\?&(.*)/,
         re_post = /P(UT|OST)/i,
         re_json = /^(\{.*\}|\[.*\]|".*"|\d+(\.\d+)?|true|false|null)$/,
-        re_request = /^([a-z]+)?\s*(.*?)\s*(?:@(json|text|html|xml))?$/i,
+        re_request = /^([a-z]+)?\s*(.*?)\s*(?:@(json|xml|html|text))?$/i,
         re_dataTypes = /\/(json|xml|html|plain)(?:[; ])?/i,
         fn_encode = encodeURIComponent,
         optionsDefault = {
-            method: 'GET', uri: '', uriParams: null, data: null, dataType: 'json', async: true,
-            headers: {'X-Requested-With': 'XMLHttpRequest'},
-            noCache: true, autoSend: true, onStart: null, onStop: null, /* @todo: queue */
-            onProgress: null, onHeaders: null, onDone: null, onSuccess: null, onFailure: null,
+            method: 'GET', uri: '', uriParams: null, data: null, dataType: 'json', headers: {},
+            async: true, noCache: true, autoSend: true,
+            onStart: null, onStop: null, /* @todo: queue */ onProgress: null, onHeaders: null,
+            onDone: null, onSuccess: null, onFailure: null,
             onAbort: null, onTimeout: null, onBeforeSend: null, onAfterSend: null
         },
         STATE_OPENED = 1, STATE_HEADERS_RECEIVED = 2, STATE_LOADING = 3, STATE_DONE = 4
@@ -29,8 +29,8 @@
         },
         // only two-dimensionals
         serialize: function(data) {
-            if ($.isVoid(data)) {
-                return null;
+            if (!$.isIterable(data)) {
+                return data;
             }
             if ($.isList(data)) {
                 data = data.data;
@@ -78,6 +78,7 @@
         this.uri = client.options.uri;
         this.uriParams = client.options.uriParams;
     }
+
     function Response(client) {
         this.super(client);
         this.status = null;
@@ -111,9 +112,8 @@
                     headers = $.http.parseHeaders(client.api.getAllResponseHeaders()),
                     data = client.api.responseText,
                     dataType = options.dataType || (re_dataTypes.exec(headers['content-type']) || [,])[1];
-                headers[0] = status;
 
-                client.response.status = status;
+                client.response.status = headers[0] = status;
                 client.response.statusCode = client.api.status;
                 client.response.statusText = client.api.statusText;
                 client.response.headers = headers;
@@ -134,7 +134,7 @@
                 client.fire((client.response.statusCode > 99 && client.response.statusCode < 400)
                     ? 'success' : 'failure');
 
-                // end
+                // end!
                 client.fire('done');
 
                 removeReadyStateChange(client);
@@ -148,9 +148,9 @@
         }
 
         options = $.extend({}, optionsDefault, options);
-        if (!options.uri) {
-            options.uri = uri;
-        }
+        options.uri = options.uri || uri;
+        options.method = options.method || optionsDefault.method;
+
         // correct path for localhost only
         if (window.location.host == 'localhost' && options.uri.charAt(0) == '/') {
             options.uri = options.uri.substring(1);
@@ -178,7 +178,7 @@
 
         this.request.data = options.data;
         this.request.dataType = options.dataType;
-        this.request.headers = $.extend({}, options.headers);
+        this.request.headers = $.extend({}, options.headers, {'X-Requested-With': 'XMLHttpRequest'});
 
         if (options.async) {
             this.api.onreadystatechange = function() {
@@ -256,18 +256,26 @@
 
     // init's helper
     function prepareArgs(uri, options, onDone, onSuccess, onFailure, method) {
-        if ($.isObject(uri)) {
-            options = uri, uri = options.uri;
-        } else if ($.isFunction(options)) {
-            var args = arguments;
-            options = {onDone: args[1], onSuccess: args[2], onFailure: args[3]};
+        if (!$.isString(uri)) {
+            throw ('URI must be string!');
         }
-        return {uri: uri, options: $.extend(options || {}, {method: method, uri: uri})};
-    }
+        var re, optionsNew = {uri: uri, method: method};
+        if (uri.index(' ')) {
+            re = re_request.exec(uri);
+            re && (optionsNew.method = re[1], optionsNew.uri = re[2], optionsNew.dataType = re[3]);
+        } else {
+            optionsNew.uri = uri;
+        }
 
-    function request(uri, options, onDone, onSuccess, onFailure) {
-        //
-        return initClient(uri, options).send();
+        if ($.isFunction(options)) {
+            optionsNew = $.extend(optionsNew,
+                {onDone: options, onSuccess: onDone, onFailure: onSuccess});
+        } else if ($.isObject(options)) {
+            optionsNew = $.extend(optionsNew,
+                $.extend({onDone: onDone, onSuccess: onSuccess, onFailure: onSuccess}, options));
+        }
+
+        return {uri: uri, options: optionsNew};
     }
 
     $.extend('@http', {
@@ -276,32 +284,16 @@
         Response: initResponse,
         get: function(uri, options, onDone, onSuccess, onFailure) {
             var args = prepareArgs(uri, options, onDone, onSuccess, onFailure, 'GET');
-            return request(uri, options, onDone, onSuccess, onFailure);
+            return initClient(args.uri, args.options);
         },
         post: function(uri, options, onDone, onSuccess, onFailure) {
             var args = prepareArgs(uri, options, onDone, onSuccess, onFailure, 'POST');
-            return request(uri, options, onDone, onSuccess, onFailure);
+            return initClient(args.uri, args.options);
+        },
+        request: function(uri, options, onDone, onSuccess, onFailure) {
+            var args = prepareArgs(uri, options, onDone, onSuccess, onFailure);
+            return initClient(args.uri, args.options);
         }
     });
-
-    var uri = 'http://localhost/.dev/so/test/ajax.php';
-
-    $.http.get(uri, null, function() {});
-    $.http.get(uri, {data: 123}, function() {});
-    $.http.get({uri: uri, data: 123}, function() {});
-
-    // $.http.get(uri).on('done', function() {});
-
-    // var a = new Client(uri, {
-    //     data: {a:1},
-    //     method: 'POST',
-    //     // onDone: function(request, response, client) {
-    //     //     log(request, response, client)
-    //     // }
-    //     headers: {'X-foo': 'foo'}
-    // })
-    // .send().end(function(request, response, client) {
-    //     log(request, response, client)
-    // })
 
 })(window, so);
