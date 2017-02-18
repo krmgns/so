@@ -1,6 +1,6 @@
 ;(function(window, $) { 'use strict';
 
-    var re_query = /\?&(.*)/,
+    var re_query = /\?&+(.*)/,
         re_post = /P(UT|OST)/i,
         re_json = /^(\{.*\}|\[.*\]|".*"|\d+(\.\d+)?|true|false|null)$/,
         re_request = /^([a-z]+)?\s*(.*?)\s*(?:@(json|xml|html|text))?$/i,
@@ -148,25 +148,20 @@
         }
 
         options = $.extend({}, optionsDefault, options);
-        options.uri = options.uri || uri;
-        options.method = options.method || optionsDefault.method;
-
-        // correct path for localhost only
-        if (window.location.host == 'localhost' && options.uri.charAt(0) == '/') {
-            options.uri = options.uri.substring(1);
-        }
-        options.method = $.trim(options.method).toUpperCase();
+        options.uri = uri;
+        options.method = (options.method || optionsDefault.method).toUpperCase();
         options.headers = $.extend({}, optionsDefault.headers, options.headers);
         if (re_post.test(options.method)) {
             options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
         }
         if (options.uriParams) {
-            var uriParams = $.http.serialize(uriParams);
-            options.uri = !options.uri.index('?')
-                ? options.uri.append('?', uriParams) : options.uri.append('&', uriParams);
-            options.noCache && options.uri.append(!options.uri.index('?') ? '?_=' : '&_=', $.now());
+            options.uri = options.uri.append(!options.uri.index('?') ? '?' : '&',
+                $.http.serialize(options.uriParams));
         }
-        options.uri = $.trim(options.uri).replace(re_query, '?$1');
+        if (!options.noCache) {
+            options.uri = options.uri.append(!options.uri.index('?') ? '?' : '&', '_=', $.now());
+        }
+        options.uri = options.uri.replace(re_query, '?$1');
 
         var _this = this;
         this.options = options;
