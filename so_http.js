@@ -58,7 +58,8 @@
             var ret = {};
             if ($.isString(headers)) {
                 headers.trim().split('\r\n').forEach(function(header) {
-                    header = header.split(':', 2), ret[$.trim(header[0]).toLowerCase()] = $.trim(header[1]);
+                    header = header.split(':', 2),
+                        ret[$.trim(header[0]).toLowerCase()] = $.trim(header[1]);
                 });
             }
             return ret;
@@ -94,7 +95,6 @@
     }
 
     function onReadyStateChange(client) {
-        var options = client.options;
         if (client.aborted) {
             return removeReadyStateChange(client);
         }
@@ -111,7 +111,8 @@
                 var status = 'HTTP/1.1 %s %s'.format(client.api.status, client.api.statusText),
                     headers = $.http.parseHeaders(client.api.getAllResponseHeaders()),
                     data = client.api.responseText,
-                    dataType = options.dataType || (re_dataTypes.exec(headers['content-type']) || [,])[1];
+                    dataType = client.options.dataType
+                        || (re_dataTypes.exec(headers['content-type']) || [,])[1];
 
                 client.response.status = headers[0] = status;
                 client.response.statusCode = client.api.status;
