@@ -190,7 +190,7 @@
                 }
                 client.response.dataType = dataType;
 
-                // specials, e.g: 200: function(){...}
+                // specials, eg: 200: function(){...}
                 client.fire(NULL, client.response.statusCode);
 
                 // success or failure?
@@ -205,6 +205,11 @@
         }
     }
 
+    /**
+     * Client.
+     * @param {String} uri
+     * @param {Object} options
+     */
     function Client(uri, options) {
         if (!uri) {
             throw ('URI required!');
@@ -214,9 +219,12 @@
         options.uri = uri;
         options.method = (options.method || optionsDefault.method).toUpperCase();
         options.headers = $.extend({}, optionsDefault.headers, options.headers);
+
+        // handle post streams
         if (re_post.test(options.method)) {
             options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
         }
+
         if (options.uriParams) {
             options.uri = options.uri.append(!options.uri.index('?') ? '?' : '&',
                 $.http.serialize(options.uriParams));
@@ -257,8 +265,13 @@
     }
 
     $.extendPrototype(Client, {
+        /**
+         * Send.
+         * @return {this}
+         */
         send: function() {
             var _this = this, options = this.options;
+
             if (!this.sent && !this.aborted) {
                 $.forEach(this.request.headers, function(value, key) {
                     _this.api.setRequestHeader(key, value);
@@ -278,8 +291,16 @@
                     }, options.timeout);
                 }
             }
+
             return this;
         },
+
+        /**
+         * Fire.
+         * @param  {Function} fn
+         * @param  {Int}      fnCode
+         * @return {void}
+         */
         fire: function(fn, fnCode) {
             if (!$.isFunction(fn)) {
                 fn = fn ? 'on'+ fn.toCapitalCase() : fnCode;
@@ -287,30 +308,49 @@
                     fn = this.options[fn];
                 }
             }
+
             $.isFunction(fn) && fn(this.request, this.response, this);
         },
+
+        /**
+         * Cancel
+         * @return {void}
+         */
         cancel: function() {
             this.api.abort();
             this.call('abort');
             this.aborted = TRUE;
         },
-        // final callback
+
+        /**
+         * End.
+         * @param  {Function} fn
+         * @return {this}
+         */
         end: function(fn) {
             var _this = this, i;
+
             i = setInterval(function() {
                 if (_this.done) {
                     _this.fire(fn);
                     clearInterval(i);
                 }
             }, 1);
+
             return this;
         }
     });
 
-    // shortcuts
-    function initClient(uri, options) { return new Client(uri, options); }
-    function initRequest(client) { return new Request(client); }
-    function initResponse(client) { return new Response(client); }
+    // shortcut helpers
+    function initClient(uri, options) {
+        return new Client(uri, options);
+    }
+    function initRequest(client) {
+        return new Request(client);
+    }
+    function initResponse(client) {
+        return new Response(client);
+    }
 
     // init's helper
     function prepareArgs(uri, options, onDone, onSuccess, onFailure, method) {
@@ -320,6 +360,7 @@
 
         var re, optionsNew = {uri: uri, method: method};
         if (uri.index(' ')) {
+            // <method> <uri> @<data type>, eg: '/foo', '/foo @json', 'GET /foo', 'GET /foo @json'
             re = re_request.exec(uri);
             re && (optionsNew.method = re[1], optionsNew.uri = re[2], optionsNew.dataType = re[3]);
         } else {
@@ -327,9 +368,11 @@
         }
 
         if ($.isFunction(options)) {
+            // eg: '/foo', function() {...}
             optionsNew = $.extend(optionsNew,
                 {onDone: options, onSuccess: onDone, onFailure: onSuccess});
         } else if ($.isObject(options)) {
+            // eg: '/foo', {...}
             optionsNew = $.extend(optionsNew,
                 $.extend({onDone: onDone, onSuccess: onSuccess, onFailure: onSuccess}, options));
         }
