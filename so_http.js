@@ -1,5 +1,10 @@
 ;(function(window, $) { 'use strict';
 
+    // minify candies
+    var NULL = null, NULLS = '',
+        TRUE = true, FALSE = false
+    ;
+
     var re_query = /\?&+(.*)/,
         re_post = /P(UT|OST)/i,
         re_json = /^(\{.*\}|\[.*\]|".*"|\d+(\.\d+)?|true|false|null)$/,
@@ -7,11 +12,11 @@
         re_dataTypes = /\/(json|xml|html|plain)(?:[; ])?/i,
         fn_encode = encodeURIComponent,
         optionsDefault = {
-            method: 'GET', uri: '', uriParams: null, data: null, dataType: 'json', headers: {},
-            async: true, noCache: true, autoSend: true,
-            onStart: null, onStop: null, /* @todo: queue */ onProgress: null, onHeaders: null,
-            onDone: null, onSuccess: null, onFailure: null,
-            onAbort: null, onTimeout: null, onBeforeSend: null, onAfterSend: null
+            method: 'GET', uri: NULLS, uriParams: NULL, data: NULL, dataType: 'json', headers: {},
+            async: TRUE, noCache: TRUE, autoSend: TRUE,
+            onStart: NULL, onStop: NULL, /* @todo: queue */ onProgress: NULL, onHeaders: NULL,
+            onDone: NULL, onSuccess: NULL, onFailure: NULL,
+            onAbort: NULL, onTimeout: NULL, onBeforeSend: NULL, onAfterSend: NULL
         },
         STATE_OPENED = 1, STATE_HEADERS_RECEIVED = 2, STATE_LOADING = 3, STATE_DONE = 4
     ;
@@ -19,7 +24,7 @@
     $.extend('@http', {
         parseXml: function(input, inputType) {
             if ($.isDocument(input)) { return input; }
-            if (!$.isString(input)) { return null; }
+            if (!$.isString(input)) { return NULL; }
             return new DOMParser.parseFromString(input, inputType || 'text/xml');
         },
         parseJson: function(input) {
@@ -69,8 +74,8 @@
     function Stream(client) {
         this.client = client;
         this.headers = {};
-        this.data = null;
-        this.dataType = null;
+        this.data = NULL;
+        this.dataType = NULL;
     }
 
     function Request(client) {
@@ -82,16 +87,16 @@
 
     function Response(client) {
         this.super(client);
-        this.status = null;
-        this.statusCode = null;
-        this.statusText = null;
+        this.status = NULL;
+        this.statusCode = NULL;
+        this.statusText = NULL;
     }
 
     $.class(Request).extends(Stream);
     $.class(Response).extends(Stream);
 
     function removeReadyStateChange(client) {
-        client.api.onreadystatechange = null;
+        client.api.onreadystatechange = NULL;
     }
 
     function onReadyStateChange(client) {
@@ -106,7 +111,7 @@
             case STATE_HEADERS_RECEIVED: client.fire('headers');  break;
             case STATE_LOADING:          client.fire('progress'); break;
             case STATE_DONE:
-                client.done = true;
+                client.done = TRUE;
 
                 var status = 'HTTP/1.1 %s %s'.format(client.api.status, client.api.statusText),
                     headers = $.http.parseHeaders(client.api.getAllResponseHeaders()),
@@ -129,7 +134,7 @@
                 client.response.dataType = dataType;
 
                 // specials, e.g: 200: function(){...}
-                client.fire(null, client.response.statusCode);
+                client.fire(NULL, client.response.statusCode);
 
                 // success or failure
                 client.fire((client.response.statusCode > 99 && client.response.statusCode < 400)
@@ -183,9 +188,9 @@
         }
 
         this.state = 0;
-        this.sent = false;
-        this.done = false;
-        this.aborted = false;
+        this.sent = FALSE;
+        this.done = FALSE;
+        this.aborted = FALSE;
 
         this.api.client = this;
 
@@ -206,7 +211,7 @@
                 this.api.send($.http.serialize(this.request.data));
                 this.fire('afterSend');
 
-                this.sent = true;
+                this.sent = TRUE;
 
                 if (options.timeout) {
                     var i = setTimeout(function(){
@@ -230,7 +235,7 @@
         cancel: function() {
             this.api.abort();
             this.call('abort');
-            this.aborted = true;
+            this.aborted = TRUE;
         },
         // final callback
         end: function(fn) {
@@ -255,6 +260,7 @@
         if (!$.isString(uri)) {
             throw ('URI must be string!');
         }
+
         var re, optionsNew = {uri: uri, method: method};
         if (uri.index(' ')) {
             re = re_request.exec(uri);
