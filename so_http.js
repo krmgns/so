@@ -21,9 +21,7 @@
         STATE_OPENED = 1, STATE_HEADERS_RECEIVED = 2, STATE_LOADING = 3, STATE_DONE = 4
     ;
 
-    /**
-     * Base methods.
-     */
+    // export base methods
     $.extend('@http', {
         /**
          * Parse XML.
@@ -352,49 +350,57 @@
         return new Response(client);
     }
 
-    // init's helper
-    function prepareArgs(uri, options, onDone, onSuccess, onFailure, method) {
+    /**
+     * Invoke.
+     * @param  {String}             uri
+     * @param  {Object|Function}    options
+     * @param  {Function|undefined} onDone
+     * @param  {Function|undefined} onSuccess
+     * @param  {Function|undefined} onFailure
+     * @param  {String}             method @internal
+     * @return {Client}
+     */
+    function invoke(uri, options, onDone, onSuccess, onFailure, method) {
         if (!$.isString(uri)) {
             throw ('URI must be string!');
         }
 
-        var re, optionsNew = {uri: uri, method: method};
+        var re, _options = options;
+        uri = uri.trim();
         if (uri.index(' ')) {
             // <method> <uri> @<data type>, eg: '/foo', '/foo @json', 'GET /foo', 'GET /foo @json'
             re = re_request.exec(uri);
-            re && (optionsNew.method = re[1], optionsNew.uri = re[2], optionsNew.dataType = re[3]);
+            re && (options.method = re[1], options.uri = re[2], options.dataType = re[3]);
         } else {
-            optionsNew.uri = uri;
+            options.uri = uri, options.method = method;
         }
 
-        if ($.isFunction(options)) {
+        if ($.isFunction(_options)) {
             // eg: '/foo', function() {...}
-            optionsNew = $.extend(optionsNew,
-                {onDone: options, onSuccess: onDone, onFailure: onSuccess});
-        } else if ($.isObject(options)) {
+            options = $.extend(options,
+                {onDone: _options, onSuccess: onDone, onFailure: onSuccess});
+        } else if ($.isObject(_options)) {
             // eg: '/foo', {...}
-            optionsNew = $.extend(optionsNew,
-                $.extend({onDone: onDone, onSuccess: onSuccess, onFailure: onSuccess}, options));
+            options = $.extend(options,
+                $.extend({onDone: onDone, onSuccess: onSuccess, onFailure: onSuccess}, _options));
         }
 
-        return {uri: uri, options: optionsNew};
+        return initClient(uri, options);
     }
 
+    // export more methods
     $.extend('@http', {
         Client: initClient,
         Request: initRequest,
         Response: initResponse,
         get: function(uri, options, onDone, onSuccess, onFailure) {
-            var args = prepareArgs(uri, options, onDone, onSuccess, onFailure, 'GET');
-            return initClient(args.uri, args.options);
+            return invoke(uri, options, onDone, onSuccess, onFailure, 'get');
         },
         post: function(uri, options, onDone, onSuccess, onFailure) {
-            var args = prepareArgs(uri, options, onDone, onSuccess, onFailure, 'POST');
-            return initClient(args.uri, args.options);
+            return invoke(uri, options, onDone, onSuccess, onFailure, 'post');
         },
         request: function(uri, options, onDone, onSuccess, onFailure) {
-            var args = prepareArgs(uri, options, onDone, onSuccess, onFailure);
-            return initClient(args.uri, args.options);
+            return invoke(uri, options, onDone, onSuccess, onFailure);
         }
     });
 
