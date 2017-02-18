@@ -113,6 +113,10 @@
         }
     });
 
+    /**
+     * Stream.
+     * @param {Client} client
+     */
     function Stream(client) {
         this.client = client;
         this.headers = {};
@@ -120,6 +124,10 @@
         this.dataType = NULL;
     }
 
+    /**
+     * Request.
+     * @param {Client} client
+     */
     function Request(client) {
         this.super(client);
         this.method = client.options.method;
@@ -127,6 +135,10 @@
         this.uriParams = client.options.uriParams;
     }
 
+    /**
+     * Response.
+     * @param {Client} client
+     */
     function Response(client) {
         this.super(client);
         this.status = NULL;
@@ -134,9 +146,11 @@
         this.statusText = NULL;
     }
 
+    // extend request & response
     $.class(Request).extends(Stream);
     $.class(Response).extends(Stream);
 
+    // shortcut helpers
     function removeReadyStateChange(client) {
         client.api.onreadystatechange = NULL;
     }
@@ -166,6 +180,7 @@
                 client.response.statusText = client.api.statusText;
                 client.response.headers = headers;
 
+                // parse wars..
                 if (dataType == 'json') {
                     client.response.data = $.http.parseJson(data);
                 } else if (dataType == 'xml') {
@@ -178,7 +193,7 @@
                 // specials, e.g: 200: function(){...}
                 client.fire(NULL, client.response.statusCode);
 
-                // success or failure
+                // success or failure?
                 client.fire((client.response.statusCode > 99 && client.response.statusCode < 400)
                     ? 'success' : 'failure');
 
