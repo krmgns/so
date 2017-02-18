@@ -200,6 +200,8 @@
 
                 removeReadyStateChange(client);
                 break;
+            default:
+                throw ('Unknown HTTP error!');
         }
     }
 
