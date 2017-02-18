@@ -196,8 +196,13 @@
                 }
                 client.response.dataType = dataType;
 
+                // on('data', ...) if data exist
+                if (!$.isNulls(client.response.data)) {
+                    client.fire('data', client.response.data);
+                }
+
                 // specials, eg: 200: function(){...}
-                client.fire(NULL, client.response.statusCode);
+                client.fire(client.response.statusCode);
 
                 // success or failure?
                 client.fire((client.response.statusCode > 99 && client.response.statusCode < 400)
@@ -307,21 +312,28 @@
         /**
          * Fire.
          * @param  {String|Function} fn
-         * @param  {Int}      fnCode
+         * @param  {Array}           fnArgs
          * @return {void}
          */
-        fire: function(fn, fnCode) {
+        fire: function(fn, fnArgs) {
             // check 'ons'
             if (this.options.ons[fn]) {
                 fn = this.options.ons[fn];
             } else if (!$.isFunction(fn)) {
-                fn = fn ? 'on'+ fn.toCapitalCase() : fnCode;
+                fn = $.isNumeric(fn) // status code functions
+                    ? fn : fn.toCapitalCase().prepend('on');
                 if (this.options[fn]) {
                     fn = this.options[fn];
                 }
             }
 
-            $.isFunction(fn) && fn(this.request, this.response, this);
+            if($.isFunction(fn)) {
+                var args = [this.request, this.response, this];
+                if (fnArgs) {
+                    args = [fnArgs].concat(args);
+                }
+                fn.apply(this, args);
+            }
         },
 
         /**
