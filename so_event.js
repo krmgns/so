@@ -168,6 +168,9 @@
         function initEvent(type, fn, options) {
             return new Event(type, fn, options);
         }
+        function initCustomEvent(type, fn, options) {
+            return new Event(type, fn, $.extend({}, options, {custom: TRUE}));
+        }
         function initEventTarget(target) {
             return new EventTarget(target);
         }
@@ -205,14 +208,19 @@
             _this.options = $.extend({}, optionsDefault, options);
             _this.data = _this.options.data;
 
-            options = $.pickAll(_this.options, 'target', 'useCapture');
-            _this.target = options.target;
-            _this.useCapture = !!options.useCapture;
+            _this.custom = $.pick(_this.options, 'custom');
+            if (_this.custom) {
+                _this.options.eventClass = 'CustomEvent';
+            }
 
-            var event = createEvent(options.eventClass, _this.type, _this.options);
+            var event = createEvent(_this.options.eventClass, _this.type, _this.options);
             _this.event = event.event;
             _this.eventClass = event.eventClass;
             _this.eventTarget = NULL;
+
+             options = $.pickAll(_this.options, 'target', 'useCapture');
+            _this.target = options.target;
+            _this.useCapture = !!options.useCapture;
 
             _this.fn = extendFn(_this, fn);
             _this.fnOrig = fn;
@@ -434,6 +442,7 @@
             fire: fire,
             create: createEvent,
             Event: initEvent,
+            CustomEvent: initCustomEvent,
             EventTarget: initEventTarget,
             keyCode: {
                 BACKSPACE:  8, TAB:      9, ENTER:      13, ESC:       27,  LEFT:     37,
