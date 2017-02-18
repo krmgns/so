@@ -334,7 +334,7 @@
          * @return {String}
          */
         toCapitalCase: function(all) {
-            var str = toString(this).toLowerCase(), i;
+            var str = toString(this), i;
 
             if (all !== FALSE) {
                 for (i = 0, str = str.split(' '); i < str.length; i++) {
