@@ -150,7 +150,7 @@
 
         /** Is numeric. @param {Any} input @return {Bool} */
         isNumeric: function(input) {
-            return !$.isVoid(input) && !$.isNulls(input) && isFinite(input) && !isNaN(parseFloat(input));
+            return re_numeric.test(input);
         },
 
         /** Is function. @param {Any} input @return {Bool} */
@@ -510,7 +510,8 @@
     var _uuid = 0,
         fn_eval = window.eval, // direct eval breaks minify tool
         fn_slice = [].slice,
-        fn_toString = {}.toString
+        fn_toString = {}.toString,
+        re_numeric = /^-?\.?(\d+|\d+\.\d+)$/
     ;
 
     /**
