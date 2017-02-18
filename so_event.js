@@ -7,7 +7,7 @@
  */
 ;(function(window, $) { 'use strict';
 
-    // minify tools
+    // minify candies
     var NULL = null, NULLS = '',
         TRUE = true, FALSE = false
     ;
