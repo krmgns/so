@@ -6,7 +6,7 @@
     ;
 
     var re_query = /\?&+(.*)/,
-        re_post = /P(UT|OST)/i,
+        re_post = /P(U|OS)T/i,
         re_json = /^(\{.*\}|\[.*\]|".*"|\d+(\.\d+)?|true|false|null)$/,
         re_request = /^([a-z]+)?\s*(.*?)\s*(?:@(json|xml|html|text))?$/i,
         re_dataTypes = /\/(json|xml|html|plain)(?:[; ])?/i,
