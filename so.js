@@ -921,7 +921,16 @@
         },
 
         /**
-         * Extend.
+         * Extend options.
+         * @param  {Object|void} options
+         * @return {Object}
+         */
+        extendOptions: function(options) {
+            $.extend(options || {}, makeArray(arguments, 1));
+        },
+
+        /**
+         * Extend prototype.
          * @param  {Function} target
          * @param  {Object}   prototype
          * @return {Function}
