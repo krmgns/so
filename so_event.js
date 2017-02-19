@@ -399,7 +399,7 @@
             if ($.isObject(fn)) {
                 options = fn, fn = options.fn;
             }
-            return {fn: fn, options: $.extend(options || {}, {target: target, once: !!once})};
+            return {fn: fn, options: $.extendOptions(options, {target: target, once: !!once})};
         }
 
         /**
@@ -440,6 +440,7 @@
             off: off,
             once: once,
             fire: fire,
+            // watch: watch,
             create: createEvent,
             Event: initEvent,
             CustomEvent: initCustomEvent,

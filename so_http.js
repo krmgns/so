@@ -402,7 +402,7 @@
             throw ('URI must be string!');
         }
 
-        var re, _options = options = options || {};
+        var re, _options = options = $.extendOptions(options);
         uri = uri.trim();
         if (uri.index(' ')) {
             // <method> <uri> @<data type>, eg: '/foo', '/foo @json', 'GET /foo', 'GET /foo @json'
