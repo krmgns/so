@@ -1371,12 +1371,10 @@
         prepend: function(value) {
             var data = {0: value};
 
-            this.forEach(function(key, value) {
+            return this.forEach(function(key, value) {
                 $.isNumeric(key) && key++; // push key
                 data[key] = value;
-            });
-
-            return this.init(data);
+            }), this.init(data);
         },
 
         /**
