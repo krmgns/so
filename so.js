@@ -646,14 +646,12 @@
             var id, fnArgs = fnArgs || [];
             if (!repeat) {
                 id = setTimeout(function() {
-                    fn.apply(window, fnArgs);
-                    clearTimeout(id);
+                    fn.apply(window, fnArgs), clearTimeout(id);
                 }, delay);
             } else {
                 id = setInterval(function() {
-                    fn.apply(window, fnArgs);
-                    clearInterval(id);
-                });
+                    fn.apply(window, fnArgs), clearInterval(id);
+                }, delay);
             }
         },
 
