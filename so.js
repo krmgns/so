@@ -926,9 +926,9 @@
          * @param  {Object|void} options
          * @return {Object}
          */
-        extendOptions: function(options) {
-            return $.extend.apply(NULL, [options || {}].concat(makeArray(arguments, 1)));
-        },
+        // extendOptions: function(options) {
+        //     return $.extend.apply(NULL, [options || {}].concat(makeArray(arguments, 1)));
+        // },
 
         /**
          * Extend prototype.
