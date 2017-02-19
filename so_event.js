@@ -31,7 +31,7 @@
             DeviceMotionEvent: 'devicemotion', DeviceOrientationEvent: 'deviceorientation'
         },
         re_typesFix = /^(UI|Mouse|Mutation|HTML)Event$/i,
-        re_typesStandard = new RegExp(Object.values(re_types).join('|'), 'i'),
+        re_typesStandard = $.re(Object.values(re_types).join('|'), 'i'),
         optionsDefault = {
             bubbles: TRUE, cancelable: TRUE, scoped: FALSE, composed: FALSE, // all
             view: window, detail: NULL, // ui, mouse, custom
@@ -56,8 +56,8 @@
         options = $.extend({}, optionsDefault, options);
 
         if (!eventClass) { // autodetect
-            $.forEach(re_types, function(re, _eventClass) {
-                re = new RegExp('^('+ re +')$', 'i');
+            $.forEach(re_types, function(_eventClass, re) {
+                re = $.re('^('+ re +')$', 'i');
                 if (re.test(eventType)) {
                     eventClass = eventClassOrig = _eventClass;
                     return 0;
@@ -364,15 +364,15 @@
 
                 if (eventsRemove) {
                     events = target.$events;
-                    eventsRemove.forEach(function(event) {
+                    eventsRemove.for(function(event) {
                         events.data[event.type].removeAt(event.i);
                         target.removeEventListener(event.type, event.fn, event.useCapture);
                     });
 
                     // think memory!
-                    events.forEach(function(list, i) {
+                    events.forEach(function(key, list) {
                         if (!list.size) {
-                            events.replaceAt(i, NULL);
+                            events.replaceAt(key, NULL);
                         }
                     });
                 }
@@ -387,10 +387,10 @@
                 var target = checkTarget(this.target),
                     events = target.$events.get(event.type);
                 if (events) {
-                    events.forEach(function(event) {
-                        event.fn(event.event);
-                    });
-                } else $.logWarn('No `%s` type events found to fire.'.format(event.type));
+                    events.for(function(event) { event.fn(event.event); });
+                } else {
+                    $.logWarn('No `%s` type events found to fire.'.format(event.type));
+                }
             }
         });
 
