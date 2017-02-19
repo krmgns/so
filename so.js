@@ -647,14 +647,14 @@
 
         /**
          * Fire.
-         * @param  {Int}      delay
+         * @param  {Int}      delay (seconds)
          * @param  {Function} fn
          * @param  {Array}    fnArgs
          * @param  {Boolean}  repeat
          * @return {void}
          */
         fire: function(delay, fn, fnArgs, repeat) {
-            var id, fnArgs = fnArgs || [];
+            var id, fnArgs = fnArgs || []; delay *= 1000;
             if (!repeat) {
                 id = setTimeout(function() {
                     fn.apply(window, fnArgs), clearTimeout(id);
