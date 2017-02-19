@@ -98,7 +98,7 @@
 
             var ret = [];
 
-            $.forEach(data, function(value, key) { // only two-dimensionals
+            $.forEach(data, function(key, value) { // only two-dimensionals
                 key = fn_encode(key);
                 if ($.isArray(value)) {
                     if (value.length) {
@@ -107,7 +107,7 @@
                         }
                     } else ret.push('%s[]='.format(key));
                 } else if ($.isObject(value)) {
-                    $.forEach(value, function(_value, _key) {
+                    $.forEach(value, function(_key, _value) {
                         ret.push('%s[%s]=%s'.format(key, _key, fn_encode(_value)));
                     });
                 } else {
@@ -287,7 +287,7 @@
             var _this = this, options = this.options;
 
             if (!this.sent && !this.aborted) {
-                $.forEach(this.request.headers, function(value, key) {
+                $.forEach(this.request.headers, function(key, value) {
                     _this.api.setRequestHeader(key, value);
                 });
 
