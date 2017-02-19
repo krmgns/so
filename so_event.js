@@ -32,6 +32,7 @@
         },
         re_typesFix = /^(UI|Mouse|Mutation|HTML)Event$/i,
         re_typesStandard = $.re(Object.values(re_types).join('|'), 'i'),
+        re_split = /,\s*/,
         optionsDefault = {
             bubbles: TRUE, cancelable: TRUE, scoped: FALSE, composed: FALSE, // all
             view: window, detail: NULL, // ui, mouse, custom
@@ -66,7 +67,7 @@
         }
 
         eventClass = eventClassOrig = eventClass || 'Event'; // @default
-        if ($.isFunction(window[eventClass])) {
+        if ($.isFunction(window[eventClass]) && eventClass != 'MutationEvent') {
             event = new window[eventClass](eventType, options);
         } else {
             // add 's' if needed
@@ -122,6 +123,9 @@
 
             if (!e.data) {
                 e.data = event.data;
+            }
+            if (!e.target) {
+                e = $.defineProperty(e, 'target', [event.target])
             }
 
             // sugars..
@@ -213,7 +217,7 @@
                 _this.options.eventClass = 'CustomEvent';
             }
 
-            var event = createEvent(_this.options.eventClass, _this.type, _this.options);
+            event = createEvent(_this.options.eventClass, _this.type, _this.options);
             _this.event = event.event;
             _this.eventClass = event.eventClass;
             _this.eventTarget = NULL;
@@ -233,16 +237,27 @@
             _this.fired = 0;
             _this.cancalled = FALSE;
             _this.custom = event.eventClass == 'CustomEvent' || !re_typesStandard.test(type);
-
         }
 
         $.extendPrototype(Event, {
             /**
              * Bind.
+             * @param  {String|undefined} type
              * @return {this}
              */
-            bind: function() {
-                return initEventTarget(this.target).addEvent(this), this;
+            bind: function(type) {
+                var _this = this;
+
+                if (!type) {
+                    initEventTarget(_this.target).addEvent(_this);
+                } else {
+                    type.split(re_split).forEach(function(type) {
+                        _this.type = type;
+                        initEventTarget(_this.target).addEvent(_this);
+                    });
+                }
+
+                return _this;
             },
 
             /**
@@ -265,7 +280,7 @@
                 if (!type) {
                     initEventTarget(_this.target).removeEvent(_this);
                 } else {
-                    type.split(/,\s*/).forEach(function(type) {
+                    type.split(re_split).forEach(function(type) {
                         _this.type = type;
                         initEventTarget(_this.target).removeEvent(_this);
                     });
@@ -285,7 +300,7 @@
                 if (!type) {
                     initEventTarget(_this.target).dispatch(_this);
                 } else {
-                    type.split(/,\s*/).forEach(function(type) {
+                    type.split(re_split).forEach(function(type) {
                         _this.type = type;
                         initEventTarget(_this.target).dispatch(_this);
                     });
@@ -399,7 +414,7 @@
             if ($.isObject(fn)) {
                 options = fn, fn = options.fn;
             }
-            return {fn: fn, options: $.extendOptions(options, {target: target, once: !!once})};
+            return {fn: fn, options: $.options(options, {target: target, once: !!once})};
         }
 
         /**
@@ -412,11 +427,11 @@
          */
         function on(target, type, fn, options) {
             var args = prepareArgs(fn, options, target);
-            return initEvent(type, args.fn, args.options).bind();
+            return initEvent(type, args.fn, args.options).bind(type);
         }
         function once(target, type, fn, options) {
             var args = prepareArgs(fn, options, target, TRUE);
-            return initEvent(type, args.fn, args.options).bind();
+            return initEvent(type, args.fn, args.options).bind(type);
         }
         function off(target, type, fn, options) {
             var args = prepareArgs(fn, options, target);
@@ -440,7 +455,6 @@
             off: off,
             once: once,
             fire: fire,
-            // watch: watch,
             create: createEvent,
             Event: initEvent,
             CustomEvent: initCustomEvent,
