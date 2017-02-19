@@ -4,7 +4,7 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function(window, undefined) { 'use strict';
+;(function(window, $, undefined) { 'use strict';
 
     // simply support check
     if (!''.trim) {
@@ -26,13 +26,6 @@
         NODE_TYPE_DOCUMENT = 9,
         NODE_TYPE_DOCUMENT_FRAGMENT = 11
     ;
-
-    /**
-     * Shortcut for 'so'.
-     * @type {Object}
-     * @private
-     */
-    var $ = {};
 
     // globals
     window.so = $;
@@ -84,24 +77,33 @@
     }
 
     /**
-     * For each.
+     * Loop.
      * @param  {Array|Object} input
      * @param  {Function}     fn
      * @param  {Object}       opt__this
+     * @param  {Boolean}      useKey
      * @return {Array|Object}
      * @private
      */
-    function forEach(input, fn, opt__this) {
-        var _this = opt__this || input, len = input && input.length, i = 0, key;
+    function loop(input, fn, opt__this, useKey) {
+        var _this = opt__this || input, len = input && input.length, i = 0, key, value;
 
         if (len != NULL) {
             for (; i < len; i++) {
-                if (fn.call(_this, input[i], i, i) === 0) break;
+                value = input[i];
+                if (0 === fn.apply(_this, !useKey ?
+                        [value, i] /* for */ : [i, value, i] /* forEach */)) {
+                    break;
+                }
             }
         } else {
             for (key in input) {
                 if (input.hasOwnProperty(key)) {
-                    if (fn.call(_this, input[key], key, i++) === 0) break;
+                    value = input[key];
+                    if (0 === fn.apply(_this, !useKey ?
+                            [value, i++] /* for */ : [key, value, i++] /* forEach */)) {
+                        break;
+                    }
                 }
             }
         }
@@ -109,109 +111,126 @@
         return _this;
     }
 
-    /**
-     * so: type functions.
-     */
+
+    // so: for, forEach
     extend($, {
-        /** Is void. @param {Any} input @return {Bool} */
+        /**
+         * For: value, i
+         * @inheritDoc
+         */
+        for: function(input, fn, opt__this) {
+            return loop(input, fn, opt__this);
+        },
+        /**
+         * For each: key, value, i
+         * @inheritDoc
+         */
+        forEach: function(input, fn, opt__this) {
+            return loop(input, fn, opt__this, TRUE);
+        }
+    });
+
+    // so: type functions.
+    extend($, {
+        /** Is void. @param {Any} input @return {Boolean} */
         isVoid: function(input) {
             return (input == NULL);
         },
 
-        /** Is null. @param {Any} input @return {Bool} */
+        /** Is null. @param {Any} input @return {Boolean} */
         isNull: function(input) {
             return (input === NULL);
         },
 
-        /** Is nulls. @param {Any} input @return {Bool} */
+        /** Is nulls. @param {Any} input @return {Boolean} */
         isNulls: function(input) {
             return (input === NULLS);
         },
 
-        /** Is undefined. @param {Any} input @return {Bool} */
+        /** Is undefined. @param {Any} input @return {Boolean} */
         isUndefined: function(input) {
             return (input === undefined);
         },
 
-        /** Is string. @param {Any} input @return {Bool} */
+        /** Is string. @param {Any} input @return {Boolean} */
         isString: function(input) {
             return (typeof input == 'string');
         },
 
-        /** Is bool. @param {Any} input @return {Bool} */
+        /** Is bool. @param {Any} input @return {Boolean} */
         isBool: function(input) {
             return (typeof input == 'boolean');
         },
 
-        /** Is number. @param {Any} input @return {Bool} */
+        /** Is number. @param {Any} input @return {Boolean} */
         isNumber: function(input) {
             return (typeof input == 'number');
         },
 
-        /** Is numeric. @param {Any} input @return {Bool} */
+        /** Is numeric. @param {Any} input @return {Boolean} */
         isNumeric: function(input) {
             return re_numeric.test(input);
         },
 
-        /** Is function. @param {Any} input @return {Bool} */
+        /** Is function. @param {Any} input @return {Boolean} */
         isFunction: function(input) {
             return (typeof input == 'function');
         },
 
-        /** Is array.@param {Any} input @return {Bool} */
+        /** Is array.@param {Any} input @return {Boolean} */
         isArray: function(input) {
             return Array.isArray(input);
         },
 
-        /** Is object. @param {Any} input @return {Bool} */
+        /** Is object. @param {Any} input @return {Boolean} */
         isObject: function(input) {
             return input && (input.constructor == Object);
         },
 
-        /** Is list. @param {Any} input @return {Bool} */
+        /** Is list. @param {Any} input @return {Boolean} */
         isList: function(input) {
             return input && (input.constructor && input.constructor.name == 'List');
         },
 
-        /** Is int. @param {Any} input @return {Bool} */
+        /** Is int. @param {Any} input @return {Boolean} */
         isInt: function(input) {
             return $.isNumber(input) && input == (input | 0);
         },
 
-        /** Is float. @param {Any} input @return {Bool} */
+        /** Is float. @param {Any} input @return {Boolean} */
         isFloat: function(input) {
             return $.isNumber(input) && input != (input | 0);
         },
 
-        /** Is iterable.     @param {Any} input @return {Bool} */
+        /** Is iterable.     @param {Any} input @return {Boolean} */
         isIterable: function(input) {
             return $.isArray(input) || $.isObject(input) || $.isList(input) || (input && (
                 (input.length != NULL && !input[NAME_NODE_TYPE]) // dom, nodelist, string etc.
             ));
         },
 
-        /** Is primitive. @param {Any} input @return {Bool} */
+        /** Is primitive. @param {Any} input @return {Boolean} */
         isPrimitive: function(input) {
             return $.isVoid(input) || /^(string|number|boolean)$/.test(typeof input);
         },
 
-        /** Is window. @param {Any} input @return {Bool} */
+        /** Is window. @param {Any} input @return {Boolean} */
         isWindow: function(input) {
             return toBool(input && input == input[NAME_WINDOW] && input == input[NAME_WINDOW].window);
         },
 
-        /** Is document. @param {Any} input @return {Bool} */
+        /** Is document. @param {Any} input @return {Boolean} */
         isDocument: function(input) {
             return toBool(input && input[NAME_NODE_TYPE] === NODE_TYPE_DOCUMENT);
         },
 
-        /** Is node. @param {Any} input @return {Bool} */
+        /** Is node. @param {Any} input @return {Boolean} */
         isNode: function(input) {
             return toBool(input && (input[NAME_NODE_TYPE] === NODE_TYPE_ELEMENT
                 || input[NAME_NODE_TYPE] === NODE_TYPE_DOCUMENT_FRAGMENT));
         },
 
-        /** Is node element. @param {Any} input @return {Bool} */
+        /** Is node element. @param {Any} input @return {Boolean} */
         isNodeElement: function(input) {
             return toBool(input && input[NAME_NODE_TYPE] === NODE_TYPE_ELEMENT);
         }
@@ -224,10 +243,10 @@
      * @return {Array}
      */
     Object.keys = Object.keys || function(object, ret) {
-        return ret = [], forEach(object, function(_, key) { ret.push(key); }), ret;
+        return ret = [], $.forEach(object, function(key) { ret.push(key); }), ret;
     };
     Object.values = Object.values || function(object, ret) {
-        return ret = [], forEach(object, function(value) { ret.push(value); }), ret;
+        return ret = [], $.forEach(object, function(_, value) { ret.push(value); }), ret;
     };
 
     // shortcut
@@ -309,7 +328,7 @@
         },
         /**
          * Is numeric.
-         * @return {Bool}
+         * @return {Boolean}
          */
         isNumeric: function() {
             return $.isNumeric(this);
@@ -330,8 +349,8 @@
 
         /**
          * To capital case.
-         * @param  {Bool} all   @default=true
-         * @param  {Bool} lower @default=false
+         * @param  {Boolean} all   @default=true
+         * @param  {Boolean} lower @default=false
          * @return {String}
          */
         toCapitalCase: function(all, lower) {
@@ -376,7 +395,7 @@
          * @return {String}
          */
         append: function() {
-            var str = toString(this); return $.forEach(arguments, function(value) {
+            var str = toString(this); return $.for(arguments, function(value) {
                 str = str + value;
             }), str;
         },
@@ -387,7 +406,7 @@
          * @return {String}
          */
         prepend: function(input) {
-            var str = toString(this); return $.forEach(arguments, function(value) {
+            var str = toString(this); return $.for(arguments, function(value) {
                 str = value + str;
             }), str;
         },
@@ -418,12 +437,21 @@
         },
 
         /**
+         * For.
+         * @param  {Function} fn
+         * @return {String}
+         */
+        for: function(fn) {
+            return $.for(toString(this), fn, this);
+        },
+
+        /**
          * For each.
          * @param  {Function} fn
          * @return {String}
          */
         forEach: function(fn) {
-            return forEach(toString(this), fn, this);
+            return $.forEach(toString(this), fn, this);
         },
 
         /**
@@ -472,9 +500,9 @@
          * Starts with.
          * @param  {String}  search
          * @param  {Int}     index
-         * @param  {Bool}    opt_noCase
+         * @param  {Boolean}    opt_noCase
          * @param  @internal str
-         * @return {Bool}
+         * @return {Boolean}
          * @override For no-case option.
          */
         startsWith: function(search, index, opt_noCase, str) {
@@ -486,9 +514,9 @@
          * Ends with.
          * @param  {String}  search
          * @param  {Int}     index
-         * @param  {Bool}    opt_noCase
+         * @param  {Boolean}    opt_noCase
          * @param  @internal str
-         * @return {Bool}
+         * @return {Boolean}
          * @override For no-case option.
          */
         endsWith: function(search, index, opt_noCase, str) {
@@ -499,9 +527,9 @@
         /**
          * Contains.
          * @param  {String}  search
-         * @param  {Bool}    opt_noCase
+         * @param  {Boolean}    opt_noCase
          * @param  @internal str
-         * @return {Bool}
+         * @return {Boolean}
          */
         contains: function(search, opt_noCase, str) {
             return (str = prepareSearchStuff(this, search, opt_noCase))
@@ -546,9 +574,7 @@
         console[fn].apply(NULL, ['>> so:'].concat(makeArray(args)));
     }
 
-    /**
-     * so: base functions.
-     */
+    // so: base functions.
     extend($, {
         /**
          * Debug tools.
@@ -749,18 +775,6 @@
                 || ($.isObject(input) && !Object.keys(input).length);
         },
 
-        /**
-         * For each.
-         * @param  {Array|Object} input
-         * @param  {Function}     fn
-         * @param  {Object}       opt__this
-         * @return {Array|Object}
-         * @private
-         */
-        forEach: function(input, fn, opt__this) {
-            return forEach(input, fn, opt__this);
-        },
-
         mix: function() {
             throw '@todo Remove method $.mix()!';
         },
@@ -881,12 +895,12 @@
          * @return {Object}
          */
         object: function(object, properties) {
-            $.forEach(properties, function(value, key) {
-                properties[key] = {
-                    value: value[0],
-                    writable: value[1] != NULL ? !!value[1] : TRUE,
-                    enumerable: value[2] != NULL ? !!value[2] : TRUE,
-                    configurable: value[3] != NULL ? !!value[3] : FALSE
+            $.forEach(properties, function(name, property) {
+                properties[name] = {
+                    value: property[0],
+                    writable: property[1] != NULL ? !!property[1] : TRUE,
+                    enumerable: property[2] != NULL ? !!property[2] : TRUE,
+                    configurable: property[3] != NULL ? !!property[3] : FALSE
                 }
             });
 
@@ -935,7 +949,7 @@
         pickAll: function(input) {
             var keys = makeArray(arguments, 1), values = {};
 
-            forEach(input, function(value, key) {
+            $.forEach(input, function(key, value) {
                 // if ($.isNumeric(key)) key *= 1; // fix for index
                 if (keys.index(key)) {
                     values[key] = value, delete input[key];
@@ -957,7 +971,7 @@
          * Define property.
          * @param  {Object} object
          * @param  {String} name
-         * @param  {Object} property
+         * @param  {Object} property eg: [writable, enumerable, configurable]
          * @return {Object}
          */
         defineProperty: function(object, name, property) {
@@ -980,7 +994,7 @@
          * @return {Object}
          */
         definePropertyAll: function(object, properties) {
-            return $.forEach(properties, function(property, name) {
+            return $.forEach(properties, function(name, property) {
                 $.defineProperty(object, name, property);
             });
         }
@@ -1059,7 +1073,7 @@
                       super: supClass
             }, supClass[NAME_PROTOTYPE], subClass[NAME_PROTOTYPE]);
 
-            forEach(prototype, function(value, name) {
+            $.forEach(prototype, function(name, value) {
                 subClass[NAME_PROTOTYPE][name] = value;
             });
 
@@ -1106,12 +1120,21 @@
             this.data = {};
             this.size = 0;
 
-            $.forEach(data, function(value, key) {
+            $.forEach(data, function(key, value) {
                 this.data[key] = value;
                 this.size++; // why naming as 'length' sucks?!
             }, this);
 
             return this;
+        },
+
+        /**
+         * For.
+         * @param  {Function} fn
+         * @return {this}
+         */
+        for: function(fn) {
+            return $.for(this.data, fn, this);
         },
 
         /**
@@ -1124,6 +1147,24 @@
         },
 
         /**
+         * For all.
+         * @param  {Function} fn
+         * @return {this}
+         */
+        forAll: function(fn) {
+            var key, value, i = 0;
+
+            return this.for(function(list) {
+                for (key in list.data) {
+                    value = list.data[key];
+                    if (fn.call(this, value, i++) === 0) {
+                        return 0; // break;
+                    }
+                }
+            });
+        },
+
+        /**
          * For each all.
          * @param  {Function} fn
          * @return {this}
@@ -1131,10 +1172,10 @@
         forEachAll: function(fn) {
             var key, value, i = 0;
 
-            return this.forEach(function(list) {
+            return this.for(function(list) {
                 for (key in list.data) {
                     value = list.data[key];
-                    if (fn.call(this, value, key, i++) === 0) {
+                    if (fn.call(this, key, value, i++) === 0) {
                         return 0; // break;
                     }
                 }
@@ -1147,8 +1188,7 @@
          * @param {Any} value
          */
         set: function(key, value) {
-            // return this.data[key != NULL ? key : this.size] = value, this.size++, this;
-            return key = key != NULL ? key : this.size, !(key in this.data) && this.size++,
+            return key = (key != NULL ? key : this.size), !(key in this.data) && this.size++,
                 this.data[key] = value, this;
         },
 
@@ -1187,7 +1227,7 @@
          * @return {this}
          */
         replace: function(searchValue, replaceValue) {
-            return this.forEach(function(value, key) {
+            return this.forEach(function(key, value) {
                 if (value === searchValue) {
                     this.data[key] = replaceValue;
                 }
@@ -1231,7 +1271,7 @@
          * @return {Boolean}
          */
         has: function(searchValue, strict, ret /* @internal */) {
-            return ret = FALSE, this.forEach(function(value) {
+            return ret = FALSE, this.for(function(value) {
                 if (strict ? value === searchValue : value == searchValue) {
                     ret = TRUE; return 0; // break
                 }
@@ -1264,7 +1304,7 @@
         prepend: function(value) {
             var data = {0: value};
 
-            this.forEach(function(value, key) {
+            this.forEach(function(key, value) {
                 $.isNumeric(key) && key++; // push key
                 data[key] = value;
             });
@@ -1292,15 +1332,15 @@
          * @return {Any}
          */
         find: function(searchValue, valueDefault, opt_return) {
-            var test = searchValue, ret = valueDefault;
+            var search = searchValue, ret = valueDefault;
 
             // make test function
             if (!$.isFunction(searchValue)) {
-                test = function(value) { return value === searchValue; };
+                search = function(value) { return value === searchValue; };
             }
 
-            this.forEach(function(value, key, i) {
-                if (test(value)) {
+            this.forEach(function(key, value, i) {
+                if (search(value)) {
                     ret = opt_return == NULL ? value : opt_return == 0 ? key : i;
                     return 0; // break
                 }
@@ -1312,19 +1352,19 @@
         /**
          * Find index.
          * @param  {Any} searchValue
-         * @return {String|null}
+         * @return {String|undefined}
          */
         findKey: function(searchValue) {
-            return this.find(searchValue, NULL, 0);
+            return this.find(searchValue, undefined, 0);
         },
 
         /**
          * Find index.
          * @param  {Any} searchValue
-         * @return {Int|null}
+         * @return {Int|undefined}
          */
         findIndex: function(searchValue) {
-            return this.find(searchValue, NULL, 1);
+            return this.find(searchValue, undefined, 1);
         },
 
         /**
@@ -1395,7 +1435,7 @@
          * @return {this}
          */
         map: function(fn) {
-            return this.forEach(function(value, key, i) {
+            return this.forEach(function(key, value, i) {
                 this.data[key] = fn(value, key, i);
             });
         },
@@ -1407,7 +1447,7 @@
          * @return {Any}
          */
         reduce: function(inValue, fn) {
-            return this.forEach(function(value, key, i) {
+            return this.forEach(function(key, value, i) {
                 inValue = fn(value, key, i, inValue);
             }), inValue;
         },
@@ -1421,7 +1461,7 @@
             var _this = this, list = new List();
             fn = fn || function(value) { return !!value; }; // set default tester
 
-            return this.forEach(function(value, key, i) {
+            return this.forEach(function(key, value, i) {
                 if (fn(value, key, i)) {
                     list.set(key, value);
                 }
@@ -1436,7 +1476,7 @@
         select: function(fn) {
             var list = new List();
 
-            return this.forEach(function(value, key, i) {
+            return this.forEach(function(key, value, i) {
                 if (fn(value, key, i)) {
                     list.set(key, value);
                 }
@@ -1452,7 +1492,7 @@
             var list = new List();
             fn = fn || function() { return TRUE; }; // set default tester
 
-            return this.forEachAll(function(value, key, i) {
+            return this.forEachAll(function(key, value, i) {
                 if (fn(value, key, i)) {
                     list.append(value);
                 }
@@ -1466,7 +1506,7 @@
         uniq: function() {
             var _this = this, list = new List();
 
-            return this.forEach(function(value, key) {
+            return this.forEach(function(key, value) {
                 if (!list.has(value)) {
                     list.set(key, value);
                 }
@@ -1497,7 +1537,7 @@
          * @return {Any}
          */
         first: function(valueDefault) {
-            return this.forEach(function(value) {
+            return this.for(function(value) {
                 valueDefault = value; return 0; //break
             }), valueDefault;
         },
@@ -1508,7 +1548,7 @@
          * @return {Any}
          */
         last: function(valueDefault) {
-            return this.forEach(function(value, key, i) {
+            return this.for(function(value) {
                 valueDefault = value;
             }), valueDefault;
         },
@@ -1526,9 +1566,8 @@
          * @return {String}
          */
         toString: function() {
-            return !this.isEmpty()
-                ? (this.type == 'string' ? this.values().join('')
-                : $.jsonEncode(this.type == 'array' ? this.values() : this.data)) : '';
+            return this.isEmpty() '' ? this.type == 'string' ? this.values().join('')
+                : $.jsonEncode(this.type == 'array' ? this.values() : this.data);
         }
     });
 
@@ -1563,7 +1602,7 @@
         }, FALSE);
     };
 
-})(window);
+})(window, {});
 
 /**
  * Shortcut for 'console.log'.
