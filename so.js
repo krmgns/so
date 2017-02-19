@@ -922,15 +922,6 @@
         },
 
         /**
-         * Extend options.
-         * @param  {Object|void} options
-         * @return {Object}
-         */
-        // extendOptions: function(options) {
-        //     return $.extend.apply(NULL, [options || {}].concat(makeArray(arguments, 1)));
-        // },
-
-        /**
          * Extend prototype.
          * @param  {Function} target
          * @param  {Object}   prototype
@@ -972,6 +963,15 @@
             });
 
             return Object.create(object, properties);
+        },
+
+        /**
+         * Options.
+         * @param  {Object|void} options
+         * @return {Object}
+         */
+        options: function(options) {
+            return $.extend.apply(NULL, [options || {}].concat(makeArray(arguments, 1)));
         },
 
         /**
