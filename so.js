@@ -926,7 +926,7 @@
          * @return {Object}
          */
         extendOptions: function(options) {
-            $.extend(options || {}, makeArray(arguments, 1));
+            return $.extend.apply(NULL, [options || {}].concat(makeArray(arguments, 1)));
         },
 
         /**
