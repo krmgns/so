@@ -34,17 +34,12 @@
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
     window.so.DOMLevel = window[NAME_DOCUMENT].adoptNode ? 3 : 2;
 
-    /**
-     * To value, int, float, bool, string, json.
-     * @param  {Any} input
-     * @return {Int|Float|Bool|String}
-     * @private
-     */
+    // shortcut convert helpers
     function toValue(input) {
         return (input != NULL && input.valueOf) ? input.valueOf() : input;
     }
     function toInt(input) {
-        return !$.isNumeric(input = toString(input)) ? NULL : parseInt(input.replace(/^-?\./, '0.'), 10);
+        return !$.isNumeric(input = toString(input)) ? NULL : parseInt(input.replace(/^-?\./, '0.'));
     }
     function toFloat(input) {
         return !$.isNumeric(input = toString(input)) ? NULL : parseFloat(input);
@@ -54,6 +49,42 @@
     }
     function toBool(input) {
         return !!toValue(input);
+    }
+
+    // re stuff
+    var _re_cache = {};
+
+    function toRegExp(pattern, flags, ttl) {
+        flags = flags || NULLS;
+        if ($.isInt(flags)) {
+            ttl = flags, flags = NULLS;
+        }
+
+        if (!ttl) { // no cache
+            return new RegExp(pattern, flags);
+        }
+
+        if ($.isString(ttl)) {
+            var s = ttl.split(/(\d+)(\w+)/),
+                time = parseInt(s[1]), timeDir = s[2];
+            switch (timeDir) {
+                case 's': case 'sec': ttl = time; break;
+                case 'm': case 'min': ttl = time * 60; break;
+            }
+        }
+        ttl = (ttl > -1) ? ttl : 60 * 60 * 24; // one day
+
+        var i = pattern + (flags || ''), ret = _re_cache[i];
+        if (!ret) {
+            ret = _re_cache[i] = new RegExp(pattern, flags);
+        }
+
+        // simple gc
+        $.fire(1000 * ttl, function(){
+            _re_cache = {};
+        });
+
+        return ret;
     }
 
     /**
@@ -277,27 +308,11 @@
         }
     });
 
-    /**
-     * To trim chars.
-     * @param  {String|undefined} chars
-     * @param  {Boolean}          opt_isLeft
-     * @return {String}
-     * @private
-     */
-    function toTrimRegExp(chars, opt_isLeft) {
-        return new RegExp((opt_isLeft ? '^[%s]+' : '[%s]+$')
-            .format(chars ? chars.replace(/([\[\]\\])/g, '$1') : '\\s'));
+    // string helpers
+    function prepareTrimRegExp(chars, opt_isLeft) {
+        return toRegExp((opt_isLeft ? '^[%s]+' : '[%s]+$')
+            .format(chars ? chars.replace(/([\[\]\\])/g, '\\$1') : '\\s'));
     }
-
-    /**
-     * To search stuff.
-     * @param  {String}  str
-     * @param  {String}  search
-     * @param  {Integer} index
-     * @param  {Boolean} opt_noCase
-     * @return {Object}
-     * @private
-     */
     function prepareSearchStuff(str, search, index, opt_noCase) {
         if (str && search) {
             // swap arguments
@@ -437,6 +452,16 @@
         },
 
         /**
+         * Replace all.
+         * @param  {String} searchValue
+         * @param  {String} replaceValue
+         * @return {String}
+         */
+        replaceAll: function(searchValue, replaceValue) {
+            return this.replace(toRegExp(searchValue, 'g'), replaceValue);
+        },
+
+        /**
          * For.
          * @param  {Function} fn
          * @return {String}
@@ -471,7 +496,7 @@
          * @override For chars option.
          */
         trimLeft: function(chars) {
-            var str = toString(this), re = toTrimRegExp(chars, TRUE);
+            var str = toString(this), re = prepareTrimRegExp(chars, TRUE);
 
             while (re.test(str)) {
                 str = str.replace(re, NULLS);
@@ -487,7 +512,7 @@
          * @override For chars option.
          */
         trimRight: function(chars) {
-            var str = toString(this), re = toTrimRegExp(chars);
+            var str = toString(this), re = prepareTrimRegExp(chars);
 
             while (re.test(str)) {
                 str = str.replace(re, NULLS);
@@ -607,6 +632,40 @@
          */
         uuid: function() {
             return ++_uuid;
+        },
+
+        /**
+         * Fire.
+         * @param  {Int}      delay
+         * @param  {Function} fn
+         * @param  {Array}    fnArgs
+         * @param  {Boolean}  repeat
+         * @return {void}
+         */
+        fire: function(delay, fn, fnArgs, repeat) {
+            var id, fnArgs = fnArgs || [];
+            if (!repeat) {
+                id = setTimeout(function() {
+                    fn.apply(window, fnArgs);
+                    clearTimeout(id);
+                }, delay);
+            } else {
+                id = setInterval(function() {
+                    fn.apply(window, fnArgs);
+                    clearInterval(id);
+                });
+            }
+        },
+
+        /**
+         * Re.
+         * @param  {String} pattern
+         * @param  {String} flags
+         * @param  {Int}    ttl
+         * @return {RegExp}
+         */
+        re: function(pattern, flags, ttl) {
+            return toRegExp(pattern, flags, ttl);
         },
 
         /**
@@ -1566,8 +1625,9 @@
          * @return {String}
          */
         toString: function() {
-            return this.isEmpty() '' ? this.type == 'string' ? this.values().join('')
-                : $.jsonEncode(this.type == 'array' ? this.values() : this.data);
+            return this.isEmpty() ? ''
+                : this.type == 'string' ? this.values().join('')
+                    : $.jsonEncode(this.type == 'array' ? this.values() : this.data);
         }
     });
 
