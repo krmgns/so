@@ -700,8 +700,8 @@
             if (input) {
                 if (input[NAME_OWNER_DOCUMENT]) { // document or node
                     ret = input[NAME_OWNER_DOCUMENT];
-                } else if (input[NAME_DOCUMENT]) {
-                    ret = input[NAME_DOCUMENT]; // window
+                } else if (input[NAME_DOCUMENT]) { // window
+                    ret = input[NAME_DOCUMENT];
                 } else if ($.isDocument(input)) {
                     ret = input;
                 }
