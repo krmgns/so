@@ -1180,7 +1180,7 @@
                 data = data.data;
             }
 
-            options = $.extend({type: type}, options);
+            options = $.extend({}, {type: type}, options);
 
             this.type = options.type;
             this.data = {};
