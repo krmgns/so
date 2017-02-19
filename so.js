@@ -1372,7 +1372,7 @@
             var data = {0: value};
 
             return this.forEach(function(key, value) {
-                $.isNumeric(key) && key++; // push key
+                if ($.isNumeric(key)) key++; // push key
                 data[key] = value;
             }), this.init(data);
         },
