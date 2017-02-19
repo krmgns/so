@@ -635,6 +635,17 @@
         },
 
         /**
+         * Re.
+         * @param  {String} pattern
+         * @param  {String} flags
+         * @param  {Int}    ttl
+         * @return {RegExp}
+         */
+        re: function(pattern, flags, ttl) {
+            return toRegExp(pattern, flags, ttl);
+        },
+
+        /**
          * Fire.
          * @param  {Int}      delay
          * @param  {Function} fn
@@ -653,17 +664,6 @@
                     fn.apply(window, fnArgs), clearInterval(id);
                 }, delay);
             }
-        },
-
-        /**
-         * Re.
-         * @param  {String} pattern
-         * @param  {String} flags
-         * @param  {Int}    ttl
-         * @return {RegExp}
-         */
-        re: function(pattern, flags, ttl) {
-            return toRegExp(pattern, flags, ttl);
         },
 
         /**
