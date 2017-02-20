@@ -360,6 +360,7 @@
         has: function(search) {
             return has(this, search);
         },
+
         /**
          * Is numeric.
          * @return {Boolean}
@@ -447,11 +448,13 @@
 
         /**
          * Wrap.
-         * @param  {String} input
+         * @param  {String|Array} input
          * @return {String}
          */
         wrap: function(input) {
-            return input = toString(input), input + toString(this) + input;
+            return $.isString(input)
+                ? input + toString(this) + input
+                : input[0] + toString(this) + input[1];
         },
 
         /**
