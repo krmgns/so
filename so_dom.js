@@ -160,7 +160,8 @@
                 });
             }
             return elements;
-        }
+        },
+        isEmpty: function() {return !this.size;}
     });
 
     $.onReady(function() { var dom, doc = document, els
@@ -171,9 +172,9 @@
         // els = dom.find('input:checked!)')
         // els = dom.find('p:nth(1)')
         // els = dom.find('input:first, input:last, p:nth(1), a, button')
-        els = dom.find('body > *')
+        els = dom.find('body > aaa')
         log(els)
-        // log(els)
+        log(els.size,els.isEmpty())
     })
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };

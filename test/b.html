@@ -1,32 +1,42 @@
 <!-- <script src="so-all.php"></script> -->
 
 <script src="../so.js"></script>
-<!-- <script src="../so_util.js"></script> -->
-<!-- <script src="../so_browser.js"></script> -->
+<script src="../so_util.js"></script>
+<script src="../so_browser.js"></script>
 <script src="../so_event.js"></script>
 <script src="../so_http.js"></script>
+<script src="../so_dom.js"></script>
 
-<form id="form">
-    <input id="form_i">
+<form id="form" attr="foo">
+    <input so:v="1" id="form_i" value="123">
     <select id="form_s">
         <option value="1">1</option>
         <option value="2">2</option>
     </select>
     <input type="submit" name="">
 </form>
+<input type="checkbox">
+<input type="checkbox" checked="checked">
+<hr>
+<button>button</button>
 
-<p>Lorem ipsum dolor sit amet.</p>
+<a id="a" href="#" onclick="alert(1); return !1">Lorem ipsum dolor sit amet.</a>
+
+<div>
+    <p id="p1">p1</p>
+    <p id="p2">p2</p>
+    <p id="p3">p3</p>
+</div>
 
 <script>
 so.onReady(function($) {
     // dom!
-})
+ })
 </script>
 
 <script>
 so.onReady(function($) {
-    // var url = '/.dev/so/test/ajax.php';
-    // var uri = '/.dev/so/test/ajax.php', a
+    var uri = '/.dev/so/test/ajax.php', a
     // var onDone = function onDone() { log('done', arguments) },
     //     onSuccess = function onSuccess() { log('success') },
     //     onFailure = function onFailure() { log('failure') }
@@ -42,13 +52,17 @@ so.onReady(function($) {
     // a = $.http.request('post /foo', onDone);
     // a = $.http.request('post /foo @html', onDone);
     // a = $.http.request('/foo', {method:'post', data:{id:123}, dataType:'html'}, onDone);
-    a = $.http.get(uri, {autoSend:false})
+    // a = $.http.get(uri, {autoSend:false})
     // a.on('done', function() {
     //     log('done!')
     // }).end(function() {
     //     log("end")
     // }).send()
     // log("a:",a)
+
+    // a = $.http.get(uri, {200:log}).on('data', function(data) {
+    //     log("data::",data)
+    // });
 
     // var a = new Client(uri, {
     //     data: {a:1},
@@ -62,6 +76,7 @@ so.onReady(function($) {
     //     log(request, response, client)
     // })
 
+    // var url = '/.dev/so/test/ajax.php';
     // $.http.get(url, function(request, response, client, api) {
     //     log(request, response, client)
     //     log(response.headers['content-type'])
