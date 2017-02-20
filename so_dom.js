@@ -134,6 +134,7 @@
         forEach: function(fn) { return $.forEach(this.toArray(), fn, this); },
         map: function(fn) {return initDom(this.toArray().map(fn));},
         filter: function(fn) {return initDom(this.toArray().filter(fn));},
+        reverse: function() {return initDom(this.toArray().reverse());},
         get: function(i) {
             var element;
             if ($.isVoid(i)) {
@@ -172,9 +173,9 @@
         // els = dom.find('input:checked!)')
         // els = dom.find('p:nth(1)')
         // els = dom.find('input:first, input:last, p:nth(1), a, button')
-        els = dom.find('body > aaa')
+        els = dom.find('body > *')
         log(els)
-        log(els.size,els.isEmpty())
+        log(els.reverse())
     })
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
