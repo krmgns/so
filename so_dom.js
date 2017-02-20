@@ -138,7 +138,7 @@
         map: function(fn) {return initDom(this.toArray().map(fn));},
         filter: function(fn) {return initDom(this.toArray().filter(fn));},
         reverse: function() {return initDom(this.toArray().reverse());},
-        item: function(i) {
+        get: function(i, init) {
             var element;
             if (isVoid(i)) {
                 element = this[0];
@@ -151,25 +151,23 @@
                     }
                 });
             }
-            return element;
+            return init ? initDom(element) : element;
         },
-        itemAll: function(is) {
+        getAll: function(is, init) {
             var elements = [], element;
             if (isVoid(is)) {
                 elements = this.toArray();
             } else {
                 var _this = this;
                 is.split(re_commaSplit).forEach(function(i) {
-                    element = _this.item(i);
+                    element = _this.get(i);
                     if (element && !elements.has(element)) {
                         elements.push(element);
                     }
                 });
             }
-            return elements;
+            return init ? initDom(elements) : elements;
         },
-        get: function(i) {return initDom(this.item(i))},
-        getAll: function(is) {return initDom(this.itemAll(is))},
         tag: function() {return getNodeName(this[0])},
         tags: function() {var ret = [];return this.for(function(element) {ret.push(getNodeName(element))}), ret;}
     });
@@ -216,7 +214,7 @@
         els[0].on('mouseup', function(e) {log(this)})
         // els[0].on('mouseup,mousedown', )
 
-        el = els.clone().item(0)
+        el = els.clone().get()
         doc.body.appendChild(el)
 
         $.fire(1, function() {
