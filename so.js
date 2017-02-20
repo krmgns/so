@@ -294,9 +294,9 @@
         } else if ($.isString(input)) {
             ret = input.search(search);
         } else if ($.isArray(input)) {
-            $.for(input, function(value) {
+            $.for(input, function(value, i) {
                 if (ret = toString(value).search(search) > -1) {
-                    return 0; // break
+                    ret = i; return 0; // break
                 }
             });
         }
