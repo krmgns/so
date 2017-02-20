@@ -12,8 +12,8 @@
         querySelectorAll = function(root, selector) { return root.querySelectorAll(selector); }
     ;
 
-    function getNodeName(node) {
-        return node && (node.nodeName && node.nodeName.toLowerCase() || isWindow(node) && "#window");
+    function getNodeName(input, undefined) {
+        return (input && input.nodeName) ? input.nodeName.toLowerCase() : isWindow(input) ? '#window' : null;
     }
 
     function isDom(input) {
@@ -170,6 +170,8 @@
         },
         get: function(i) {return initDom(this.item(i))},
         getAll: function(is) {return initDom(this.itemAll(is))},
+        tag: function() {return getNodeName(this[0])},
+        tags: function() {var ret = [];return this.for(function(element) {ret.push(getNodeName(element))}), ret;}
     });
 
     $.onReady(function() { var dom, doc = document, els
@@ -182,8 +184,8 @@
         // els = dom.find('input:first, input:last, p:nth(1), a, button')
         els = dom.find('body > *')
         log(els)
-        // log(els.get('1'))
-        log(els.getAll('0,2,3,hr'))
+        log(els.tag('1'))
+        log(els.tags('0,2,3,hr'))
     })
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
