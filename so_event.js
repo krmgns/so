@@ -32,7 +32,7 @@
         },
         re_typesFix = /^(UI|Mouse|Mutation|HTML)Event$/i,
         re_typesStandard = $.re(Object.values(re_types).join('|'), 'i'),
-        re_split = /,\s*/,
+        re_commaSplit = /,\s*/,
         optionsDefault = {
             bubbles: TRUE, cancelable: TRUE, scoped: FALSE, composed: FALSE, // all
             view: window, detail: NULL, // ui, mouse, custom
@@ -251,7 +251,7 @@
                 if (!type) {
                     initEventTarget(_this.target).addEvent(_this);
                 } else {
-                    type.split(re_split).forEach(function(type) {
+                    type.split(re_commaSplit).forEach(function(type) {
                         _this.type = type;
                         initEventTarget(_this.target).addEvent(_this);
                     });
@@ -280,7 +280,7 @@
                 if (!type) {
                     initEventTarget(_this.target).removeEvent(_this);
                 } else {
-                    type.split(re_split).forEach(function(type) {
+                    type.split(re_commaSplit).forEach(function(type) {
                         _this.type = type;
                         initEventTarget(_this.target).removeEvent(_this);
                     });
@@ -300,7 +300,7 @@
                 if (!type) {
                     initEventTarget(_this.target).dispatch(_this);
                 } else {
-                    type.split(re_split).forEach(function(type) {
+                    type.split(re_commaSplit).forEach(function(type) {
                         _this.type = type;
                         initEventTarget(_this.target).dispatch(_this);
                     });
