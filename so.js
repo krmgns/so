@@ -657,7 +657,7 @@
         fn_eval = window.eval, // direct eval breaks minify tool
         fn_slice = [].slice,
         fn_toString = {}.toString,
-        re_numeric = /^-?(?:\.?\d+|\d+\.\d+)$/
+        re_numeric = /^-?(\.?\d+|\d+\.\d+)$/
     ;
 
     /**
