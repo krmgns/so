@@ -203,6 +203,11 @@
             return re_numeric.test(input);
         },
 
+        /** Is RegExp. @param {Any} input @return {Boolean} */
+        isRegExp: function(input) {
+            return input && input.constructor == RegExp;
+        },
+
         /** Is function. @param {Any} input @return {Boolean} */
         isFunction: function(input) {
             return (typeof input == 'function');
@@ -282,7 +287,21 @@
 
     // shortcut
     function index(input, search) {
-        return input.indexOf(search) > -1;
+        var ret;
+
+        if ($.isString(search)) {
+            ret = input.indexOf(search); // simply
+        } else if ($.isString(input)) {
+            ret = input.search(search);
+        } else if ($.isArray(input)) {
+            $.for(input, function(value) {
+                if (ret = toString(value).search(search) > -1) {
+                    return 0; // break
+                }
+            });
+        }
+
+        return !!(ret && ret > -1);
     }
 
     /**
