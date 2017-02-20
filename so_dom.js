@@ -191,12 +191,30 @@
         }
         return clone;
     }
+    function cleanElement(element, child) {
+        element.$data = element.$events = null;
+        var child;
+        while (child = element.firstChild) {
+            child.$data = child.$events = null;
+            cleanElement(child);
+            element.removeChild(child);
+            break;
+        }
+    }
 
     Dom.extendPrototype({
         clone: function(deep) {
             var clones = []; return this.for(function(element, i) {
                 clones[i] = cloneElement(element, deep);
             }), initDom(clones);
+        },
+        remove: function() {
+            return this.for(function(element) {
+                cleanElement(element);
+                if (element.parentNode) {
+                    element.parentNode.removeChild(element);
+                }
+            });
         }
     });
 
@@ -211,14 +229,10 @@
         els = dom.find('a:last')
         log('els:',els)
 
-        els[0].on('mouseup', function(e) {log(this)})
-        // els[0].on('mouseup,mousedown', )
+        els[0].on('click', log)
 
-        el = els.clone().get()
-        doc.body.appendChild(el)
-
-        $.fire(1, function() {
-            log(dom.find('[id="a2:clone-1"]'))
+        $.fire(2, function() {
+            initDom(els[0]).remove()
         })
     })
 
