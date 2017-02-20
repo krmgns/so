@@ -132,8 +132,7 @@
         toList: function() { return $.list(this.toArray()); },
         for: function(fn) { return $.for(this.toArray(), fn, this); },
         forEach: function(fn) { return $.forEach(this.toArray(), fn, this); },
-        map: function() {},
-        reduce: function() {},
+        map: function(fn) {return initDom(this.toArray().map(fn));},
         filter: function(fn) {return initDom(this.toArray().filter(fn));},
         get: function(i) {
             var element;
@@ -171,11 +170,10 @@
         // els = dom.find('input:not([checked])')
         // els = dom.find('input:checked!)')
         // els = dom.find('p:nth(1)')
-        els = dom.find('input:first, input:last, p:nth(1), a, button')
+        // els = dom.find('input:first, input:last, p:nth(1), a, button')
+        els = dom.find('body > *')
+        log(els)
         // log(els)
-        log(els.map(function(el) {
-            return el.tagName.toLowerCase() !== 'input';
-        }))
     })
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
