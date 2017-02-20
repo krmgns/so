@@ -154,13 +154,16 @@
             return element;
         },
         itemAll: function(is) {
-            var elements = [];
+            var elements = [], element;
             if (isVoid(is)) {
                 elements = this.toArray();
             } else {
                 var _this = this;
                 is.split(re_commaSplit).forEach(function(i) {
-                    elements.push(_this.item(i));
+                    element = _this.item(i);
+                    if (element && !elements.has(element)) {
+                        elements.push(element);
+                    }
                 });
             }
             return elements;
@@ -179,8 +182,8 @@
         // els = dom.find('input:first, input:last, p:nth(1), a, button')
         els = dom.find('body > *')
         log(els)
-        log(els.item('1'))
-        log(els.itemAll('0,2,3,hr'))
+        // log(els.get('1'))
+        log(els.getAll('0,2,3,hr'))
     })
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
