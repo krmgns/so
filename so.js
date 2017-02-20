@@ -286,22 +286,20 @@
     };
 
     // shortcut
-    function has(input, search) {
+    function has(input, searchValue, strict) {
         var ret;
 
-        if ($.isString(search)) {
-            ret = input.indexOf(search); // simply
-        } else if ($.isString(input)) {
-            ret = input.search(search);
-        } else if ($.isArray(input)) {
+        if ($.isString(input)) {
+            ret = $.isRegExp(searchValue) ? input.search(searchValue) : input.indexOf(searchValue); // simply
+        } else if ($.isArray(input) || $.isObject(input)) {
             $.for(input, function(value, i) {
-                if (ret = toString(value).search(search) > -1) {
-                    return 0; // break
+                if (strict ? value === searchValue : value == searchValue) {
+                    ret = i; return 0; // break
                 }
             });
         }
 
-        return !!(ret != NULL && ret > -1);
+        return ret > -1;
     }
 
     /**
@@ -310,11 +308,12 @@
     extend(Array[NAME_PROTOTYPE], {
         /**
          * Has.
-         * @param  {Any} search
+         * @param  {Any}     search
+         * @param  {Boolean} strict
          * @return {Boolean}
          */
-        has: function(search) {
-            return has(this, search);
+        has: function(search, strict) {
+            return has(this, search, strict);
         },
 
         /**
@@ -367,11 +366,12 @@
     extend(String[NAME_PROTOTYPE], {
         /**
          * Has.
-         * @param  {Any} search
+         * @param  {Any}     search
+         * @param  {Boolean} strict
          * @return {Boolean}
          */
-        has: function(search) {
-            return has(this, search);
+        has: function(search, strict) {
+            return has(this, search, strict);
         },
 
         /**
@@ -1424,16 +1424,12 @@
 
         /**
          * Has.
-         * @param  {Any}     searchValue
-         * @param  {Boolean} strict @default=true
+         * @param  {Any}     search
+         * @param  {Boolean} strict
          * @return {Boolean}
          */
-        has: function(searchValue, strict, ret /* @internal */) {
-            return ret = FALSE, this.for(function(value) {
-                if (strict ? value === searchValue : value == searchValue) {
-                    ret = TRUE; return 0; // break
-                }
-            }), !!ret;
+        has: function(search, strict) {
+            return has(this.data, search, strict);
         },
 
         /**
