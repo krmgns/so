@@ -5,6 +5,42 @@
         re_htmlContent = /^<([a-z-]+).*\/?>(?:.*<\/\1>)?$/i
     ;
 
+    function prepareSelector(selector) {
+        if (selector == '') return '';
+
+        var re_space = /\s+/g;
+        var re_attr = /\[.+\]/;
+        var re_attrFix = /\[(.+)=(.+)\]/g;
+        var re_attrExcape = /([.:])/g;
+        var re_attrQuotes = /(^['"]|['"]$)/g;
+        var re_attrStates = /(((check|select|disabl)ed|readonly)!?)/gi;
+
+        selector = selector.replace(re_space, ' ');
+
+        // grammar: https://www.w3.org/TR/css3-selectors/#grammar
+        if (selector.index(re_attr)) {
+            // prevent DOMException 'input[foo=1]' is not a valid selector.
+            selector = selector.replace(re_attrFix, function(_, $1, $2) {
+                $1 = $1.replace(re_attrExcape, '\\$1');
+                $2 = $2.replace(re_attrQuotes, '');
+                return '[%s="%s"]'.format($1, $2);
+            });
+        }
+
+        var re, search, replace, not = '!';
+        // shortcut for input:not([checked]) as input:checked!
+        if (re = selector.match(re_attrStates)) {
+            search = $.re(re[0], 'g'), replace = re[0].replace(not, '');
+            if (re[0].index(not)) {
+                selector = selector.replace(search, 'not([%s])'.format(replace));
+            } else {
+                selector = selector.replace(search, replace);
+            }
+        }
+
+        return selector;
+    }
+
     function isDom(input) {
         return (input instanceof Dom);
     }
@@ -33,8 +69,7 @@
                     }
                 } else {
                     if (!$.isNode(root)) root = document;
-                    selector = prepareSelector(selector);
-                    elements = root.querySelectorAll(selector, root);
+                    elements = root.querySelectorAll(prepareSelector(selector), root);
                     if (!isNaN(i)) {
                         elements = [elements[i]];
                     }
@@ -58,39 +93,6 @@
         for: function(fn) { return $.for(this.toArray(), fn, this); },
         forEach: function(fn) { return $.forEach(this.toArray(), fn, this); },
     });
-
-    // var re_attr = /\[.+=(?!['"]).+\]/
-    // var re_attrFix = /\[(.+)=(?!['"])(.+)\]/g
-    function prepareSelector(selector, root) {
-        var re_space = /\s+/g;
-        var re_attr = /\[.+\]/;
-        var re_attrFix = /\[(.+)=(.+)\]/g;
-        var re_attrExcape = /([.:])/g;
-        var re_attrQuotes = /(^['"]|['"]$)/g;
-        var re_attrStates = /(((check|select|disabl)ed|readonly)!?)/gi;
-
-        log(selector)
-        selector = selector.replace(re_space, ' ');
-
-        // grammar: https://www.w3.org/TR/css3-selectors/#grammar
-        if (selector.index(re_attr)) {
-            log("attr!")
-            // prevent DOMException 'input[foo=1]' is not a valid selector.
-            selector = selector.replace(re_attrFix, function(_, $1, $2) {
-                $1 = $1.replace(re_attrExcape, '\\$1');
-                $2 = $2.replace(re_attrQuotes, '');
-                return '[%s="%s"]'.format($1, $2);
-            });
-        }
-        var re;
-        // shortcut for input:not([checked]) as input:checked!
-        if (re = selector.match(re_attrStates)) {
-            selector = selector.replace($.re(re[0], 'g'),
-                'not([%s])'.format(re[0].substr(0, re[0].length-1)));
-        }
-        log(selector)
-        return selector;
-    }
 
     $.onReady(function() { var dom, doc = document, els
         dom = new Dom(doc)
