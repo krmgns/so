@@ -132,6 +132,7 @@
         toList: function() { return $.list(this.toArray()); },
         for: function(fn) { return $.for(this.toArray(), fn, this); },
         forEach: function(fn) { return $.forEach(this.toArray(), fn, this); },
+        isEmpty: function() {return !this.size;},
         map: function(fn) {return initDom(this.toArray().map(fn));},
         filter: function(fn) {return initDom(this.toArray().filter(fn));},
         reverse: function() {return initDom(this.toArray().reverse());},
@@ -161,8 +162,7 @@
                 });
             }
             return elements;
-        },
-        isEmpty: function() {return !this.size;}
+        }
     });
 
     $.onReady(function() { var dom, doc = document, els
