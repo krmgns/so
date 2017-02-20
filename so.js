@@ -562,6 +562,28 @@
         }
     });
 
+    /**
+     * Function extends.
+     */
+    extend(Function[NAME_PROTOTYPE], {
+        /**
+         * Extend.
+         * @param  {Object} properties
+         * @return {Function}
+         */
+        extend: function(properties) {
+            return extend(this, properties, this);
+        },
+        /**
+         * Extend prototype.
+         * @param  {Object} prototype
+         * @return {Function}
+         */
+        extendPrototype: function(prototype) {
+            return extend(this[NAME_PROTOTYPE], prototype, this);
+        }
+    });
+
     // internal vars
     var _uuid = 0,
         fn_eval = window.eval, // direct eval breaks minify tool
