@@ -245,7 +245,7 @@
         if (!options.noCache) {
             options.uri = options.uri.append(!options.uri.has('?') ? '?' : '&', '_=', $.now());
         }
-        options.uri = options.uri.replace(re_query, '?$1');
+        options.uri = options.uri.replace(re_query, '?$&');
 
         var _this = this;
         this.options = options;
