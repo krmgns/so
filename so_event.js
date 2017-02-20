@@ -241,12 +241,23 @@
 
         $.extendPrototype(Event, {
             /**
+             * Copy.
+             * @return {Event}
+             */
+            copy: function() {
+                var _this = this,
+                    event = initEvent(_this.type, _this.fnOrig, _this.options);
+
+                return $.extend(event, _this);
+            },
+
+            /**
              * Bind.
              * @param  {String|undefined} type
              * @return {this}
              */
             bind: function(type) {
-                var _this = this;
+                var _this = this.copy();
 
                 if (!type) {
                     initEventTarget(_this.target).addEvent(_this);
@@ -263,10 +274,21 @@
             /**
              * Bind to.
              * @param  {Object} target
-             * @return {this}
+             * @return {Event}
              */
             bindTo: function(target) {
-                return initEventTarget(target).addEvent(this), this;
+                var event = this.copy(), fn;
+
+                event.target = event.options.target = target;
+
+                // add fn after target set
+                fn = this.fnOrig.bind(target);
+                event.fn = extendFn(event, fn);
+                event.fnOrig = fn;
+
+                initEventTarget(target).addEvent(event);
+
+                return event;
             },
 
             /**
@@ -275,7 +297,7 @@
              * @return {this}
              */
             unbind: function(type) {
-                var _this = this;
+                var _this = this.copy();
 
                 if (!type) {
                     initEventTarget(_this.target).removeEvent(_this);
@@ -295,7 +317,7 @@
              * @return {this}
              */
             fire: function(type) {
-                var _this = this;
+                var _this = this.copy();
 
                 if (!type) {
                     initEventTarget(_this.target).dispatch(_this);
@@ -317,12 +339,12 @@
                 return !!this.fired;
             },
 
-            // for chaining >> el.on(...).fire().off()
+            // for chaining, eg: el.on(...).fire().off()
             off: function(type) { return this.unbind(type); }
         });
 
         /**
-         * Event Target
+         * Event Target.
          * @param {Object} target
          */
         function EventTarget(target) {
@@ -337,9 +359,11 @@
              */
             addEvent: function(event) {
                 var target = checkTarget(this.target, event.type);
+
                 event.target = target;
                 event.eventTarget = this;
                 event.i = target.$events.get(event.type).append(event).size - 1;
+
                 target.addEventListener(event.type, event.fn, event.useCapture);
             },
 
@@ -375,7 +399,9 @@
                             eventsRemove = events;
                         }
                     }
-                } else $.logWarn('No `%s` events found to fire.'.format(event.type));
+                } else {
+                    $.logWarn('No `%s` events found to fire.'.format(event.type));
+                }
 
                 if (eventsRemove) {
                     events = target.$events;
@@ -401,6 +427,7 @@
             dispatch: function(event) {
                 var target = checkTarget(this.target),
                     events = target.$events.get(event.type);
+
                 if (events) {
                     events.for(function(event) { event.fn(event.event); });
                 } else {
@@ -414,6 +441,7 @@
             if ($.isObject(fn)) {
                 options = fn, fn = options.fn;
             }
+
             return {fn: fn, options: $.options(options, {target: target, once: !!once})};
         }
 
@@ -427,24 +455,28 @@
          */
         function on(target, type, fn, options) {
             var args = prepareArgs(fn, options, target);
+
             type.split(re_commaSplit).forEach(function(type) {
                 initEvent(type, args.fn, args.options).bind(type);
             });
         }
         function once(target, type, fn, options) {
             var args = prepareArgs(fn, options, target, TRUE);
+
             type.split(re_commaSplit).forEach(function(type) {
                 initEvent(type, args.fn, args.options).bind(type);
             });
         }
         function off(target, type, fn, options) {
             var args = prepareArgs(fn, options, target);
+
             type.split(re_commaSplit).forEach(function(type) {
                 initEvent(type, args.fn, args.options).unbind(type);
             });
         }
         function fire(target, type, fn, options) {
             var args = prepareArgs(fn, options, target);
+
             type.split(re_commaSplit).forEach(function(type) {
                 initEvent(type, args.fn, args.options).fire(type);
             });
