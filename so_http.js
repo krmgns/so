@@ -239,11 +239,11 @@
         }
 
         if (options.uriParams) {
-            options.uri = options.uri.append(!options.uri.index('?') ? '?' : '&',
+            options.uri = options.uri.append(!options.uri.has('?') ? '?' : '&',
                 $.http.serialize(options.uriParams));
         }
         if (!options.noCache) {
-            options.uri = options.uri.append(!options.uri.index('?') ? '?' : '&', '_=', $.now());
+            options.uri = options.uri.append(!options.uri.has('?') ? '?' : '&', '_=', $.now());
         }
         options.uri = options.uri.replace(re_query, '?$1');
 
@@ -404,7 +404,7 @@
 
         var re, _options = options = options || {};
         uri = uri.trim();
-        if (uri.index(' ')) {
+        if (uri.has(' ')) {
             // <method> <uri> @<data type>, eg: '/foo', '/foo @json', 'GET /foo', 'GET /foo @json'
             re = re_request.exec(uri);
             re && (options.method = re[1], options.uri = re[2], options.dataType = re[3]);

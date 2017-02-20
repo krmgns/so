@@ -286,7 +286,7 @@
     };
 
     // shortcut
-    function index(input, search) {
+    function has(input, search) {
         var ret;
 
         if ($.isString(search)) {
@@ -309,12 +309,12 @@
      */
     extend(Array[NAME_PROTOTYPE], {
         /**
-         * Index.
+         * Has.
          * @param  {Any} search
          * @return {Boolean}
          */
-        index: function(search) {
-            return index(this, search);
+        has: function(search) {
+            return has(this, search);
         },
         /**
          * Get.
@@ -353,12 +353,12 @@
      */
     extend(String[NAME_PROTOTYPE], {
         /**
-         * Index.
+         * Has.
          * @param  {Any} search
          * @return {Boolean}
          */
-        index: function(search) {
-            return index(this, search);
+        has: function(search) {
+            return has(this, search);
         },
         /**
          * Is numeric.
@@ -463,7 +463,7 @@
             var str = toString(this);
             input = toString(input);
 
-            if (str.index(input)) {
+            if (str.has(input)) {
                 return str.substr(input.length).substr(-input.length);
             }
 
@@ -900,7 +900,7 @@
         copyTo: function(inputTo, inputFrom, opt_keysExclude, opt_overwrite) {
             var keys = opt_keysExclude || [], key;
             for (key in inputFrom) {
-                if (!keys.index(key)) {
+                if (!keys.has(key)) {
                     if (opt_overwrite !== FALSE && key in inputTo) {
                         continue;
                     }
@@ -1060,7 +1060,7 @@
 
             $.forEach(input, function(key, value) {
                 // if ($.isNumeric(key)) key *= 1; // fix for index
-                if (keys.index(key)) {
+                if (keys.has(key)) {
                     values[key] = value, delete input[key];
                 }
             });

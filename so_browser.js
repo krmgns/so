@@ -27,8 +27,8 @@
             var osName = fn.slice(2).toLowerCase();
 
             browser[fn] = (fn == 'isUnix')
-                ? function() { return ua.index('x11') && !ua.index('linux'); }
-                : function() { return ua.index(osName); };
+                ? function() { return ua.has('x11') && !ua.has('linux'); }
+                : function() { return ua.has(osName); };
 
             // set os name testing
             if (browser[fn]()) {

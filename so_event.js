@@ -360,7 +360,7 @@
                         eventsRemove = events.selectAll(function(_event) {
                             return _event && _event.fired;
                         });
-                    } else if (type.index('**')) { // all fired 'x' types, eg: .off('click**')
+                    } else if (type.has('**')) { // all fired 'x' types, eg: .off('click**')
                         type = type.slice(0, -2);
                         eventsRemove = events.selectAll(function(_event) {
                             return _event && _event.type == type && _event.fired;
