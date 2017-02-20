@@ -28,6 +28,15 @@
             return (''+ input).replace(/([A-Z])/g, function($0, $1) {
                 return '-'+ $1.toLowerCase();
             });
+        },
+
+        /**
+         * Escape RegExp.
+         * @param  {String} input
+         * @return {String}
+         */
+        escapeRegExp: function(input) {
+            return input.replace(/[.*+?^$|{}()\[\]\\]/g, '\\$&');
         }
     });
 
