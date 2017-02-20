@@ -70,7 +70,7 @@
 
         var re_attr = /\[.+\]/,
             re_attrFix = /\[(.+)=(.+)\]/g,
-            re_attrExcape = /([.:])/g,
+            re_attrEscape = /([.:])/g,
             re_attrQuotes = /(^['"]|['"]$)/g,
             re_attrStates = /(((check|select|disabl)ed|readonly)!?)/gi,
             re_fln = /(?:(\w+):((fir|la)st|nth\((\d+)\)))(?!-)/gi,
@@ -106,7 +106,7 @@
         if (selector.has(re_attr)) {
             // prevent DOMException 'input[foo=1]' is not a valid selector.
             selector = selector.replace(re_attrFix, function(_, $1, $2) {
-                $1 = $1.replace(re_attrExcape, '\\$1');
+                $1 = $1.replace(re_attrEscape, '\\$&');
                 $2 = $2.replace(re_attrQuotes, '');
                 return '[%s="%s"]'.format($1, $2);
             });
@@ -174,7 +174,35 @@
         tags: function() {var ret = [];return this.for(function(element) {ret.push(getNodeName(element))}), ret;}
     });
 
-    $.onReady(function() { var dom, doc = document, els
+    function cloneElement(element, deep) {
+        var clone = element.cloneNode(false);
+        // clone.cloneOf = function() { return element; }; // @wait
+        if (clone.id) {
+            clone.id += ':clone-'+ $.uuid();
+        }
+        deep = (deep !== false);
+        if (deep) {
+            $.for(element.childNodes, function(child) {
+                clone.appendChild(cloneElement(child, deep));
+            });
+            if (element.$events) {
+                element.$events.forAll(function(event) {
+                    event.copy().bindTo(clone);
+                });
+            }
+        }
+        return clone;
+    }
+
+    Dom.extendPrototype({
+        clone: function(deep) {
+            var clones = []; return this.for(function(element, i) {
+                clones[i] = cloneElement(element, deep);
+            }), initDom(clones);
+        }
+    });
+
+    $.onReady(function() { var dom, doc = document, el, els
         dom = new Dom(doc)
         // log(dom)
         // els = dom.find('input[so:v=1]')
@@ -182,10 +210,18 @@
         // els = dom.find('input:checked!)')
         // els = dom.find('p:nth(1)')
         // els = dom.find('input:first, input:last, p:nth(1), a, button')
-        els = dom.find('body > *')
-        log(els)
-        log(els.tag('1'))
-        log(els.tags('0,2,3,hr'))
+        els = dom.find('a:last')
+        log('els:',els)
+
+        els[0].on('mouseup', function(e) {log(this)})
+        // els[0].on('mouseup,mousedown', )
+
+        el = els.clone().item(0)
+        doc.body.appendChild(el)
+
+        $.fire(1, function() {
+            log(dom.find('[id="a2:clone-1"]'))
+        })
     })
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
