@@ -316,6 +316,7 @@
         has: function(search) {
             return has(this, search);
         },
+
         /**
          * Get.
          * @param  {Int} key
@@ -324,6 +325,18 @@
          */
         get: function(key, valueDefault) {
             return (key in this) ? this[key] : valueDefault;
+        },
+
+        /**
+         * Extract.
+         * @return {Object}
+         */
+        extract: function() {
+            var keys = makeArray(arguments), values = {};
+
+            return $.for(keys, function(key, i) {
+                values[key] = this[i];
+            }, this), values;
         }
     });
 
@@ -581,6 +594,15 @@
         contains: function(search, opt_noCase, str) {
             return (str = prepareSearchStuff(this, search, opt_noCase))
                 && str.s !== str.s.split(str.ss)[0];
+        },
+
+        /**
+         * To RegExp
+         * @param  {String|undefined} flags
+         * @return {RegExp}
+         */
+        toRegExp: function(flags) {
+            return toRegExp(this, flags);
         }
     });
 
