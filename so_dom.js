@@ -2,14 +2,18 @@
 ;(function(window, $, undefined) { 'use strict';
 
     var re_space = /\s+/g,
+        re_commaSplit = /,\s*/,
         re_htmlContent = /^<([a-z-]+).*\/?>(?:.*<\/\1>)?$/i,
-        fn_isNaN = isNaN,
+        isNaN = window.isNaN,
+        isVoid = $.isVoid, isObject = $.isObject,
+        isNode = $.isNode, isWindow = $.isWindow, isDocument = $.isDocument,
+        isNumber = $.isNumber, isNumeric = $.isNumeric, isString = $.isString,
         querySelector = function(root, selector) { return root.querySelector(selector); },
         querySelectorAll = function(root, selector) { return root.querySelectorAll(selector); }
     ;
 
     function getNodeName(node) {
-        return node && (node.nodeName && node.nodeName.toLowerCase() || $.isWindow(node) && "#window");
+        return node && (node.nodeName && node.nodeName.toLowerCase() || isWindow(node) && "#window");
     }
 
     function isDom(input) {
@@ -24,28 +28,28 @@
     }
 
     function Dom(selector, root, i) {
-        if ($.isNumber(root)) {
+        if (isNumber(root)) {
             i = root, root = null;
         }
         var elements;
-        if ($.isString(selector)) {
+        if (isString(selector)) {
             selector = $.trim(selector);
             if (selector) {
                 if (re_htmlContent.test(selector)) {
                     elements = createElement(selector);
-                    if ($.isObject(root)) {
+                    if (isObject(root)) {
                         $.forEach(elements, function(name, value){
                             elements.setAttribute(name, value);
                         });
                     }
                 } else {
                     elements = select(selector, root);
-                    if (!fn_isNaN(i)) {
+                    if (!isNaN(i)) {
                         elements = [elements[i]];
                     }
                 }
             }
-        } else if ($.isNode(selector) || $.isWindow(selector) || $.isDocument(selector)) {
+        } else if (isNode(selector) || isWindow(selector) || isDocument(selector)) {
             elements = [selector];
         } else {
             elements = selector;
@@ -58,25 +62,23 @@
     }
 
     function select(selector, root) {
-        if (selector == '') {
-            return '';
-        }
+        if (selector == '') return '';
 
-        if (!$.isNode(root)) {
+        if (!isNode(root)) {
             root = document;
         }
 
-        var re_attr = /\[.+\]/;
-        var re_attrFix = /\[(.+)=(.+)\]/g;
-        var re_attrExcape = /([.:])/g;
-        var re_attrQuotes = /(^['"]|['"]$)/g;
-        var re_attrStates = /(((check|select|disabl)ed|readonly)!?)/gi;
-        var re_fln = /(?:(\w+):((fir|la)st|nth\((\d+)\)))(?!-)/gi;
-        var re, ret = [];
+        var re_attr = /\[.+\]/,
+            re_attrFix = /\[(.+)=(.+)\]/g,
+            re_attrExcape = /([.:])/g,
+            re_attrQuotes = /(^['"]|['"]$)/g,
+            re_attrStates = /(((check|select|disabl)ed|readonly)!?)/gi,
+            re_fln = /(?:(\w+):((fir|la)st|nth\((\d+)\)))(?!-)/gi,
+            re, ret = [], re_remove = []
+        ;
 
         selector = selector.replace(re_space, ' ');
         if (re = selector.matchAll(re_fln)) {
-            var re_remove = [];
             re.forEach(function(re) {
                 var tag = re[1], dir = re[2], all;
                 if (dir == 'first') { // p:first
@@ -136,33 +138,35 @@
         map: function(fn) {return initDom(this.toArray().map(fn));},
         filter: function(fn) {return initDom(this.toArray().filter(fn));},
         reverse: function() {return initDom(this.toArray().reverse());},
-        get: function(i) {
+        item: function(i) {
             var element;
-            if ($.isVoid(i)) {
+            if (isVoid(i)) {
                 element = this[0];
-            } else if ($.isString(i)) {
+            } else if (isNumeric(i)) {
+                element = this[i];
+            } else if (isString(i)) {
                 this.for(function(_element) {
                     if (i == getNodeName(_element)) {
                         element = _element; return 0;
                     }
                 });
-            } else if (!fn_isNaN(i)) {
-                element = this[i];
             }
             return element;
         },
-        getAll: function(ii) {
+        itemAll: function(is) {
             var elements = [];
-            if ($.isVoid(ii)) {
+            if (isVoid(is)) {
                 elements = this.toArray();
             } else {
                 var _this = this;
-                ii.forEach(function(i) {
-                    elements.push(_this.get(i));
+                is.split(re_commaSplit).forEach(function(i) {
+                    elements.push(_this.item(i));
                 });
             }
             return elements;
-        }
+        },
+        get: function(i) {return initDom(this.item(i))},
+        getAll: function(is) {return initDom(this.itemAll(is))},
     });
 
     $.onReady(function() { var dom, doc = document, els
@@ -175,7 +179,8 @@
         // els = dom.find('input:first, input:last, p:nth(1), a, button')
         els = dom.find('body > *')
         log(els)
-        log(els.reverse())
+        log(els.item('1'))
+        log(els.itemAll('0,2,3,hr'))
     })
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
