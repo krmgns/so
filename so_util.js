@@ -14,7 +14,7 @@
          * @return {String}
          */
         toCamelCaseFromDashCase: function(input) {
-            return (''+ input).replace(/-([a-z])/gi, function($0, $1) {
+            return (''+ input).replace(/-([a-z])/gi, function(_, $1) {
                 return $1.toUpperCase();
             });
         },
@@ -25,7 +25,7 @@
          * @return {String}
          */
         toDashCaseFromUpperCase: function(input) {
-            return (''+ input).replace(/([A-Z])/g, function($0, $1) {
+            return (''+ input).replace(/([A-Z])/g, function(_, $1) {
                 return '-'+ $1.toLowerCase();
             });
         },
