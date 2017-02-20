@@ -301,7 +301,7 @@
             });
         }
 
-        return !!(ret && ret > -1);
+        return !!(ret != NULL && ret > -1);
     }
 
     /**
@@ -435,6 +435,30 @@
             }
 
             return str;
+        },
+
+        /**
+         * Match all.
+         * @param  {RegExp} pattern
+         * @return {Array|null}
+         */
+        matchAll: function(pattern) {
+            pattern = toString(pattern);
+
+            var slashPosition = pattern.lastIndexOf('/'),
+                source = pattern.substr(1, slashPosition - 1),
+                flags  = pattern.substr(slashPosition + 1),
+                r, re, ret = [];
+
+            // never forget or lost in infinite loops..
+            if (!flags.has('g')) flags += 'g';
+
+            re = toRegExp(source, flags);
+            while (r = re.exec(this)) {
+                ret.push(r);
+            }
+
+            return ret.length ? ret : NULL;
         },
 
         /**
