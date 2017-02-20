@@ -73,14 +73,14 @@
         }
 
         // geoposition
-        browser.getGeoposition = function(onDone, onFail, options) {
+        browser.getGeoposition = function(onDone, onError, options) {
             options = $.extend({}, {
                 timeout: 5000,
                 maximumAge: 0,
                 enableHighAccuracy: true
             }, options);
 
-            navigator.geolocation.getCurrentPosition(function(position, onFail, options){
+            navigator.geolocation.getCurrentPosition(function(position, onError, options){
                 onDone(position, position.coords.latitude, position.coords.longitude);
             });
         };
