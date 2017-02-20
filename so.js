@@ -1121,15 +1121,6 @@
             return values;
         },
 
-        /**
-         * Escape RegExp.
-         * @param  {String} input
-         * @return {String}
-         */
-        escapeRegExp: function(input) {
-            return input.replace(/[.*+?^$|{}()\[\]\\]/g, '\\$&');
-        },
-
         toString: function(name, opt_object) {
             throw '@todo Remove method $.toString()!';
         },
