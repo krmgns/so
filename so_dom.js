@@ -120,8 +120,14 @@
                         }
                     }
                 }
-            } else if (isNode(selector) || isWindow(selector)) {
+            } else if (isWindow(selector) || isDocument(selector)) {
                 elements = [selector];
+            } else if (isNode(selector)) {
+                if (root && root != selector.parentNode) {
+                    // pass (check root reliability)
+                } else {
+                    elements = [selector];
+                }
             } else {
                 elements = selector;
             }
@@ -141,7 +147,7 @@
 
     Dom.extendPrototype({
         // init: initDom,
-        find: function(selector, i) { return this[0] ? initDom(selector, this[0], i) : this; },
+        find: function(selector, i) {return this[0] ? initDom(selector, this[0], i) : this;},
         all: function() {return this.toArray()},
         copy: function() {return initDom(this.toArray())},
         toArray: function() {var ret = [], i = 0; while (i < this.size) {ret.push(this[i++]);} return ret;},
@@ -357,7 +363,8 @@
         // els = els.find('input:checked!)')
         // els = els.find('p:nth(1)')
         // els = els.find('input:first, input:last, p:nth(1), a, button')
-        els = els.find('#div > hr')
+        els = els.find('#div')
+        els = els.find(document.getElementById('p1'))
         log('els:',els)
         log('---')
 
