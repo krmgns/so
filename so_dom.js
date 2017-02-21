@@ -359,6 +359,7 @@
             }
             return !!ret;
         },
+        contains: function(s) {var el = this[0]; return !!(el && initDom(s, el).size);}
     });
 
     $.onReady(function() { var dom, el, els
@@ -373,8 +374,7 @@
         log('els:',els)
         log('---')
 
-        log(els.hasChilds())
-        log(els.hasChilds('#div-in1'))
+        log(els.contains('div'))
     })
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
