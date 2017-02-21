@@ -288,7 +288,6 @@
     // dom: walkers
     Dom.extendPrototype({
         parent: function() { return initDom(__(this, 'parentNode')); },
-        sibling: function(i) {return this.siblings(i).first();},
         siblings: function(i) {
             var el = __(this), elp = el && el.parentNode, rets;
             if (el && elp) {
@@ -303,16 +302,7 @@
             }
             return rets;
         },
-        child: function(i) {
-            var ret;
-            if (isNumber(i)) {
-                ret = this.childs().item(i);
-            } else if (isString(i)) {
-                ret = initDom(__(this)).find(i);
-            }
-            return initDom(ret);
-        },
-        childs: function() { return initDom(__(this, 'children')); },
+        children: function() { return initDom(__(this, 'children')); },
         prev: function() { return initDom(__(this, 'previousElementSibling')); },
         prevAll: function(s) {
             var el = this[0], rets = [];
