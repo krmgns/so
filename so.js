@@ -262,8 +262,11 @@
 
         /** Is node. @param {Any} input @return {Boolean} */
         isNode: function(input) {
-            return toBool(input && (input[NAME_NODE_TYPE] === NODE_TYPE_ELEMENT
-                || input[NAME_NODE_TYPE] === NODE_TYPE_DOCUMENT_FRAGMENT));
+            return toBool(input && (
+                   input[NAME_NODE_TYPE] === NODE_TYPE_ELEMENT
+                || input[NAME_NODE_TYPE] === NODE_TYPE_DOCUMENT
+                || input[NAME_NODE_TYPE] === NODE_TYPE_DOCUMENT_FRAGMENT
+            ));
         },
 
         /** Is node element. @param {Any} input @return {Boolean} */
