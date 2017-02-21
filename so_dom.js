@@ -289,9 +289,9 @@
         parent: function() { return initDom(__(this, 'parentNode')); },
         sibling: function(i) {return this.siblings(i).first();},
         siblings: function(i) {
-            var el = __(this), els, rets;
-            if (el) {
-                rets = this.parent().childs().filter(function(_el) {
+            var el = __(this), elp = el && el.parentNode, rets;
+            if (el && elp) {
+                rets = walk(elp, 'children').filter(function(_el) {
                     return _el != el;
                 });
                 if (isNumber(i)) {
@@ -363,8 +363,8 @@
         log('els:',els)
         log('---')
 
-        log(els.nextAll())
-        log(els.nextAll('br'))
+        log(els.siblings())
+        // log(els.siblings('br'))
     })
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
