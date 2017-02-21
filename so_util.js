@@ -7,6 +7,8 @@
  */
 ;(function($) { 'use strict';
 
+    var re_rgb = /(.*?)rgb\((\d+),\s*(\d+),\s*(\d+)\)/;
+
     $.extend('@util', {
         /**
          * toCamelCaseFromDashCase.
@@ -28,6 +30,28 @@
             return (''+ input).replace(/([A-Z])/g, function(_, $1) {
                 return '-'+ $1.toLowerCase();
             });
+        },
+
+        /**
+         * toHexFromRgb.
+         * @param  {String} color
+         * @return {String}
+         */
+        toHexFromRgb: function(color) {
+            if (!color || color.charAt(0) == '#' || color.indexOf('rgb') == -1) {
+                return color;
+            }
+
+            var nums = re_rgb.exec(color) || [, 0, 0, 0, 0],
+                r = parseInt(nums[2]).toString(16),
+                g = parseInt(nums[3]).toString(16),
+                b = parseInt(nums[4]).toString(16);
+
+            return '#'+ (
+                (r.length == 1 ? '0'+ r : r) +
+                (g.length == 1 ? '0'+ g : g) +
+                (b.length == 1 ? '0'+ b : b)
+            );
         },
 
         /**
