@@ -1130,30 +1130,41 @@
          * @param  {Object} object
          * @param  {String} name
          * @param  {Object} property eg: [writable, enumerable, configurable]
+         * @param  {Object} accessors
          * @return {Object}
          */
-        defineProperty: function(object, name, property) {
-            if ($.isVoid(property[2])) {
-                property[2] = TRUE; // always visible
+        defineProperty: function(object, name, descriptor, accessors) {
+            if ($.isVoid(descriptor[2])) {
+                descriptor[2] = TRUE; // always visible
             }
 
-            return Object.defineProperty(object, name, {
-                value: property[0],
-                writable: property[1] != NULL ? !!property[1] : TRUE,
-                enumerable: property[2] != NULL ? !!property[2] : TRUE,
-                configurable: property[3] != NULL ? !!property[3] : FALSE
-            });
+            descriptor = {
+                value: descriptor[0],
+                writable: descriptor[1] != NULL ? !!descriptor[1] : TRUE,
+                enumerable: descriptor[2] != NULL ? !!descriptor[2] : TRUE,
+                configurable: descriptor[3] != NULL ? !!descriptor[3] : FALSE
+            };
+
+            // set / get
+            if (accessors) {
+                // cannot both specify accessors and value
+                delete descriptor.value, delete descriptor.writable;
+                if (accessors.set) descriptor.set = accessors.set;
+                if (accessors.get) descriptor.get = accessors.get;
+            }
+
+            return Object.defineProperty(object, name, descriptor);
         },
 
         /**
          * Define property all.
          * @param  {Object} object
-         * @param  {Object} properties
+         * @param  {Object} descriptors
          * @return {Object}
          */
-        definePropertyAll: function(object, properties) {
-            return $.forEach(properties, function(name, property) {
-                $.defineProperty(object, name, property);
+        definePropertyAll: function(object, descriptors) {
+            return $.forEach(descriptors, function(name, descriptor) {
+                $.defineProperty(object, name, descriptor);
             });
         }
     });
