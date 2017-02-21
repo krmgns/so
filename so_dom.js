@@ -5,9 +5,10 @@
         re_commaSplit = /,\s*/,
         re_htmlContent = /^<([a-z-]+).*\/?>(?:.*<\/\1>)?$/i,
         isNaN = window.isNaN,
-        isVoid = $.isVoid, isObject = $.isObject,
-        isNode = $.isNode, isWindow = $.isWindow, isDocument = $.isDocument,
+        isVoid = $.isVoid, isObject = $.isObject, isArray = $.isArray,
         isNumber = $.isNumber, isNumeric = $.isNumeric, isString = $.isString,
+        isWindow = $.isWindow, isDocument = $.isDocument,
+        isNode = $.isNode, isNodeElement = $.isNodeElement,
         querySelector = function(root, selector) { return root.querySelector(selector); },
         querySelectorAll = function(root, selector) { return root.querySelectorAll(selector); }
     ;
@@ -27,39 +28,13 @@
         return new Dom(selector, root, i);
     }
 
-    function Dom(selector, root, i) {
-        if (isNumber(root)) {
-            i = root, root = null;
-        }
-        var elements;
-        if (isString(selector)) {
-            selector = $.trim(selector);
-            if (selector) {
-                if (re_htmlContent.test(selector)) {
-                    elements = createElement(selector);
-                    if (isObject(root)) {
-                        $.forEach(elements, function(name, value){
-                            elements.setAttribute(name, value);
-                        });
-                    }
-                } else {
-                    elements = select(selector, root);
-                    if (!isNaN(i)) {
-                        elements = [elements[i]];
-                    }
-                }
-            }
-        } else if (isNode(selector) || isWindow(selector) || isDocument(selector)) {
-            elements = [selector];
-        } else {
-            elements = selector;
-        }
-
-        this.size = 0;
-        $.for(elements, function(element) {
-            if (element) this[this.size++] = element;
-        }, this);
-    }
+    var re_attr = /\[.+\]/,
+        re_attrFix = /\[(.+)=(.+)\]/g,
+        re_attrEscape = /([.:])/g,
+        re_attrQuotes = /(^['"]|['"]$)/g,
+        re_attrStates = /(((check|select|disabl)ed|readonly)!?)/gi,
+        re_fln = /(?:(\w+):((fir|la)st|nth\((\d+)\)))(?!-)/gi
+    ;
 
     function select(selector, root) {
         if (selector == '') return '';
@@ -68,28 +43,22 @@
             root = document;
         }
 
-        var re_attr = /\[.+\]/,
-            re_attrFix = /\[(.+)=(.+)\]/g,
-            re_attrEscape = /([.:])/g,
-            re_attrQuotes = /(^['"]|['"]$)/g,
-            re_attrStates = /(((check|select|disabl)ed|readonly)!?)/gi,
-            re_fln = /(?:(\w+):((fir|la)st|nth\((\d+)\)))(?!-)/gi,
-            re, ret = [], re_remove = []
-        ;
-
         selector = selector.replace(re_space, ' ');
+
+        var re, ret = [], re_remove = [];
         if (re = selector.matchAll(re_fln)) {
             re.forEach(function(re) {
                 var tag = re[1], dir = re[2], all;
+
                 if (dir == 'first') { // p:first
-                    ret.push(querySelector(root, tag));
+                    all = querySelector(root, tag);
                 } else if (dir == 'last') { // p:last
-                    all = querySelectorAll(root, tag);
-                    ret.push(all[all.length - 1]);
+                    all = querySelectorAll(root, tag), all = all[all.length - 1];
                 } else { // p:nth(..)
-                    all = querySelectorAll(root, tag);
-                    ret.push(all[re[4] - 1]);
+                    all = querySelectorAll(root, tag), all = all[re[4] - 1];
                 }
+                ret.push(all);
+
                 re_remove.push($.util.escapeRegExp(re[0]));
             });
 
@@ -124,6 +93,40 @@
         }
 
         return $.array(ret, querySelectorAll(root, selector));
+    }
+
+    function Dom(selector, root, i) {
+        if (isNumber(root)) {
+            i = root, root = null;
+        }
+        var elements;
+        if (isString(selector)) {
+            selector = $.trim(selector);
+            if (selector) {
+                if (re_htmlContent.test(selector)) {
+                    elements = createElement(selector);
+                    if (isObject(root)) {
+                        $.forEach(elements, function(name, value){
+                            elements.setAttribute(name, value);
+                        });
+                    }
+                } else {
+                    elements = select(selector, root);
+                    if (!isNaN(i)) {
+                        elements = [elements[i]];
+                    }
+                }
+            }
+        } else if (isNode(selector) || isWindow(selector) || isDocument(selector)) {
+            elements = [selector];
+        } else {
+            elements = selector;
+        }
+
+        this.size = 0;
+        $.for(elements, function(element) {
+            if (element) this[this.size++] = element;
+        }, this);
     }
 
     Dom.extendPrototype({
@@ -191,14 +194,14 @@
         }
         return clone;
     }
-    function cleanElement(element, child) {
+    function cleanElement(element) {
         element.$data = element.$events = null;
         var child;
         while (child = element.firstChild) {
-            child.$data = child.$events = null;
-            cleanElement(child);
+            if (isNodeElement(child)) {
+                cleanElement(child);
+            }
             element.removeChild(child);
-            break;
         }
     }
 
@@ -215,6 +218,11 @@
                     element.parentNode.removeChild(element);
                 }
             });
+        },
+        empty: function() {
+            return this.for(function(element) {
+                cleanElement(element);
+            });
         }
     });
 
@@ -226,13 +234,13 @@
         // els = dom.find('input:checked!)')
         // els = dom.find('p:nth(1)')
         // els = dom.find('input:first, input:last, p:nth(1), a, button')
-        els = dom.find('a:last')
+        els = dom.find('#div')
         log('els:',els)
 
         els[0].on('click', log)
 
-        $.fire(2, function() {
-            initDom(els[0]).remove()
+        $.fire(3, function() {
+            initDom(els[0]).empty()
         })
     })
 
