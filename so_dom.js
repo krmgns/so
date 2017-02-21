@@ -171,6 +171,10 @@
             }
             return init ? initDom(elements) : elements;
         },
+        item: function(i) {return initDom(this[i])},
+        first: function() {return this.item(0)},
+        last: function() {return this.item(this.size - 1)},
+        nth: function(i) {return this.item(i)},
         tag: function() {return getNodeName(this[0])},
         tags: function() {var ret = [];return this.for(function(element) {ret.push(getNodeName(element))}), ret;}
     });
@@ -234,14 +238,13 @@
         // els = dom.find('input:checked!)')
         // els = dom.find('p:nth(1)')
         // els = dom.find('input:first, input:last, p:nth(1), a, button')
-        els = dom.find('#div')
+        els = dom.find('p')
         log('els:',els)
 
-        els[0].on('click', log)
-
-        $.fire(3, function() {
-            initDom(els[0]).empty()
-        })
+        // els[0].on('click', log)
+        // $.fire(3, function() {
+        //     initDom(els[0]).empty()
+        // })
     })
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
