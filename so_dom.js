@@ -358,6 +358,12 @@
 
     function isNonUnitStyle(name) { return nonUnitStyles.has(name); }
 
+    function getStyle(el, name) {
+        var styles;
+        return el && (styles = $.getWindow(el).getComputedStyle(el))
+           ? styles[name] || styles.getPropertyValue(name) || '' : '';
+    }
+
     function parseStyle(text) {
         var styles = {}, s;
         text = (''+ text).split($.re('\\s*;\\s*'));
@@ -369,7 +375,6 @@
         }
         return styles;
     }
-    function() {}
 
     // // dom: styles
     Dom.extendPrototype({
@@ -387,6 +392,16 @@
                     el.style[name] = value;
                 });
             });
+        },
+        getStyle: function(name, hex) {
+            var el = this[0], value;
+            if (el) {
+                name = toStyleName(name), value = getStyle(el, name) || '';
+                if (value != '' && hex !== true && name.has('color')) {
+                    value = $.util.toHexFromRgb(value);
+                }
+            }
+            return value;
         }
     });
 
@@ -398,11 +413,12 @@
         // els = els.find('input:checked!)')
         // els = els.find('p:nth(1)')
         // els = els.find('input:first, input:last, p:nth(1), a, button')
-        els = els.find('p')
+        els = els.find('#div')
         log('els:',els)
         log('---')
 
-        els.setStyle('color:#fff; background-color:red; font-size:12')
+        // els.setStyle('color:#fff; background-color:red; zoom:1')
+        log(els.getStyle('color'))
     })
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
