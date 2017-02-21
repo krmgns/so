@@ -133,10 +133,13 @@
         constructor: Dom,
         // init: initDom,
         find: function(selector, i) { return this[0] ? initDom(selector, this[0], i) : this; },
-        toArray: function() {var ret = [], i = 0, il = this.size; while (i < il) {ret.push(this[i++]);} return ret;},
+        all: function() {return this.toArray()},
+        copy: function() {return initDom(this.toArray())},
+        toArray: function() {var ret = [], i = 0; while (i < this.size) {ret.push(this[i++]);} return ret;},
         toList: function() { return $.list(this.toArray()); },
         for: function(fn) { return $.for(this.toArray(), fn, this); },
         forEach: function(fn) { return $.forEach(this.toArray(), fn, this); },
+        has: function(search, strict) {return this.toArray().has(search, strict);},
         isEmpty: function() {return !this.size;},
         map: function(fn) {return initDom(this.toArray().map(fn));},
         filter: function(fn) {return initDom(this.toArray().filter(fn));},
@@ -171,9 +174,9 @@
             }
             return init ? initDom(elements) : elements;
         },
-        item: function(i) {return initDom(this[i])},
-        first: function() {return this.item(0)},
-        last: function() {return this.item(this.size - 1)},
+        item: function(i) {return initDom(this[i - 1])},
+        first: function() {return this.item(1)},
+        last: function() {return this.item(this.size)},
         nth: function(i) {return this.item(i)},
         tag: function() {return getNodeName(this[0])},
         tags: function() {var ret = [];return this.for(function(element) {ret.push(getNodeName(element))}), ret;}
@@ -208,7 +211,7 @@
             element.removeChild(child);
         }
     }
-
+    // dom: modifiers
     Dom.extendPrototype({
         clone: function(deep) {
             var clones = []; return this.for(function(element, i) {
@@ -230,6 +233,52 @@
         }
     });
 
+    function _(_this, i, property) {
+        var element = _this[i];
+        if (property) {
+            element = element && element[property];
+        }
+        return element;
+    }
+    function _ne(a, b) { return a != b; }
+
+    // dom: walkers
+    Dom.extendPrototype({
+        parent: function() { return initDom(_(this, 0, 'parentNode')); },
+        sibling: function(i) {
+            return this.siblings(i).first();
+        },
+        siblings: function(i) {
+            var element = _(this, 0), elements, rets;
+            if (element) {
+                rets = this.parent().childs().filter(function(_element) {
+                    return _element != element;
+                });
+                if (isNumber(i)) {
+                    rets = rets.item(i);
+                } else if (isString(i)) {
+                    elements = this.parent().find(i);
+                    rets = rets.filter(function(_element) {
+                        return elements.has(_element);
+                    });
+                }
+            }
+            return rets;
+        },
+        child: function(i) {
+            var ret;
+            if (isNumber(i)) {
+                ret = this.childs().item(i);
+            } else if (isString(i)) {
+                ret = initDom(_(this, 0)).find(i);
+            }
+            return initDom(ret);
+        },
+        childs: function() { return initDom(_(this, 0, 'children')); },
+        prev: function() { return initDom(_(this, 0, 'previousElementSibling')); },
+        next: function() { return initDom(_(this, 0, 'nextElementSibling')); },
+    });
+
     $.onReady(function() { var dom, doc = document, el, els
         dom = new Dom(doc)
         // log(dom)
@@ -238,8 +287,17 @@
         // els = dom.find('input:checked!)')
         // els = dom.find('p:nth(1)')
         // els = dom.find('input:first, input:last, p:nth(1), a, button')
-        els = dom.find('p')
+        els = dom.find('#div-div')
         log('els:',els)
+        log('---')
+
+        // log(els.siblings())
+        // log(els.siblings(1))
+        log(els.siblings('hr,br'))
+
+        // ;['parent', 'prev','next','childs'].forEach(function(a) {
+        //     log(a,els[a]())
+        // })
 
         // els[0].on('click', log)
         // $.fire(3, function() {
