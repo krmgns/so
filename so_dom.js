@@ -402,6 +402,17 @@
                 }
             }
             return value;
+        },
+        removeStyle: function(name) {
+            return this.for(function(el) {
+                if (name == '*') {
+                    el.removeAttribute('style');
+                } else {
+                    name.split(re_commaSplit).forEach(function(name) {
+                        el.style[toStyleName(name)] = '';
+                    });
+                }
+            });
         }
     });
 
@@ -417,8 +428,10 @@
         log('els:',els)
         log('---')
 
-        // els.setStyle('color:#fff; background-color:red; zoom:1')
-        log(els.getStyle('color'))
+        $.fire(3, function() {
+            // els.setStyle('color:#fff; background-color:red; zoom:1')
+            log(els.removeStyle('*'))
+        });
     })
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
