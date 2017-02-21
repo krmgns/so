@@ -314,9 +314,9 @@
         childs: function() { return initDom(__(this, 'children')); },
         prev: function() { return initDom(__(this, 'previousElementSibling')); },
         prevAll: function(s) {
-            var el = this[0], els, rets = [];
+            var el = this[0], rets = [];
             if (el) {
-                els = walk(el, 'previousElementSibling').reverse();
+                rets = walk(el, 'previousElementSibling').reverse();
                 if (s && rets.length) {
                     rets = match(rets, this.parent().find(s).toArray());
                 }
@@ -325,7 +325,7 @@
         },
         next: function() { return initDom(__(this, 'nextElementSibling')); },
         nextAll: function(s) {
-            var el = this[0], els, rets = [], found;
+            var el = this[0], rets = [], found;
             if (el) {
                 this.parent().childs().for(function(_el,i) {
                     if (!found && _el == el) {
@@ -364,12 +364,12 @@
         // els = dom.find('input:checked!)')
         // els = dom.find('p:nth(1)')
         // els = dom.find('input:first, input:last, p:nth(1), a, button')
-        els = dom.find('#div > hr')
+        els = dom.find('#div > br')
         log('els:',els)
         log('---')
 
-        log(els.prevAll())
-        // log(els.prevAll('#div'))
+        log(els.nextAll())
+        // log(els.nextAll('p[id],hr'))
     })
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
