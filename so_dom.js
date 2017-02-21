@@ -249,6 +249,9 @@
         }
         return element;
     }
+    function __(_this, property) {
+        return _(_this, 0, property);
+    }
     function match(a, b) { // intersect
         var tmp = (b.length > a.length) ? (tmp = b, b = a, a = tmp) : null; // loop over shorter
         return a.filter(function(e) {
@@ -264,12 +267,12 @@
 
     // dom: walkers
     Dom.extendPrototype({
-        parent: function() { return initDom(_(this, 0, 'parentNode')); },
+        parent: function() { return initDom(__(this, 'parentNode')); },
         sibling: function(i) {
             return this.siblings(i).first();
         },
         siblings: function(i) {
-            var el = _(this, 0), els, rets;
+            var el = __(this), els, rets;
             if (el) {
                 rets = this.parent().childs().filter(function(_el) {
                     return _el != el;
@@ -287,12 +290,12 @@
             if (isNumber(i)) {
                 ret = this.childs().item(i);
             } else if (isString(i)) {
-                ret = initDom(_(this, 0)).find(i);
+                ret = initDom(__(this)).find(i);
             }
             return initDom(ret);
         },
-        childs: function() { return initDom(_(this, 0, 'children')); },
-        prev: function() { return initDom(_(this, 0, 'previousElementSibling')); },
+        childs: function() { return initDom(__(this, 'children')); },
+        prev: function() { return initDom(__(this, 'previousElementSibling')); },
         prevAll: function(s) {
             var el = this[0], els, rets = [];
             if (el) {
@@ -308,7 +311,7 @@
             }
             return initDom(rets);
         },
-        next: function() { return initDom(_(this, 0, 'nextElementSibling')); },
+        next: function() { return initDom(__(this, 'nextElementSibling')); },
         nextAll: function(s) {
             var el = this[0], els, rets = [], found;
             if (el) {
