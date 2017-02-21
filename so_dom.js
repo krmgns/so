@@ -96,41 +96,50 @@
     }
 
     function Dom(selector, root, i) {
+        var elements, size = 0;
+
         if (isNumber(root)) {
-            i = root, root = null;
-        }
-        var elements;
-        if (isString(selector)) {
-            selector = $.trim(selector);
-            if (selector) {
-                if (re_htmlContent.test(selector)) {
-                    elements = createElement(selector);
-                    if (isObject(root)) {
-                        $.forEach(elements, function(name, value){
-                            elements.setAttribute(name, value);
-                        });
-                    }
-                } else {
-                    elements = select(selector, root);
-                    if (!isNaN(i)) {
-                        elements = [elements[i]];
-                    }
-                }
-            }
-        } else if (isNode(selector) || isWindow(selector) || isDocument(selector)) {
-            elements = [selector];
-        } else {
-            elements = selector;
+            i = root, root = undefined;
         }
 
-        this.size = 0;
-        $.for(elements, function(element) {
-            if (element) this[this.size++] = element;
-        }, this);
+        if (!isVoid(selector)) {
+            if (isString(selector)) {
+                selector = $.trim(selector);
+                if (selector) {
+                    if (re_htmlContent.test(selector)) {
+                        elements = createElement(selector);
+                        if (isObject(root)) {
+                            $.forEach(elements, function(name, value){
+                                elements.setAttribute(name, value);
+                            });
+                        }
+                    } else {
+                        elements = select(selector, root);
+                        if (!isNaN(i)) {
+                            elements = [elements[i]];
+                        }
+                    }
+                }
+            } else if (isNode(selector) || isWindow(selector) || isDocument(selector)) {
+                elements = [selector];
+            } else {
+                elements = selector;
+            }
+
+            $.for(elements, function(element) {
+                if (element) this[size++] = element;
+            }, this);
+        }
+
+        // define all read-only
+        Object.defineProperties(this, {
+                'size': {value: size},
+            'selector': {value: selector},
+                'root': {value: root}
+        });
     }
 
     Dom.extendPrototype({
-        constructor: Dom,
         // init: initDom,
         find: function(selector, i) { return this[0] ? initDom(selector, this[0], i) : this; },
         all: function() {return this.toArray()},
@@ -279,9 +288,9 @@
         next: function() { return initDom(_(this, 0, 'nextElementSibling')); },
     });
 
-    $.onReady(function() { var dom, doc = document, el, els
-        dom = new Dom(doc)
-        // log(dom)
+    $.onReady(function() { var dom, el, els
+        dom = new Dom(document.body)
+        log(dom)
         // els = dom.find('input[so:v=1]')
         // els = dom.find('input:not([checked])')
         // els = dom.find('input:checked!)')
@@ -291,9 +300,7 @@
         log('els:',els)
         log('---')
 
-        // log(els.siblings())
-        // log(els.siblings(1))
-        log(els.siblings('hr,br'))
+        log(":",els.size=1)
 
         // ;['parent', 'prev','next','childs'].forEach(function(a) {
         //     log(a,els[a]())
