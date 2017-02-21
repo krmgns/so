@@ -120,7 +120,7 @@
                         }
                     }
                 }
-            } else if (isNode(selector) || isWindow(selector) || isDocument(selector)) {
+            } else if (isNode(selector) || isWindow(selector)) {
                 elements = [selector];
             } else {
                 elements = selector;
@@ -265,6 +265,8 @@
             return b.indexOf(e) < 0;
         });
     }
+
+    var fn_slice = [].slice;
     function walk(root, property, fn) {
             // if (property == 'up') property = 'previousElementSibling';
             // else if (property == 'down') property = 'nextElementSibling';
@@ -273,7 +275,11 @@
                 if (fn && fn(node) === 0) {
                     break;
                 }
-                nodes.push(node);
+                if (!isNode(node)) { // handle nodelist etc.
+                    nodes = nodes.concat(fn_slice.call(node));
+                } else {
+                    nodes.push(node);
+                }
             }
             return nodes;
         }
@@ -308,7 +314,7 @@
         childs: function() { return initDom(__(this, 'children')); },
         prev: function() { return initDom(__(this, 'previousElementSibling')); },
         prevAll: function(s) {
-            var el = this[0], elp = el && el.parentNode, els, rets = [];
+            var el = this[0], els, rets = [];
             if (el) {
                 els = walk(el, 'previousElementSibling').reverse();
                 if (s && rets.length) {
