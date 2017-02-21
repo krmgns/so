@@ -1141,34 +1141,25 @@
          * @return {Function}
          */
         create: function(name, prototype) {
-            // create constructor
+            // create constructor with original name (minify tools change the original name)
             function createConstructor(contents) {
-                return fn_eval('(function(){'+ contents +'})()');
+                return new Function('return function '+ name +'(){'+ contents +'}')();
             }
 
-            // create a named constructor
-            var Constructor = createConstructor(
-                'var Constructor = function '+ name +'() {' +
-                ' if (this.init) {' +
-                '   this.init.apply(this, arguments);' +
-                ' }' +
-                '};' +
-                'return Constructor;'
-            );
+            var Class = createConstructor('if(this.init)this.init.apply(this,arguments)');
 
-            // add constructor prototype and constructor constructor
             if (prototype) {
-                Constructor[NAME_PROTOTYPE] = Object.create(prototype, {
-                    constructor: {value: createConstructor(
-                        'var Constructor = function '+ name +'(){};' +
-                        'Constructor.prototype = prototype;' +
-                        'Constructor.prototype.constructor = Constructor;' +
-                        'return Constructor;'
-                    )}
+                Class[NAME_PROTOTYPE] = Object.create(prototype, {
+                    constructor: {value: (function() {
+                        var Constructor = createConstructor();
+                        Constructor[NAME_PROTOTYPE] = prototype;
+                        Constructor[NAME_PROTOTYPE].constructor = Constructor;
+                        return Constructor;
+                    })()}
                 });
             }
 
-            return Constructor;
+            return Class;
         },
 
         /**
