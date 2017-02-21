@@ -1123,49 +1123,6 @@
 
         toString: function(name, opt_object) {
             throw '@todo Remove method $.toString()!';
-        },
-
-        /**
-         * Define property.
-         * @param  {Object} object
-         * @param  {String} name
-         * @param  {Object} property eg: [writable, enumerable, configurable]
-         * @param  {Object} accessors
-         * @return {Object}
-         */
-        defineProperty: function(object, name, descriptor, accessors) {
-            if ($.isVoid(descriptor[2])) {
-                descriptor[2] = TRUE; // always visible
-            }
-
-            descriptor = {
-                value: descriptor[0],
-                writable: descriptor[1] != NULL ? !!descriptor[1] : TRUE,
-                enumerable: descriptor[2] != NULL ? !!descriptor[2] : TRUE,
-                configurable: descriptor[3] != NULL ? !!descriptor[3] : FALSE
-            };
-
-            // set / get
-            if (accessors) {
-                // cannot both specify accessors and value
-                delete descriptor.value, delete descriptor.writable;
-                if (accessors.set) descriptor.set = accessors.set;
-                if (accessors.get) descriptor.get = accessors.get;
-            }
-
-            return Object.defineProperty(object, name, descriptor);
-        },
-
-        /**
-         * Define property all.
-         * @param  {Object} object
-         * @param  {Object} descriptors
-         * @return {Object}
-         */
-        definePropertyAll: function(object, descriptors) {
-            return $.forEach(descriptors, function(name, descriptor) {
-                $.defineProperty(object, name, descriptor);
-            });
         }
     });
 

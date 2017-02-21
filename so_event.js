@@ -125,7 +125,7 @@
                 e.data = event.data;
             }
             if (!e.target) {
-                e = $.defineProperty(e, 'target', [event.target])
+                e = Object.defineProperty(e, 'target', {value: event.target});
             }
 
             // sugars..
