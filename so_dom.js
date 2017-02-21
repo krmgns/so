@@ -308,14 +308,9 @@
         childs: function() { return initDom(__(this, 'children')); },
         prev: function() { return initDom(__(this, 'previousElementSibling')); },
         prevAll: function(s) {
-            var el = this[0], els, rets = [];
+            var el = this[0], elp = el && el.parentNode, els, rets = [];
             if (el) {
-                this.parent().childs().for(function(_el) {
-                    if (_el == el) {
-                        return 0;
-                    }
-                    rets.push(_el);
-                });
+                els = walk(el, 'previousElementSibling').reverse();
                 if (s && rets.length) {
                     rets = match(rets, this.parent().find(s).toArray());
                 }
@@ -339,12 +334,12 @@
             return initDom(rets);
         },
         hasParent: function(s) {
-            var ret;
+            var el = this[0], ret;
             if (!s) {
-                ret = __(this, 'parentNode');
+                ret = el && el.parentNode;
             } else {
                 s = initDom(s).first().get();
-                walk(this[0], 'parentNode', function(node) {
+                walk(el, 'parentNode', function(node) {
                     if (s == node) {
                         ret = true; return 0;
                     }
@@ -367,8 +362,8 @@
         log('els:',els)
         log('---')
 
-        log(els.hasParent())
-        log(els.hasParent('#div'))
+        log(els.prevAll())
+        // log(els.prevAll('#div'))
     })
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
