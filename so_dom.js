@@ -297,16 +297,33 @@
             var el = this[0], els, rets = [];
             if (el) {
                 this.parent().childs().for(function(_el) {
-                    if (_el == el) return 0;
+                    if (_el == el) {
+                        return 0;
+                    }
                     rets.push(_el);
                 });
                 if (s && rets.length) {
                     rets = match(rets, this.parent().find(s).toArray());
                 }
             }
-            return initDom(rets)
+            return initDom(rets);
         },
         next: function() { return initDom(_(this, 0, 'nextElementSibling')); },
+        nextAll: function(s) {
+            var el = this[0], els, rets = [], found;
+            if (el) {
+                this.parent().childs().for(function(_el,i) {
+                    if (!found && _el == el) {
+                        found = true;
+                    }
+                    found && _el != el && rets.push(_el);
+                });
+                if (s && rets.length) {
+                    rets = match(rets, this.parent().find(s).toArray());
+                }
+            }
+            return initDom(rets);
+        }
     });
 
     $.onReady(function() { var dom, el, els
@@ -317,12 +334,12 @@
         // els = dom.find('input:checked!)')
         // els = dom.find('p:nth(1)')
         // els = dom.find('input:first, input:last, p:nth(1), a, button')
-        els = dom.find('#div > br')
+        els = dom.find('#div > hr')
         log('els:',els)
         log('---')
 
-        log(els.siblings())
-        log(els.siblings('hr'))
+        log(els.nextAll())
+        log(els.nextAll('br'))
     })
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
