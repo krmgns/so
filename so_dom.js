@@ -353,12 +353,12 @@
         return ret;
     }
 
-    var nonuniteStyles = ['opacity', 'zoom', 'zIndex', 'columnCount', 'columns',
+    var nonUnitStyles = ['opacity', 'zoom', 'zIndex', 'columnCount', 'columns',
         'fillOpacity', 'fontWeight', 'lineHeight'];
 
-    function isNonuniteStyle(name) { return nonuniteStyles.has(name); }
+    function isNonUnitStyle(name) { return nonUnitStyles.has(name); }
 
-    function parseStyleText(text) {
+    function parseStyle(text) {
         var styles = {}, s;
         text = (''+ text).split($.re('\\s*;\\s*'));
         while (text.length) {
@@ -369,18 +369,19 @@
         }
         return styles;
     }
+    function() {}
 
     // // dom: styles
     Dom.extendPrototype({
         setStyle: function(name, value) {
             var styles = name;
             if (isString(styles)) {
-                styles = !isVoid(value) ? toKeyValue(name, value) : parseStyleText(name);
+                styles = !isVoid(value) ? toKeyValue(name, value) : parseStyle(name);
             }
             this.for(function(el) {
                 $.forEach(styles, function(name, value) {
                     name = toStyleName(name), value = trim(value);
-                    if (value && isNumeric(value) && !nonuniteStyles.has(name)) {
+                    if (value && isNumeric(value) && !isNonUnitStyle(name)) {
                         value += 'px';
                     }
                     el.style[name] = value;
