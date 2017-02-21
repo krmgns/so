@@ -327,12 +327,7 @@
         nextAll: function(s) {
             var el = this[0], rets = [], found;
             if (el) {
-                this.parent().childs().for(function(_el,i) {
-                    if (!found && _el == el) {
-                        found = true;
-                    }
-                    found && _el != el && rets.push(_el);
-                });
+                rets = walk(el, 'nextElementSibling');
                 if (s && rets.length) {
                     rets = match(rets, this.parent().find(s).toArray());
                 }
@@ -364,12 +359,12 @@
         // els = dom.find('input:checked!)')
         // els = dom.find('p:nth(1)')
         // els = dom.find('input:first, input:last, p:nth(1), a, button')
-        els = dom.find('#div > br')
+        els = dom.find('#div > hr')
         log('els:',els)
         log('---')
 
         log(els.nextAll())
-        // log(els.nextAll('p[id],hr'))
+        log(els.nextAll('br'))
     })
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
