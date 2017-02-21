@@ -166,6 +166,11 @@
             return removeReadyStateChange(client);
         }
 
+        // hold trigger button
+        if (client.options.trigger) {
+            client.options.trigger.disabled = 1;
+        }
+
         // handle states
         client.state = client.api.readyState;
         switch (client.state) {
@@ -210,6 +215,11 @@
 
                 // end!
                 client.fire('done');
+
+                // release trigger button
+                if (client.options.trigger) {
+                    client.options.trigger.disabled = 0;
+                }
 
                 removeReadyStateChange(client);
                 break;
