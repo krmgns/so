@@ -158,7 +158,7 @@
             if (isVoid(i)) {
                 element = this[0];
             } else if (isNumeric(i)) {
-                element = this[i];
+                element = this[i - 1];
             } else if (isString(i)) {
                 this.for(function(_element) {
                     if (i == getNodeName(_element)) {
@@ -252,6 +252,7 @@
     function __(_this, property) {
         return _(_this, 0, property);
     }
+
     function match(a, b) { // intersect
         var tmp = (b.length > a.length) ? (tmp = b, b = a, a = tmp) : null; // loop over shorter
         return a.filter(function(e) {
@@ -264,13 +265,23 @@
             return b.indexOf(e) < 0;
         });
     }
+    function walk(root, property, fn) {
+            // if (property == 'up') property = 'previousElementSibling';
+            // else if (property == 'down') property = 'nextElementSibling';
+            var node = root, nodes = [];
+            while (node && (node = node[property])) {
+                if (fn && fn(node) === 0) {
+                    break;
+                }
+                nodes.push(node);
+            }
+            return nodes;
+        }
 
     // dom: walkers
     Dom.extendPrototype({
         parent: function() { return initDom(__(this, 'parentNode')); },
-        sibling: function(i) {
-            return this.siblings(i).first();
-        },
+        sibling: function(i) {return this.siblings(i).first();},
         siblings: function(i) {
             var el = __(this), els, rets;
             if (el) {
@@ -326,7 +337,22 @@
                 }
             }
             return initDom(rets);
-        }
+        },
+        hasParent: function(s) {
+            var ret;
+            if (!s) {
+                ret = __(this, 'parentNode');
+            } else {
+                s = initDom(s).first().get();
+                walk(this[0], 'parentNode', function(node) {
+                    if (s == node) {
+                        ret = true; return 0;
+                    }
+                });
+            }
+            return !!ret;
+        },
+        // hasChild:
     });
 
     $.onReady(function() { var dom, el, els
@@ -341,8 +367,8 @@
         log('els:',els)
         log('---')
 
-        log(els.nextAll())
-        log(els.nextAll('br'))
+        log(els.hasParent())
+        log(els.hasParent('#div'))
     })
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
