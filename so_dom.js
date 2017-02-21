@@ -339,11 +339,9 @@
             if (!s) {
                 ret = el && el.parentNode;
             } else {
-                s = initDom(s).first().get();
-                walk(el, 'parentNode', function(node) {
-                    if (s == node) {
-                        ret = true; return 0;
-                    }
+                s = initDom(s).first()[0];
+                walk(el, 'parentNode').forEach(function(_s) {
+                    if (s == _s) ret = true; return 0;
                 });
             }
             return !!ret;
@@ -352,19 +350,19 @@
     });
 
     $.onReady(function() { var dom, el, els
-        dom = new Dom(document.body)
-        // log(dom)
-        // els = dom.find('input[so:v=1]')
-        // els = dom.find('input:not([checked])')
-        // els = dom.find('input:checked!)')
-        // els = dom.find('p:nth(1)')
-        // els = dom.find('input:first, input:last, p:nth(1), a, button')
-        els = dom.find('#div > hr')
+        els = new Dom(document.body)
+        // log(els)
+        // els = els.find('input[so:v=1]')
+        // els = els.find('input:not([checked])')
+        // els = els.find('input:checked!)')
+        // els = els.find('p:nth(1)')
+        // els = els.find('input:first, input:last, p:nth(1), a, button')
+        els = els.find('#div > hr')
         log('els:',els)
         log('---')
 
-        log(els.siblings())
-        // log(els.siblings('br'))
+        // log(els.hasParent())
+        // log(els.hasParent('#div'))
     })
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
