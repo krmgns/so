@@ -372,18 +372,18 @@
 
     // // dom: styles
     Dom.extendPrototype({
-        setStyle: function(key, value) {
-            var styles = key;
+        setStyle: function(name, value) {
+            var styles = name;
             if (isString(styles)) {
-                styles = !isVoid(value) ? toKeyValue(key, value) : parseStyleText(key);
+                styles = !isVoid(value) ? toKeyValue(name, value) : parseStyleText(name);
             }
             this.for(function(el) {
-                $.forEach(styles, function(key, value) {
-                    key = toStyleName(key), value = trim(value);
-                    if (value && isNumeric(value) && !nonuniteStyles.has(key)) {
+                $.forEach(styles, function(name, value) {
+                    name = toStyleName(name), value = trim(value);
+                    if (value && isNumeric(value) && !nonuniteStyles.has(name)) {
                         value += 'px';
                     }
-                    el.style[key] = value;
+                    el.style[name] = value;
                 });
             });
         }
