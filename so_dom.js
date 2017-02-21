@@ -249,7 +249,18 @@
         }
         return element;
     }
-    function _ne(a, b) { return a != b; }
+    function match(a, b) { // intersect
+        var tmp = (b.length > a.length) ? (tmp = b, b = a, a = tmp) : null; // loop over shorter
+        return a.filter(function(e) {
+            return b.indexOf(e) > -1;
+        });
+    }
+    function unmatch(a, b) { // diff
+        var tmp = (b.length > a.length) ? (tmp = b, b = a, a = tmp) : null; // loop over shorter
+        return a.filter(function(e) {
+            return b.indexOf(e) < 0;
+        });
+    }
 
     // dom: walkers
     Dom.extendPrototype({
@@ -258,18 +269,15 @@
             return this.siblings(i).first();
         },
         siblings: function(i) {
-            var element = _(this, 0), elements, rets;
-            if (element) {
-                rets = this.parent().childs().filter(function(_element) {
-                    return _element != element;
+            var el = _(this, 0), els, rets;
+            if (el) {
+                rets = this.parent().childs().filter(function(_el) {
+                    return _el != el;
                 });
                 if (isNumber(i)) {
                     rets = rets.item(i);
                 } else if (isString(i)) {
-                    elements = this.parent().find(i);
-                    rets = rets.filter(function(_element) {
-                        return elements.has(_element);
-                    });
+                    rets = match(rets, this.parent().find(i).toArray());
                 }
             }
             return rets;
@@ -285,31 +293,36 @@
         },
         childs: function() { return initDom(_(this, 0, 'children')); },
         prev: function() { return initDom(_(this, 0, 'previousElementSibling')); },
+        prevAll: function(s) {
+            var el = this[0], els, rets = [];
+            if (el) {
+                this.parent().childs().for(function(_el) {
+                    if (_el == el) return 0;
+                    rets.push(_el);
+                });
+                if (s && rets.length) {
+                    rets = match(rets, this.parent().find(s).toArray());
+                }
+            }
+            return initDom(rets)
+        },
         next: function() { return initDom(_(this, 0, 'nextElementSibling')); },
     });
 
     $.onReady(function() { var dom, el, els
         dom = new Dom(document.body)
-        log(dom)
+        // log(dom)
         // els = dom.find('input[so:v=1]')
         // els = dom.find('input:not([checked])')
         // els = dom.find('input:checked!)')
         // els = dom.find('p:nth(1)')
         // els = dom.find('input:first, input:last, p:nth(1), a, button')
-        els = dom.find('#div-div')
+        els = dom.find('#div > br')
         log('els:',els)
         log('---')
 
-        log(":",els.size=1)
-
-        // ;['parent', 'prev','next','childs'].forEach(function(a) {
-        //     log(a,els[a]())
-        // })
-
-        // els[0].on('click', log)
-        // $.fire(3, function() {
-        //     initDom(els[0]).empty()
-        // })
+        log(els.siblings())
+        log(els.siblings('hr'))
     })
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
