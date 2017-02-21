@@ -325,6 +325,7 @@
             }
             return initDom(rets);
         },
+        contains: function(s) {var el = this[0]; return !!(el && initDom(s, el).size);},
         hasParent: function(s) {
             var el = this[0], ret;
             if (!s) {
@@ -337,19 +338,8 @@
             }
             return !!ret;
         },
-        hasChilds: function(s) {
-            var el = this[0], ret;
-            if (!s) {
-                ret = el && el.children && el.children.length;
-            } else {
-                s = initDom(s, el)[0];
-                walk(el, 'children').forEach(function(_s) {
-                    if (s && s == _s) ret = true; return 0;
-                });
-            }
-            return !!ret;
-        },
-        contains: function(s) {var el = this[0]; return !!(el && initDom(s, el).size);}
+        hasChild: function(s) { return !!this.children().size;},
+        hasChildren: function(s) { return this.hasChild();}
     });
 
     $.onReady(function() { var dom, el, els
@@ -364,7 +354,7 @@
         log('els:',els)
         log('---')
 
-        log(els.contains('div'))
+        log(els.hasChild('div'))
     })
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
