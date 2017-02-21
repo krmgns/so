@@ -2,13 +2,16 @@
 ;(function(window, $, undefined) { 'use strict';
 
     var re_space = /\s+/g,
+        re_trim = /^\s+|\s+$/g,
         re_commaSplit = /,\s*/,
         re_htmlContent = /^<([a-z-]+).*\/?>(?:.*<\/\1>)?$/i,
         isNaN = window.isNaN,
+        trim = function(s) { return s == null ? '' : (''+ s).replace(re_trim, '') },
         isVoid = $.isVoid, isObject = $.isObject, isArray = $.isArray,
         isNumber = $.isNumber, isNumeric = $.isNumeric, isString = $.isString,
         isWindow = $.isWindow, isDocument = $.isDocument,
         isNode = $.isNode, isNodeElement = $.isNodeElement,
+        toStyleName = $.util.toCamelCaseFromDashCase,
         querySelector = function(root, selector) { return root.querySelector(selector); },
         querySelectorAll = function(root, selector) { return root.querySelectorAll(selector); }
     ;
@@ -342,6 +345,50 @@
         hasChildren: function(s) { return this.hasChild();}
     });
 
+    function toKeyValue(key, value) {
+        var ret = key;
+        if (isString(ret)) {
+            ret = {}, ret[key] = value;
+        }
+        return ret;
+    }
+
+    var nonuniteStyles = ['opacity', 'zoom', 'zIndex', 'columnCount', 'columns',
+        'fillOpacity', 'fontWeight', 'lineHeight'];
+
+    function isNonuniteStyle(name) { return nonuniteStyles.has(name); }
+
+    function parseStyleText(text) {
+        var styles = {}, s;
+        text = (''+ text).split($.re('\\s*;\\s*'));
+        while (text.length) {
+            // wtf! :)
+            (s = text.shift().split($.re('\\s*:\\s*')))
+                && (s[0] = $.trim(s[0]))
+                    && (styles[s[0]] = s[1] || '');
+        }
+        return styles;
+    }
+
+    // // dom: styles
+    Dom.extendPrototype({
+        setStyle: function(key, value) {
+            var styles = key;
+            if (isString(styles)) {
+                styles = !isVoid(value) ? toKeyValue(key, value) : parseStyleText(key);
+            }
+            this.for(function(el) {
+                $.forEach(styles, function(key, value) {
+                    key = toStyleName(key), value = trim(value);
+                    if (value && isNumeric(value) && !nonuniteStyles.has(key)) {
+                        value += 'px';
+                    }
+                    el.style[key] = value;
+                });
+            });
+        }
+    });
+
     $.onReady(function() { var dom, el, els
         els = new Dom(document.body)
         // log(els)
@@ -350,11 +397,11 @@
         // els = els.find('input:checked!)')
         // els = els.find('p:nth(1)')
         // els = els.find('input:first, input:last, p:nth(1), a, button')
-        els = els.find('#div')
+        els = els.find('p')
         log('els:',els)
         log('---')
 
-        log(els.hasChild('div'))
+        els.setStyle('color:#fff; background-color:red; font-size:12')
     })
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
