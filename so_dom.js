@@ -273,14 +273,9 @@
     }
 
     var fn_slice = [].slice;
-    function walk(root, property, fn) {
-            // if (property == 'up') property = 'previousElementSibling';
-            // else if (property == 'down') property = 'nextElementSibling';
+    function walk(root, property) {
             var node = root, nodes = [];
             while (node && (node = node[property])) {
-                if (fn && fn(node) === 0) {
-                    break;
-                }
                 if (!isNode(node)) { // handle nodelist etc.
                     nodes = nodes.concat(fn_slice.call(node));
                 } else {
@@ -345,14 +340,25 @@
             if (!s) {
                 ret = el && el.parentNode;
             } else {
-                s = initDom(s).first()[0];
+                s = initDom(s)[0];
                 walk(el, 'parentNode').forEach(function(_s) {
-                    if (s == _s) ret = true; return 0;
+                    if (s && s == _s) ret = true; return 0;
                 });
             }
             return !!ret;
         },
-        // hasChild:
+        hasChilds: function(s) {
+            var el = this[0], ret;
+            if (!s) {
+                ret = el && el.children && el.children.length;
+            } else {
+                s = initDom(s, el)[0];
+                walk(el, 'children').forEach(function(_s) {
+                    if (s && s == _s) ret = true; return 0;
+                });
+            }
+            return !!ret;
+        },
     });
 
     $.onReady(function() { var dom, el, els
@@ -364,12 +370,11 @@
         // els = els.find('p:nth(1)')
         // els = els.find('input:first, input:last, p:nth(1), a, button')
         els = els.find('#div')
-        els = els.find(document.getElementById('p1'))
         log('els:',els)
         log('---')
 
-        // log(els.hasParent())
-        // log(els.hasParent('#div'))
+        log(els.hasChilds())
+        log(els.hasChilds('#div-in1'))
     })
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
