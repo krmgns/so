@@ -358,12 +358,7 @@
 
     function isNonUnitStyle(name) { return nonUnitStyles.has(name); }
 
-    function getStyle(el, name) {
-        var styles;
-        return el && (styles = $.getWindow(el).getComputedStyle(el))
-           ? styles[name] || styles.getPropertyValue(name) || '' : '';
-    }
-
+    function getStyle(el, name) {return $.getWindow(el).getComputedStyle(el)[toStyleName(name)] || '';}
     function parseStyle(text) {
         var styles = {}, s;
         text = (''+ text).split($.re('\\s*;\\s*'));
@@ -396,8 +391,8 @@
         getStyle: function(name, hex) {
             var el = this[0], value;
             if (el) {
-                name = toStyleName(name), value = getStyle(el, name) || '';
-                if (value != '' && hex !== false && name.has('color')) {
+                value = getStyle(el, name);
+                if (value != '' && hex !== false && name.has(/color/i)) {
                     value = $.util.toHexFromRgb(value);
                 }
             }
