@@ -49,7 +49,7 @@
 
         selector = selector.replace(re_space, ' ');
 
-        var re, ret = [], re_remove = [];
+        var re, ret = [], reRemove = [];
         if (re = selector.matchAll(re_fln)) {
             re.forEach(function(re) {
                 var tag = re[1], dir = re[2], all;
@@ -63,11 +63,11 @@
                 }
                 ret.push(all);
 
-                re_remove.push($.util.escapeRegExpInput(re[0]));
+                reRemove.push($.util.escapeRegExpInput(re[0]));
             });
 
             // remove processed selectors
-            selector = selector.replace('(%s),?\\s*'.format(re_remove.join('|')).toRegExp('gi'), '');
+            selector = selector.replace('(%s),?\\s*'.format(reRemove.join('|')).toRegExp('gi'), '');
         }
 
         // could be empty after processe above
@@ -438,8 +438,8 @@
 
         $.fire(1, function() {
             // els.setStyle('color:#fff; background-color:red; zoom:1')
-            log(els.getStyle('color'))
-            log(els.getStyle('padding'))
+            log(els.getStyle('color', false))
+            log(els.getStyle('padding', false))
         });
     })
 
