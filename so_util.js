@@ -7,7 +7,9 @@
  */
 ;(function($) { 'use strict';
 
-    var re_rgb = /.*rgba?\((\d+),\s*(\d+),\s*(\d+)(,.*)\)/i;
+    var re_rgb = /.*rgba?\((\d+),\s*(\d+),\s*(\d+)(,.*)\)/i,
+        toInt = parseInt
+    ;
 
     $.extend('@util', {
         /**
@@ -45,10 +47,10 @@
                 return input;
             }
 
-            var nums = re_rgb.exec(input) || [, '0', '0', '0'],
-                r = nums[1].toInt(16),
-                g = nums[2].toInt(16),
-                b = nums[3].toInt(16);
+            var re = re_rgb.exec(input) || [, '0', '0', '0'],
+                r = toInt(re[1]).toString(16),
+                g = toInt(re[2]).toString(16),
+                b = toInt(re[3]).toString(16);
 
             return '#'+ (
                 (r.length == 1 ? '0'+ r : r) +
