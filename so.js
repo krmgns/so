@@ -599,7 +599,7 @@
          * Starts with.
          * @param  {String}  search
          * @param  {Int}     index
-         * @param  {Boolean}    opt_noCase
+         * @param  {Boolean} opt_noCase
          * @param  @internal str
          * @return {Boolean}
          * @override For no-case option.
@@ -613,7 +613,7 @@
          * Ends with.
          * @param  {String}  search
          * @param  {Int}     index
-         * @param  {Boolean}    opt_noCase
+         * @param  {Boolean} opt_noCase
          * @param  @internal str
          * @return {Boolean}
          * @override For no-case option.
@@ -626,7 +626,7 @@
         /**
          * Contains.
          * @param  {String}  search
-         * @param  {Boolean}    opt_noCase
+         * @param  {Boolean} opt_noCase
          * @param  @internal str
          * @return {Boolean}
          */
