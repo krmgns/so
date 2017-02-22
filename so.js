@@ -38,8 +38,8 @@
     function toValue(input) {
         return (input != NULL && input.valueOf) ? input.valueOf() : input;
     }
-    function toInt(input) {
-        return !$.isNumeric(input = toString(input)) ? NULL : parseInt(input.replace(/^-?\./, '0.'));
+    function toInt(input, base) {
+        return !$.isNumeric(input = toString(input)) ? NULL : parseInt(input.replace(/^-?\./, '0.'), base || 10);
     }
     function toFloat(input) {
         return !$.isNumeric(input = toString(input)) ? NULL : parseFloat(input);
@@ -397,9 +397,10 @@
 
         /**
          * To int.
+         * @param  {Int} base
          * @return {Int|null}
          */
-        toInt: function() { return toInt(this); },
+        toInt: function(base) { return toInt(this, base); },
 
         /**
          * To float.

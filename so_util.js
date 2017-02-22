@@ -37,15 +37,15 @@
 
         /**
          * toHexFromRgb.
-         * @param  {String} color
+         * @param  {String} input
          * @return {String}
          */
-        toHexFromRgb: function(color) {
-            if (!color || color[0] == '#' || color.indexOf('rgb') < 0) {
-                return color;
+        toHexFromRgb: function(input) {
+            if (!input || input[0] == '#' || input.indexOf('rgb') < 0) {
+                return input;
             }
 
-            var nums = re_rgb.exec(color) || [, 0, 0, 0, 0],
+            var nums = re_rgb.exec(input) || [, 0, 0, 0, 0],
                 r = parseInt(nums[2]).toString(16),
                 g = parseInt(nums[3]).toString(16),
                 b = parseInt(nums[4]).toString(16);
