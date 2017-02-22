@@ -45,10 +45,10 @@
                 return input;
             }
 
-            var nums = re_rgb.exec(input) || [, 0, 0, 0, 0],
-                r = parseInt(nums[2]).toString(16),
-                g = parseInt(nums[3]).toString(16),
-                b = parseInt(nums[4]).toString(16);
+            var nums = re_rgb.exec(input) || [, '0', '0', '0'],
+                r = nums[1].toInt(16),
+                g = nums[2].toInt(16),
+                b = nums[3].toInt(16);
 
             return '#'+ (
                 (r.length == 1 ? '0'+ r : r) +
