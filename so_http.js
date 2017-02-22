@@ -8,29 +8,27 @@
 ;(function(window, $) { 'use strict';
 
     // minify candies
-    var NULL = null, NULLS = '',
-        TRUE = true, FALSE = false
-    ;
+    var NULL = null, NULLS = '';
+    var TRUE = true, FALSE = false;
 
-    var re_query = /\?&+(.*)/,
-        re_post = /P(U|OS)T/i,
-        re_json = /^(\{.*\}|\[.*\]|".*"|\d+(\.\d+)?|true|false|null)$/,
-        re_request = /^([a-z]+)?\s*(.*?)\s*(?:@(json|xml|html|text))?$/i,
-        re_dataTypes = /\/(json|xml|html|plain)(?:[; ])?/i,
-        fn_encode = encodeURIComponent,
-        optionsDefault = {
-            method: 'GET', uri: NULLS, uriParams: NULL, data: NULL, dataType: 'json',
-            async: TRUE, noCache: TRUE, autoSend: TRUE, headers: {},
-            onStart: NULL, onStop: NULL, /* @todo: queue */ onProgress: NULL, onHeaders: NULL,
-            onDone: NULL, onSuccess: NULL, onFailure: NULL,
-            onAbort: NULL, onTimeout: NULL, onBeforeSend: NULL, onAfterSend: NULL,
-            ons: {} // all other on.. stuff
-        },
-        STATE_OPENED = 1, STATE_HEADERS_RECEIVED = 2, STATE_LOADING = 3, STATE_DONE = 4
-    ;
+    var re_query = /\?&+(.*)/;
+    var re_post = /P(U|OS)T/i;
+    var re_json = /^(\{.*\}|\[.*\]|".*"|\d+(\.\d+)?|true|false|null)$/;
+    var re_request = /^([a-z]+)?\s*(.*?)\s*(?:@(json|xml|html|text))?$/i;
+    var re_dataTypes = /\/(json|xml|html|plain)(?:[; ])?/i;
+    var fn_encode = encodeURIComponent;
+    var optionsDefault = {
+        method: 'GET', uri: NULLS, uriParams: NULL, data: NULL, dataType: 'json',
+        async: TRUE, noCache: TRUE, autoSend: TRUE, headers: {},
+        onStart: NULL, onStop: NULL, /* @todo: queue */ onProgress: NULL, onHeaders: NULL,
+        onDone: NULL, onSuccess: NULL, onFailure: NULL,
+        onAbort: NULL, onTimeout: NULL, onBeforeSend: NULL, onAfterSend: NULL,
+        ons: {} // all other on.. stuff
+    };
+    var STATE_OPENED = 1, STATE_HEADERS_RECEIVED = 2, STATE_LOADING = 3, STATE_DONE = 4;
 
     // export base methods
-    $.extend('@http', {
+    $.http = {
         /**
          * Parse XML.
          * @param  {Any}    input
@@ -117,7 +115,7 @@
 
             return ret.join('&').replace(/%20/g, '+');
         }
-    });
+    };
 
     /**
      * Stream.
@@ -435,7 +433,7 @@
     }
 
     // export more methods
-    $.extend('@http', {
+    $.extend($.http, {
         Client: initClient,
         Request: initRequest,
         Response: initResponse,
