@@ -60,11 +60,11 @@
         },
 
         /**
-         * Escape RegExp.
+         * Escape RegExp input.
          * @param  {String} input
          * @return {String}
          */
-        escapeRegExp: function(input) {
+        escapeRegExpInput: function(input) {
             return input.replace(/[.*+?^$|{}()\[\]\\]/g, '\\$&');
         }
     });
