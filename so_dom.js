@@ -353,8 +353,13 @@
         return ret;
     }
 
-    var nonUnitStyles = ['opacity', 'zoom', 'zIndex', 'columnCount', 'columns',
-        'fillOpacity', 'fontWeight', 'lineHeight'];
+    var re_rgb = /rgb/i,
+        re_color = /color/i,
+        re_unit = /(?:p[xt]|em|%)/i, // short & quick
+        re_unitOther = /(?:ex|in|[cm]m|pc|v[hw]?min)/i,
+        nonUnitStyles = ['opacity', 'zoom', 'zIndex', 'columnCount', 'columns',
+            'fillOpacity', 'fontWeight', 'lineHeight']
+    ;
 
     function getStyle(el, name, valueDefault) {
         return name = toStyleName(name), $.getWindow(el).getComputedStyle(el)[name] || valueDefault || '';
@@ -394,9 +399,14 @@
         getStyle: function(name, valueDefault) {
             var el = this[0], value;
             if (el) {
-                value = getStyle(el, name, valueDefault);
-                if (value && isBool(valueDefault) && !isFalse(valueDefault) && name.has(/color/i)) {
-                    value = $.util.toHexFromRgb(value);
+                value = getStyle(el, name);
+                if (value && (isVoid(valueDefault) || isTrue(valueDefault))) {
+                    value = re_rgb.test(value)
+                        ? $.util.toHexFromRgb(value) // convert rgb to hex
+                            : re_unit.test(value) || re_unitOther.test(value) // convert px etc. to float
+                                ? value.toFloat() : value;
+                } else {
+                    value = valueDefault;
                 }
             }
             return value;
@@ -426,9 +436,10 @@
         log('els:',els)
         log('---')
 
-        $.fire(3, function() {
+        $.fire(1, function() {
             // els.setStyle('color:#fff; background-color:red; zoom:1')
-            log(els.getStyle('padding', true))
+            log(els.getStyle('color'))
+            log(els.getStyle('padding'))
         });
     })
 
