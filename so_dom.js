@@ -63,7 +63,7 @@
                 }
                 ret.push(all);
 
-                re_remove.push($.util.escapeRegExp(re[0]));
+                re_remove.push($.util.escapeRegExpInput(re[0]));
             });
 
             // remove processed selectors
