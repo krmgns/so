@@ -31,11 +31,11 @@
 
             Class = createConstructor(name, 'if(this.init)this.init.apply(this,arguments)');
             if (prototype) {
-                Class[NAME_PROTOTYPE] = Object.create(prototype, {
+                Class.prototype = Object.create(prototype, {
                     constructor: {value: (function() {
                         Constructor = createConstructor(name);
-                        Constructor[NAME_PROTOTYPE] = prototype;
-                        Constructor[NAME_PROTOTYPE].constructor = Constructor;
+                        Constructor.prototype = prototype;
+                        Constructor.prototype.constructor = Constructor;
                         return Constructor;
                     })()}
                 });
@@ -62,18 +62,18 @@
          * @return {Function}
          */
         extends: function(supClass) {
-            // subClass[NAME_PROTOTYPE] = Object.create(supClass[NAME_PROTOTYPE], {
+            // subClass.prototype = Object.create(supClass.prototype, {
             //     constructor: {value: subClass},
             //           super: {value: supClass}
             // });
 
-            var prototype = extend({
+            var prototype = $.extend({
                 constructor: subClass,
                       super: supClass
-            }, supClass[NAME_PROTOTYPE], subClass[NAME_PROTOTYPE]);
+            }, supClass.prototype, subClass.prototype);
 
             $.forEach(prototype, function(name, value) {
-                subClass[NAME_PROTOTYPE][name] = value;
+                subClass.prototype[name] = value;
             });
 
             return subClass;
