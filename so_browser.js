@@ -7,20 +7,20 @@
  */
 ;(function(window, $) { 'use strict';
 
-    var navigator = window.navigator,
-        re_src = /(chrome|safari|firefox|opera|msie|trident(?=\/))\/?\s*([\d.]+)/,
-        fns_os = ['isMac', 'isWindows', 'isLinux', 'isUnix'],
-        fns_ua = ['isChrome', 'isSafari', 'isFirefox', 'isOpera', 'isIE', 'isTrident'],
-        ret_isTouchDevice = navigator.maxTouchPoints > 0 || 'ontouchstart' in window,
-        ret_isMobileDevice = /android|ip(hone|od|ad)|opera *mini|webos|blackberry|mobile|windows *phone/i.test(navigator)
-    ;
+    var re_src = /(chrome|safari|firefox|opera|msie|trident(?=\/))\/?\s*([\d.]+)/;
+    var fns_os = ['isMac', 'isWindows', 'isLinux', 'isUnix'];
+    var fns_ua = ['isChrome', 'isSafari', 'isFirefox', 'isOpera', 'isIE', 'isTrident'];
+    var navigator = window.navigator;
+    var isTouchDevice = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
+    var isMobileDevice = /android|ip(hone|od|ad)|opera *mini|webos|blackberry|mobile|windows *phone/i.test(navigator);
 
-    $.extend('@browser', (function() {
-        var ua = navigator.userAgent.toLowerCase(), uap = navigator.platform.toLowerCase(),
-            re, name, test, browser = {};
+    $.browser = (function() {
+        var ua = navigator.userAgent.toLowerCase();
+        var uap = navigator.platform.toLowerCase();
+        var re, name, test, browser = {};
 
-        browser.isTouchDevice = function() { return ret_isTouchDevice; };
-        browser.isMobileDevice = function() { return ret_isMobileDevice; };
+        browser.isTouchDevice = function() { return isTouchDevice; };
+        browser.isMobileDevice = function() { return isMobileDevice; };
 
         // set 'is' functions for os
         fns_os.forEach(function(fn) {
@@ -98,6 +98,6 @@
         };
 
         return browser;
-    })());
+    })();
 
 })(window, so);
