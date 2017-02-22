@@ -33,7 +33,16 @@
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
     window.so.DOMLevel = window[NAME_DOCUMENT].adoptNode ? 3 : 2;
     // shortcut for 'console.log'
-    window.log = function() { console.log.apply(console, arguments); }
+    window.log = function() {
+        var args = arguments, i = 0;
+        while (i < args.length) {
+            if (typeof args[i] == 'string') {
+                args[i] = '"'+ args[i] +'"'; // show strings in quotes
+            }
+            i++;
+        }
+        console.log.apply(console, args);
+    }
 
     var _reCache = {};
     var re_dot = /^[-+]?\./;
