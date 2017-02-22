@@ -389,6 +389,15 @@
         },
 
         /**
+         * Test.
+         * @param  {RegExp} re
+         * @return {Boolean}
+         */
+        test: function(re) {
+            return re.test(this);
+        },
+
+        /**
          * Is numeric.
          * @return {Boolean}
          */
