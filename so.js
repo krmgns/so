@@ -678,10 +678,10 @@
     });
 
     var _uuid = 0;
+    var re_numeric = /^[-+]?(?:\.?\d+|\d+\.\d+)$/;
     var fn_eval = window.eval; // direct eval breaks minify tool
     var fn_slice = [].slice;
     var fn_toString = {}.toString;
-    var re_numeric = /^[-+]?(?:\.?\d+|\d+\.\d+)$/;
 
     /**
      * Array.
