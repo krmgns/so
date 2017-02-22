@@ -902,9 +902,7 @@
         float: function(input) { return toInt(input); },
         string: function(input) { return toString(input); },
         bool: function(input) { return toBool(input); },
-        value: function(input, valueDefault) {
-            return toValue(input, valueDefault);
-        },
+        value: function(input, valueDefault) { return toValue(input, valueDefault); },
 
         /**
          * Json encode.
