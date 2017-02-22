@@ -16,9 +16,12 @@
          * @return {String}
          */
         toCamelCaseFromDashCase: function(input) {
-            return (''+ input).replace(/-([a-z])/gi, function(_, $1) {
-                return $1.toUpperCase();
-            });
+            if (input.indexOf('-') > 0) {
+                input = (''+ input).replace(/-([a-z])/gi, function(_, $1) {
+                    return $1.toUpperCase();
+                });
+            }
+            return input;
         },
 
         /**
