@@ -8,40 +8,38 @@
 ;(function(window, $) { 'use strict';
 
     // minify candies
-    var NULL = null, NULLS = '',
-        TRUE = true, FALSE = false
-    ;
+    var NULL = null, NULLS = '';
+    var TRUE = true, FALSE = false;
 
     var re_types = {
-            UIEvent: 'resize|scroll|select|(un)?load|DOMActivate',
-            MouseEvent: '(dbl)?click|mouse(up|down|enter|leave|in|out|over|move|wheel)|show|contextmenu|DOMMouseScroll',
-            FocusEvent: 'blur|focus(in|out)?|DOMFocus(In|Out)',
-            KeyboardEvent: 'key(up|down|press)',
-            TouchEvent: 'touch(end|start|move|cancel)',
-            DragEvent: 'drag(end|start|enter|leave|over|exit|gesture|drop)?|drop',
-            WheelEvent: 'wheel',
-            HashChangeEvent: 'hashchange',
-            BeforeUnloadEvent: 'beforeunload',
-            MutationEvent: 'DOM((Attr|CharacterData|Subtree)Modified|Node(Inserted(IntoDocument)?|Removed(FromDocument)?))',
-            MessageEvent: 'message', PopStateEvent: 'popstate', StorageEvent: 'storage',
-            AnimationEvent: 'animation(end|start|iteration)',
-            TransitionEvent: 'transition(end|start)', PageTransitionEvent: 'page(hide|show)',
-            ProgressEvent: 'load(end|start)|progress|timeout',
-            CompositionEvent: 'composition(end|start|update)',
-            DeviceMotionEvent: 'devicemotion', DeviceOrientationEvent: 'deviceorientation'
-        },
-        re_typesFix = /^(UI|Mouse|Mutation|HTML)Event$/i,
-        re_typesStandard = $.re(Object.values(re_types).join('|'), 'i'),
-        re_commaSplit = /,\s*/,
-        optionsDefault = {
-            bubbles: TRUE, cancelable: TRUE, scoped: FALSE, composed: FALSE, // all
-            view: window, detail: NULL, // ui, mouse, custom
-            relatedNode: NULL, prevValue: NULLS, newValue: NULLS, attrName: NULLS, attrChange: 0, // mutation
-            screenX: 0, screenY: 0, clientX: 0, clientY: 0, ctrlKey: FALSE, altKey: TRUE, shiftKey: FALSE,
-                metaKey: FALSE, button: 1, relatedTarget: NULL, // mouse
-            useCapture: FALSE, once: FALSE, passive: FALSE, data: {}
-        }
-    ;
+        UIEvent: 'resize|scroll|select|(un)?load|DOMActivate',
+        MouseEvent: '(dbl)?click|mouse(up|down|enter|leave|in|out|over|move|wheel)|show|contextmenu|DOMMouseScroll',
+        FocusEvent: 'blur|focus(in|out)?|DOMFocus(In|Out)',
+        KeyboardEvent: 'key(up|down|press)',
+        TouchEvent: 'touch(end|start|move|cancel)',
+        DragEvent: 'drag(end|start|enter|leave|over|exit|gesture|drop)?|drop',
+        WheelEvent: 'wheel',
+        HashChangeEvent: 'hashchange',
+        BeforeUnloadEvent: 'beforeunload',
+        MutationEvent: 'DOM((Attr|CharacterData|Subtree)Modified|Node(Inserted(IntoDocument)?|Removed(FromDocument)?))',
+        MessageEvent: 'message', PopStateEvent: 'popstate', StorageEvent: 'storage',
+        AnimationEvent: 'animation(end|start|iteration)',
+        TransitionEvent: 'transition(end|start)', PageTransitionEvent: 'page(hide|show)',
+        ProgressEvent: 'load(end|start)|progress|timeout',
+        CompositionEvent: 'composition(end|start|update)',
+        DeviceMotionEvent: 'devicemotion', DeviceOrientationEvent: 'deviceorientation'
+    };
+    var re_typesFix = /^(UI|Mouse|Mutation|HTML)Event$/i;
+    var re_typesStandard = $.re(Object.values(re_types).join('|'), 'i');
+    var re_commaSplit = /,\s*/;
+    var optionsDefault = {
+        bubbles: TRUE, cancelable: TRUE, scoped: FALSE, composed: FALSE, // all
+        view: window, detail: NULL, // ui, mouse, custom
+        relatedNode: NULL, prevValue: NULLS, newValue: NULLS, attrName: NULLS, attrChange: 0, // mutation
+        screenX: 0, screenY: 0, clientX: 0, clientY: 0, ctrlKey: FALSE, altKey: TRUE, shiftKey: FALSE,
+            metaKey: FALSE, button: 1, relatedTarget: NULL, // mouse
+        useCapture: FALSE, once: FALSE, passive: FALSE, data: {}
+    };
 
     /**
      * Create event.
@@ -167,7 +165,7 @@
         };
     }
 
-    $.extend('@event', (function() {
+    $.event = (function() {
         // private helpers
         function initEvent(type, fn, options) {
             return new Event(type, fn, options);
@@ -507,6 +505,6 @@
                 SHIFT:     16, CONTROL: 17, ALT:        18, ALTGRAPH:  225
             }
         };
-    })());
+    })();
 
 })(window, so);
