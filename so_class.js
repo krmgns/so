@@ -51,7 +51,7 @@
          * @return {Function}
          */
         extend: function(target, prototype) {
-            return $.extend(target, NULL, prototype);
+            return $.extendPrototype(target, prototype);
         },
 
         /**
