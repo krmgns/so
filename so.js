@@ -288,7 +288,7 @@
     });
 
     /**
-     * Object keys & values.
+     * Object keys, values, copy.
      * @param  {Object} object
      * @param  @internal ret
      * @return {Array}
@@ -298,6 +298,15 @@
     };
     Object.values = Object.values || function(object, ret) {
         return ret = [], $.forEach(object, function(_, value) { ret.push(value); }), ret;
+    };
+    Object[NAME_PROTOTYPE].copy = function() {
+        var _this = this, ret = {}, i;
+        for (i in _this) {
+            if (_this.hasOwnProperty(i)) {
+                ret[i] = _this[i];
+            }
+        }
+        return ret;
     };
 
     // shortcut
