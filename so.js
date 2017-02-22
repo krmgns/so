@@ -188,9 +188,29 @@
             return (typeof input == 'string');
         },
 
+        /** Is int. @param {Any} input @return {Boolean} */
+        isInt: function(input) {
+            return $.isNumber(input) && input == (input | 0);
+        },
+
+        /** Is float. @param {Any} input @return {Boolean} */
+        isFloat: function(input) {
+            return $.isNumber(input) && input != (input | 0);
+        },
+
         /** Is bool. @param {Any} input @return {Boolean} */
         isBool: function(input) {
             return (typeof input == 'boolean');
+        },
+
+        /** Is true. @param {Any} input @return {Boolean} */
+        isTrue: function(input) {
+            return input === TRUE;
+        },
+
+        /** Is false. @param {Any} input @return {Boolean} */
+        isFalse: function(input) {
+            return input === FALSE;
         },
 
         /** Is number. @param {Any} input @return {Boolean} */
@@ -226,16 +246,6 @@
         /** Is list. @param {Any} input @return {Boolean} */
         isList: function(input) {
             return input && (input.constructor && input.constructor.name == 'List');
-        },
-
-        /** Is int. @param {Any} input @return {Boolean} */
-        isInt: function(input) {
-            return $.isNumber(input) && input == (input | 0);
-        },
-
-        /** Is float. @param {Any} input @return {Boolean} */
-        isFloat: function(input) {
-            return $.isNumber(input) && input != (input | 0);
         },
 
         /** Is iterable.     @param {Any} input @return {Boolean} */
