@@ -7,7 +7,7 @@
         re_htmlContent = /^<([a-z-]+).*\/?>(?:.*<\/\1>)?$/i,
         isNaN = window.isNaN,
         trim = function(s) { return s == null ? '' : (''+ s).replace(re_trim, '') },
-        isTrue = $.isTrue, isFalse = $.isFalse,
+        isBool = $.isBool, isTrue = $.isTrue, isFalse = $.isFalse,
         isVoid = $.isVoid, isObject = $.isObject, isArray = $.isArray,
         isNumber = $.isNumber, isNumeric = $.isNumeric, isString = $.isString,
         isWindow = $.isWindow, isDocument = $.isDocument,
@@ -356,8 +356,8 @@
     var nonUnitStyles = ['opacity', 'zoom', 'zIndex', 'columnCount', 'columns',
         'fillOpacity', 'fontWeight', 'lineHeight'];
 
-    function getStyle(el, name) {
-        return name = toStyleName(name), $.getWindow(el).getComputedStyle(el)[name] || '';
+    function getStyle(el, name, valueDefault) {
+        return name = toStyleName(name), $.getWindow(el).getComputedStyle(el)[name] || valueDefault || '';
     }
     function setStyle(el, name, value) {
         name = toStyleName(name), value = trim(value);
@@ -391,11 +391,11 @@
                 });
             });
         },
-        getStyle: function(name, hex) {
+        getStyle: function(name, valueDefault) {
             var el = this[0], value;
             if (el) {
-                value = getStyle(el, name);
-                if (value != '' && !isFalse(hex) && name.has(/color/i)) {
+                value = getStyle(el, name, valueDefault);
+                if (value && isBool(valueDefault) && !isFalse(valueDefault) && name.has(/color/i)) {
                     value = $.util.toHexFromRgb(value);
                 }
             }
@@ -428,7 +428,7 @@
 
         $.fire(3, function() {
             // els.setStyle('color:#fff; background-color:red; zoom:1')
-            log(els.removeStyle('*'))
+            log(els.getStyle('padding', true))
         });
     })
 
