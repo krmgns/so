@@ -989,51 +989,15 @@
          * Extend.
          * @param  {Any}     target
          * @param  {Any}     source
-         * @param  {Object}  prototype
-         * @usage  $.extend(target, source)
-         * @usage  $.extend(target, null, prototype)
-         * @usage  $.extend('@x', ...), $.extend('@', {x: ...}) @self
          * @return {Any}
          */
-        extend: function(target, source, prototype) {
-            // self extend
-            if ($.isString(target) && target.charAt(0) == '@') {
-                var targetName = target.slice(1), tmpSource;
-
-                // $.extend('@x', ...)
-                if (targetName) {
-                    target = $;
-                    if ($[targetName]) {
-                        target = $[targetName][NAME_PROTOTYPE] || $[targetName];
-                    } else {
-                        tmpSource = {};
-                        tmpSource[targetName] = source;
-                        source = tmpSource;
-                    }
-
-                    return extend(target, source);
-                }
-
-                // $.extend('@', {x: ...})
-                return extend($, source);
-            }
-
+        extend: function(target, source) {
             if ($.isArray(target)) {
                 while (target.length) {
-                    $.extend(target.shift(), source, prototype);
+                    $.extend(target.shift(), source);
                 }
             } else {
-                var args = makeArray(arguments);
-
-                if (source == NULL) { // prototype
-                    source = prototype;
-                    target = target[NAME_PROTOTYPE];
-                    args = args.slice(3);
-                } else {
-                    args = args.slice(2);
-                }
-
-                return extend.apply(NULL, [target, source].concat(args));
+                return extend.apply(NULL, [target, source].concat(makeArray(arguments, 2)));
             }
         },
 
@@ -1044,7 +1008,7 @@
          * @return {Function}
          */
         extendPrototype: function(target, prototype) {
-            return $.extend(target, NULL, prototype);
+            return $.extend(target[NAME_PROTOTYPE], prototype);
         },
 
         /**
