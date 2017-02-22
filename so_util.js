@@ -7,7 +7,7 @@
  */
 ;(function($) { 'use strict';
 
-    var re_rgb = /(.*?)rgb\((\d+),\s*(\d+),\s*(\d+)\)/;
+    var re_rgb = /.*rgba?\((\d+),\s*(\d+),\s*(\d+)(,.*)\)/i;
 
     $.extend('@util', {
         /**
@@ -41,7 +41,7 @@
          * @return {String}
          */
         toHexFromRgb: function(color) {
-            if (!color || color.charAt(0) == '#' || color.indexOf('rgb') == -1) {
+            if (!color || color[0] == '#' || color.indexOf('rgb') < 0) {
                 return color;
             }
 
