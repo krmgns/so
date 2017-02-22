@@ -300,14 +300,14 @@
     };
 
     // shortcut
-    function has(input, searchValue, strict) {
+    function has(input, search, strict) {
         var ret;
 
         if ($.isString(input)) {
-            ret = $.isRegExp(searchValue) ? input.search(searchValue) : input.indexOf(searchValue); // simply
+            ret = $.isRegExp(search) ? input.search(search) : input.indexOf(search); // simply
         } else if ($.isArray(input) || $.isObject(input)) {
             $.for(input, function(value, i) {
-                if (strict ? value === searchValue : value == searchValue) {
+                if (strict ? value === search : value == search) {
                     ret = i; return 0; // break
                 }
             });
@@ -1127,6 +1127,17 @@
             }
 
             return values;
+        },
+
+        /**
+         * Has.
+         * @param  {Any}     input
+         * @param  {Any}     search
+         * @param  {Boolean} strict
+         * @return {Boolean}
+         */
+        has: function(input, search, strict) {
+            return has(input, search, strict);
         },
 
         toString: function(name, opt_object) {
