@@ -1,23 +1,22 @@
 // deps: so, so.list, so.util
 ;(function(window, $, undefined) { 'use strict';
 
-    var re_space = /\s+/g,
-        re_trim = /^\s+|\s+$/g,
-        re_commaSplit = /,\s*/,
-        re_htmlContent = /^<([a-z-]+).*\/?>(?:.*<\/\1>)?$/i,
-        ret_root = /^#(?:window|document)$/,
-        isNaN = window.isNaN,
-        trim = function(s) { return s == null ? '' : (''+ s).replace(re_trim, '') },
-        isBool = $.isBool, isTrue = $.isTrue, isFalse = $.isFalse,
-        isVoid = $.isVoid, isObject = $.isObject, isArray = $.isArray,
-        isNumber = $.isNumber, isNumeric = $.isNumeric, isString = $.isString,
-        isWindow = $.isWindow, isDocument = $.isDocument,
-        isNode = $.isNode, isNodeElement = $.isNodeElement,
-        toStyleName = $.util.toCamelCaseFromDashCase,
-        querySelector = function(root, selector) { return root.querySelector(selector); },
-        querySelectorAll = function(root, selector) { return root.querySelectorAll(selector); },
-        _var // no define one-var each time (@minify)
-    ;
+    var re_space = /\s+/g;
+    var re_trim = /^\s+|\s+$/g;
+    var re_commaSplit = /,\s*/;
+    var re_htmlContent = /^<([a-z-]+).*\/?>(?:.*<\/\1>)?$/i;
+    var ret_root = /^#(?:window|document)$/;
+    var isNaN = window.isNaN;
+    var trim = function(s) { return s == null ? '' : (''+ s).replace(re_trim, '') };
+    var isBool = $.isBool, isTrue = $.isTrue, isFalse = $.isFalse;
+    var isVoid = $.isVoid, isObject = $.isObject, isArray = $.isArray;
+    var isNumber = $.isNumber, isNumeric = $.isNumeric, isString = $.isString;
+    var isWindow = $.isWindow, isDocument = $.isDocument;
+    var isNode = $.isNode, isNodeElement = $.isNodeElement;
+    var toStyleName = $.util.toCamelCaseFromDashCase;
+    var querySelector = function(root, selector) { return root.querySelector(selector); };
+    var querySelectorAll = function(root, selector) { return root.querySelectorAll(selector); };
+    var _var; // no define one-var each time (@minify)
 
     function getTag(el) {return (el && el.nodeName) ? el.nodeName.toLowerCase() : isWindow(el) ? '#window' : null;}
 
@@ -355,13 +354,11 @@
         return ret;
     }
 
-    var re_rgb = /rgb/i,
-        re_color = /color/i,
-        re_unit = /(?:p[xt]|em|%)/i, // short & quick
-        re_unitOther = /(?:ex|in|[cm]m|pc|v[hw]?min)/i,
-        nonUnitStyles = ['opacity', 'zoom', 'zIndex', 'columnCount', 'columns',
-            'fillOpacity', 'fontWeight', 'lineHeight']
-    ;
+    var re_rgb = /rgb/i;
+    var re_color = /color/i;
+    var re_unit = /(?:p[xt]|em|%)/i; // short & quick
+    var re_unitOther = /(?:ex|in|[cm]m|pc|v[hw]?min)/i;
+    var nonUnitStyles = ['opacity', 'zoom', 'zIndex', 'columnCount', 'columns', 'fillOpacity', 'fontWeight', 'lineHeight'];
 
     function getStyle(el, name, value) {
         return _var = $.getWindow(el).getComputedStyle(el),
@@ -445,8 +442,11 @@
                 width = window.innerWidth, height = window.innerHeight;
             } else {
                 width = el.offsetWidth, height = el.offsetHeight;
+                log(width, height)
                 var style = getStyle(el), display, position, visibility;
+                log(style.getPropertyValue("display"))
                 if (style.display == 'none') {
+                log(width, height)
                     display = style.display;
                     position = style.position;
                     visibility = style.visibility;
