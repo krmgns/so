@@ -12,20 +12,19 @@
     }
 
     // minify candies
-    var NULL = null, NULLS = '',
-        TRUE = true, FALSE = false,
+    var NULL = null, NULLS = '';
+    var TRUE = true, FALSE = false;
 
-        NAME_WINDOW = 'window',
-        NAME_DOCUMENT = 'document',
-        NAME_OWNER_DOCUMENT = 'ownerDocument',
-        NAME_DEFAULT_VIEW = 'defaultView',
-        NAME_PROTOTYPE = 'prototype',
-        NAME_NODE_TYPE = 'nodeType',
+    var NAME_WINDOW = 'window';
+    var NAME_DOCUMENT = 'document';
+    var NAME_OWNER_DOCUMENT = 'ownerDocument';
+    var NAME_DEFAULT_VIEW = 'defaultView';
+    var NAME_PROTOTYPE = 'prototype';
+    var NAME_NODE_TYPE = 'nodeType';
 
-        NODE_TYPE_ELEMENT = 1,
-        NODE_TYPE_DOCUMENT = 9,
-        NODE_TYPE_DOCUMENT_FRAGMENT = 11
-    ;
+    var NODE_TYPE_ELEMENT = 1;
+    var NODE_TYPE_DOCUMENT = 9;
+    var NODE_TYPE_DOCUMENT_FRAGMENT = 11;
 
     // globals
     window.so = $;
@@ -33,10 +32,11 @@
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
     window.so.DOMLevel = window[NAME_DOCUMENT].adoptNode ? 3 : 2;
+    // shortcut for 'console.log'
+    window.log = function() { console.log.apply(console, arguments); }
 
-    var re_dot = /^[-+]?\./,
-        _reCache = {}
-    ;
+    var _reCache = {};
+    var re_dot = /^[-+]?\./;
 
     // shortcut convert helpers
     function toValue(input, valueDefault) {
@@ -677,13 +677,11 @@
         }
     });
 
-    // internal vars
-    var _uuid = 0,
-        fn_eval = window.eval, // direct eval breaks minify tool
-        fn_slice = [].slice,
-        fn_toString = {}.toString,
-        re_numeric = /^[-+]?(?:\.?\d+|\d+\.\d+)$/
-    ;
+    var _uuid = 0;
+    var fn_eval = window.eval; // direct eval breaks minify tool
+    var fn_slice = [].slice;
+    var fn_toString = {}.toString;
+    var re_numeric = /^[-+]?(?:\.?\d+|\d+\.\d+)$/;
 
     /**
      * Array.
@@ -1155,15 +1153,13 @@
         }
     });
 
-    // onReady callbacks
-    var callbacks = [];
-
-    // onReady callbacks firer
-    function fireCallbacks() {
-        while (callbacks.length) {
-            callbacks.shift()($);
+    // onReady stuff
+    var onReadyCallbacks = [];
+    var onReadyCallbacksFire = function() {
+        while (onReadyCallbacks.length) {
+            onReadyCallbacks.shift()($);
         }
-    }
+    };
 
     /**
      * Oh baby..
@@ -1173,7 +1169,7 @@
      */
     $.onReady = function(callback, document) {
         if ($.isFunction(callback)) {
-            callbacks.push(callback);
+            onReadyCallbacks.push(callback);
         }
 
         // iframe support
@@ -1182,16 +1178,8 @@
         var type = 'DOMContentLoaded';
         document.addEventListener(type, function _() {
             document.removeEventListener(type, _, FALSE);
-            fireCallbacks();
+            onReadyCallbacksFire();
         }, FALSE);
     };
 
 })(window, {});
-
-/**
- * Shortcut for 'console.log'.
- * @param  {Object} ...arguments
- * @return {void}
- * @public
- */
-function log() { console.log.apply(console, arguments); }
