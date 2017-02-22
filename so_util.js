@@ -7,7 +7,7 @@
  */
 ;(function($) { 'use strict';
 
-    var re_rgb = /.*rgba?\((\d+),\s*(\d+),\s*(\d+)(,.*)\)/i,
+    var re_rgb = /.*rgba?\((\d+),\s*(\d+),\s*(\d+)(,.*)?\)/i,
         toInt = parseInt
     ;
 
