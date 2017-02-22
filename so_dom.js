@@ -376,7 +376,7 @@
         return styles;
     }
 
-    // // dom: styles
+    // dom: styles
     Dom.extendPrototype({
         setStyle: function(name, value) {
             var styles = name;
@@ -397,7 +397,7 @@
             var el = this[0], value;
             if (el) {
                 name = toStyleName(name), value = getStyle(el, name) || '';
-                if (value != '' && hex !== true && name.has('color')) {
+                if (value != '' && hex !== false && name.has('color')) {
                     value = $.util.toHexFromRgb(value);
                 }
             }
