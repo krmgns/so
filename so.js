@@ -34,7 +34,7 @@
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
     window.so.DOMLevel = window[NAME_DOCUMENT].adoptNode ? 3 : 2;
 
-    var re_dot = /^-?\./,
+    var re_dot = /^[-+]?\./,
         _reCache = {}
     ;
 
@@ -682,7 +682,7 @@
         fn_eval = window.eval, // direct eval breaks minify tool
         fn_slice = [].slice,
         fn_toString = {}.toString,
-        re_numeric = /^-?(\.?\d+|\d+\.\d+)$/
+        re_numeric = /^[-+]?(?:\.?\d+|\d+\.\d+)$/
     ;
 
     /**
