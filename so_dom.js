@@ -7,6 +7,7 @@
         re_htmlContent = /^<([a-z-]+).*\/?>(?:.*<\/\1>)?$/i,
         isNaN = window.isNaN,
         trim = function(s) { return s == null ? '' : (''+ s).replace(re_trim, '') },
+        isTrue = $.isTrue, isFalse = $.isFalse,
         isVoid = $.isVoid, isObject = $.isObject, isArray = $.isArray,
         isNumber = $.isNumber, isNumeric = $.isNumeric, isString = $.isString,
         isWindow = $.isWindow, isDocument = $.isDocument,
@@ -356,9 +357,16 @@
     var nonUnitStyles = ['opacity', 'zoom', 'zIndex', 'columnCount', 'columns',
         'fillOpacity', 'fontWeight', 'lineHeight'];
 
-    function isNonUnitStyle(name) { return nonUnitStyles.has(name); }
-
-    function getStyle(el, name) {return $.getWindow(el).getComputedStyle(el)[toStyleName(name)] || '';}
+    function getStyle(el, name) {
+        return name = toStyleName(name), $.getWindow(el).getComputedStyle(el)[name] || '';
+    }
+    function setStyle(el, name, value) {
+        name = toStyleName(name), value = trim(value);
+        if (value && isNumeric(value) && !nonUnitStyles.has(name)) {
+            value += 'px';
+        }
+        el.style[name] = value;
+    }
     function parseStyle(text) {
         var styles = {}, s;
         text = (''+ text).split($.re('\\s*;\\s*'));
@@ -380,11 +388,7 @@
             }
             this.for(function(el) {
                 $.forEach(styles, function(name, value) {
-                    name = toStyleName(name), value = trim(value);
-                    if (value && isNumeric(value) && !isNonUnitStyle(name)) {
-                        value += 'px';
-                    }
-                    el.style[name] = value;
+                    setStyle(el, name, value);
                 });
             });
         },
@@ -392,7 +396,7 @@
             var el = this[0], value;
             if (el) {
                 value = getStyle(el, name);
-                if (value != '' && hex !== false && name.has(/color/i)) {
+                if (value != '' && !isFalse(hex) && name.has(/color/i)) {
                     value = $.util.toHexFromRgb(value);
                 }
             }
@@ -404,7 +408,7 @@
                     el.removeAttribute('style');
                 } else {
                     name.split(re_commaSplit).forEach(function(name) {
-                        el.style[toStyleName(name)] = '';
+                        setStyle(el, name, '');
                     });
                 }
             });
