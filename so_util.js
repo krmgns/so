@@ -43,7 +43,7 @@
          * @return {String}
          */
         toHexFromRgb: function(input) {
-            if (!input || input[0] == '#' || input.indexOf('rgb') < 0) {
+            if (!(input +'') || input[0] == '#' || input.indexOf('rgb') < 0) {
                 return input;
             }
 
