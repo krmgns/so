@@ -7,11 +7,9 @@
  */
 ;(function($) { 'use strict';
 
-    var re_rgb = /.*rgba?\((\d+),\s*(\d+),\s*(\d+)(,.*)?\)/i,
-        toInt = parseInt
-    ;
+    var re_rgb = /.*rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(.*))?\)/i;
 
-    $.extend('@util', {
+    $.util = {
         /**
          * toCamelCaseFromDashCase.
          * @param  {String} input
@@ -47,16 +45,33 @@
                 return input;
             }
 
-            var re = re_rgb.exec(input) || [, '0', '0', '0'],
-                r = toInt(re[1]).toString(16),
-                g = toInt(re[2]).toString(16),
-                b = toInt(re[3]).toString(16);
+            var rgb = $.util.parseRgb(input),
+                r = rgb.r.toString(16), g = rgb.g.toString(16), b = rgb.b.toString(16);
 
             return '#'+ (
                 (r.length == 1 ? '0'+ r : r) +
                 (g.length == 1 ? '0'+ g : g) +
                 (b.length == 1 ? '0'+ b : b)
             );
+        },
+
+        /**
+         * parseRgb.
+         * @param  {String} input
+         * @return {Object}
+         */
+        parseRgb: function(input) {
+            var re = re_rgb.exec(input),
+                ret = {r: 0, g: 0, b: 0, opacity: 0.00};
+
+            if (re) {
+                ret.r = re[1].toInt(), ret.g = re[2].toInt(), ret.b = re[3].toInt();
+                if (re[4]) {
+                    ret.opacity = re[4].toFloat();
+                }
+            }
+
+            return ret;
         },
 
         /**
@@ -67,6 +82,6 @@
         escapeRegExpInput: function(input) {
             return input.replace(/[.*+?^$|{}()\[\]\\]/g, '\\$&');
         }
-    });
+    };
 
 })(so);
