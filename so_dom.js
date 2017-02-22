@@ -396,16 +396,20 @@
                 });
             });
         },
-        getStyle: function(name, valueDefault) {
-            var el = this[0], value;
+        getStyle: function(name, valueDefault, raw) {
+            var el = this[0], value,
+                convert = isVoid(valueDefault) || isTrue(valueDefault),
+                valueDefault = !isBool(valueDefault) ? valueDefault : '';
             if (el) {
+                if (raw) return el.style[toStyleName(name)] || valueDefault;
+
                 value = getStyle(el, name);
-                if (value && (isVoid(valueDefault) || isTrue(valueDefault))) {
+                if (value && convert) {
                     value = re_rgb.test(value)
                         ? $.util.toHexFromRgb(value) // convert rgb to hex
                             : re_unit.test(value) || re_unitOther.test(value) // convert px etc. to float
                                 ? value.toFloat() : value;
-                } else {
+                } else if (!value) {
                     value = valueDefault;
                 }
             }
@@ -437,9 +441,13 @@
         log('---')
 
         $.fire(1, function() {
-            // els.setStyle('color:#fff; background-color:red; zoom:1')
+            log(els.getStyle('color'))
             log(els.getStyle('color', false))
+            log(els.getStyle('color', false, true))
+            log('---')
+            log(els.getStyle('padding'))
             log(els.getStyle('padding', false))
+            log(els.getStyle('padding', false, true))
         });
     })
 
