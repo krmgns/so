@@ -43,10 +43,10 @@
         return input != NULL ? input : valueDefault;
     }
     function toInt(input, base) {
-        return $.isNumeric(input) ? parseInt(input.replace(re_dot, '0.'), base || 10) : NULL;
+        return parseInt(input.replace(re_dot, '0.'), base || 10) || 0;
     }
     function toFloat(input) {
-        return $.isNumeric(input) ? parseFloat(input) : NULL;
+        return parseFloat(input) || 0;
     }
     function toString(input) {
         return (input != NULL && input.toString) ? input.toString() : (''+ input);
