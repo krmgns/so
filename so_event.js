@@ -1,7 +1,7 @@
 /**
  * @package so
  * @object  so.event
- * @depends so
+ * @depends so, so.list
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
