@@ -34,21 +34,23 @@
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
     window.so.DOMLevel = window[NAME_DOCUMENT].adoptNode ? 3 : 2;
 
+    var re_dot = /^-?\./;
+
     // shortcut convert helpers
-    function toValue(input) {
-        return (input != NULL && input.valueOf) ? input.valueOf() : input;
+    function toValue(input, valueDefault) {
+        return input != NULL ? input : valueDefault;
     }
     function toInt(input, base) {
-        return !$.isNumeric(input = toString(input)) ? NULL : parseInt(input.replace(/^-?\./, '0.'), base || 10);
+        return $.isNumeric(input) ? parseInt(input.replace(re_dot, '0.'), base || 10) : NULL;
     }
     function toFloat(input) {
-        return !$.isNumeric(input = toString(input)) ? NULL : parseFloat(input);
+        return $.isNumeric(input) ? parseFloat(input) : NULL;
     }
     function toString(input) {
         return (input != NULL && input.toString) ? input.toString() : (''+ input);
     }
     function toBool(input) {
-        return !!toValue(input);
+        return !!input;
     }
 
     // re stuff
@@ -200,7 +202,7 @@
 
         /** Is bool. @param {Any} input @return {Boolean} */
         isBool: function(input) {
-            return (typeof input == 'boolean');
+            return (input === TRUE || input === FALSE);
         },
 
         /** Is true. @param {Any} input @return {Boolean} */
@@ -220,7 +222,7 @@
 
         /** Is numeric. @param {Any} input @return {Boolean} */
         isNumeric: function(input) {
-            return re_numeric.test(input);
+            return $.isNumber(input) || re_numeric.test(input);
         },
 
         /** Is RegExp. @param {Any} input @return {Boolean} */
@@ -885,15 +887,17 @@
         },
 
         /**
-         * To value, int, float, string, bool
+         * Int, float, string, bool, value.
          * @param  {Any} input
          * @return {Any}
          */
-        value: function(input) { return toValue(input); },
         int: function(input) { return toInt(input); },
         float: function(input) { return toInt(input); },
         string: function(input) { return toString(input); },
         bool: function(input) { return toBool(input); },
+        value: function(input, valueDefault) {
+            return toValue(input, valueDefault);
+        },
 
         /**
          * Json encode.
@@ -1061,9 +1065,9 @@
             $.forEach(properties, function(name, property) {
                 properties[name] = {
                     value: property[0],
-                    writable: property[1] != NULL ? !!property[1] : TRUE,
-                    enumerable: property[2] != NULL ? !!property[2] : TRUE,
-                    configurable: property[3] != NULL ? !!property[3] : FALSE
+                    writable: toBool(property[1] != NULL ? property[1] : TRUE),
+                    enumerable: toBool(property[2] != NULL ? property[2] : TRUE),
+                    configurable: toBool(property[3] != NULL ? property[3] : FALSE),
                 }
             });
 
