@@ -207,8 +207,7 @@
         if (clone.id) {
             clone.id += ':clone-'+ $.uuid();
         }
-        deep = (deep !== false);
-        if (deep) {
+        if (!isFalse(deep)) {
             $.for(element.childNodes, function(child) {
                 clone.appendChild(cloneElement(child, deep));
             });
