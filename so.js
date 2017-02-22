@@ -34,7 +34,9 @@
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
     window.so.DOMLevel = window[NAME_DOCUMENT].adoptNode ? 3 : 2;
 
-    var re_dot = /^-?\./;
+    var re_dot = /^-?\./,
+        _reCache = {}
+    ;
 
     // shortcut convert helpers
     function toValue(input, valueDefault) {
@@ -52,10 +54,7 @@
     function toBool(input) {
         return !!input;
     }
-
-    // re stuff
-    var _re_cache = {};
-
+    // cacheable regexp stuff
     function toRegExp(pattern, flags, ttl) {
         flags = flags || NULLS;
         if ($.isInt(flags)) {
@@ -76,14 +75,14 @@
         }
         ttl = (ttl > -1) ? ttl : 60 * 60 * 24; // one day
 
-        var i = pattern + (flags || ''), ret = _re_cache[i];
+        var i = pattern + (flags || ''), ret = _reCache[i];
         if (!ret) {
-            ret = _re_cache[i] = new RegExp(pattern, flags);
+            ret = _reCache[i] = new RegExp(pattern, flags);
         }
 
         // simple gc
         $.fire(1000 * ttl, function(){
-            _re_cache = {};
+            _reCache = {};
         });
 
         return ret;
