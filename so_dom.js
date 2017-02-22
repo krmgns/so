@@ -1,10 +1,11 @@
-// deps: so, so.util
+// deps: so, so.list, so.util
 ;(function(window, $, undefined) { 'use strict';
 
     var re_space = /\s+/g,
         re_trim = /^\s+|\s+$/g,
         re_commaSplit = /,\s*/,
         re_htmlContent = /^<([a-z-]+).*\/?>(?:.*<\/\1>)?$/i,
+        ret_root = /^#(?:window|document)$/,
         isNaN = window.isNaN,
         trim = function(s) { return s == null ? '' : (''+ s).replace(re_trim, '') },
         isBool = $.isBool, isTrue = $.isTrue, isFalse = $.isFalse,
@@ -14,12 +15,13 @@
         isNode = $.isNode, isNodeElement = $.isNodeElement,
         toStyleName = $.util.toCamelCaseFromDashCase,
         querySelector = function(root, selector) { return root.querySelector(selector); },
-        querySelectorAll = function(root, selector) { return root.querySelectorAll(selector); }
+        querySelectorAll = function(root, selector) { return root.querySelectorAll(selector); },
+        _var // no define one-var each time (@minify)
     ;
 
-    function getNodeName(input, undefined) {
-        return (input && input.nodeName) ? input.nodeName.toLowerCase() : isWindow(input) ? '#window' : null;
-    }
+    function getTag(el) {return (el && el.nodeName) ? el.nodeName.toLowerCase() : isWindow(el) ? '#window' : null;}
+
+    function isRoot(el) {return _var = getTag(el), !!(_var && _var.test(ret_root));}
 
     function isDom(input) {
         return (input instanceof Dom);
@@ -171,7 +173,7 @@
                 element = this[i - 1];
             } else if (isString(i)) {
                 this.for(function(_element) {
-                    if (i == getNodeName(_element)) {
+                    if (i == getTag(_element)) {
                         element = _element; return 0;
                     }
                 });
@@ -197,12 +199,12 @@
         first: function() {return this.item(1)},
         last: function() {return this.item(this.size)},
         nth: function(i) {return this.item(i)},
-        tag: function() {return getNodeName(this[0])},
-        tags: function() {var ret = [];return this.for(function(element) {ret.push(getNodeName(element))}), ret;}
+        tag: function() {return getTag(this[0])},
+        tags: function() {var ret = [];return this.for(function(element) {ret.push(getTag(element))}), ret;}
     });
 
     function cloneElement(element, deep) {
-        var clone = element.cloneNode(false);
+        var clone = element.cloneNode();
         // clone.cloneOf = function() { return element; }; // @wait
         if (clone.id) {
             clone.id += ':clone-'+ $.uuid();
@@ -361,8 +363,9 @@
             'fillOpacity', 'fontWeight', 'lineHeight']
     ;
 
-    function getStyle(el, name, valueDefault) {
-        return name = toStyleName(name), $.getWindow(el).getComputedStyle(el)[name] || valueDefault || '';
+    function getStyle(el, name, value) {
+        return _var = $.getWindow(el).getComputedStyle(el),
+            name ? (name = toStyleName(name), _var[name] || value || '') : _var;
     }
     function setStyle(el, name, value) {
         name = toStyleName(name), value = trim(value);
@@ -371,7 +374,14 @@
         }
         el.style[name] = value;
     }
-    function parseStyle(text) {
+    function sumStyleProperty(el, style) {
+        var i = 2, args = arguments, ret = 0, style = style || getStyle(el);
+        while (i < args.length) {
+            ret += style[args[i++]].toFloat();
+        }
+        return ret;
+    }
+    function parseStyleText(text) {
         var styles = {}, s;
         text = (''+ text).split($.re('\\s*;\\s*'));
         while (text.length) {
@@ -388,7 +398,7 @@
         setStyle: function(name, value) {
             var styles = name;
             if (isString(styles)) {
-                styles = !isVoid(value) ? toKeyValue(name, value) : parseStyle(name);
+                styles = !isVoid(value) ? toKeyValue(name, value) : parseStyleText(name);
             }
             this.for(function(el) {
                 $.forEach(styles, function(name, value) {
@@ -428,8 +438,38 @@
         }
     });
 
+    function getDimensions(el) {
+        var width = 0, height = 0, style;
+        if (el) {
+            if (isRoot(el)) {
+                width = window.innerWidth, height = window.innerHeight;
+            } else {
+                width = el.offsetWidth, height = el.offsetHeight;
+                var style = getStyle(el), display, position, visibility;
+                if (style.display == 'none') {
+                    display = style.display;
+                    position = style.position;
+                    visibility = style.visibility;
+                    el.style.position = 'absolute', el.style.visibility = 'hidden', el.style.display = 'block';
+                    width = el.offsetWidth, height = el.offsetHeight; // grab it
+                    el.style.position = position, el.style.visibility = visibility, el.style.display = display;
+                }
+                width -= sumStyleProperty(null, style, 'borderLeftWidth', 'borderRightWidth');
+                height -= sumStyleProperty(null, style, 'borderTopWidth', 'borderBottomWidth');
+            }
+        }
+        return {width: width, height: height};
+    }
+
+    // dom: dimensions
+    Dom.extendPrototype({
+        dimensions: function() {
+            return getDimensions(this[0]);
+        }
+    });
+
     $.onReady(function() { var dom, el, els
-        els = new Dom(document.body)
+        els = new Dom('body')
         // log(els)
         // els = els.find('input[so:v=1]')
         // els = els.find('input:not([checked])')
@@ -441,13 +481,7 @@
         log('---')
 
         $.fire(1, function() {
-            log(els.getStyle('color'))
-            log(els.getStyle('color', false))
-            log(els.getStyle('color', false, true))
-            log('---')
-            log(els.getStyle('padding'))
-            log(els.getStyle('padding', false))
-            log(els.getStyle('padding', false, true))
+            log(els.dimensions())
         });
     })
 
