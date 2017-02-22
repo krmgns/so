@@ -43,7 +43,8 @@
         return input != NULL ? input : valueDefault;
     }
     function toInt(input, base) {
-        return parseInt(input.replace(re_dot, '0.'), base || 10) || 0;
+        return input = input.replace(re_dot, '0.'),
+            (base == NULL ? parseInt(input) : parseInt(input, base)) || 0;
     }
     function toFloat(input) {
         return parseFloat(input) || 0;
@@ -67,7 +68,7 @@
 
         if ($.isString(ttl)) {
             var s = ttl.split(/(\d+)(\w+)/),
-                time = parseInt(s[1]), timeDir = s[2];
+                time = toInt(s[1]), timeDir = s[2];
             switch (timeDir) {
                 case 's': case 'sec': ttl = time; break;
                 case 'm': case 'min': ttl = time * 60; break;
@@ -899,7 +900,7 @@
          * @param  {Any} input
          * @return {Any}
          */
-        int: function(input) { return toInt(input); },
+        int: function(input, base) { return toInt(input, base); },
         float: function(input) { return toInt(input); },
         string: function(input) { return toString(input); },
         bool: function(input) { return toBool(input); },
