@@ -1,5 +1,5 @@
 <!doctype html><html><head></head><body>
-
+<style>*{margin:0; padding:0}</style>
 <!-- <script src="so-all.php"></script> -->
 <script src="../so.js"></script>
 <script src="../so_list.js"></script>
@@ -9,6 +9,12 @@
 <script src="../so_event.js"></script>
 <script src="../so_http.js"></script>
 <script src="../so_dom.js"></script>
+
+<div id="div0" style="position:relative; border:1px solid; top:5px; left:1px;">
+    <div id="div1" style="position:relative; width:300px; height:300px; border:1px solid red; top:5px; left:2px;">
+        <div id="div2" style="position:absolute; width:100px; height:100px; border:1px solid blue; top:50px; left:20px;"></div>
+    </div>
+</div>
 
 <form id="form" attr="foo">
     <input so:v="1" id="form_i" value="123">
@@ -29,7 +35,7 @@
 <div id="div-out" style="padding:">
     <!-- <div id="div" style="width: 200px; color:red; margin:10px; padding:10px; border:1px solid; min-height:10px; transform: scale(0.5); display:none; position:relative"> -->
     <!-- <div id="div" style="width: ; margin:10px; padding:20px; border:1px solid;  "> -->
-    <div id="div" style="border:1px solid; transform:scale(0.5); display:none!">
+    <div id="div" style="border:1px solid; transform:scale(0.5); display:none">
         <p id="p">p</p>
         <p id="p1">p1</p>
         <p id="p2">p2</p>

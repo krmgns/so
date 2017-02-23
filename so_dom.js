@@ -484,7 +484,7 @@
         return ret[ret.length - 1] /* return last rule */ || {};
     }
     function isHidden(el) {return el && (el.style.display == 'none' || !(el.offsetWidth || el.offsetHeight));}
-    function getHiddenProperties(el, properties) {
+    function getHiddenElementProperties(el, properties) {
         var ret = [];
         var doc = $.getDocument(el);
         var sid = $.sid(), className = ' '+ sid;
@@ -535,8 +535,9 @@
             var win = $.getWindow(el);
             width = win.innerWidth, height = win.innerHeight;
         } else if (isNodeElement(el)) {
+            var properties;
             if (isHidden(el)) {
-                var properties = getHiddenProperties(el, ['offsetWidth', 'offsetHeight']);
+                properties = getHiddenElementProperties(el, ['offsetWidth', 'offsetHeight']);
                 ret.width = properties[0], ret.height = properties[1];
             } else {
                 ret.width = el.offsetWidth, ret.height = el.offsetHeight;
@@ -599,13 +600,23 @@
         }
     });
 
-    function getOffset(el, rel) {
+    function getOffset(el, relative) {
         var ret = {top: 0, left: 0};
         if (isNodeElement(el)) {
+            var style = getStyle(el);
             var body = $.getDocument(el).body;
-            var rect = !isHidden(el) ? el.getBoundingClientRect()
-                : getHiddenProperties(el, ['getBoundingClientRect'])[0];
-            ret.top = rect.top + body.scrollTop, ret.left = rect.left + body.scrollLeft;
+            var properties;
+            if (isHidden(el)) {
+                properties = getHiddenElementProperties(el, ['offsetTop', 'offsetLeft']);
+                ret.top = properties[0], ret.left = properties[1];
+            } else {
+                ret.top = el.offsetTop, ret.left = el.offsetLeft;
+            }
+            ret.top += body.scrollTop, ret.left += body.scrollLeft;
+            if (relative) {
+                var parentOffset = getOffset(el.parentElement, relative);
+                ret.top += parentOffset.top, ret.left += parentOffset.left;
+            }
         }
         return ret;
     }
@@ -629,10 +640,14 @@
         // log('els:',els)
         // log('---')
 
-        el = $.dom("#div")[0]
-        log(el.getBoundingClientRect())
-        log(el.offsetTop, el.clientTop)
-        log(getOffset(el))
+        el = $.dom("#div1,#div2").for(function(el) {
+            log(el.getBoundingClientRect())
+            log(el.offsetTop,el.offsetLeft)
+            log(getOffset(el), getOffset(el, true))
+        });
+
+        // el = $.dom("#div2")[0]
+        // log(getOffset(el, true))
 
         // log(el.dimensions())
         // log("width x height:", el.width(), el.height())
