@@ -485,7 +485,7 @@
     }
     function isHidden(el) {return el && (el.style.display == 'none' || !(el.offsetWidth || el.offsetHeight));}
     function getHiddenProperties(el, properties) {
-        var ret = {};
+        var ret = [];
         var doc = $.getDocument(el);
         var sid = $.sid(), className = ' '+ sid;
         var styleText = el.style.cssText;
@@ -508,8 +508,13 @@
         el.style.display = '', el.style.visibility = ''; // for `!important` annots
 
         // finally, grap it!
-        // ret.width = el.offsetWidth, ret.height = el.offsetHeight;
-        properties.forEach(function(name) { ret[name] = el[name]; });
+        properties.forEach(function(name) {
+            var value = el[name];
+            if (value.call) { // el.getBoundingClientRect() etc.
+                value = value.call(el);
+            }
+            ret.push(value);
+        });
 
         // restore all
         doc.body.removeChild(styleEl);
@@ -531,10 +536,11 @@
                 var win = $.getWindow(el);
                 width = win.innerWidth, height = win.innerHeight;
             } else if (isNodeElement(el)) {
-                ret.width = el.offsetWidth, ret.height = el.offsetHeight;
                 if (isHidden(el)) {
                     var properties = getHiddenProperties(el, ['offsetWidth', 'offsetHeight']);
-                    ret.width = properties.offsetWidth, ret.height = properties.offsetHeight;
+                    ret.width = properties[0], ret.height = properties[1];
+                } else {
+                    ret.width = el.offsetWidth, ret.height = el.offsetHeight;
                 }
                 if (addStack) {
                     ret.el = el;
@@ -595,6 +601,22 @@
         }
     });
 
+    function getOffset(el, rel) {
+        var ret = {top: 0, left: 0};
+        if (el && isNodeElement(el)) {
+            var body = $.getDocument(el).body;
+            var rect = !isHidden(el) ? el.getBoundingClientRect()
+                : getHiddenProperties(el, ['getBoundingClientRect'])[0];
+            ret.top = rect.top + body.scrollTop, ret.left = rect.left + body.scrollLeft;
+        }
+        return ret;
+    }
+
+    // dom: box, offset, position, scroll
+    Dom.extendPrototype({
+        offset: function() {return getOffset(this[el]);}
+    });
+
     $.dom = function(selector, root, i) { return initDom(selector, root, i) };
 
     $.onReady(function() { var doc = document, dom, el, els, body = document.body
@@ -609,9 +631,12 @@
         // log('els:',els)
         // log('---')
 
-        el = $.dom("#div")
+        el = $.dom("#div")[0]
+        log(el.getBoundingClientRect())
+        log(el.offsetTop, el.clientTop)
+        log(getOffset(el))
 
-        log(el.dimensions())
+        // log(el.dimensions())
         // log("width x height:", el.width(), el.height())
         // log("innerWidth x innerHeight:", el.innerWidth(), el.innerHeight())
         // log("outerWidth x outerHeight:", el.outerWidth(), el.outerWidth(true), el.outerHeight(), el.outerHeight(true))
