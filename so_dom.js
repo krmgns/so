@@ -549,11 +549,11 @@
 
     // dom: dimensions
     Dom.extendPrototype({
-        getDimensions: function() {
-            return getDimensions(this[0]);
+        getDimensions: function(addStack /* @internal */) {
+            return getDimensions(this[0], addStack);
         },
         width: function() {
-            var dim = getDimensions(this[0], true), width = dim.width;
+            var dim = this.getDimensions(true), width = dim.width;
             if (width && dim.isNodeElement) {
                 width -= sumStyleValue(dim.el, dim.style, 'paddingLeft', 'paddingRight');
                 width -= sumStyleValue(dim.el, dim.style, 'borderLeftWidth', 'borderRightWidth');
@@ -561,7 +561,7 @@
             return width;
         },
         innerWidth: function() {
-            var dim = getDimensions(this[0], true), width = dim.width;
+            var dim = this.getDimensions(true), width = dim.width;
             if (width && dim.isNodeElement) {
                 width -= sumStyleValue(dim.el, dim.style, 'borderLeftWidth', 'borderRightWidth');
             }
@@ -569,14 +569,14 @@
 
         },
         outerWidth: function(addMargin) {
-            var dim = getDimensions(this[0], true), width = dim.width;
+            var dim = this.getDimensions(true), width = dim.width;
             if (width && dim.isNodeElement && addMargin) {
                 width += sumStyleValue(dim.el, dim.style, 'marginLeft', 'marginRight');
             }
             return width;
         },
         height: function() {
-            var dim = getDimensions(this[0], true), height = dim.height;
+            var dim = this.getDimensions(true), height = dim.height;
             if (height && dim.isNodeElement) {
                 height -= sumStyleValue(dim.el, dim.style, 'paddingTop', 'paddingBottom');
                 height -= sumStyleValue(dim.el, dim.style, 'borderTopWidth', 'borderBottomWidth');
@@ -584,19 +584,19 @@
             return height;
         },
         innerHeight: function() {
-            var dim = getDimensions(this[0], true), height = dim.height;
+            var dim = this.getDimensions(true), height = dim.height;
             if (height && dim.isNodeElement) {
                 height -= sumStyleValue(dim.el, dim.style, 'borderTopWidth', 'borderBottomWidth');
             }
             return height;
         },
         outerHeight: function(addMargin) {
-            var dim = getDimensions(this[0], true), height = dim.height;
+            var dim = this.getDimensions(true), height = dim.height;
             if (height && dim.isNodeElement && addMargin) {
                 height += sumStyleValue(dim.el, dim.style, 'marginTop', 'marginBottom');
             }
             return height;
-        }
+        },
     });
 
     $.dom = function(selector, root, i) { return initDom(selector, root, i) };
