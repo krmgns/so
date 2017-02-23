@@ -487,17 +487,18 @@
         return el && (el.style.display == 'none' || !(el.offsetWidth || el.offsetHeight));
     }
 
-    function getDimensions(el) {
-        var width = 0, height = 0;
+    // @note: offset(width|height) = (width|height) + padding + border
+    function getDimensions(el, addStack) {
+        var dimensions = {width: 0, height: 0};
         if (el) {
             if (isRoot(el)) {
                 var win = $.getWindow(el);
                 width = win.innerWidth, height = win.innerHeight;
-            } else {
-                var style = getStyle(el), styleText;
-                width = el.offsetWidth, height = el.offsetHeight;
+            } else if (isNodeElement(el)) {
+                var style = getStyle(el);
+                dimensions.width = el.offsetWidth, dimensions.height = el.offsetHeight;
                 if (isHidden(el)) {
-                    styleText = el.style.cssText;
+                    var styleText = el.style.cssText;
                     var doc = $.getDocument(el);
                     var sid = $.sid(), className = ' '+ sid;
                     var display = style.display, visibility = style.visibility;
@@ -523,7 +524,7 @@
                         el.style.display = '', el.style.visibility = ''; // for `!important` annots
 
                         // finally, grap it!
-                        width = el.offsetWidth, height = el.offsetHeight;
+                        dimensions.width = el.offsetWidth, dimensions.height = el.offsetHeight;
 
                         // restore all
                         doc.body.removeChild(styleEl);
@@ -535,18 +536,46 @@
                         }
                     }
                 }
-                width && (width -= sumStyleValue(null, style, 'borderLeftWidth', 'borderRightWidth'));
-                height && (height -= sumStyleValue(null, style, 'borderTopWidth', 'borderBottomWidth'));
+
+                if (addStack) {
+                    dimensions.style = style;
+                    dimensions.isNodeElement = true;
+                }
             }
         }
-        return {width: width, height: height};
+        return dimensions;
     }
 
     // dom: dimensions
     Dom.extendPrototype({
         dimensions: function() {return getDimensions(this[0]);},
-        width: function() { return getDimensions(this[0]).width; },
-        height: function() { return getDimensions(this[0]).height; }
+        width: function() {
+            // no padding, no margin, no border
+            var el = this[0], dimensions = getDimensions(el, true), width = dimensions.width;
+            if (width && dimensions.isNodeElement) {
+                width -= sumStyleValue(el, dimensions.style, 'paddingLeft', 'paddingRight');
+                width -= sumStyleValue(el, dimensions.style, 'borderLeftWidth', 'borderRightWidth');
+            }
+            return width;
+        },
+        innerWidth: function() {
+            // includes padding but not border
+            var el = this[0], dimensions = getDimensions(el, true), width = dimensions.width;
+            if (width && dimensions.isNodeElement) {
+                width -= sumStyleValue(el, dimensions.style, 'borderLeftWidth', 'borderRightWidth');
+            }
+            return width;
+
+        },
+        outerWidth: function(addMargin) {
+            // includes padding, border, and optionally margin
+            var el = this[0], dimensions = getDimensions(el, true), width = dimensions.width;
+            if (width && dimensions.isNodeElement && addMargin) {
+                width += sumStyleValue(el, dimensions.style, 'marginLeft', 'marginRight');
+            }
+            return width;
+        },
+        // height: function() { return getDimensions(this[0]).height; },
     });
 
     $.dom = function(selector, root, i) { return initDom(selector, root, i) };
@@ -563,7 +592,12 @@
         // log('els:',els)
         // log('---')
 
-        log($.dom("#div").innerWidth())
+        log("parent-width:",$.dom("#div-out").width())
+        var s = "#div";
+        log($.dom(s).dimensions())
+        log("width:",$.dom(s).width())
+        log("innerWidth:",$.dom(s).innerWidth())
+        log("outerWidth:",$.dom(s).outerWidth(),$.dom(s).outerWidth(true))
 
         // log($.dom(body).width())
         // log($.dom(window).width())

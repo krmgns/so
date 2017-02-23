@@ -26,13 +26,13 @@
 <a id="a1" href="#" onclick="alert(1); return !1">a 1</a>
 <a id="a2" href="#">a 2</a>
 
-<div id="div-out">
+<div id="div-out" style="padding:1px">
     <!-- <div id="div" style="width: 200px; color:red; margin:10px; padding:10px; border:1px solid; min-height:10px; transform: scale(0.5); display:none; position:relative"> -->
-    <div id="div" style="width: 200px; border:1px solid; padding:1px; margin:1px">
+    <div id="div" style="width: ; margin:10px; padding:20px; border:1px solid;  ">
+        <p id="p">p</p>
         <p id="p1">p1</p>
         <p id="p2">p2</p>
         <p id="p3">p3</p>
-        <p>p</p>
         <hr>
         <br>
         <div id="div-in1">div-in1</div>
@@ -41,7 +41,7 @@
 </div>
 <!-- <style>#div-out, #div {color:red; position:inherit; display:none}</style> -->
 
-<style>.div {display:none; visibility: hidden;}</style>
+<!-- <style>.div {display:none; visibility: hidden;}</style>
 
 <div id="div-parent-root" class="div" style="display:none!important">
     <div id="div-parent-3" class="div" style="visibility:hidden!important">
@@ -51,7 +51,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 <script>
 so.onReady(function($) {
