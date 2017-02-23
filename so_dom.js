@@ -494,8 +494,8 @@
                 var win = $.getWindow(el);
                 width = win.innerWidth, height = win.innerHeight;
             } else {
-                width = el.offsetWidth, height = el.offsetHeight;
                 var style = getStyle(el), styleText;
+                width = el.offsetWidth, height = el.offsetHeight;
                 if (isHidden(el)) {
                     styleText = el.style.cssText;
                     var doc = $.getDocument(el);
@@ -535,8 +535,6 @@
                         }
                     }
                 }
-                width && (width -= sumStyleValue(null, style, 'borderLeftWidth', 'borderRightWidth'));
-                height && (height -= sumStyleValue(null, style, 'borderTopWidth', 'borderBottomWidth'));
             }
         }
         return {width: width, height: height};
@@ -549,7 +547,9 @@
         height: function() { return getDimensions(this[0]).height; }
     });
 
-    $.onReady(function() { var dom, el, els
+    $.dom = function(selector, root, i) { return initDom(selector, root, i) };
+
+    $.onReady(function() { var doc = document, dom, el, els, body = document.body
         els = new Dom('body')
         // log(els)
         // els = els.find('input[so:v=1]')
@@ -557,16 +557,19 @@
         // els = els.find('input:checked!)')
         // els = els.find('p:nth(1)')
         // els = els.find('input:first, input:last, p:nth(1), a, button')
-        els = els.find('#div-target')
-        log('els:',els)
-        log('---')
+        // els = els.find('#div-target')
+        // log('els:',els)
+        // log('---')
 
-        // log(getStyle(els[0]))
-        // log(getCssStyle(els[0]))
+        log($.dom("#div").dimensions())
+
+        // log($.dom(body).width())
+        // log($.dom(window).width())
+        // log($.dom(document).width())
 
         $.fire(1, function() {
-            log(els.path())
-            log(els.path(true))
+            // log(els.path())
+            // log(els.path(true))
             // log(els.width(), els.height())
         });
     })
