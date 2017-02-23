@@ -295,6 +295,21 @@
 
     // dom: walkers
     Dom.extendPrototype({
+        path: function(join) {
+            var el = this[0], path, paths = [];
+            if (el) {
+                path = el.nodeName.toLowerCase();
+                if (el.id) path += '#'+ el.id;
+                if (el.className) path += '.'+ el.className.split(re_space).join('.');
+                paths.push(path);
+                return this.parents().for(function(node) {
+                    path = node.nodeName.toLowerCase();
+                    if (node.id) path += '#'+ node.id;
+                    if (node.className) path += '.'+ node.className.split(re_space).join('.');
+                    paths.push(path);
+                }), paths = paths.reverse(), join ? paths.join(' > ') : paths;
+            }
+        },
         parent: function() { return initDom(__(this, 'parentNode')); },
         parents: function() { return initDom(walk(this[0], 'parentNode')); },
         comments: function() {
@@ -550,7 +565,8 @@
         // log(getCssStyle(els[0]))
 
         $.fire(1, function() {
-            log(els.parents())
+            log(els.path())
+            log(els.path(true))
             // log(els.width(), els.height())
         });
     })
