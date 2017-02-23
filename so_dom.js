@@ -16,7 +16,7 @@
     var toStyleName = $.util.toCamelCaseFromDashCase;
     var querySelector = function(root, selector) { return root.querySelector(selector); };
     var querySelectorAll = function(root, selector) { return root.querySelectorAll(selector); };
-    var _var; // no define one-var each time (@minify)
+    var _break = 0 /* loop break tick */, _var /* no define one-var each time (@minify) */;
 
     function getTag(el) {return (el && el.nodeName) ? el.nodeName.toLowerCase() : isWindow(el) ? '#window' : null;}
 
@@ -205,9 +205,7 @@
     function cloneElement(element, deep) {
         var clone = element.cloneNode();
         // clone.cloneOf = function() { return element; }; // @wait
-        if (clone.id) {
-            clone.id += ':clone-'+ $.uuid();
-        }
+        clone.id += ':clone-'+ $.id();
         if (!isFalse(deep)) {
             $.for(element.childNodes, function(child) {
                 clone.appendChild(cloneElement(child, deep));
@@ -278,16 +276,16 @@
 
     var fn_slice = [].slice;
     function walk(root, property) {
-            var node = root, nodes = [];
-            while (node && (node = node[property])) {
-                if (!isNode(node)) { // handle nodelist etc.
-                    nodes = nodes.concat(fn_slice.call(node));
-                } else {
-                    nodes.push(node);
-                }
+        var node = root, nodes = [];
+        while (node && (node = node[property])) {
+            if (!isNode(node)) { // handle nodelist etc.
+                nodes = nodes.concat(fn_slice.call(node));
+            } else {
+                nodes.push(node);
             }
-            return nodes;
         }
+        return nodes;
+    }
 
     // dom: walkers
     Dom.extendPrototype({
@@ -346,6 +344,12 @@
         hasChildren: function(s) { return this.hasChild();}
     });
 
+    var re_rgb = /rgb/i;
+    var re_color = /color/i;
+    var re_unit = /(?:p[xt]|em|%)/i; // short & quick
+    var re_unitOther = /(?:ex|in|[cm]m|pc|v[hw]?min)/i;
+    var nonUnitStyles = ['opacity', 'zoom', 'zIndex', 'columnCount', 'columns', 'fillOpacity', 'fontWeight', 'lineHeight'];
+
     function toKeyValue(key, value) {
         var ret = key;
         if (isString(ret)) {
@@ -353,12 +357,6 @@
         }
         return ret;
     }
-
-    var re_rgb = /rgb/i;
-    var re_color = /color/i;
-    var re_unit = /(?:p[xt]|em|%)/i; // short & quick
-    var re_unitOther = /(?:ex|in|[cm]m|pc|v[hw]?min)/i;
-    var nonUnitStyles = ['opacity', 'zoom', 'zIndex', 'columnCount', 'columns', 'fillOpacity', 'fontWeight', 'lineHeight'];
 
     function getStyle(el, name, value) {
         return _var = $.getWindow(el).getComputedStyle(el),
@@ -412,10 +410,9 @@
 
                 value = getStyle(el, name);
                 if (value && convert) {
-                    value = re_rgb.test(value)
-                        ? $.util.toHexFromRgb(value) // convert rgb to hex
-                            : re_unit.test(value) || re_unitOther.test(value) // convert px etc. to float
-                                ? value.toFloat() : value;
+                    value = re_rgb.test(value) ? $.util.toHexFromRgb(value) // convert rgb to hex
+                        : re_unit.test(value) || re_unitOther.test(value) // convert px etc. to float
+                        ? value.toFloat() : value;
                 } else if (!value) {
                     value = valueDefault;
                 }
@@ -435,27 +432,89 @@
         }
     });
 
+    var matchesSelector = document.documentElement.matches || function(selector) {
+        var all = querySelectorAll(this.ownerDocument, selector), i = 0;
+        while (i < all.length) { if (all[i++] == this) return true; } return false;
+    };
+
+    function getCssStyle(el) {
+        var sheets = el.ownerDocument.styleSheets, ret = [];
+        $.for(sheets, function(sheet) {
+            var rules = sheet.rules || sheet.cssRules;
+            $.for(rules, function(rule) {
+                if (matchesSelector.call(el, rule.selectorText)) {
+                    ret.push(rule.style); // loop over all until last
+                }
+            });
+        });
+        return ret[ret.length - 1] /* return last rule */ || {};
+    }
+    function isHidden(el) {
+        return el && (el.style.display == 'none' || !(el.offsetWidth || el.offsetHeight));
+    }
+
+    var defaultDisplays = {};
+
+    function getDefaultDisplay(el) {
+        var ret = defaultDisplays[el.tagName];
+        if (!ret) {
+            // document.createElement();
+        }
+    }
+    function hasStyle(el, name) {
+        return el && el.style.cssText.indexOf(name) > -1;
+    }
+
     function getDimensions(el) {
-        var width = 0, height = 0, style;
+        var width = 0, height = 0;
         if (el) {
             if (isRoot(el)) {
-                width = window.innerWidth, height = window.innerHeight;
+                var win = $.getWindow(el);
+                width = win.innerWidth, height = win.innerHeight;
             } else {
                 width = el.offsetWidth, height = el.offsetHeight;
-                log(width, height)
-                var style = getStyle(el), display, position, visibility;
-                log(style.getPropertyValue("display"))
-                if (style.display == 'none') {
-                log(width, height)
-                    display = style.display;
-                    position = style.position;
-                    visibility = style.visibility;
-                    el.style.position = 'absolute', el.style.visibility = 'hidden', el.style.display = 'block';
-                    width = el.offsetWidth, height = el.offsetHeight; // grab it
-                    el.style.position = position, el.style.visibility = visibility, el.style.display = display;
+                var style = getStyle(el), styleText;
+                if (isHidden(el)) {
+                    styleText = el.style.cssText;
+                    var doc = $.getDocument(el);
+                    var sid = $.sid(), className = ' '+ sid;
+                    var display = style.display, visibility = style.visibility;
+                    var parent = el.parentElement, parents = [], parentStyle;
+                    // doesn't give if parents are hidden
+                    while (parent) {
+                        if (isHidden(parent)) {
+                            parentStyle = getStyle(parent);
+                            parents.push({el: parent, styleText: parent.style.cssText,
+                                display: parentStyle.display, visibility: parentStyle.visibility});
+                            parent.className += className;
+                            parent.style.display = '', parent.style.visibility = ''; // for `!important` annots
+                        }
+                        parent = parent.parentElement;
+                    }
+                    if (parents.length) {
+                        var styleEl = doc.createElement('style');
+                        styleEl.id = sid;
+                        styleEl.textContent = '.'+ sid +'{display:block!important;visibility:hidden!important}';
+                        doc.body.appendChild(styleEl);
+
+                        el.className += className;
+                        el.style.display = '', el.style.visibility = ''; // for `!important` annots
+
+                        // finally, grap it!
+                        width = el.offsetWidth, height = el.offsetHeight;
+
+                        // restore all
+                        doc.body.removeChild(styleEl);
+                        el.className = el.className.replace(className, '');
+                        if (styleText) el.style.cssText = styleText;
+                        while (parent = parents.shift()) {
+                            parent.el.className = parent.el.className.replace(className, '');
+                            if (parent.styleText) parent.el.style.cssText = parent.styleText;
+                        }
+                    }
                 }
-                width -= sumStyleProperty(null, style, 'borderLeftWidth', 'borderRightWidth');
-                height -= sumStyleProperty(null, style, 'borderTopWidth', 'borderBottomWidth');
+                width && (width -= sumStyleProperty(null, style, 'borderLeftWidth', 'borderRightWidth'));
+                height && (height -= sumStyleProperty(null, style, 'borderTopWidth', 'borderBottomWidth'));
             }
         }
         return {width: width, height: height};
@@ -476,9 +535,12 @@
         // els = els.find('input:checked!)')
         // els = els.find('p:nth(1)')
         // els = els.find('input:first, input:last, p:nth(1), a, button')
-        els = els.find('#div')
+        els = els.find('#div-target')
         log('els:',els)
         log('---')
+
+        // log(getStyle(els[0]))
+        // log(getCssStyle(els[0]))
 
         $.fire(1, function() {
             log(els.dimensions())
