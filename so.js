@@ -695,7 +695,7 @@
         }
     });
 
-    var _uuid = 0;
+    var _id = 0;
     var re_numeric = /^[-+]?(?:\.?\d+|\d+\.\d+)$/;
     var fn_eval = window.eval; // direct eval breaks minify tool
     var fn_slice = [].slice;
@@ -758,11 +758,19 @@
         },
 
         /**
-         * Uuid.
+         * Id.
          * @return {Int}
          */
-        uuid: function() {
-            return ++_uuid;
+        id: function() {
+            return ++_id;
+        },
+
+        /**
+         * Sid.
+         * @return {String}
+         */
+        sid: function() {
+            return '__so_sid_'+ $.id();
         },
 
         /**
