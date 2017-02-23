@@ -621,7 +621,7 @@
         return ret;
     }
 
-    // dom: box, offset, position, scroll
+    // dom: offset, scroll, box, boxModel
     Dom.extendPrototype({
         offset: function() {return getOffset(this[el]);}
     });
