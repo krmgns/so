@@ -511,9 +511,9 @@
 
     // dom: dimensions
     Dom.extendPrototype({
-        dimensions: function() {
-            return getDimensions(this[0]);
-        }
+        dimensions: function() {return getDimensions(this[0]);},
+        width: function() { return getDimensions(this[0]).width; },
+        height: function() { return getDimensions(this[0]).height; }
     });
 
     $.onReady(function() { var dom, el, els
@@ -533,6 +533,7 @@
 
         $.fire(1, function() {
             log(els.dimensions())
+            log(els.width(), els.height())
         });
     })
 
