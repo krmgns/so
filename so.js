@@ -273,17 +273,17 @@
 
         /** Is window. @param {Any} input @return {Boolean} */
         isWindow: function(input) {
-            return toBool(input && input == input[NAME_WINDOW] && input == input[NAME_WINDOW].window);
+            return !!(input && input == input[NAME_WINDOW] && input == input[NAME_WINDOW].window);
         },
 
         /** Is document. @param {Any} input @return {Boolean} */
         isDocument: function(input) {
-            return toBool(input && input[NAME_NODE_TYPE] === NODE_TYPE_DOCUMENT);
+            return !!(input && input[NAME_NODE_TYPE] === NODE_TYPE_DOCUMENT);
         },
 
         /** Is node. @param {Any} input @return {Boolean} */
         isNode: function(input) {
-            return toBool(input && (
+            return !!(input && (
                    input[NAME_NODE_TYPE] === NODE_TYPE_ELEMENT
                 || input[NAME_NODE_TYPE] === NODE_TYPE_DOCUMENT
                 || input[NAME_NODE_TYPE] === NODE_TYPE_DOCUMENT_FRAGMENT
@@ -292,7 +292,7 @@
 
         /** Is node element. @param {Any} input @return {Boolean} */
         isNodeElement: function(input) {
-            return toBool(input && input[NAME_NODE_TYPE] === NODE_TYPE_ELEMENT);
+            return !!(input && input[NAME_NODE_TYPE] === NODE_TYPE_ELEMENT);
         }
     });
 
@@ -813,16 +813,16 @@
         getWindow: function(input) {
             var ret;
 
-            if (input) {
-                if ($.isNode(input)) {
-                    ret = input[NAME_OWNER_DOCUMENT][NAME_DEFAULT_VIEW]; // node document window
+            if (!input) {
+                ret = window;
+            } else {
+                if ($.isWindow(input)) {
+                    ret = input;
                 } else if ($.isDocument(input)) {
                     ret = input[NAME_DEFAULT_VIEW]; // document window
-                } else if ($.isWindow(input)) {
-                    ret = input;
+                } else if ($.isNode(input)) {
+                    ret = input[NAME_OWNER_DOCUMENT][NAME_DEFAULT_VIEW]; // node document window
                 }
-            } else {
-                ret = window;
             }
 
             return ret;
@@ -836,16 +836,16 @@
         getDocument: function(input) {
             var ret;
 
-            if (input) {
-                if (input[NAME_OWNER_DOCUMENT]) { // document or node
-                    ret = input[NAME_OWNER_DOCUMENT];
+            if (!input) {
+                ret = window[NAME_DOCUMENT];
+            } else {
+                if ($.isDocument(input)) {
+                    ret = input;
                 } else if (input[NAME_DOCUMENT]) { // window
                     ret = input[NAME_DOCUMENT];
-                } else if ($.isDocument(input)) {
-                    ret = input;
+                } else if (input[NAME_OWNER_DOCUMENT]) { // document or node
+                    ret = input[NAME_OWNER_DOCUMENT];
                 }
-            } else {
-                ret = window[NAME_DOCUMENT];
             }
 
             return ret;
