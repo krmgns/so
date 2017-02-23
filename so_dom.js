@@ -535,6 +535,8 @@
                         }
                     }
                 }
+                width && (width -= sumStyleValue(null, style, 'borderLeftWidth', 'borderRightWidth'));
+                height && (height -= sumStyleValue(null, style, 'borderTopWidth', 'borderBottomWidth'));
             }
         }
         return {width: width, height: height};
@@ -561,16 +563,13 @@
         // log('els:',els)
         // log('---')
 
-        log($.dom("#div").dimensions())
+        log($.dom("#div").innerWidth())
 
         // log($.dom(body).width())
         // log($.dom(window).width())
         // log($.dom(document).width())
 
         $.fire(1, function() {
-            // log(els.path())
-            // log(els.path(true))
-            // log(els.width(), els.height())
         });
     })
 
