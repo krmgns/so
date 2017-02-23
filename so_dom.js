@@ -452,15 +452,6 @@
     function isHidden(el) {
         return el && (el.style.display == 'none' || !(el.offsetWidth || el.offsetHeight));
     }
-
-    var defaultDisplays = {};
-
-    function getDefaultDisplay(el) {
-        var ret = defaultDisplays[el.tagName];
-        if (!ret) {
-            // document.createElement();
-        }
-    }
     function hasStyle(el, name) {
         return el && el.style.cssText.indexOf(name) > -1;
     }
