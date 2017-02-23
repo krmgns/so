@@ -549,11 +549,9 @@
 
     // dom: dimensions
     Dom.extendPrototype({
-        getDimensions: function(addStack /* @internal */) {
-            return getDimensions(this[0], addStack);
-        },
+        dimensions: function(addStack /* @internal */) {return getDimensions(this[0], addStack);},
         width: function() {
-            var dim = this.getDimensions(true), width = dim.width;
+            var dim = this.dimensions(true), width = dim.width;
             if (width && dim.isNodeElement) {
                 width -= sumStyleValue(dim.el, dim.style, 'paddingLeft', 'paddingRight');
                 width -= sumStyleValue(dim.el, dim.style, 'borderLeftWidth', 'borderRightWidth');
@@ -561,22 +559,21 @@
             return width;
         },
         innerWidth: function() {
-            var dim = this.getDimensions(true), width = dim.width;
+            var dim = this.dimensions(true), width = dim.width;
             if (width && dim.isNodeElement) {
                 width -= sumStyleValue(dim.el, dim.style, 'borderLeftWidth', 'borderRightWidth');
             }
             return width;
-
         },
         outerWidth: function(addMargin) {
-            var dim = this.getDimensions(true), width = dim.width;
+            var dim = this.dimensions(true), width = dim.width;
             if (width && dim.isNodeElement && addMargin) {
                 width += sumStyleValue(dim.el, dim.style, 'marginLeft', 'marginRight');
             }
             return width;
         },
         height: function() {
-            var dim = this.getDimensions(true), height = dim.height;
+            var dim = this.dimensions(true), height = dim.height;
             if (height && dim.isNodeElement) {
                 height -= sumStyleValue(dim.el, dim.style, 'paddingTop', 'paddingBottom');
                 height -= sumStyleValue(dim.el, dim.style, 'borderTopWidth', 'borderBottomWidth');
@@ -584,19 +581,19 @@
             return height;
         },
         innerHeight: function() {
-            var dim = this.getDimensions(true), height = dim.height;
+            var dim = this.dimensions(true), height = dim.height;
             if (height && dim.isNodeElement) {
                 height -= sumStyleValue(dim.el, dim.style, 'borderTopWidth', 'borderBottomWidth');
             }
             return height;
         },
         outerHeight: function(addMargin) {
-            var dim = this.getDimensions(true), height = dim.height;
+            var dim = this.dimensions(true), height = dim.height;
             if (height && dim.isNodeElement && addMargin) {
                 height += sumStyleValue(dim.el, dim.style, 'marginTop', 'marginBottom');
             }
             return height;
-        },
+        }
     });
 
     $.dom = function(selector, root, i) { return initDom(selector, root, i) };
@@ -613,12 +610,11 @@
         // log('els:',els)
         // log('---')
 
-        log("parent-width:",$.dom("#div-out").height())
-        var s = "#div";
-        log($.dom(s).getDimensions())
-        log("height:",$.dom(s).height())
-        log("innerHeight:",$.dom(s).innerHeight())
-        log("outerHeight:",$.dom(s).outerHeight(),$.dom(s).outerHeight(true))
+        el = $.dom("#div>hr")
+        log(el.dimensions())
+        log("width x height:", el.width(), el.height())
+        log("innerWidth x innerHeight:", el.innerWidth(), el.innerHeight())
+        log("outerWidth x outerHeight:", el.outerWidth(), el.outerWidth(true), el.outerHeight(), el.outerHeight(true))
 
         // log($.dom(body).width())
         // log($.dom(window).width())
