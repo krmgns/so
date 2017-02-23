@@ -11,7 +11,6 @@
     var re_trim = /^\s+|\s+$/g;
     var re_commaSplit = /,\s*/;
     var re_htmlContent = /^<([a-z-]+).*\/?>(?:.*<\/\1>)?$/i;
-    var ret_root = /^#(?:window|document)$/;
     var isNaN = window.isNaN;
     var trim = function(s) { return s == null ? '' : (''+ s).replace(re_trim, '') };
     var isBool = $.isBool, isTrue = $.isTrue, isFalse = $.isFalse;
@@ -26,7 +25,8 @@
 
     function getTag(el) {return (el && el.nodeName) ? el.nodeName.toLowerCase() : isWindow(el) ? '#window' : null;}
 
-    function isRoot(el) {return _var = getTag(el), !!(_var && _var.test(ret_root));}
+    function isRoot(el) {return _var = getTag(el), _var == '#window' || _var == '#document';}
+    function isRootElement(el) { return _var = getTag(el), _var == 'html' || _var == 'body';}
 
     function isDom(input) {
         return (input instanceof Dom);
@@ -179,7 +179,7 @@
             } else if (isString(i)) {
                 this.for(function(_element) {
                     if (i == getTag(_element)) {
-                        element = _element; return 0;
+                        element = _element; return _break;
                     }
                 });
             }
@@ -367,8 +367,8 @@
                 ret = el && el.parentNode;
             } else {
                 s = initDom(s)[0];
-                walk(el, 'parentNode').forEach(function(_s) {
-                    if (s && s == _s) ret = true; return 0;
+                this.parents().forEach(function(_s) {
+                    if (s && s == _s) ret = true; return _break;
                 });
             }
             return !!ret;
@@ -483,68 +483,67 @@
         });
         return ret[ret.length - 1] /* return last rule */ || {};
     }
-    function isHidden(el) {
-        return el && (el.style.display == 'none' || !(el.offsetWidth || el.offsetHeight));
+    function isHidden(el) {return el && (el.style.display == 'none' || !(el.offsetWidth || el.offsetHeight));}
+    function getHiddenProperties(el, properties) {
+        var ret = {};
+        var doc = $.getDocument(el);
+        var sid = $.sid(), className = ' '+ sid;
+        var styleText = el.style.cssText;
+        var parent = el.parentElement, parents = [], parentStyle;
+        while (parent) { // doesn't give if parents are hidden
+            if (isHidden(parent)) {
+                parentStyle = getStyle(parent);
+                parents.push({el: parent, styleText: parent.style.cssText});
+                parent.className += className;
+                parent.style.display = '', parent.style.visibility = ''; // for `!important` annots
+            }
+            parent = parent.parentElement;
+        }
+        var styleEl = doc.createElement('style');
+        styleEl.id = sid;
+        styleEl.textContent = '.'+ sid +'{display:block!important;visibility:hidden!important}';
+        doc.body.appendChild(styleEl);
+
+        el.className += className;
+        el.style.display = '', el.style.visibility = ''; // for `!important` annots
+
+        // finally, grap it!
+        // ret.width = el.offsetWidth, ret.height = el.offsetHeight;
+        properties.forEach(function(name) { ret[name] = el[name]; });
+
+        // restore all
+        doc.body.removeChild(styleEl);
+        el.className = el.className.replace(className, '');
+        if (styleText) el.style.cssText = styleText;
+        while (parent = parents.shift()) {
+            parent.el.className = parent.el.className.replace(className, '');
+            if (parent.styleText) parent.el.style.cssText = parent.styleText;
+        }
+
+        return ret;
     }
 
     // @note: offset(width|height) = (width|height) + padding + border
     function getDimensions(el, addStack) {
-        var dim = {width: 0, height: 0};
+        var ret = {width: 0, height: 0};
         if (el) {
             if (isRoot(el)) {
                 var win = $.getWindow(el);
                 width = win.innerWidth, height = win.innerHeight;
             } else if (isNodeElement(el)) {
-                var style = getStyle(el);
-                dim.width = el.offsetWidth, dim.height = el.offsetHeight;
+                ret.width = el.offsetWidth, ret.height = el.offsetHeight;
                 if (isHidden(el)) {
-                    var styleText = el.style.cssText;
-                    var doc = $.getDocument(el);
-                    var sid = $.sid(), className = ' '+ sid;
-                    var display = style.display, visibility = style.visibility;
-                    var parent = el.parentElement, parents = [], parentStyle;
-                    // doesn't give if parents are hidden
-                    while (parent) {
-                        if (isHidden(parent)) {
-                            parentStyle = getStyle(parent);
-                            parents.push({el: parent, styleText: parent.style.cssText,
-                                display: parentStyle.display, visibility: parentStyle.visibility});
-                            parent.className += className;
-                            parent.style.display = '', parent.style.visibility = ''; // for `!important` annots
-                        }
-                        parent = parent.parentElement;
-                    }
-                    if (parents.length) {
-                        var styleEl = doc.createElement('style');
-                        styleEl.id = sid;
-                        styleEl.textContent = '.'+ sid +'{display:block!important;visibility:hidden!important}';
-                        doc.body.appendChild(styleEl);
-
-                        el.className += className;
-                        el.style.display = '', el.style.visibility = ''; // for `!important` annots
-
-                        // finally, grap it!
-                        dim.width = el.offsetWidth, dim.height = el.offsetHeight;
-
-                        // restore all
-                        doc.body.removeChild(styleEl);
-                        el.className = el.className.replace(className, '');
-                        if (styleText) el.style.cssText = styleText;
-                        while (parent = parents.shift()) {
-                            parent.el.className = parent.el.className.replace(className, '');
-                            if (parent.styleText) parent.el.style.cssText = parent.styleText;
-                        }
-                    }
+                    var properties = getHiddenProperties(el, ['offsetWidth', 'offsetHeight']);
+                    ret.width = properties.offsetWidth, ret.height = properties.offsetHeight;
                 }
-
                 if (addStack) {
-                    dim.el = el;
-                    dim.style = style;
-                    dim.isNodeElement = true;
+                    ret.el = el;
+                    ret.style = getStyle(el);
+                    ret.isNodeElement = true;
                 }
             }
         }
-        return dim;
+        return ret;
     }
 
     // dom: dimensions
@@ -610,15 +609,12 @@
         // log('els:',els)
         // log('---')
 
-        el = $.dom("#div>hr")
-        log(el.dimensions())
-        log("width x height:", el.width(), el.height())
-        log("innerWidth x innerHeight:", el.innerWidth(), el.innerHeight())
-        log("outerWidth x outerHeight:", el.outerWidth(), el.outerWidth(true), el.outerHeight(), el.outerHeight(true))
+        el = $.dom("#div")
 
-        // log($.dom(body).width())
-        // log($.dom(window).width())
-        // log($.dom(document).width())
+        log(el.dimensions())
+        // log("width x height:", el.width(), el.height())
+        // log("innerWidth x innerHeight:", el.innerWidth(), el.innerHeight())
+        // log("outerWidth x outerHeight:", el.outerWidth(), el.outerWidth(true), el.outerHeight(), el.outerHeight(true))
 
         $.fire(1, function() {
         });
