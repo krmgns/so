@@ -296,6 +296,7 @@
     // dom: walkers
     Dom.extendPrototype({
         parent: function() { return initDom(__(this, 'parentNode')); },
+        parents: function() { return initDom(walk(this[0], 'parentNode')); },
         comments: function() {
             var el = this[0], node, nodes = [], i = 0;
             if (el) {
@@ -541,7 +542,7 @@
         // els = els.find('input:checked!)')
         // els = els.find('p:nth(1)')
         // els = els.find('input:first, input:last, p:nth(1), a, button')
-        els = els.find('#div-out')
+        els = els.find('#div-target')
         log('els:',els)
         log('---')
 
@@ -549,7 +550,7 @@
         // log(getCssStyle(els[0]))
 
         $.fire(1, function() {
-            log(els.comments())
+            log(els.parents())
             // log(els.width(), els.height())
         });
     })
