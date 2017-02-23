@@ -7,7 +7,7 @@
  */
 ;(function(window, $) { 'use strict';
 
-    var re_src = /(chrome|safari|firefox|opera|msie|trident(?=\/))\/?\s*([\d.]+)/;
+    var re_src = /(chrome|safari|firefox|opera|msie|trident(?=\/))(?:.*version)?\/?\s*([\d.]+)/i;
     var fns_os = ['isMac', 'isWindows', 'isLinux', 'isUnix'];
     var fns_ua = ['isChrome', 'isSafari', 'isFirefox', 'isOpera', 'isIE', 'isTrident'];
     var navigator = window.navigator;
