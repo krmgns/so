@@ -548,7 +548,7 @@
 
     // dom: dimensions
     Dom.extendPrototype({
-        dimensions: function() {return getDimensions(this[0]);},
+        getDimensions: function() {return getDimensions(this[0]);},
         width: function() {
             var el = this[0], dimensions = getDimensions(el, true), width = dimensions.width;
             if (width && dimensions.isNodeElement) {
