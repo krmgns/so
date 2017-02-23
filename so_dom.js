@@ -550,7 +550,6 @@
     Dom.extendPrototype({
         dimensions: function() {return getDimensions(this[0]);},
         width: function() {
-            // no padding, no margin, no border
             var el = this[0], dimensions = getDimensions(el, true), width = dimensions.width;
             if (width && dimensions.isNodeElement) {
                 width -= sumStyleValue(el, dimensions.style, 'paddingLeft', 'paddingRight');
@@ -559,7 +558,6 @@
             return width;
         },
         innerWidth: function() {
-            // includes padding but not border
             var el = this[0], dimensions = getDimensions(el, true), width = dimensions.width;
             if (width && dimensions.isNodeElement) {
                 width -= sumStyleValue(el, dimensions.style, 'borderLeftWidth', 'borderRightWidth');
@@ -568,14 +566,34 @@
 
         },
         outerWidth: function(addMargin) {
-            // includes padding, border, and optionally margin
             var el = this[0], dimensions = getDimensions(el, true), width = dimensions.width;
             if (width && dimensions.isNodeElement && addMargin) {
                 width += sumStyleValue(el, dimensions.style, 'marginLeft', 'marginRight');
             }
             return width;
         },
-        // height: function() { return getDimensions(this[0]).height; },
+        height: function() {
+            var el = this[0], dimensions = getDimensions(el, true), height = dimensions.height;
+            if (height && dimensions.isNodeElement) {
+                height -= sumStyleValue(el, dimensions.style, 'paddingTop', 'paddingBottom');
+                height -= sumStyleValue(el, dimensions.style, 'borderTopWidth', 'borderBottomWidth');
+            }
+            return height;
+        },
+        innerHeight: function() {
+            var el = this[0], dimensions = getDimensions(el, true), height = dimensions.height;
+            if (height && dimensions.isNodeElement) {
+                height -= sumStyleValue(el, dimensions.style, 'borderTopWidth', 'borderBottomWidth');
+            }
+            return height;
+        },
+        outerHeight: function(addMargin) {
+            var el = this[0], dimensions = getDimensions(el, true), height = dimensions.height;
+            if (height && dimensions.isNodeElement && addMargin) {
+                height += sumStyleValue(el, dimensions.style, 'marginTop', 'marginBottom');
+            }
+            return height;
+        }
     });
 
     $.dom = function(selector, root, i) { return initDom(selector, root, i) };
@@ -592,12 +610,12 @@
         // log('els:',els)
         // log('---')
 
-        log("parent-width:",$.dom("#div-out").width())
+        log("parent-width:",$.dom("#div-out").height())
         var s = "#div";
         log($.dom(s).dimensions())
-        log("width:",$.dom(s).width())
-        log("innerWidth:",$.dom(s).innerWidth())
-        log("outerWidth:",$.dom(s).outerWidth(),$.dom(s).outerWidth(true))
+        log("height:",$.dom(s).height())
+        log("innerHeight:",$.dom(s).innerHeight())
+        log("outerHeight:",$.dom(s).outerHeight(),$.dom(s).outerHeight(true))
 
         // log($.dom(body).width())
         // log($.dom(window).width())
