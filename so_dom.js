@@ -531,22 +531,20 @@
     // @note: offset(width|height) = (width|height) + padding + border
     function getDimensions(el, addStack) {
         var ret = {width: 0, height: 0};
-        if (el) {
-            if (isRoot(el)) {
-                var win = $.getWindow(el);
-                width = win.innerWidth, height = win.innerHeight;
-            } else if (isNodeElement(el)) {
-                if (isHidden(el)) {
-                    var properties = getHiddenProperties(el, ['offsetWidth', 'offsetHeight']);
-                    ret.width = properties[0], ret.height = properties[1];
-                } else {
-                    ret.width = el.offsetWidth, ret.height = el.offsetHeight;
-                }
-                if (addStack) {
-                    ret.el = el;
-                    ret.style = getStyle(el);
-                    ret.isNodeElement = true;
-                }
+        if (isRoot(el)) {
+            var win = $.getWindow(el);
+            width = win.innerWidth, height = win.innerHeight;
+        } else if (isNodeElement(el)) {
+            if (isHidden(el)) {
+                var properties = getHiddenProperties(el, ['offsetWidth', 'offsetHeight']);
+                ret.width = properties[0], ret.height = properties[1];
+            } else {
+                ret.width = el.offsetWidth, ret.height = el.offsetHeight;
+            }
+            if (addStack) {
+                ret.el = el;
+                ret.style = getStyle(el);
+                ret.isNodeElement = true;
             }
         }
         return ret;
@@ -603,7 +601,7 @@
 
     function getOffset(el, rel) {
         var ret = {top: 0, left: 0};
-        if (el && isNodeElement(el)) {
+        if (isNodeElement(el)) {
             var body = $.getDocument(el).body;
             var rect = !isHidden(el) ? el.getBoundingClientRect()
                 : getHiddenProperties(el, ['getBoundingClientRect'])[0];
