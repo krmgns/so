@@ -742,10 +742,10 @@
         logError: function() { _log('error', arguments); },
 
         /**
-         * Fun.
+         * Fn.
          * @return {Function}
          */
-        fun: function() {
+        fn: function() {
             return function() {};
         },
 
