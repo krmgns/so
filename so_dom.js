@@ -623,7 +623,7 @@
 
     // dom: offset, scroll, box, boxModel
     Dom.extendPrototype({
-        offset: function() {return getOffset(this[el]);}
+        offset: function() {return getOffset(this[0]);}
     });
 
     $.dom = function(selector, root, i) { return initDom(selector, root, i) };
