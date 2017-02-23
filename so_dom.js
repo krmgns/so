@@ -1,6 +1,12 @@
 // deps: so, so.list, so.util
 ;(function(window, $, undefined) { 'use strict';
 
+    var NODE_TYPE_ELEMENT = 1,
+        NODE_TYPE_TEXT = 3,
+        NODE_TYPE_COMMENT = 8,
+        NODE_TYPE_DOCUMENT = 9,
+        NODE_TYPE_DOCUMENT_FRAGMENT = 11;
+
     var re_space = /\s+/g;
     var re_trim = /^\s+|\s+$/g;
     var re_commaSplit = /,\s*/;
@@ -290,6 +296,17 @@
     // dom: walkers
     Dom.extendPrototype({
         parent: function() { return initDom(__(this, 'parentNode')); },
+        comments: function() {
+            var el = this[0], node, nodes = [], i = 0;
+            if (el) {
+                while (node = el.childNodes[i++]) {
+                    if (node.nodeType === NODE_TYPE_COMMENT) {
+                        nodes.push(node);
+                    }
+                }
+            }
+            return initDom(nodes);
+        },
         siblings: function(i) {
             var el = __(this), elp = el && el.parentNode, rets;
             if (el && elp) {
@@ -524,7 +541,7 @@
         // els = els.find('input:checked!)')
         // els = els.find('p:nth(1)')
         // els = els.find('input:first, input:last, p:nth(1), a, button')
-        els = els.find('#div-target')
+        els = els.find('#div-out')
         log('els:',els)
         log('---')
 
@@ -532,8 +549,8 @@
         // log(getCssStyle(els[0]))
 
         $.fire(1, function() {
-            log(els.dimensions())
-            log(els.width(), els.height())
+            log(els.comments())
+            // log(els.width(), els.height())
         });
     })
 
