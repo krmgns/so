@@ -369,13 +369,7 @@
         }
         el.style[name] = value;
     }
-    function sumStyleProperty(el, style) {
-        var i = 2, args = arguments, ret = 0, style = style || getStyle(el);
-        while (i < args.length) {
-            ret += style[args[i++]].toFloat();
-        }
-        return ret;
-    }
+    function hasStyle(el, name) {return el && el.style.cssText.indexOf(name) > -1;}
     function parseStyleText(text) {
         var styles = {}, s;
         text = (''+ text).split($.re('\\s*;\\s*'));
@@ -386,6 +380,13 @@
                     && (styles[s[0]] = s[1] || '');
         }
         return styles;
+    }
+    function sumStyleValue(el, style) {
+        var i = 2, args = arguments, ret = 0, style = style || getStyle(el);
+        while (i < args.length) {
+            ret += style[args[i++]].toFloat();
+        }
+        return ret;
     }
 
     // dom: styles
@@ -452,9 +453,6 @@
     function isHidden(el) {
         return el && (el.style.display == 'none' || !(el.offsetWidth || el.offsetHeight));
     }
-    function hasStyle(el, name) {
-        return el && el.style.cssText.indexOf(name) > -1;
-    }
 
     function getDimensions(el) {
         var width = 0, height = 0;
@@ -504,8 +502,8 @@
                         }
                     }
                 }
-                width && (width -= sumStyleProperty(null, style, 'borderLeftWidth', 'borderRightWidth'));
-                height && (height -= sumStyleProperty(null, style, 'borderTopWidth', 'borderBottomWidth'));
+                width && (width -= sumStyleValue(null, style, 'borderLeftWidth', 'borderRightWidth'));
+                height && (height -= sumStyleValue(null, style, 'borderTopWidth', 'borderBottomWidth'));
             }
         }
         return {width: width, height: height};
