@@ -308,24 +308,24 @@
     Object.values = Object.values || function(object, ret) {
         return ret = [], $.forEach(object, function(_, value) { ret.push(value); }), ret;
     };
-    Object[NAME_PROTOTYPE].copy = function() {
-        var _this = this, ret = {}, i;
-        for (i in _this) {
-            if (_this.hasOwnProperty(i)) {
-                ret[i] = _this[i];
-            }
-        }
-        return ret;
-    };
-    Object[NAME_PROTOTYPE].append = function(source) {
-        var _this = this, i;
-        for (i in source) {
-            if (source.hasOwnProperty(i)) {
-                _this[i] = source[i];
-            }
-        }
-        return _this;
-    };
+    // Object[NAME_PROTOTYPE].copy = function() {
+    //     var _this = this, ret = {}, i;
+    //     for (i in _this) {
+    //         if (_this.hasOwnProperty(i)) {
+    //             ret[i] = _this[i];
+    //         }
+    //     }
+    //     return ret;
+    // };
+    // Object[NAME_PROTOTYPE].append = function(source) {
+    //     var _this = this, i;
+    //     for (i in source) {
+    //         if (source.hasOwnProperty(i)) {
+    //             _this[i] = source[i];
+    //         }
+    //     }
+    //     return _this;
+    // };
 
     // shortcut
     function has(input, search, strict) {
