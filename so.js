@@ -128,10 +128,10 @@
      * @private
      */
     function loop(input, fn, opt__this, useKey, useLength) {
-        var _this = opt__this || input, len = input && input.length, i = 0, key, value;
+        var _this = opt__this || input, length = input && input.length, i = 0, key, value;
 
-        if (len != NULL && useLength != FALSE) {
-            for (; i < len; i++) {
+        if (length != NULL && useLength != FALSE) {
+            for (; i < length; i++) {
                 value = input[i];
                 if (0 === fn.apply(_this, !useKey ?
                         [value, i] /* for */ : [i, value, i] /* forEach */)) {
