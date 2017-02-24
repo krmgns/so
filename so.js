@@ -124,6 +124,7 @@
      * @param  {Function}     fn
      * @param  {Object}       opt__this
      * @param  {Boolean}      useKey
+     * @param  {Boolean}      useLength
      * @return {Array|Object}
      * @private
      */
