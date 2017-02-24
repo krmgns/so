@@ -317,6 +317,15 @@
         }
         return ret;
     };
+    Object[NAME_PROTOTYPE].append = function(source) {
+        var _this = this, i;
+        for (i in source) {
+            if (source.hasOwnProperty(i)) {
+                _this[i] = source[i];
+            }
+        }
+        return _this;
+    };
 
     // shortcut
     function has(input, search, strict) {
