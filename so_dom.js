@@ -543,7 +543,7 @@
     }
 
     // @note: offset(width|height) = (width|height) + padding + border
-    function getDimensions(el, addStack) {
+    function getDimensions(el) {
         var ret = {width: 0, height: 0};
         if (isNodeElement(el)) {
             if (isHidden(el) || isHiddenParent(el)) {
@@ -552,11 +552,6 @@
             } else {
                 ret.width = el.offsetWidth, ret.height = el.offsetHeight;
             }
-            if (addStack) {
-                ret.el = el;
-                ret.style = getStyle(el);
-                ret.isNodeElement = true;
-            }
         } else if (isRoot(el)) {
             var win = $.getWindow(el);
             width = win.innerWidth, height = win.innerHeight;
@@ -564,37 +559,40 @@
         return ret;
     }
     function getDimensionsBy(el, by, options) {
-        var dim = getDimensions(el, true);
+        options = options || {};
+        var dim = getDimensions(el);
         var ret = {width: dim.width, innerWidth: dim.width, outerWidth: dim.width,
                    height: dim.height, innerHeight: dim.height, outerHeight: dim.height};
-        if (dim.isNodeElement) {
+        var style;
+        if (isNodeElement(el)) {
+            style = ret.style = getStyle(el);
             if ((!by || by == 'width') && dim.width) {
-                ret.width -= sumStyleValue(dim.el, dim.style, 'paddingLeft', 'paddingRight')
-                           + sumStyleValue(dim.el, dim.style, 'borderLeftWidth', 'borderRightWidth');
+                ret.width -= sumStyleValue(null, style, 'paddingLeft', 'paddingRight')
+                           + sumStyleValue(null, style, 'borderLeftWidth', 'borderRightWidth');
                 if (by) return ret.width;
             }
             if ((!by || by == 'innerWidth') && dim.width) {
-                ret.innerWidth -= sumStyleValue(dim.el, dim.style, 'borderLeftWidth', 'borderRightWidth');;
+                ret.innerWidth -= sumStyleValue(null, style, 'borderLeftWidth', 'borderRightWidth');;
                 if (by) return ret.innerWidth;
             }
             if ((!by || by == 'outerWidth') && dim.width) {
-                if (options && options.margins) {
-                    ret.outerWidth += sumStyleValue(dim.el, dim.style, 'marginLeft', 'marginRight');
+                if (options.margined) {
+                    ret.outerWidth += sumStyleValue(null, style, 'marginLeft', 'marginRight');
                 }
                 if (by) return ret.outerWidth;
             }
             if ((!by || by == 'height') && dim.height) {
-                ret.height -= sumStyleValue(dim.el, dim.style, 'paddingTop', 'paddingBottom')
-                            + sumStyleValue(dim.el, dim.style, 'borderTopWidth', 'borderBottomWidth');
+                ret.height -= sumStyleValue(null, style, 'paddingTop', 'paddingBottom')
+                            + sumStyleValue(null, style, 'borderTopWidth', 'borderBottomWidth');
                 if (by) return ret.height;
             }
             if ((!by || by == 'innerHeight') && dim.height) {
-                ret.innerHeight -= sumStyleValue(dim.el, dim.style, 'borderTopWidth', 'borderBottomWidth');
+                ret.innerHeight -= sumStyleValue(null, style, 'borderTopWidth', 'borderBottomWidth');
                 if (by) return ret.innerHeight;
             }
             if ((!by || by == 'outerHeight') && dim.height) {
-                if (options && options.margins) {
-                    ret.outerHeight += sumStyleValue(dim.el, dim.style, 'marginTop', 'marginBottom');
+                if (options.margined) {
+                    ret.outerHeight += sumStyleValue(dim.el, style, 'marginTop', 'marginBottom');
                 }
                 if (by) return ret.outerHeight;
             }
@@ -613,8 +611,8 @@
         innerWidth: function() {
             return getDimensionsBy(this[0], 'innerWidth');
         },
-        outerWidth: function(margins) {
-            return getDimensionsBy(this[0], 'outerWidth', {margins: margins});
+        outerWidth: function(margined) {
+            return getDimensionsBy(this[0], 'outerWidth', {margined: margined});
         },
         height: function() {
             return getDimensionsBy(this[0], 'height');
@@ -622,8 +620,8 @@
         innerHeight: function() {
             return getDimensionsBy(this[0], 'innerHeight');
         },
-        outerHeight: function(margins) {
-            return getDimensionsBy(this[0], 'outerHeight', {margins: margins});
+        outerHeight: function(margined) {
+            return getDimensionsBy(this[0], 'outerHeight', {margined: margined});
         }
     });
 
@@ -671,6 +669,28 @@
                 }
             }
             return initDom(el);
+        },
+        box: function() {
+            var el = this[0], ret = {};
+            if (el) {
+                var dim = getDimensionsBy(el);
+                var offset = getOffset(el), scroll = getScroll(el);
+                var parentDim = getDimensions(el.parentElement);
+                var borderXSize = sumStyleValue(null, dim.style, 'borderLeftWidth', 'borderRightWidth');
+                var borderYSize = sumStyleValue(null, dim.style, 'borderTopWidth', 'borderBottomWidth');
+                var marginXSize = sumStyleValue(null, dim.style, 'marginLeft', 'marginRight');
+                var marginYSize = sumStyleValue(null, dim.style, 'marginTop', 'marginBottom');
+                ret = dim;
+                ret.outerWidthMargined = dim.width + marginXSize;
+                ret.outerHeightMargined = dim.height + marginYSize;
+                ret.offset = offset;
+                ret.offset.right = ret.offset.x = parentDim.width - borderXSize - (offset.left + dim.outerWidth);
+                ret.offset.bottom = ret.offset.y = parentDim.height - borderYSize - (offset.top + dim.outerHeight);
+                ret.scroll = scroll;
+                ret.scroll.x = scroll.left;
+                ret.scroll.y = scroll.top;
+            }
+            return ret;
         }
     });
 
@@ -681,28 +701,8 @@
         // log(els)
         // log('---')
 
-        el = $.dom("#div")
-        log(getDimensionsBy(el[0]))
-        // $.forEach(getDimensionsBy(el[0]), function(k,v) {
-        //     log(k,v, v === el[k]())
-        // })
-        // ;['width', 'innerWidth', 'outerWidth'].forEach((dir) => log(dir,el[dir]()))
-        // ;['height', 'innerHeight', 'outerHeight'].forEach((dir) => log(dir,el[dir]()))
-
-        // els.for(function(el) {
-        //     // el.scrollTop = 150, el.scrollLeft = 100;
-        //     // log(el.scrollTop,el.scrollLeft)
-        //     log(getScroll(el))
-        // });
-        // els[0].on("scroll", function(e) { log(e, e.target.scrollTop) })
-
-        // el = $.dom("#div2")[0]
-        // log(getOffset(el, true))
-
-        // log(el.dimensions())
-        // log("width x height:", el.width(), el.height())
-        // log("innerWidth x innerHeight:", el.innerWidth(), el.innerHeight())
-        // log("outerWidth x outerHeight:", el.outerWidth(), el.outerWidth(true), el.outerHeight(), el.outerHeight(true))
+        el = $.dom("#div2")
+        log(el.box())
 
         $.fire(1, function() {
         });
