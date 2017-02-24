@@ -483,13 +483,25 @@
         });
         return ret[ret.length - 1] /* return last rule */ || {};
     }
-    function isHidden(el) {return el && (el.style.display == 'none' || !(el.offsetWidth || el.offsetHeight));}
+    function isHidden(el) {
+        return el && !(el.offsetWidth || el.offsetHeight);
+    }
+    function isHiddenParent(el) {
+        var parent = el && el.parentElement;
+        while (parent) {
+            if (isHidden(parent)) {
+                return true;
+            }
+            parent = parent.parentElement;
+        }
+        return false;
+    }
     function getHiddenElementProperties(el, properties) {
         var ret = [];
-        var doc = $.getDocument(el);
         var sid = $.sid(), className = ' '+ sid;
         var styleText = el.style.cssText;
         var parent = el.parentElement, parents = [], parentStyle;
+
         while (parent) { // doesn't give if parents are hidden
             if (isHidden(parent)) {
                 parentStyle = getStyle(parent);
@@ -499,10 +511,11 @@
             }
             parent = parent.parentElement;
         }
-        var styleEl = doc.createElement('style');
-        styleEl.id = sid;
-        styleEl.textContent = '.'+ sid +'{display:block!important;visibility:hidden!important}';
-        doc.body.appendChild(styleEl);
+
+        var doc = $.getDocument(el);
+        var css = doc.createElement('style');
+        css.textContent = '.'+ sid +'{display:block!important;visibility:hidden!important}';
+        doc.body.appendChild(css);
 
         el.className += className;
         el.style.display = '', el.style.visibility = ''; // for `!important` annots
@@ -517,7 +530,7 @@
         });
 
         // restore all
-        doc.body.removeChild(styleEl);
+        doc.body.removeChild(css);
         el.className = el.className.replace(className, '');
         if (styleText) el.style.cssText = styleText;
         while (parent = parents.shift()) {
@@ -531,13 +544,9 @@
     // @note: offset(width|height) = (width|height) + padding + border
     function getDimensions(el, addStack) {
         var ret = {width: 0, height: 0};
-        if (isRoot(el)) {
-            var win = $.getWindow(el);
-            width = win.innerWidth, height = win.innerHeight;
-        } else if (isNodeElement(el)) {
-            var properties;
-            if (isHidden(el)) {
-                properties = getHiddenElementProperties(el, ['offsetWidth', 'offsetHeight']);
+        if (isNodeElement(el)) {
+            if (isHidden(el) || isHiddenParent(el)) {
+                var properties = getHiddenElementProperties(el, ['offsetWidth', 'offsetHeight']);
                 ret.width = properties[0], ret.height = properties[1];
             } else {
                 ret.width = el.offsetWidth, ret.height = el.offsetHeight;
@@ -547,6 +556,9 @@
                 ret.style = getStyle(el);
                 ret.isNodeElement = true;
             }
+        } else if (isRoot(el)) {
+            var win = $.getWindow(el);
+            width = win.innerWidth, height = win.innerHeight;
         }
         return ret;
     }
@@ -603,11 +615,9 @@
     function getOffset(el, relative) {
         var ret = {top: 0, left: 0};
         if (isNodeElement(el)) {
-            var style = getStyle(el);
             var body = $.getDocument(el).body;
-            var properties;
-            if (isHidden(el)) {
-                properties = getHiddenElementProperties(el, ['offsetTop', 'offsetLeft']);
+            if (isHidden(el) || isHiddenParent(el)) {
+                var properties = getHiddenElementProperties(el, ['offsetTop', 'offsetLeft']);
                 ret.top = properties[0], ret.left = properties[1];
             } else {
                 ret.top = el.offsetTop, ret.left = el.offsetLeft;
@@ -620,10 +630,33 @@
         }
         return ret;
     }
+    function getScroll(el) {
+        var ret = {top: 0, left: 0};
+        if (isNodeElement(el)) {
+            ret.top = el.scrollTop, ret.left = el.scrollLeft;
+        } else if (isRoot(el) || isRootElement(el)) {
+            var win = $.win(el);
+            ret.top = win.pageYOffset, ret.left = win.pageXOffset;
+        }
+        return ret;
+    }
 
-    // dom: offset, scroll, box, boxModel
+    // dom: offset, scroll, scrollTo, box, boxModel
     Dom.extendPrototype({
-        offset: function() {return getOffset(this[0]);}
+        offset: function() {return getOffset(this[0]);},
+        scroll: function() {return getScroll(this[0]);},
+        scrollTo: function(top, left, anim, animDuration, animOnEnd) {
+            var el = this[0];
+            if (el) {
+                top = top || 0, left = left || 0;
+                if (!anim) {
+                    el.scrollTop = top, el.scrollLeft = left;
+                } else {
+                    // @todo
+                }
+            }
+            return initDom(el);
+        }
     });
 
     $.dom = function(selector, root, i) { return initDom(selector, root, i) };
@@ -631,20 +664,17 @@
     $.onReady(function() { var doc = document, dom, el, els, body = document.body
         els = new Dom('body')
         // log(els)
-        // els = els.find('input[so:v=1]')
-        // els = els.find('input:not([checked])')
-        // els = els.find('input:checked!)')
-        // els = els.find('p:nth(1)')
-        // els = els.find('input:first, input:last, p:nth(1), a, button')
-        // els = els.find('#div-target')
-        // log('els:',els)
         // log('---')
 
-        el = $.dom("#div1,#div2").for(function(el) {
-            log(el.getBoundingClientRect())
-            log(el.offsetTop,el.offsetLeft)
-            log(getOffset(el), getOffset(el, true))
-        });
+        el = $.dom("#div1")
+        el.scrollTo(100, 50)
+
+        // els.for(function(el) {
+        //     // el.scrollTop = 150, el.scrollLeft = 100;
+        //     // log(el.scrollTop,el.scrollLeft)
+        //     log(getScroll(el))
+        // });
+        // els[0].on("scroll", function(e) { log(e, e.target.scrollTop) })
 
         // el = $.dom("#div2")[0]
         // log(getOffset(el, true))
@@ -656,6 +686,13 @@
 
         $.fire(1, function() {
         });
+
+        // els = els.find('input[so:v=1]')
+        // els = els.find('input:not([checked])')
+        // els = els.find('input:checked!)')
+        // els = els.find('p:nth(1)')
+        // els = els.find('input:first, input:last, p:nth(1), a, button')
+        // els = els.find('#div-target')
     })
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
