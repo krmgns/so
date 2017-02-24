@@ -454,6 +454,17 @@
             }
             return value;
         },
+        getComputedStyle: function() {
+            var el = this[0], ret = {};
+            if (el) {
+                $.forEach(getStyle(el), function(name, value) {
+                    if (!isNumeric(name)) {
+                        ret[name] = value;
+                    }
+                }, null, false);
+            }
+            return ret;
+        },
         removeStyle: function(name) {
             return this.for(function(el) {
                 if (name == '*') {
@@ -655,7 +666,7 @@
         return ret;
     }
 
-    // dom: offset, scroll, scrollTo, box, boxModel
+    // dom: offset, scroll, scrollTo, box
     Dom.extendPrototype({
         offset: function() {return getOffset(this[0]);},
         scroll: function() {return getScroll(this[0]);},
@@ -703,7 +714,7 @@
         // log('---')
 
         el = $.dom("#div2")
-        log(el.box())
+        log(el.getComputedStyle())
 
         $.fire(1, function() {
         });
