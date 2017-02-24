@@ -774,6 +774,48 @@
         }
     });
 
+    // dom: values
+    Dom.extendPrototype({
+        value: function(value) {
+            var ret;
+            if (isNull(value)) {
+                ret = this.setValue('');
+            } else if (isUndefined(value)) {
+                ret = this.getValue();
+            } else {
+                ret = this.setValue(value);
+            }
+            return ret;
+        },
+        setValue: function(value) {
+            value += ''; // @important
+            return this.for(function(el) {
+                if (el.options) { // <select>
+                    $.for(el.options, function(option) {
+                        if (option.value === value) {
+                            option.selected = true;
+                        }
+                    });
+                } else {
+                    el.value = value;
+                }
+            });
+        },
+        getValue: function(valueDefault) {
+            var el = this[0], ret = valueDefault, option;
+            if (el) {
+                if (el.options && !isVoid(option = el.options[el.selectedIndex])) {
+                    log(el.options[el.selectedIndex])
+                    ret = hasAttribute(option, 'value')
+                        ? (option.disabled || option.parentElement.disabled ? '' : option.value) : '';
+                } else {
+                    ret = el.value;
+                }
+            }
+            return ret;
+        }
+    });
+
     $.dom = function(selector, root, i) {
         return initDom(selector, root, i);
     };
@@ -784,7 +826,7 @@
         // log('---')
 
         el = $.dom("#form_i")
-        log(el.attribute('*',null))
+        log(el.getValue())
         // el.removeAttribute("name,value")
         // log("attr:",el.getAttribute("id"))
         // log(el.getAttribute("ACCEPT_CHARSETs"))
