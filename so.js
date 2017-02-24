@@ -127,10 +127,10 @@
      * @return {Array|Object}
      * @private
      */
-    function loop(input, fn, opt__this, useKey) {
+    function loop(input, fn, opt__this, useKey, useLength) {
         var _this = opt__this || input, len = input && input.length, i = 0, key, value;
 
-        if (len != NULL) {
+        if (len != NULL && useLength != FALSE) {
             for (; i < len; i++) {
                 value = input[i];
                 if (0 === fn.apply(_this, !useKey ?
@@ -160,15 +160,15 @@
          * For: value, i
          * @inheritDoc
          */
-        for: function(input, fn, opt__this) {
-            return loop(input, fn, opt__this);
+        for: function(input, fn, opt__this, useLength) {
+            return loop(input, fn, opt__this, FALSE, useLength);
         },
         /**
          * For each: key, value, i
          * @inheritDoc
          */
-        forEach: function(input, fn, opt__this) {
-            return loop(input, fn, opt__this, TRUE);
+        forEach: function(input, fn, opt__this, useLength) {
+            return loop(input, fn, opt__this, TRUE, useLength);
         }
     });
 
