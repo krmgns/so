@@ -481,11 +481,13 @@
         }
 
         // shortcuts for element
-        $.extendPrototype([Window, Document, Element], {
-            on: function(type, fn, options) { return on(this, type, fn, options); },
-            off: function(type, fn, options) { return off(this, type, fn, options); },
-            once: function(type, fn, options) { return once(this, type, fn, options); },
-            fire: function(type, fn, options) { return fire(this, type, fn, options); }
+        [Window, Document, Element].forEach(function(target) {
+            $.extendPrototype(target, {
+                on: function(type, fn, options) { return on(this, type, fn, options); },
+                off: function(type, fn, options) { return off(this, type, fn, options); },
+                once: function(type, fn, options) { return once(this, type, fn, options); },
+                fire: function(type, fn, options) { return fire(this, type, fn, options); }
+            });
         });
 
         return {
