@@ -546,6 +546,7 @@
     function getDimensions(el) {
         var ret = {width: 0, height: 0};
         if (isNodeElement(el)) {
+            ret.style = getStyle(el); // to re-use after
             if (isHidden(el) || isHiddenParent(el)) {
                 var properties = getHiddenElementProperties(el, ['offsetWidth', 'offsetHeight']);
                 ret.width = properties[0], ret.height = properties[1];
@@ -561,11 +562,12 @@
     function getDimensionsBy(el, by, options) {
         options = options || {};
         var dim = getDimensions(el);
-        var ret = {width: dim.width, innerWidth: dim.width, outerWidth: dim.width,
-                   height: dim.height, innerHeight: dim.height, outerHeight: dim.height};
-        var style;
+        var ret = $.extend(dim, {
+            innerWidth: dim.width, outerWidth: dim.width,
+            innerHeight: dim.height, outerHeight: dim.height
+        });
         if (isNodeElement(el)) {
-            style = ret.style = getStyle(el);
+            var style = dim.style;
             if ((!by || by == 'width') && dim.width) {
                 ret.width -= sumStyleValue(null, style, 'paddingLeft', 'paddingRight')
                            + sumStyleValue(null, style, 'borderLeftWidth', 'borderRightWidth');
