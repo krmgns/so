@@ -786,7 +786,7 @@
 
         /**
          * Fire.
-         * @param  {Int}      delay (seconds)
+         * @param  {Int}      delay (ms)
          * @param  {Function} fn
          * @param  {Array}    fnArgs
          * @param  {Boolean}  repeat
