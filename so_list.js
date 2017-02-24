@@ -5,7 +5,7 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function($) { 'use strict';
+;(function($, undefined) { 'use strict';
 
     /**
      * List.
@@ -110,7 +110,7 @@
          * @param {Any} value
          */
         set: function(key, value) {
-            return key = (key != NULL ? key : this.size), !(key in this.data) && this.size++,
+            return key = (key != null ? key : this.size), !(key in this.data) && this.size++,
                 this.data[key] = value, this;
         },
 
@@ -211,7 +211,7 @@
          * @return {this}
          */
         append: function(value) {
-            return this.set(NULL, value);
+            return this.set(null, value);
         },
 
         /**
@@ -257,7 +257,7 @@
 
             this.forEach(function(key, value, i) {
                 if (search(value)) {
-                    ret = opt_return == NULL ? value : opt_return == 0 ? key : i;
+                    ret = opt_return == null ? value : opt_return == 0 ? key : i;
                     return 0; // break
                 }
             });
@@ -396,7 +396,7 @@
          */
         selectAll: function(fn) {
             var list = new List();
-            fn = fn || function() { return TRUE; }; // set default tester
+            fn = fn || function() { return true; }; // set default tester
 
             return this.forEachAll(function(key, value, i) {
                 if (fn(value, key, i)) {
