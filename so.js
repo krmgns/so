@@ -479,7 +479,7 @@
             var str = toString(this), args = arguments, match = str.match(/(%s)/g) || [], i = 0;
 
             if (args.length < match.length) {
-                throw ('No enough arguments!');
+                $.logWarn('No enough arguments!');
             }
 
             while (match.shift()) {
