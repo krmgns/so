@@ -726,6 +726,27 @@
 
     // dom: attributes
     Dom.extendPrototype({
+        attribute: function(name, value) {
+            var ret;
+            if (isNull(value)) {
+                ret = this.removeAttribute(name);
+            } else if (isUndefined(value)) {
+                ret = this.getAttribute(name);
+            } else {
+                ret = this.setAttribute(name, value);
+            }
+            return ret;
+        },
+        attributes: function() {
+            var el = this[0], ret = {};
+            if (el) {
+                $.for(el.attributes, function(attribute) {
+                    ret[attribute.name] = re_attrStateName.test(attribute.name)
+                        ? attribute.name :  attribute.value;
+                });
+            }
+            return ret;
+        },
         hasAttribute: function(name) {
             return hasAttribute(this[0], name);
         },
@@ -738,12 +759,12 @@
             return getAttribute(this[0], name, valueDefault);
         },
         removeAttribute: function(name) {
-            this.for(function(el) {
-                var names = [], i = 0, attribute;
+            return this.for(function(el) {
+                var names = [];
                 if (name == '*') {
-                    while (attribute = el.attributes[i++]) {
+                    $.for(el.attributes, function(attribute) {
                         names.push(attribute.name);
-                    }
+                    });
                 } else { names = name.split(re_commaSplit); }
 
                 while (name = names.shift()) {
@@ -763,14 +784,14 @@
         // log('---')
 
         el = $.dom("#form_i")
-        // el.removeAttribute("*")
+        log(el.attribute('*',null))
         // el.removeAttribute("name,value")
         // log("attr:",el.getAttribute("id"))
         // log(el.getAttribute("ACCEPT_CHARSETs"))
         // log(el[0].getAttribute("ACCEPT_CHARSETs"))
 
-        $.fire(3, function() {
-            log("attr:",el.getAttribute("id"))
+        $.fire(2, function() {
+            // log("attr:",el.attribute("id", "undefined"))
             // el.setAttribute("disabled", false)
         });
 
