@@ -19,8 +19,8 @@
 </div>
 <!-- <style>#div1{ width: 1000px!important; height: 1000px!important; max-width: 300px; max-height: 500px; overflow-y: auto; } #div2{ width: 1500px!important; height: 1500px!important }</style> -->
 <br>
-<form id="form" attr="foo">
-    <input so:v="1" id="form_i" value="123">
+<form id="form" attr="attr-foo" acceptcharset="utf8" src="?foo=1">
+    <input so:v="1" id="form_i" name="foo" value="123" disabled>
     <select id="form_s">
         <option value="1">1</option>
         <option value="2">2</option>
@@ -62,21 +62,6 @@
         </div>
     </div>
 </div> -->
-
-<script>
-so.onReady(function($) {
-    // dom!
-    // var Foo = $.class.create('Foo', {
-    // var Foo = foo('Foo', {
-    //     // constructor: Foo,
-    //     init: function() {
-    //         log(this)
-    //     }
-    // })
-    // log(Foo)
-    // var f = new Foo
- })
-</script>
 
 <script>
 so.onReady(function($) {

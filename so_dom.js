@@ -14,7 +14,8 @@
     var isNaN = window.isNaN;
     var trim = function(s) { return s == null ? '' : (''+ s).replace(re_trim, '') };
     var isBool = $.isBool, isTrue = $.isTrue, isFalse = $.isFalse;
-    var isVoid = $.isVoid, isObject = $.isObject, isArray = $.isArray;
+    var isVoid = $.isVoid, isNull = $.isNull, isUndefined = $.isUndefined;
+    var isObject = $.isObject, isArray = $.isArray;
     var isNumber = $.isNumber, isNumeric = $.isNumeric, isString = $.isString;
     var isWindow = $.isWindow, isDocument = $.isDocument;
     var isNode = $.isNode, isNodeElement = $.isNodeElement;
@@ -27,10 +28,7 @@
 
     function isRoot(el) {return _var = getTag(el), _var == '#window' || _var == '#document';}
     function isRootElement(el) { return _var = getTag(el), _var == 'html' || _var == 'body';}
-
-    function isDom(input) {
-        return (input instanceof Dom);
-    }
+    function isDom(input) {return (input instanceof Dom);}
 
     function initDom(selector, root, i) {
         if (isDom(selector)) {
@@ -43,7 +41,7 @@
         re_attrFix = /\[(.+)=(.+)\]/g,
         re_attrEscape = /([.:])/g,
         re_attrQuotes = /(^['"]|['"]$)/g,
-        re_attrStates = /(((check|select|disabl)ed|readonly)!?)/gi,
+        re_attrState = /(((check|select|disabl)ed|readonly)!?)/gi,
         re_fln = /(?:(\w+):((fir|la)st|nth\((\d+)\)))(?!-)/gi
     ;
 
@@ -94,7 +92,7 @@
 
         var search, replace, not = '!';
         // shortcut for input:not([checked]) as input:checked!
-        if (re = selector.match(re_attrStates)) {
+        if (re = selector.match(re_attrState)) {
             search = $.re(re[0], 'g'), replace = re[0].replace(not, '');
             if (re[0].has(not)) {
                 selector = selector.replace(search, 'not([%s])'.format(replace));
@@ -115,7 +113,7 @@
 
         if (!isVoid(selector)) {
             if (isString(selector)) {
-                selector = $.trim(selector);
+                selector = trim(selector);
                 if (selector) {
                     if (re_htmlContent.test(selector)) {
                         elements = createElement(selector);
@@ -409,7 +407,7 @@
         while (text.length) {
             // wtf! :)
             (s = text.shift().split($.re('\\s*:\\s*')))
-                && (s[0] = $.trim(s[0]))
+                && (s[0] = trim(s[0]))
                     && (styles[s[0]] = s[1] || '');
         }
         return styles;
@@ -706,17 +704,74 @@
         }
     });
 
-    $.dom = function(selector, root, i) { return initDom(selector, root, i) };
+    var re_attrStateName = /^(?:(?:check|select|disabl)ed|readonly)$/i;
+
+    function hasAttribute(el, name) {
+        return el && el.hasAttribute(name);
+    }
+    function setAttribute(el, name, value) {
+        if (el) {
+            if (isNull(value)) {
+                el.removeAttribute(name);
+            } else if (re_attrStateName.test(name)) {
+                isUndefined(value) || value ? el.setAttribute(name, name) : el.removeAttribute(name);
+            } else {
+                el.setAttribute(name, trim(value));
+            }
+        }
+    }
+    function getAttribute(el, name, valueDefault) {
+        return hasAttribute(el, name) ? el.getAttribute(name) : valueDefault;
+    }
+
+    // dom: attributes
+    Dom.extendPrototype({
+        hasAttribute: function(name) {
+            return hasAttribute(this[0], name);
+        },
+        setAttribute: function(name, value) {
+            return this.for(function(el) {
+                setAttribute(el, name, value);
+            });
+        },
+        getAttribute: function(name, valueDefault) {
+            return getAttribute(this[0], name, valueDefault);
+        },
+        removeAttribute: function(name) {
+            this.for(function(el) {
+                var names = [], i = 0, attribute;
+                if (name == '*') {
+                    while (attribute = el.attributes[i++]) {
+                        names.push(attribute.name);
+                    }
+                } else { names = name.split(re_commaSplit); }
+
+                while (name = names.shift()) {
+                    el.removeAttribute(name);
+                }
+            });
+        }
+    });
+
+    $.dom = function(selector, root, i) {
+        return initDom(selector, root, i);
+    };
 
     $.onReady(function() { var doc = document, dom, el, els, body = document.body
         els = new Dom('body')
         // log(els)
         // log('---')
 
-        el = $.dom("#div2")
-        log(el.getComputedStyle())
+        el = $.dom("#form_i")
+        // el.removeAttribute("*")
+        // el.removeAttribute("name,value")
+        // log("attr:",el.getAttribute("id"))
+        // log(el.getAttribute("ACCEPT_CHARSETs"))
+        // log(el[0].getAttribute("ACCEPT_CHARSETs"))
 
-        $.fire(1, function() {
+        $.fire(3, function() {
+            log("attr:",el.getAttribute("id"))
+            // el.setAttribute("disabled", false)
         });
 
         // els = els.find('input[so:v=1]')
