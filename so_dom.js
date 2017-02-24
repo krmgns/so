@@ -436,12 +436,13 @@
             });
         },
         getStyle: function(name, valueDefault, raw) {
-            var el = this[0], value,
-                convert = isVoid(valueDefault) || isTrue(valueDefault),
-                valueDefault = !isBool(valueDefault) ? valueDefault : '';
+            var el = this[0];
+            var convert = isVoid(valueDefault) || isTrue(valueDefault);
+            var value, valueDefault = !isBool(valueDefault) ? valueDefault : '';
             if (el) {
-                if (raw) return el.style[toStyleName(name)] || valueDefault;
-
+                if (raw) {
+                    return el.style[toStyleName(name)] || valueDefault;
+                }
                 value = getStyle(el, name);
                 if (value && convert) {
                     value = re_rgb.test(value) ? $.util.toHexFromRgb(value) // convert rgb to hex
@@ -562,54 +563,37 @@
         }
         return ret;
     }
+    function getDimensionsBy(el, by, options) {
+        var ret = getDimensions(el, true);
+        if (ret.isNodeElement) {
+            if ((!by || by == 'width') && ret.width) {
+                ret.width -= sumStyleValue(ret.el, ret.style, 'paddingLeft', 'paddingRight');
+                ret.width -= sumStyleValue(ret.el, ret.style, 'borderLeftWidth', 'borderRightWidth');
+            } else if ((!by || by == 'innerWidth') && ret.width) {
+                ret.width -= sumStyleValue(ret.el, ret.style, 'borderLeftWidth', 'borderRightWidth');
+            } else if ((!by || by == 'outerWidth') && ret.width && options && options.addMargin) {
+                ret.width += sumStyleValue(ret.el, ret.style, 'marginLeft', 'marginRight');
+            } else if ((!by || by == 'height') && ret.height) {
+                ret.height -= sumStyleValue(ret.el, ret.style, 'paddingTop', 'paddingBottom');
+                ret.height -= sumStyleValue(ret.el, ret.style, 'borderTopWidth', 'borderBottomWidth');
+            } else if ((!by || by == 'innerHeight') && ret.height) {
+                ret.height -= sumStyleValue(ret.el, ret.style, 'borderTopWidth', 'borderBottomWidth');
+            } else if ((!by || by == 'outerHeight') && ret.height && options && options.addMargin) {
+                ret.height += sumStyleValue(ret.el, ret.style, 'marginTop', 'marginBottom');
+            }
+        }
+        return by ? ret[by] : ret;
+    }
 
     // dom: dimensions
     Dom.extendPrototype({
-        dimensions: function(addStack /* @internal */) {return getDimensions(this[0], addStack);},
-        width: function() {
-            var dim = this.dimensions(true), width = dim.width;
-            if (width && dim.isNodeElement) {
-                width -= sumStyleValue(dim.el, dim.style, 'paddingLeft', 'paddingRight');
-                width -= sumStyleValue(dim.el, dim.style, 'borderLeftWidth', 'borderRightWidth');
-            }
-            return width;
-        },
-        innerWidth: function() {
-            var dim = this.dimensions(true), width = dim.width;
-            if (width && dim.isNodeElement) {
-                width -= sumStyleValue(dim.el, dim.style, 'borderLeftWidth', 'borderRightWidth');
-            }
-            return width;
-        },
-        outerWidth: function(addMargin) {
-            var dim = this.dimensions(true), width = dim.width;
-            if (width && dim.isNodeElement && addMargin) {
-                width += sumStyleValue(dim.el, dim.style, 'marginLeft', 'marginRight');
-            }
-            return width;
-        },
-        height: function() {
-            var dim = this.dimensions(true), height = dim.height;
-            if (height && dim.isNodeElement) {
-                height -= sumStyleValue(dim.el, dim.style, 'paddingTop', 'paddingBottom');
-                height -= sumStyleValue(dim.el, dim.style, 'borderTopWidth', 'borderBottomWidth');
-            }
-            return height;
-        },
-        innerHeight: function() {
-            var dim = this.dimensions(true), height = dim.height;
-            if (height && dim.isNodeElement) {
-                height -= sumStyleValue(dim.el, dim.style, 'borderTopWidth', 'borderBottomWidth');
-            }
-            return height;
-        },
-        outerHeight: function(addMargin) {
-            var dim = this.dimensions(true), height = dim.height;
-            if (height && dim.isNodeElement && addMargin) {
-                height += sumStyleValue(dim.el, dim.style, 'marginTop', 'marginBottom');
-            }
-            return height;
-        }
+        dimensions: function() {return getDimensions(this[0]);},
+        width: function() {return getDimensionsBy(this[0], 'width')},
+        innerWidth: function() { return getDimensionsBy(this[0], 'innerWidth');},
+        outerWidth: function(addMargin) {return getDimensionsBy(this[0], 'outerWidth', {addMargin: addMargin});},
+        height: function() {return getDimensionsBy(this[0], 'height')},
+        innerHeight: function() { return getDimensionsBy(this[0], 'innerHeight');},
+        outerWidth: function(addMargin) {return getDimensionsBy(this[0], 'outerWidth', {addMargin: addMargin});}
     });
 
     function getOffset(el, relative) {
@@ -666,8 +650,9 @@
         // log(els)
         // log('---')
 
-        el = $.dom("#div1")
-        el.scrollTo(100, 50)
+        el = $.dom("#div")
+        log(getDimensionsBy(el[0]))
+        // ;['width', 'innerWidth', 'outerWidth'].forEach((dir) => log(el[dir]()))
 
         // els.for(function(el) {
         //     // el.scrollTop = 150, el.scrollLeft = 100;
