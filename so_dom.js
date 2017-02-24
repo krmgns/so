@@ -546,7 +546,6 @@
     function getDimensions(el) {
         var ret = {width: 0, height: 0};
         if (isNodeElement(el)) {
-            ret.style = getStyle(el); // to re-use after
             if (isHidden(el) || isHiddenParent(el)) {
                 var properties = getHiddenElementProperties(el, ['offsetWidth', 'offsetHeight']);
                 ret.width = properties[0], ret.height = properties[1];
@@ -565,9 +564,9 @@
         var ret = $.extend(dim, {
             innerWidth: dim.width, outerWidth: dim.width,
             innerHeight: dim.height, outerHeight: dim.height
-        });
+        }), style;
         if (isNodeElement(el)) {
-            var style = dim.style;
+            style = getStyle(el);
             if ((!by || by == 'width') && dim.width) {
                 ret.width -= sumStyleValue(null, style, 'paddingLeft', 'paddingRight')
                            + sumStyleValue(null, style, 'borderLeftWidth', 'borderRightWidth');
@@ -675,13 +674,13 @@
         box: function() {
             var el = this[0], ret = {};
             if (el) {
-                var dim = getDimensionsBy(el);
+                var style = getStyle(el);
+                var borderXSize = sumStyleValue(null, style, 'borderLeftWidth', 'borderRightWidth');
+                var borderYSize = sumStyleValue(null, style, 'borderTopWidth', 'borderBottomWidth');
+                var marginXSize = sumStyleValue(null, style, 'marginLeft', 'marginRight');
+                var marginYSize = sumStyleValue(null, style, 'marginTop', 'marginBottom');
+                var dim = getDimensionsBy(el), parentDim = getDimensions(el.parentElement);
                 var offset = getOffset(el), scroll = getScroll(el);
-                var parentDim = getDimensions(el.parentElement);
-                var borderXSize = sumStyleValue(null, dim.style, 'borderLeftWidth', 'borderRightWidth');
-                var borderYSize = sumStyleValue(null, dim.style, 'borderTopWidth', 'borderBottomWidth');
-                var marginXSize = sumStyleValue(null, dim.style, 'marginLeft', 'marginRight');
-                var marginYSize = sumStyleValue(null, dim.style, 'marginTop', 'marginBottom');
                 ret = dim;
                 ret.outerWidthMargined = dim.width + marginXSize;
                 ret.outerHeightMargined = dim.height + marginYSize;
