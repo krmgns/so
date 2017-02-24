@@ -564,36 +564,67 @@
         return ret;
     }
     function getDimensionsBy(el, by, options) {
-        var ret = getDimensions(el, true);
-        if (ret.isNodeElement) {
-            if ((!by || by == 'width') && ret.width) {
-                ret.width -= sumStyleValue(ret.el, ret.style, 'paddingLeft', 'paddingRight');
-                ret.width -= sumStyleValue(ret.el, ret.style, 'borderLeftWidth', 'borderRightWidth');
-            } else if ((!by || by == 'innerWidth') && ret.width) {
-                ret.width -= sumStyleValue(ret.el, ret.style, 'borderLeftWidth', 'borderRightWidth');
-            } else if ((!by || by == 'outerWidth') && ret.width && options && options.addMargin) {
-                ret.width += sumStyleValue(ret.el, ret.style, 'marginLeft', 'marginRight');
-            } else if ((!by || by == 'height') && ret.height) {
-                ret.height -= sumStyleValue(ret.el, ret.style, 'paddingTop', 'paddingBottom');
-                ret.height -= sumStyleValue(ret.el, ret.style, 'borderTopWidth', 'borderBottomWidth');
-            } else if ((!by || by == 'innerHeight') && ret.height) {
-                ret.height -= sumStyleValue(ret.el, ret.style, 'borderTopWidth', 'borderBottomWidth');
-            } else if ((!by || by == 'outerHeight') && ret.height && options && options.addMargin) {
-                ret.height += sumStyleValue(ret.el, ret.style, 'marginTop', 'marginBottom');
+        var dim = getDimensions(el, true);
+        var ret = {width: dim.width, innerWidth: dim.width, outerWidth: dim.width,
+                   height: dim.height, innerHeight: dim.height, outerHeight: dim.height};
+        if (dim.isNodeElement) {
+            if ((!by || by == 'width') && dim.width) {
+                ret.width -= sumStyleValue(dim.el, dim.style, 'paddingLeft', 'paddingRight')
+                           + sumStyleValue(dim.el, dim.style, 'borderLeftWidth', 'borderRightWidth');
+                if (by) return ret.width;
+            }
+            if ((!by || by == 'innerWidth') && dim.width) {
+                ret.innerWidth -= sumStyleValue(dim.el, dim.style, 'borderLeftWidth', 'borderRightWidth');;
+                if (by) return ret.innerWidth;
+            }
+            if ((!by || by == 'outerWidth') && dim.width) {
+                if (options && options.margins) {
+                    ret.outerWidth += sumStyleValue(dim.el, dim.style, 'marginLeft', 'marginRight');
+                }
+                if (by) return ret.outerWidth;
+            }
+            if ((!by || by == 'height') && dim.height) {
+                ret.height -= sumStyleValue(dim.el, dim.style, 'paddingTop', 'paddingBottom')
+                            + sumStyleValue(dim.el, dim.style, 'borderTopWidth', 'borderBottomWidth');
+                if (by) return ret.height;
+            }
+            if ((!by || by == 'innerHeight') && dim.height) {
+                ret.innerHeight -= sumStyleValue(dim.el, dim.style, 'borderTopWidth', 'borderBottomWidth');
+                if (by) return ret.innerHeight;
+            }
+            if ((!by || by == 'outerHeight') && dim.height) {
+                if (options && options.margins) {
+                    ret.outerHeight += sumStyleValue(dim.el, dim.style, 'marginTop', 'marginBottom');
+                }
+                if (by) return ret.outerHeight;
             }
         }
-        return by ? ret[by] : ret;
+        return ret; // all
     }
 
     // dom: dimensions
     Dom.extendPrototype({
-        dimensions: function() {return getDimensions(this[0]);},
-        width: function() {return getDimensionsBy(this[0], 'width')},
-        innerWidth: function() { return getDimensionsBy(this[0], 'innerWidth');},
-        outerWidth: function(addMargin) {return getDimensionsBy(this[0], 'outerWidth', {addMargin: addMargin});},
-        height: function() {return getDimensionsBy(this[0], 'height')},
-        innerHeight: function() { return getDimensionsBy(this[0], 'innerHeight');},
-        outerWidth: function(addMargin) {return getDimensionsBy(this[0], 'outerWidth', {addMargin: addMargin});}
+        dimensions: function() {
+            return getDimensions(this[0]);
+        },
+        width: function() {
+            return getDimensionsBy(this[0], 'width');
+        },
+        innerWidth: function() {
+            return getDimensionsBy(this[0], 'innerWidth');
+        },
+        outerWidth: function(margins) {
+            return getDimensionsBy(this[0], 'outerWidth', {margins: margins});
+        },
+        height: function() {
+            return getDimensionsBy(this[0], 'height');
+        },
+        innerHeight: function() {
+            return getDimensionsBy(this[0], 'innerHeight');
+        },
+        outerHeight: function(margins) {
+            return getDimensionsBy(this[0], 'outerHeight', {margins: margins});
+        }
     });
 
     function getOffset(el, relative) {
@@ -652,7 +683,11 @@
 
         el = $.dom("#div")
         log(getDimensionsBy(el[0]))
-        // ;['width', 'innerWidth', 'outerWidth'].forEach((dir) => log(el[dir]()))
+        // $.forEach(getDimensionsBy(el[0]), function(k,v) {
+        //     log(k,v, v === el[k]())
+        // })
+        // ;['width', 'innerWidth', 'outerWidth'].forEach((dir) => log(dir,el[dir]()))
+        // ;['height', 'innerHeight', 'outerHeight'].forEach((dir) => log(dir,el[dir]()))
 
         // els.for(function(el) {
         //     // el.scrollTop = 150, el.scrollLeft = 100;
