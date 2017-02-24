@@ -805,13 +805,14 @@
             var id, fnArgs = fnArgs || []; delay *= 1000;
             if (!repeat) {
                 id = setTimeout(function() {
-                    fn.apply(window, fnArgs), clearTimeout(id);
+                    fn.apply(window, fnArgs);
                 }, delay);
             } else {
                 id = setInterval(function() {
-                    fn.apply(window, fnArgs), clearInterval(id);
+                    fn.apply(window, fnArgs);
                 }, delay);
             }
+            return id;
         },
 
         /**
