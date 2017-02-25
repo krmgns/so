@@ -864,6 +864,16 @@
 
     // dom: class
     Dom.extendPrototype({
+        class: function(name, set) {
+            // el.class('cls') // add
+            // el.class('cls', true) // set
+            // el.class('cls', null) // remove
+            if (name) {
+                return set ? this.setClass(name) : this.addClass(name);
+            } else if (isNull(name)) {
+                return this.removeClass('*');
+            }
+        },
         hasClass: function(name) {
             return !!hasClass(this[0], name);
         },
