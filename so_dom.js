@@ -816,6 +816,19 @@
         }
     });
 
+    // dom: id
+    Dom.extendPrototype({
+        id: function(id) {
+            return (id || isNull(id)) ? this.setId(id) : this.getId();
+        },
+        setId: function(id) {
+            return this.setAttribute('id', id);
+        },
+        getId: function() {
+            return this.getAttribute('id');
+        }
+    });
+
     $.dom = function(selector, root, i) {
         return initDom(selector, root, i);
     };
