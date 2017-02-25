@@ -894,7 +894,7 @@
          */
         trimSpace: function(input) {
             return trimSpace(input);
-        }
+        },
 
         /**
          * Trim left.
