@@ -14,8 +14,8 @@
     var re_trim = /^\s+|\s+$/g;
     var re_htmlContent = /^<([a-z-]+).*\/?>(?:.*<\/\1>)?$/i;
     var isNaN = window.isNaN;
-    var trim = function(s) { return s == null ? '' : (''+ s).replace(re_trim, ''); };
-    var split = function split(input, re) {return trim(input).split(re);};
+    var trim = $.trim, trims = $.trimSpace;
+    var split = function split(input, re) {return trims(input).split(re);};
     var isBool = $.isBool, isTrue = $.isTrue, isFalse = $.isFalse;
     var isVoid = $.isVoid, isNull = $.isNull, isUndefined = $.isUndefined;
     var isObject = $.isObject, isArray = $.isArray;
@@ -123,7 +123,7 @@
 
         if (!isVoid(selector)) {
             if (isString(selector)) {
-                selector = trim(selector);
+                selector = trims(selector);
                 if (selector) {
                     if (re_htmlContent.test(selector)) {
                         elements = createElement(selector);
@@ -396,7 +396,7 @@
             name ? (name = toStyleName(name), _var[name] || value || '') : _var;
     }
     function setStyle(el, name, value) {
-        name = toStyleName(name), value = trim(value);
+        name = toStyleName(name), value = trims(value);
         if (value && isNumeric(value) && !nonUnitStyles.has(name)) {
             value += 'px';
         }
@@ -409,7 +409,7 @@
         while (text.length) {
             // wtf! :)
             (s = text.shift().split($.re('\\s*:\\s*')))
-                && (s[0] = trim(s[0]))
+                && (s[0] = trims(s[0]))
                     && (styles[s[0]] = s[1] || '');
         }
         return styles;
@@ -916,7 +916,7 @@
     // dom: data
     Dom.extendPrototype({
         data: function(key, value) {
-            key = trim(key);
+            key = trims(key);
             // data-*
             if (key[0] == '@') {
                 return this.attribute(key, value);
@@ -947,7 +947,7 @@
             });
         },
         removeData: function(key) {
-            key = trim(key);
+            key = trims(key);
             // data-*
             if (key[0] == '@') {
                 return this.attribute(key, null);
