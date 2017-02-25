@@ -826,6 +826,15 @@
         id: function(id) {
             return (id || isNull(id)) ? this.setId(id) : this.getId();
         },
+        sid: function() {
+            var el = this[0], ret;
+            if (hasAttribute(el, 'sid')) {
+                ret = getAttribute(el, 'sid');
+            } else {
+                ret = $.sid(), setAttribute(el, 'sid', ret);
+            }
+            return ret;
+        },
         setId: function(id) {
             return this.setAttribute('id', id);
         },
@@ -890,16 +899,8 @@
         // log('---')
 
         el = $.dom("#form")
-        log(el.addClass('new'))
-        // el.removeAttribute("name,value")
-        // log("attr:",el.getAttribute("id"))
-        // log(el.getAttribute("ACCEPT_CHARSETs"))
-        // log(el[0].getAttribute("ACCEPT_CHARSETs"))
 
         $.fire(2, function() {
-            log(el.toggleClass('news'))
-            // log("attr:",el.attribute("id", "undefined"))
-            // el.setAttribute("disabled", false)
         });
 
         // els = els.find('input[so:v=1]')
