@@ -312,17 +312,18 @@
             /**
              * Fire.
              * @param  {String|undefined} type
+             * @param  {Object}           data
              * @return {this}
              */
-            fire: function(type) {
+            fire: function(type, data) {
                 var _this = this.copy();
 
                 if (!type) {
-                    initEventTarget(_this.target).dispatch(_this);
+                    initEventTarget(_this.target).dispatch(_this, data);
                 } else {
                     type.split(re_commaSplit).forEach(function(type) {
                         _this.type = type;
-                        initEventTarget(_this.target).dispatch(_this);
+                        initEventTarget(_this.target).dispatch(_this, data);
                     });
                 }
 
@@ -419,15 +420,25 @@
 
             /**
              * Dispatch.
-             * @param  {Events} event
+             * @param  {Event}  event
+             * @param  {Object} data
              * @return {void}
              */
-            dispatch: function(event) {
+            dispatch: function(event, data) {
                 var target = checkTarget(this.target),
                     events = target.$events.get(event.type);
 
                 if (events) {
-                    events.for(function(event) { event.fn(event.event); });
+                    events.for(function(event) {
+                        // call-time data
+                        if (data) {
+                            event.event.data = event.event.data || {}; // ensure
+                            for (var key in data) {
+                                event.data[key] = event.event.data[key] = data[key];
+                            }
+                        }
+                        event.fn(event.event);
+                    });
                 } else {
                     $.logWarn('No `%s` type events found to fire.'.format(event.type));
                 }
@@ -476,7 +487,7 @@
             var args = prepareArgs(fn, options, target);
 
             type.split(re_commaSplit).forEach(function(type) {
-                initEvent(type, args.fn, args.options).fire(type);
+                initEvent(type, args.fn, args.options).fire(type, args.options.data);
             });
         }
 
