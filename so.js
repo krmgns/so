@@ -81,6 +81,7 @@
             switch (timeDir) {
                 case 's': case 'sec': ttl = time; break;
                 case 'm': case 'min': ttl = time * 60; break;
+                case 'h': case 'hour': ttl = time * 60 * 60; break;
             }
         }
         ttl = (ttl > -1) ? ttl : 60 * 60 * 24; // one day
