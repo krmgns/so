@@ -46,20 +46,26 @@
 
     var _reCache = {};
     var re_dot = /^[-+]?\./;
+    var re_trimSpace = /^\s+|\s+$/g;
+
+    // faster trim
+    function trimSpace(input) {
+        return (input == NULL) ? NULLS : (NULLS + input).replace(re_trim, NULLS);
+    }
 
     // shortcut convert helpers
     function toValue(input, valueDefault) {
-        return input != NULL ? input : valueDefault;
+        return (input != NULL) ? input : valueDefault;
     }
     function toInt(input, base) {
         return input = input.replace(re_dot, '0.'),
-            (base == NULL ? parseInt(input) : parseInt(input, base)) || 0;
+            ((base == NULL) ? parseInt(input) : parseInt(input, base)) || 0;
     }
     function toFloat(input) {
         return parseFloat(input) || 0;
     }
     function toString(input) {
-        return (input != NULL && input.toString) ? input.toString() : (''+ input);
+        return ((input != NULL) && input.toString) ? input.toString() : (NULLS + input);
     }
     function toBool(input) {
         return !!input;
@@ -635,6 +641,14 @@
         },
 
         /**
+         * Trim space.
+         * @return {String}
+         */
+        trimSpace: function() {
+            return trimSpace(this);
+        },
+
+        /**
          * Starts with.
          * @param  {String}  search
          * @param  {Int}     index
@@ -865,32 +879,41 @@
 
         /**
          * Trim.
-         * @param  {String}           str
+         * @param  {String}           input
          * @param  {String|undefined} chars @optional
          * @return {String}
          */
-        trim: function(str, chars) {
-            return (str == NULL) ? NULLS : (''+ str).trim(chars);
+        trim: function(input, chars) {
+            return (input == NULL) ? NULLS : (NULLS + input).trim(chars);
         },
 
         /**
+         * Trim space.
+         * @param  {String} input
+         * @return {String}
+         */
+        trimSpace: function(input) {
+            return trimSpace(input);
+        }
+
+        /**
          * Trim left.
-         * @param  {String}           str
+         * @param  {String}           input
          * @param  {String|undefined} chars @optional
          * @return {String}
          */
-        trimLeft: function(str, chars) {
-            return (str == NULL) ? NULLS : (''+ str).trimLeft(chars);
+        trimLeft: function(input, chars) {
+            return (input == NULL) ? NULLS : (NULLS + input).trimLeft(chars);
         },
 
         /**
          * Trim right.
-         * @param  {String}           str
+         * @param  {String}           input
          * @param  {String|undefined} chars @optional
          * @return {String}
          */
-        trimRight: function(str, chars) {
-            return (str == NULL) ? NULLS : (''+ str).trimRight(chars);
+        trimRight: function(input, chars) {
+            return (input == NULL) ? NULLS : (NULLS + input).trimRight(chars);
         },
 
         /**
