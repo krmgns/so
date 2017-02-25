@@ -50,7 +50,7 @@
 
     // faster trim
     function trimSpace(input) {
-        return (input == NULL) ? NULLS : (NULLS + input).replace(re_trim, NULLS);
+        return (input == NULL) ? NULLS : (NULLS + input).replace(re_trimSpace, NULLS);
     }
 
     // shortcut convert helpers
