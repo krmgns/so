@@ -15,7 +15,7 @@
     var re_htmlContent = /^<([a-z-]+).*\/?>(?:.*<\/\1>)?$/i;
     var isNaN = window.isNaN;
     var trim = $.trim, trims = $.trimSpace;
-    var split = function split(input, re) {return trims(input).split(re);};
+    var split = function split(s, re) {return trims(s).split(re);};
     var isBool = $.isBool, isTrue = $.isTrue, isFalse = $.isFalse;
     var isVoid = $.isVoid, isNull = $.isNull, isUndefined = $.isUndefined;
     var isObject = $.isObject, isArray = $.isArray;
@@ -715,7 +715,7 @@
     var re_attrNameRemove = /[^\w\d:.-]/g;
 
     function toAttributeName(name) {  //return name
-        return name = (name[0] == '@') ? 'data-'+ name.slice(1) /* @foo => data-foo */ : name,
+        return name = name.startsWith('@') ? 'data-'+ name.slice(1) /* @foo => data-foo */ : name,
             name.replace(re_attrNameRemove, '-').trimSpace();
     }
     function hasAttribute(el, name) {
@@ -917,8 +917,9 @@
     Dom.extendPrototype({
         data: function(key, value) {
             key = trims(key);
+
             // data-*
-            if (key[0] == '@') {
+            if (key.startsWith('@')) {
                 return this.attribute(key, value);
             }
 
@@ -948,8 +949,9 @@
         },
         removeData: function(key) {
             key = trims(key);
+
             // data-*
-            if (key[0] == '@') {
+            if (key.startsWith('@')) {
                 return this.attribute(key, null);
             }
 
@@ -978,7 +980,7 @@
         // el.attribute('@foo2', 1)
 
         $.fire(2, function() {
-        el.data(' @foo ', null)
+            el.data(' @foo ', null)
         });
 
         // els = els.find('input[so:v=1]')
