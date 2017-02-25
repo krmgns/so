@@ -770,7 +770,9 @@
                     $.for(el.attributes, function(attribute) {
                         names.push(attribute.name);
                     });
-                } else { names = name.split(re_comma); }
+                } else {
+                    names = name.split(re_comma);
+                }
 
                 while (name = names.shift()) {
                     el.removeAttribute(name);
@@ -899,12 +901,60 @@
         }
     });
 
+    function checkData(el) {
+        el.$data = el.$data || $.list();
+    }
+
+    // dom: data
+    Dom.extendPrototype({
+        data: function(key, value) {
+            if (isUndefined(value)) { // get, get all
+                var el = this[0], ret;
+                if (el) {
+                    checkData(el);
+                    if (!key) {
+                        ret = el.$data;
+                    } else if (key == '*') {
+                        ret = el.$data.data;
+                    } else {
+                        ret = el.$data.get(key);
+                    }
+                }
+                return ret;
+            }
+            // set
+            var data = toKeyValueObject(key, value);
+            return this.for(function(el) {
+                checkData(el);
+                for (key in data) {
+                    el.$data.set(key, data[key]);
+                }
+            });
+        },
+        removeData: function(key) {
+            return this.for(function(el) {
+                checkData(el);
+                if (key == '*') {
+                    el.$data.empty();
+                } else {
+                    split(key, re_comma).forEach(function(key) {
+                        el.$data.removeAt(key);
+                    });
+                }
+            });
+        }
+    });
+
     $.onReady(function() { var doc = document, dom, el, els, body = document.body
         els = new Dom('body')
         // log(els)
         // log('---')
 
         el = $.dom("#form")
+
+        log(el.data("name", "kerem"))
+        el.removeData("name")
+        log(el.data("name"))
 
         $.fire(2, function() {
         });
