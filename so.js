@@ -450,10 +450,9 @@
 
         /**
          * To float.
-         * @param  @internal str
          * @return {Float|null}
          */
-        toFloat: function(str) { return toFloat(this); },
+        toFloat: function() { return toFloat(this); },
 
         /**
          * To capital case.
