@@ -9,7 +9,7 @@
 
     var re_space = /\s+/g;
     var re_trim = /^\s+|\s+$/g;
-    var re_commaSplit = /,\s*/;
+    var re_comma = /,\s*/;
     var re_htmlContent = /^<([a-z-]+).*\/?>(?:.*<\/\1>)?$/i;
     var isNaN = window.isNaN;
     var trim = function(s) { return s == null ? '' : (''+ s).replace(re_trim, '') };
@@ -37,13 +37,12 @@
         return new Dom(selector, root, i);
     }
 
-    var re_attr = /\[.+\]/,
-        re_attrFix = /\[(.+)=(.+)\]/g,
-        re_attrEscape = /([.:])/g,
-        re_attrQuotes = /(^['"]|['"]$)/g,
-        re_attrState = /(((check|select|disabl)ed|readonly)!?)/gi,
-        re_fln = /(?:(\w+):((fir|la)st|nth\((\d+)\)))(?!-)/gi
-    ;
+    var re_attr = /\[.+\]/;
+    var re_attrFix = /\[(.+)=(.+)\]/g;
+    var re_attrEscape = /([.:])/g;
+    var re_attrQuotes = /(^['"]|['"]$)/g;
+    var re_attrState = /(((check|select|disabl)ed|readonly)!?)/gi;
+    var re_fln = /(?:(\w+):((fir|la)st|nth\((\d+)\)))(?!-)/gi;
 
     function select(selector, root) {
         if (selector == '') return '';
@@ -189,7 +188,7 @@
                 elements = this.toArray();
             } else {
                 var _this = this;
-                is.split(re_commaSplit).forEach(function(i) {
+                is.split(re_comma).forEach(function(i) {
                     element = _this.get(i);
                     if (element && !elements.has(element)) {
                         elements.push(element);
@@ -468,7 +467,7 @@
                 if (name == '*') {
                     el.removeAttribute('style');
                 } else {
-                    name.split(re_commaSplit).forEach(function(name) {
+                    name.split(re_comma).forEach(function(name) {
                         setStyle(el, name, '');
                     });
                 }
@@ -765,7 +764,7 @@
                     $.for(el.attributes, function(attribute) {
                         names.push(attribute.name);
                     });
-                } else { names = name.split(re_commaSplit); }
+                } else { names = name.split(re_comma); }
 
                 while (name = names.shift()) {
                     el.removeAttribute(name);
@@ -829,6 +828,13 @@
         }
     });
 
+    // dom: class
+    Dom.extendPrototype({
+        hasClass: function(name) {
+            return this[0] && $.re(name, null, '1m').test(this[0].className);
+        },
+    });
+
     $.dom = function(selector, root, i) {
         return initDom(selector, root, i);
     };
@@ -838,8 +844,8 @@
         // log(els)
         // log('---')
 
-        el = $.dom("#form_i")
-        log(el.getValue())
+        el = $.dom("#form")
+        log(el.hasClass('cls,cls1'))
         // el.removeAttribute("name,value")
         // log("attr:",el.getAttribute("id"))
         // log(el.getAttribute("ACCEPT_CHARSETs"))
