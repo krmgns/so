@@ -25,11 +25,19 @@
     var querySelectorAll = function(root, selector) { return root.querySelectorAll(selector); };
     var _break = 0 /* loop break tick */, _var /* no define one-var each time (@minify) */;
 
-    function getTag(el) {return (el && el.nodeName) ? el.nodeName.toLowerCase() : isWindow(el) ? '#window' : null;}
-
     function isRoot(el) {return _var = getTag(el), _var == '#window' || _var == '#document';}
     function isRootElement(el) { return _var = getTag(el), _var == 'html' || _var == 'body';}
     function isDom(input) {return (input instanceof Dom);}
+
+    function getTag(el) {return (el && el.nodeName) ? el.nodeName.toLowerCase() : isWindow(el) ? '#window' : null;}
+
+    function toKeyValueObject(key, value) {
+        var ret = key;
+        if (isString(ret)) {
+            ret = {}, ret[key] = value;
+        }
+        return ret;
+    }
 
     function initDom(selector, root, i) {
         if (isDom(selector)) {
@@ -381,14 +389,6 @@
     var re_unitOther = /(?:ex|in|[cm]m|pc|v[hw]?min)/i;
     var nonUnitStyles = ['opacity', 'zoom', 'zIndex', 'columnCount', 'columns', 'fillOpacity', 'fontWeight', 'lineHeight'];
 
-    function toKeyValue(key, value) {
-        var ret = key;
-        if (isString(ret)) {
-            ret = {}, ret[key] = value;
-        }
-        return ret;
-    }
-
     function getStyle(el, name, value) {
         return _var = $.getWindow(el).getComputedStyle(el),
             name ? (name = toStyleName(name), _var[name] || value || '') : _var;
@@ -425,7 +425,7 @@
         setStyle: function(name, value) {
             var styles = name;
             if (isString(styles)) {
-                styles = !isVoid(value) ? toKeyValue(name, value) : parseStyleText(name);
+                styles = !isVoid(value) ? toKeyValueObject(name, value) : parseStyleText(name);
             }
             this.for(function(el) {
                 $.forEach(styles, function(name, value) {
