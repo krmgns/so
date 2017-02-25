@@ -710,12 +710,18 @@
     });
 
     var re_attrStateName = /^(?:(?:check|select|disabl)ed|readonly)$/i;
+    var re_attrNameRemove = /[^\w\d:.-]/g;
 
+    function toAttributeName(name) {  //return name
+        return name = (name[0] == '@') ? 'data-'+ name.slice(1) /* @foo => data-foo */ : name,
+            name.replace(re_attrNameRemove, '-');
+    }
     function hasAttribute(el, name) {
-        return el && el.hasAttribute(name);
+        return el && el.hasAttribute(toAttributeName(name));
     }
     function setAttribute(el, name, value) {
         if (el) {
+            name = toAttributeName(name);
             if (isNull(value)) {
                 el.removeAttribute(name);
             } else if (re_attrStateName.test(name)) {
@@ -726,7 +732,7 @@
         }
     }
     function getAttribute(el, name, valueDefault) {
-        return hasAttribute(el, name) ? el.getAttribute(name) : valueDefault;
+        return name = toAttributeName(name), hasAttribute(el, name) ? el.getAttribute(name) : valueDefault;
     }
 
     // dom: attributes
@@ -775,7 +781,7 @@
                 }
 
                 while (name = names.shift()) {
-                    el.removeAttribute(name);
+                    el.removeAttribute(toAttributeName(name));
                 }
             });
         }
@@ -952,9 +958,9 @@
 
         el = $.dom("#form")
 
-        log(el.data("name", "kerem"))
-        el.removeData("name")
-        log(el.data("name"))
+        el.setAttribute('@foo',1)
+        el.setAttribute('___foo',1)
+        el.setAttribute('data_foo',1)
 
         $.fire(2, function() {
         });
