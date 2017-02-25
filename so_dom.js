@@ -1,6 +1,8 @@
 // deps: so, so.list, so.util
 ;(function(window, $, undefined) { 'use strict';
 
+    var ALL = '*';
+
     var NODE_TYPE_ELEMENT = 1,
         NODE_TYPE_TEXT = 3,
         NODE_TYPE_COMMENT = 8,
@@ -465,7 +467,7 @@
         },
         removeStyle: function(name) {
             return this.for(function(el) {
-                if (name == '*') {
+                if (name == ALL) {
                     el.removeAttribute('style');
                 } else {
                     name.split(re_comma).forEach(function(name) {
@@ -772,7 +774,7 @@
         removeAttribute: function(name) {
             return this.for(function(el) {
                 var names = [];
-                if (name == '*') {
+                if (name == ALL) {
                     $.for(el.attributes, function(attribute) {
                         names.push(attribute.name);
                     });
@@ -879,7 +881,7 @@
             if (name) {
                 return set ? this.setClass(name) : this.addClass(name);
             } else if (isNull(name)) {
-                return this.removeClass('*');
+                return this.removeClass(ALL);
             }
         },
         hasClass: function(name) {
@@ -889,7 +891,7 @@
             return this.for(function(el) { addClass(el, name); });
         },
         removeClass: function(name) {
-            return (name == '*') ? this.setClass('')
+            return (name == ALL) ? this.setClass('')
                 : this.for(function(el) { removeClass(el, name); });
         },
         setClass: function(name) {
@@ -920,7 +922,7 @@
                     checkData(el);
                     if (!key) {
                         ret = el.$data;
-                    } else if (key == '*') {
+                    } else if (key == ALL) {
                         ret = el.$data.data;
                     } else {
                         ret = el.$data.get(key);
@@ -940,7 +942,7 @@
         removeData: function(key) {
             return this.for(function(el) {
                 checkData(el);
-                if (key == '*') {
+                if (key == ALL) {
                     el.$data.empty();
                 } else {
                     split(key, re_comma).forEach(function(key) {
