@@ -80,7 +80,7 @@
             });
 
             // remove processed selectors
-            selector = selector.replace('(%s),?\\s*'.format(reRemove.join('|')).toRegExp('gi'), '');
+            selector = selector.replace('('+ reRemove.join('|') +'),?\\s*'.toRegExp('gi'), '');
         }
 
         // could be empty after processe above
@@ -889,10 +889,6 @@
         }
     });
 
-    $.dom = function(selector, root, i) {
-        return initDom(selector, root, i);
-    };
-
     $.onReady(function() { var doc = document, dom, el, els, body = document.body
         els = new Dom('body')
         // log(els)
@@ -910,6 +906,10 @@
         // els = els.find('input:first, input:last, p:nth(1), a, button')
         // els = els.find('#div-target')
     })
+
+    $.dom = function(selector, root, i) {
+        return initDom(selector, root, i);
+    };
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
     // HTMLDocument.prototype.$$ = function (selector) { return this.querySelectorAll(selector); };
