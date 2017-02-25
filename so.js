@@ -652,13 +652,12 @@
          * @param  {String}  search
          * @param  {Int}     index
          * @param  {Boolean} opt_noCase
-         * @param  @internal str
          * @return {Boolean}
          * @override For no-case option.
          */
-        startsWith: function(search, index, opt_noCase, str) {
-            return (str = prepareSearchStuff(this, search, index, opt_noCase))
-                && str.ss === str.s.substr(str.i || 0, str.ss.length);
+        startsWith: function(search, index, opt_noCase) {
+            var src = prepareSearchStuff(this, search, index, opt_noCase);
+            return src.ss === src.s.substr(src.i || 0, src.ss.length);
         },
 
         /**
@@ -666,25 +665,23 @@
          * @param  {String}  search
          * @param  {Int}     index
          * @param  {Boolean} opt_noCase
-         * @param  @internal str
          * @return {Boolean}
          * @override For no-case option.
          */
-        endsWith: function(search, index, opt_noCase, str) {
-            return (str = prepareSearchStuff(this, search, index, opt_noCase))
-                && str.ss === str.s.substr(0, str.i || str.ss.length);
+        endsWith: function(search, index, opt_noCase) {
+            var src = prepareSearchStuff(this, search, index, opt_noCase);
+            return src.ss === src.s.substr(0, src.i || src.ss.length);
         },
 
         /**
          * Contains.
          * @param  {String}  search
          * @param  {Boolean} opt_noCase
-         * @param  @internal str
          * @return {Boolean}
          */
-        contains: function(search, opt_noCase, str) {
-            return (str = prepareSearchStuff(this, search, opt_noCase))
-                && str.s !== str.s.split(str.ss)[0];
+        contains: function(search, opt_noCase) {
+            var src = prepareSearchStuff(this, search, opt_noCase);
+            return src.s !== src.s.split(src.ss)[0];
         },
 
         /**
