@@ -183,7 +183,7 @@
                 target.$events = $.list();
             }
 
-            if (eventType && !target.$events.get(eventType)) {
+            if (eventType && !target.$events.has(eventType)) {
                 target.$events.set(eventType, $.list());
             }
 
