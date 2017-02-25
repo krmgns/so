@@ -34,7 +34,7 @@
     function getTag(el) {return (el && el.nodeName) ? el.nodeName.toLowerCase() : isWindow(el) ? '#window' : null;}
 
     function toKeyValueObject(key, value) {
-        var ret = key;
+        var ret = key || {};
         if (isString(ret)) {
             ret = {}, ret[key] = value;
         }
@@ -716,7 +716,7 @@
 
     function toAttributeName(name) {  //return name
         return name = (name[0] == '@') ? 'data-'+ name.slice(1) /* @foo => data-foo */ : name,
-            name.replace(re_attrNameRemove, '-');
+            name.replace(re_attrNameRemove, '-').trimSpace();
     }
     function hasAttribute(el, name) {
         return el && el.hasAttribute(toAttributeName(name));
@@ -729,7 +729,7 @@
             } else if (re_attrStateName.test(name)) {
                 isUndefined(value) || value ? el.setAttribute(name, name) : el.removeAttribute(name);
             } else {
-                el.setAttribute(name, trim(value));
+                el.setAttribute(name, value);
             }
         }
     }
@@ -916,7 +916,14 @@
     // dom: data
     Dom.extendPrototype({
         data: function(key, value) {
-            if (isUndefined(value)) { // get, get all
+            key = trim(key);
+            // data-*
+            if (key[0] == '@') {
+                return this.attribute(key, value);
+            }
+
+            // get, get all
+            if (isUndefined(value)) {
                 var el = this[0], ret;
                 if (el) {
                     checkData(el);
@@ -940,6 +947,12 @@
             });
         },
         removeData: function(key) {
+            key = trim(key);
+            // data-*
+            if (key[0] == '@') {
+                return this.attribute(key, null);
+            }
+
             return this.for(function(el) {
                 checkData(el);
                 if (key == ALL) {
@@ -960,11 +973,12 @@
 
         el = $.dom("#form")
 
-        el.setAttribute('@foo',1)
-        el.setAttribute('___foo',1)
-        el.setAttribute('data_foo',1)
+        el.attribute('@foo', 1)
+        // el.attribute('@foo1', 1)
+        // el.attribute('@foo2', 1)
 
         $.fire(2, function() {
+        el.data(' @foo ', null)
         });
 
         // els = els.find('input[so:v=1]')
