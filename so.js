@@ -205,7 +205,7 @@
 
         /** Is string. @param {Any} input @return {Boolean} */
         isString: function(input) {
-            return (typeof input == 'string');
+            return (typeof input == 'string' || (input && input.constructor == String));
         },
 
         /** Is int. @param {Any} input @return {Boolean} */
