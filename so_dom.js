@@ -712,7 +712,7 @@
     });
 
     var re_attrStateName = /^(?:(?:check|select|disabl)ed|readonly)$/i;
-    var re_attrNameRemove = /[^\w\d:.-]/g;
+    var re_attrNameRemove = /[^\w:.-]/g;
 
     function toAttributeName(name) {  //return name
         return name = name.startsWith('@') ? 'data-'+ name.slice(1) /* @foo => data-foo */ : name,
@@ -820,7 +820,6 @@
             var el = this[0], ret = valueDefault, option;
             if (el) {
                 if (el.options && !isVoid(option = el.options[el.selectedIndex])) {
-                    log(el.options[el.selectedIndex])
                     ret = hasAttribute(option, 'value')
                         ? (option.disabled || option.parentElement.disabled ? '' : option.value) : '';
                 } else {
@@ -968,16 +967,77 @@
         }
     });
 
+    var re_plus = /%20/g
+    var fn_encode = encodeURIComponent;
+    var fn_decode = decodeURIComponent;
+
+    // dom: form
+    Dom.extendPrototype({
+        serialize: function(plus) {
+            var ret = '';
+            if (getTag(this[0]) == 'form') {
+                var data = [];
+                $.for(this[0], function(el) {
+                    if (!el.name || el.disabled) {
+                        return;
+                    }
+
+                    var value;
+                    if (el.options) {
+                        $.for(el.options, function(option, i) {
+                            if (option.selected && option.hasAttribute('value')) {
+                                value = option.value; return _break;
+                            }
+                        });
+                    } else if (el.type == 'radio' || el.type == 'checkbox') {
+                        value = el.checked ? el.value != 'on' ? el.value : 'on' : undefined;
+                    } else if (el.type == 'submit' && el.value == '') {
+                        value = el.type;
+                    } else {
+                        value = el.value;
+                    }
+
+                    if (!isVoid(value)) {
+                        // data.push(fn_encode(el.name).replace('%5B', '[').replace('%5D', ']')
+                        data.push(fn_encode(el.name).replace(/%5([BD])/g, function($0, $1) {
+                            return ($1 == 'B') ? '[' : ']';
+                        }) +'='+ fn_encode(value));
+                    }
+                });
+
+                ret = data.join('&')
+                if (plus) {
+                    ret = ret.replace(re_plus, '+')
+                }
+            }
+            return ret;
+        },
+        serializeArray: function() {
+            var ret = {};
+            this.serialize(false).split('&').forEach(function(item) {
+                item = item.split('='), ret[fn_decode(item[0])] = fn_decode(item[1]);
+            });
+            return ret;
+        },
+        serializeJson: function() {
+            return JSON.stringify(this.serializeArray());
+        }
+    });
+
     $.onReady(function() { var doc = document, dom, el, els, body = document.body
         els = new Dom('body')
         // log(els)
         // log('---')
 
         el = $.dom("#form")
-
-        el.attribute('@foo', 1)
-        // el.attribute('@foo1', 1)
-        // el.attribute('@foo2', 1)
+        log(el.serialize())
+        log(el.serializeArray())
+        log(el.serializeJson())
+        el[0].on("submit", function(e) {
+            e.stop()
+            log(el.serialize())
+            log(el.serializeArray())
+        })
 
         $.fire(2, function() {
             el.data(' @foo ', null)
