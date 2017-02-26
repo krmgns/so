@@ -41,8 +41,9 @@
             }
             i++;
         }
-        console.log.apply(console, args);
-    }
+        Function[NAME_PROTOTYPE].bind.call(window.console.log, window.console) // safe for ie9
+            .apply(window.console, args);
+    };
 
     var _reCache = {};
     var re_dot = /^[-+]?\./;
@@ -749,7 +750,7 @@
 
     // shortcut
     function _log(fn, args) {
-        console[fn].apply(NULL, ['>> so:'].concat(makeArray(args)));
+        window.console[fn].apply(NULL, ['>> so:'].concat(makeArray(args)));
     }
 
     // so: base functions.
