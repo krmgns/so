@@ -47,6 +47,7 @@
     var _reCache = {};
     var re_dot = /^[-+]?\./;
     var re_trimSpace = /^\s+|\s+$/g;
+    var RegExp = window.RegExp;
 
     // faster trim
     function trimSpace(input) {
