@@ -30,7 +30,7 @@
         DeviceMotionEvent: 'devicemotion', DeviceOrientationEvent: 'deviceorientation'
     };
     var re_typesFix = /^(UI|Mouse|Mutation|HTML)Event$/i;
-    var re_typesStandard = $.re(Object.values(re_types).join('|'), 'i');
+    var re_typesStandard = $.re('('+ Object.values(re_types).join('|') +')', 'i');
     var re_commaSplit = /,\s*/;
     var fn_defineProperty = Object.defineProperty;
     var optionsDefault = {
