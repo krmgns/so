@@ -465,16 +465,6 @@
          */
         isEmpty: function() {
             return !this.size;
-        },
-
-        /**
-         * To string
-         * @return {String}
-         */
-        toString: function() {
-            return this.isEmpty() ? ''
-                : this.type == 'string' ? this.values().join('')
-                    : $.jsonEncode(this.type == 'array' ? this.values() : this.data);
         }
     });
 
