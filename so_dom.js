@@ -968,15 +968,25 @@
     });
 
     var re_plus = /%20/g
-    var re_data = /^data:(?:.+);base64,/;
+    var re_data = /^data:(?:.+)(?:;base64)?,/;
     var fn_encode = encodeURIComponent;
     var fn_decode = decodeURIComponent;
+
+    function toBase64(input) {
+        return "encoded---"+ input.slice(0, 50) +"...";
+    }
 
     var fileContents, fileContentsStack = [];
     function readFile(file, callback, multiple, i) {
         var reader = new FileReader();
         reader.onload = function(e) {
             fileContents = trims(e.target.result).replace(re_data, '');
+            log(e.target.result, fileContents)
+            if (!re_data.test(fileContents)) {
+                fileContents = fn_decode(fileContents);
+                log(fileContents)
+                fileContents = toBase64(fileContents);
+            }
             fileContentsStack.push(fileContents);
             callback(multiple ? fileContentsStack : fileContents, i--);
         };
@@ -997,8 +1007,8 @@
                     fileContents = file.readAll();
                     file.close();
                 }
-                callback(fileContents)
             }
+            callback(fileContents)
         }
         fileContentsStack = []; // reset
     }
@@ -1035,13 +1045,18 @@
                             value = el.value != '' ? el.value : type;
                             break;
                         case 'file':
-                            done = !el.files.length;
+                            done = (el.files && !el.files.length) || true;
                             readFileAll(el, function(value, i) {
-                                // log(value, i)
-                                if (!i) {
-                                    data.push(name +'='+ fn_encode(value));
-                                }
                                 done = true;
+                                if (!isArray(value)) {
+                                    data.push(name +'='+ fn_encode(value));
+                                } else { // multiple
+                                    if (i > 0) { // all read
+                                        $.for(value, function(value, i) {
+                                            data.push(name +'['+ i +']='+ fn_encode(value));
+                                        });
+                                    }
+                                }
                             });
                             break;
                         default:
@@ -1053,6 +1068,8 @@
                     }
                 });
 
+                log(done)
+
                 var x= 0
                 var i = $.firer(1, function() {
                     log("doing", x++)
@@ -1063,25 +1080,22 @@
                     if (!isFalse(opt_plus)) {
                         ret = ret.replace(re_plus, '+');
                     }
-                    log(ret.substr(0, ret.indexOf('file=') + 50) +"...")
+                    log(ret)
+                    // log(ret.substr(0, ret.indexOf('file=') + 50) +"...")
                 });
-
-                window.once('keydown', function(e) {if (e.keyCode==27) clearInterval(i); log("cleared")})
-
-                // $.fire(1, function() { log(ret) })
             }
             return ret;
         },
-        serializeArray: function(opt_base64) {
-            var ret = []; return this.serialize(opt_base64, false).split('&').forEach(function(item) {
-                item = item.split('='), ret.push({name: fn_decode(item[0]), value: fn_decode(item[1])});
-            }), ret;
-        },
-        serializeJson: function(opt_base64) {
-            var ret = {}; return this.serializeArray(opt_base64, false).forEach(function(item) {
-                ret[item.name] = item.value;
-            }), $.json(ret);
-        }
+        // serializeArray: function(opt_base64) {
+        //     var ret = []; return this.serialize(opt_base64, false).split('&').forEach(function(item) {
+        //         item = item.split('='), ret.push({name: fn_decode(item[0]), value: fn_decode(item[1])});
+        //     }), ret;
+        // },
+        // serializeJson: function(opt_base64) {
+        //     var ret = {}; return this.serializeArray(opt_base64, false).forEach(function(item) {
+        //         ret[item.name] = item.value;
+        //     }), $.json(ret);
+        // }
     });
 
     $.onReady(function() { var doc = document, dom, el, els, body = document.body
@@ -1090,7 +1104,7 @@
         // log('---')
 
         el = $.dom("#form")
-        log(el.serialize())
+        // log(el.serialize())
         // log(el.serializeArray())
         // log(el.serializeJson())
         el[0].on("submit", function(e) {
@@ -1099,9 +1113,9 @@
             // log(el.serializeArray())
         })
 
-        $.fire(2, function() {
-            el.data(' @foo ', null)
-        });
+        // $.fire(2, function() {
+        //     el.data(' @foo ', null)
+        // });
 
         // els = els.find('input[so:v=1]')
         // els = els.find('input:not([checked])')
