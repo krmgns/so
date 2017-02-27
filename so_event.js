@@ -373,12 +373,13 @@
              */
             removeEvent: function(event) {
                 var target = checkTarget(this.target),
-                    events = target.$events, eventsRemove, type = event.type;
+                    events = target.$events, eventsRemove, type = event.type,
+                    filter = function(event) { return !!event; };
 
                 if (events) {
                     eventsRemove = $.list();
                     if (type == '*') { // all
-                        eventsRemove = events.selectAll();
+                        eventsRemove = events.selectAll(filter);
                     } else if (type == '**') { // all fired 'x' types, eg: .off('**')
                         eventsRemove = events.selectAll(function(_event) {
                             return _event && _event.fired;
@@ -395,7 +396,7 @@
                                 return _event && _event.fnOrig == event.fnOrig;
                             });
                         } else { // all 'x' types, eg: .off('x')
-                            eventsRemove = events;
+                            eventsRemove = events.selectAll(filter);
                         }
                     }
                 } else {
@@ -411,7 +412,7 @@
 
                     // think memory!
                     events.forEach(function(key, list) {
-                        if (!list.size) {
+                        if (list && !list.size) {
                             events.replaceAt(key, NULL);
                         }
                     });
@@ -495,16 +496,16 @@
         [Window, Document, Element].forEach(function(target) {
             $.extendPrototype(target, {
                 on: function(type, fn, options) { return on(this, type, fn, options); },
-                off: function(type, fn, options) { return off(this, type, fn, options); },
                 once: function(type, fn, options) { return once(this, type, fn, options); },
+                off: function(type, fn, options) { return off(this, type, fn, options); },
                 fire: function(type, fn, options) { return fire(this, type, fn, options); }
             });
         });
 
         return {
             on: on,
-            off: off,
             once: once,
+            off: off,
             fire: fire,
             create: createEvent,
             Event: initEvent,
