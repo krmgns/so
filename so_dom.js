@@ -853,7 +853,7 @@
     });
 
     function toClassRegExp(name) {
-        return $.re('(^| )'+ name +'( |$)', null, '1h');
+        return $.re('(^| )'+ name +'( |$)', null, '1m');
     }
     function hasClass(el, name) {
         return el && el.className && toClassRegExp(name).test(el.className);
@@ -968,8 +968,40 @@
     });
 
     var re_plus = /%20/g
+    var re_data = /^data:(?:.+);base64,/;
     var fn_encode = encodeURIComponent;
     var fn_decode = decodeURIComponent;
+
+    var fileContents, fileContentsStack = [];
+    function readFile(file, callback, multiple, i) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            fileContents = trims(e.target.result).replace(re_data, '');
+            fileContentsStack.push(fileContents);
+            callback(multiple ? fileContentsStack : fileContents, i--);
+        };
+        reader.readAsDataURL(file);
+    }
+    function readFileAll(file, callback) {
+        if (file.files) {
+            var multiple = file.files.length > 1;
+            $.for(file.files, function(file, i) {
+                readFile(file, callback, multiple, i);
+            });
+        } else { // ie >> https://msdn.microsoft.com/en-us/library/314cz14s(v=vs.85).aspx
+            var fso, file, fileName = file.value, fileContents = '';
+            fso = new ActiveXObject('Scripting.FileSystemObject');
+            if (fileName) {
+                if (fso.fileExists(fileName)) {
+                    file = fso.openTextFile(fileName, 1);
+                    fileContents = file.readAll();
+                    file.close();
+                }
+                callback(fileContents)
+            }
+        }
+        fileContentsStack = []; // reset
+    }
 
     // dom: form
     Dom.extendPrototype({
@@ -977,45 +1009,74 @@
             var ret = '';
             if (getTag(this[0]) == 'form') {
                 var data = [];
+                var done = true;
                 $.for(this[0], function(el) {
                     if (!el.name || el.disabled) {
                         return;
                     }
+                    var type = el.options ? 'select' : el.type ? el.type : getTag(el);
+                    var name = fn_encode(el.name).replace(/%5([BD])/g, function($0, $1) {
+                        return ($1 == 'B') ? '[' : ']';
+                    }), value;
 
-                    var value;
-                    if (el.options) {
-                        $.for(el.options, function(option, i) {
-                            if (option.selected && option.hasAttribute('value')) {
-                                value = option.value; return _break;
-                            }
-                        });
-                    } else if (el.type == 'radio' || el.type == 'checkbox') {
-                        value = el.checked ? el.value != 'on' ? el.value : 'on' : undefined;
-                    } else if (el.type == 'submit' && el.value == '') {
-                        value = el.type;
-                    } else {
-                        value = el.value;
+                    switch (type) {
+                        case 'select':
+                            $.for(el.options, function(option, i) {
+                                if (option.selected && option.hasAttribute('value')) {
+                                    value = option.value; return _break;
+                                }
+                            });
+                            break;
+                        case 'radio':
+                        case 'checkbox':
+                            value = el.checked ? el.value != 'on' ? el.value : 'on' : undefined;
+                            break;
+                        case 'submit':
+                            value = el.value != '' ? el.value : type;
+                            break;
+                        case 'file':
+                            done = !el.files.length;
+                            readFileAll(el, function(value, i) {
+                                // log(value, i)
+                                if (!i) {
+                                    data.push(name +'='+ fn_encode(value));
+                                }
+                                done = true;
+                            });
+                            break;
+                        default:
+                            value = el.value;
                     }
 
                     if (!isVoid(value)) {
-                        // data.push(fn_encode(el.name).replace('%5B', '[').replace('%5D', ']')
-                        data.push(fn_encode(el.name).replace(/%5([BD])/g, function($0, $1) {
-                            return ($1 == 'B') ? '[' : ']';
-                        }) +'='+ fn_encode(value));
+                        data.push(name +'='+ fn_encode(value));
                     }
                 });
 
-                ret = data.join('&')
-                if (plus) {
-                    ret = ret.replace(re_plus, '+')
-                }
+                var x= 0
+                var i = $.firer(1, function() {
+                    log("doing", x++)
+                    if (!done) return;
+                    log("done", x)
+                    clearInterval(i);
+                    ret = data.join('&');
+                    if (plus) {
+                        ret = ret.replace(re_plus, '+');
+                    }
+                    log(ret.substr(0, ret.indexOf('file=') + 50) +"...")
+                });
+
+                window.once('keydown', function(e) {if (e.keyCode==27) clearInterval(i); log("cleared")})
+
+                // $.fire(1, function() { log(ret) })
             }
             return ret;
         },
         serializeArray: function() {
-            var ret = {};
+            var ret = [];
             this.serialize(false).split('&').forEach(function(item) {
-                item = item.split('='), ret[fn_decode(item[0])] = fn_decode(item[1]);
+                item = item.split('='),
+                ret.push({name: fn_decode(item[0]), value: fn_decode(item[1])});
             });
             return ret;
         },
@@ -1031,12 +1092,12 @@
 
         el = $.dom("#form")
         log(el.serialize())
-        log(el.serializeArray())
-        log(el.serializeJson())
+        // log(el.serializeArray())
+        // log(el.serializeJson())
         el[0].on("submit", function(e) {
             e.stop()
             log(el.serialize())
-            log(el.serializeArray())
+            // log(el.serializeArray())
         })
 
         $.fire(2, function() {
@@ -1054,6 +1115,9 @@
     $.dom = function(selector, root, i) {
         return initDom(selector, root, i);
     };
+
+    // Dom.$ => find
+    // Dom.$$ => findAll
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
     // HTMLDocument.prototype.$$ = function (selector) { return this.querySelectorAll(selector); };
