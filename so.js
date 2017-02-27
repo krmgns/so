@@ -969,24 +969,13 @@
         value: function(input, valueDefault) { return toValue(input, valueDefault); },
 
         /**
-         * Json encode.
-         * @param  {Any}      input
-         * @param  {Function} inputReplacer
-         * @param  {String}   space
+         * Json encode / decode.
+         * @param  {Any}     input
+         * @param  {Boolean} to @default=parse
          * @return {String}
          */
-        jsonEncode: function(input, inputReplacer, space) {
-            return JSON.stringify(input, inputReplacer, space);
-        },
-
-        /**
-         * Json decode.
-         * @param  {String}   input
-         * @param  {Function} inputReviver
-         * @return {Any}
-         */
-        jsonDecode: function(input, inputReviver) {
-            return JSON.parse(input, inputReviver);
+        json: function(input, to) {
+            return to ? JSON.stringify(input) : JSON.parse(input);
         },
 
         /**

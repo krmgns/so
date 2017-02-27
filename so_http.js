@@ -59,7 +59,7 @@
                 return input;
             }
 
-            return JSON.parse(input);
+            return $.json(input);
         },
 
         /**
