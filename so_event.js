@@ -411,7 +411,7 @@
 
                     // think memory!
                     events.forEach(function(key, list) {
-                        if (!list.size) {
+                        if (list && !list.size) {
                             events.replaceAt(key, NULL);
                         }
                     });
