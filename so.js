@@ -829,7 +829,6 @@
         },
         firer: function(delay, fn, fnArgs) {
             if ($.isString(delay)) delay = toTimeInt(delay);
-            log(delay)
             return setInterval(function() {
                 fn.apply(NULL, fnArgs || []);
             }, delay || 1);
