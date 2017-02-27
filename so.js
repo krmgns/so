@@ -47,6 +47,7 @@
 
     var _reCache = {};
     var re_dot = /^[-+]?\./;
+    var re_time = /(\d+)(\w+)/;
     var re_trimSpace = /^\s+|\s+$/g;
     var RegExp = window.RegExp;
 
@@ -73,15 +74,17 @@
         return !!input;
     }
 
-    function toTimeInt(input, multiply) {
-        var tmp = input.split(/(\d+)(\w+)/),
+    function toTimeInt(input) {
+        var tmp = input.split(re_time),
             time = toInt(tmp[1]), timeDir = tmp[2], ret = +input;
+
         switch (timeDir) {
-            case 's': case 'sec': input = time; break;
-            case 'm': case 'min': input = time * 60; break;
-            case 'h': case 'hour': input = time * 60 * 60; break;
+            case 's': case 'sec': input = time * 1000; break;
+            case 'm': case 'min': input = time * 1000 * 60; break;
+            case 'h': case 'hour': input = time * 1000 * 60 * 60; break;
         }
-        return multiply ? input * 1000 : input;
+
+        return input;
     }
 
     // cacheable regexp stuff
@@ -826,6 +829,7 @@
         },
         firer: function(delay, fn, fnArgs) {
             if ($.isString(delay)) delay = toTimeInt(delay);
+            log(delay)
             return setInterval(function() {
                 fn.apply(NULL, fnArgs || []);
             }, delay || 1);
