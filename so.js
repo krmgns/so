@@ -72,6 +72,18 @@
     function toBool(input) {
         return !!input;
     }
+
+    function toTimeInt(input, multiply) {
+        var tmp = input.split(/(\d+)(\w+)/),
+            time = toInt(tmp[1]), timeDir = tmp[2], ret = +input;
+        switch (timeDir) {
+            case 's': case 'sec': input = time; break;
+            case 'm': case 'min': input = time * 60; break;
+            case 'h': case 'hour': input = time * 60 * 60; break;
+        }
+        return multiply ? input * 1000 : input;
+    }
+
     // cacheable regexp stuff
     function toRegExp(pattern, flags, ttl) {
         flags = flags || NULLS;
@@ -84,13 +96,7 @@
         }
 
         if ($.isString(ttl)) {
-            var s = ttl.split(/(\d+)(\w+)/),
-                time = toInt(s[1]), timeDir = s[2];
-            switch (timeDir) {
-                case 's': case 'sec': ttl = time; break;
-                case 'm': case 'min': ttl = time * 60; break;
-                case 'h': case 'hour': ttl = time * 60 * 60; break;
-            }
+            ttl = toTimeInt(ttl, TRUE);
         }
         ttl = (ttl > -1) ? ttl : 60 * 60 * 24; // one day
 
@@ -100,9 +106,7 @@
         }
 
         // simple gc
-        $.fire(1000 * ttl, function(){
-            _reCache = {};
-        });
+        $.fire(ttl, function(){ _reCache = {}; });
 
         return ret;
     }
@@ -808,25 +812,23 @@
         },
 
         /**
-         * Fire.
+         * Fire & fire(r)ecursive.
          * @param  {Int}      delay (ms)
          * @param  {Function} fn
          * @param  {Array}    fnArgs
-         * @param  {Boolean}  repeat
          * @return {void}
          */
-        fire: function(delay, fn, fnArgs, repeat) {
-            var id, fnArgs = fnArgs || []; delay *= 1000;
-            if (!repeat) {
-                id = setTimeout(function() {
-                    fn.apply(window, fnArgs);
-                }, delay);
-            } else {
-                id = setInterval(function() {
-                    fn.apply(window, fnArgs);
-                }, delay);
-            }
-            return id;
+        fire: function(delay, fn, fnArgs) {
+            if ($.isString(delay)) delay = toTimeInt(delay);
+            return setTimeout(function() {
+                fn.apply(NULL, fnArgs || []);
+            }, delay || 1);
+        },
+        firer: function(delay, fn, fnArgs) {
+            if ($.isString(delay)) delay = toTimeInt(delay);
+            return setInterval(function() {
+                fn.apply(NULL, fnArgs || []);
+            }, delay || 1);
         },
 
         /**
