@@ -1005,7 +1005,7 @@
 
     // dom: form
     Dom.extendPrototype({
-        serialize: function(plus) {
+        serialize: function(opt_base64, opt_plus) {
             var ret = '';
             if (getTag(this[0]) == 'form') {
                 var data = [];
@@ -1060,7 +1060,7 @@
                     log("done", x)
                     clearInterval(i);
                     ret = data.join('&');
-                    if (plus) {
+                    if (!isFalse(opt_plus)) {
                         ret = ret.replace(re_plus, '+');
                     }
                     log(ret.substr(0, ret.indexOf('file=') + 50) +"...")
@@ -1072,16 +1072,15 @@
             }
             return ret;
         },
-        serializeArray: function() {
-            var ret = [];
-            this.serialize(false).split('&').forEach(function(item) {
-                item = item.split('='),
-                ret.push({name: fn_decode(item[0]), value: fn_decode(item[1])});
-            });
-            return ret;
+        serializeArray: function(opt_base64) {
+            var ret = []; return this.serialize(opt_base64, false).split('&').forEach(function(item) {
+                item = item.split('='), ret.push({name: fn_decode(item[0]), value: fn_decode(item[1])});
+            }), ret;
         },
-        serializeJson: function() {
-            return JSON.stringify(this.serializeArray());
+        serializeJson: function(opt_base64) {
+            var ret = {}; return this.serializeArray(opt_base64, false).forEach(function(item) {
+                ret[item.name] = item.value;
+            }), $.json(ret);
         }
     });
 
