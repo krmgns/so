@@ -121,7 +121,7 @@
             event.fired++;
 
             if (!e.data) {
-                e = fn_defineProperty(e, 'data', {value: event.data});
+                e.data = event.data;
             }
             if (!e.target) {
                 e = fn_defineProperty(e, 'target', {value: event.target});
@@ -474,7 +474,9 @@
             var args = prepareArgs(fn, options, target, TRUE);
 
             type.split(re_commaSplit).forEach(function(type) {
-                initEvent(type, args.fn, args.options).bind(type);
+                initEvent(type, function(e) {
+                    return e.event.unbind(), args.fn.apply(target, arguments);
+                }, args.options).bind(type);
             });
         }
         function off(target, type, fn, options) {
