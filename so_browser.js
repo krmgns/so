@@ -7,12 +7,12 @@
  */
 ;(function(window, $) { 'use strict';
 
-    var re_src = /(chrome|safari|firefox|opera|msie|trident(?=\/))(?:.*version)?\/?\s*([\d.]+)/i;
+    var re_src = /(opr|chrome|safari|firefox|opera|msie|trident(?=\/))(?:.*version)?\/?\s*([\d.]+)/;
     var fns_os = ['isMac', 'isWindows', 'isLinux', 'isUnix'];
     var fns_ua = ['isChrome', 'isSafari', 'isFirefox', 'isOpera', 'isIE', 'isTrident'];
     var navigator = window.navigator;
     var isTouchDevice = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
-    var isMobileDevice = /android|ip(hone|od|ad)|opera *mini|webos|blackberry|mobile|windows *phone/i.test(navigator);
+    var isMobileDevice = /android|ip(hone|od|ad)|opera *mini|webos|blackberry|mobile|windows *phone/;
 
     $.browser = (function() {
         var ua = navigator.userAgent.toLowerCase();
@@ -20,7 +20,7 @@
         var re, name, test, browser = {};
 
         browser.isTouchDevice = function() { return isTouchDevice; };
-        browser.isMobileDevice = function() { return isMobileDevice; };
+        browser.isMobileDevice = function() { return isMobileDevice.test(ua); };
 
         // set 'is' functions for os
         fns_os.forEach(function(fn) {
