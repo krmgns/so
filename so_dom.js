@@ -1116,10 +1116,46 @@
         }
     });
 
+    // dom: form element states
+    Dom.extendPrototype({
+        checked: function(option) {
+            var _this = this; return isVoid(option) ?
+                _this[0].checked : (setAttribute(_this[0], 'checked', option), _this);
+        },
+        selected: function(option) {
+            var _this = this; return isVoid(option) ?
+                _this[0].selected : (setAttribute(_this[0], 'selected', option), _this);
+        },
+        disabled: function(option) {
+            var _this = this; return isVoid(option) ?
+                _this[0].disabled : (setAttribute(_this[0], 'disabled', option), _this);
+        },
+        readonly: function(option) {
+            var _this = this; return isVoid(option) ?
+                _this[0].readOnly : (setAttribute(_this[0], 'readOnly', option), _this);
+        }
+    });
+
     $.onReady(function() { var doc = document, dom, el, els, body = document.body
         els = new Dom('body')
         // log(els)
         // log('---')
+
+        el = $.dom("#checkbox")
+
+        $.fire('2s', function() {
+            log(el.checked(true))
+            log(el.checked())
+            $.fire('1s', function() {
+                log(el.checked(false))
+                log(el.checked())
+                $.fire('1s', function() {
+                    log(el.checked(true))
+                    log(el.checked())
+                })
+            })
+        })
+
 
         // el = $.dom("#form")
         // log(el.serialize())
