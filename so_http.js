@@ -306,11 +306,10 @@
                 this.sent = TRUE;
 
                 if (options.timeout) {
-                    var i = setTimeout(function(){
+                    $.fire(options.timeout, function(){
                         _this.cancel();
                         _this.fire('timeout');
-                        clearTimeout(i);
-                    }, options.timeout);
+                    });
                 }
             }
 
