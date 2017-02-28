@@ -7,9 +7,10 @@
  */
 ;(function(window, $) { 'use strict';
 
-    var re_src = /(opr|chrome|safari|firefox|opera|msie|trident(?=\/))(?:.*version)?\/?\s*([\d.]+)/;
+    var re_opr = /(opr)\/([\d.]+)/;
+    var re_ua = /(chrome|safari|firefox|opera|msie|trident(?=\/))(?:.*version)?\/?\s*([\d.]+)/;
     var fns_os = ['isMac', 'isWindows', 'isLinux', 'isUnix'];
-    var fns_ua = ['isChrome', 'isSafari', 'isFirefox', 'isOpera', 'isIE', 'isTrident'];
+    var fns_ua = ['isChrome', 'isSafari', 'isFirefox', 'isOpera', 'isWebkitOpera', 'isIE', 'isTrident'];
     var navigator = window.navigator;
     var isTouchDevice = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
     var isMobileDevice = /android|ip(hone|od|ad)|opera *mini|webos|blackberry|mobile|windows *phone/;
@@ -41,13 +42,18 @@
             browser[fn] = function() { return false; };
         });
 
-        if (re = re_src.exec(ua)) {
+        if (re = (re_opr.exec(ua) || re_ua.exec(ua))) {
             if (re[1]) {
-                browser['name'] = (re[1] == 'msie') ? 'ie' : re[1];
+                var name = (re[1] == 'msie') ? 'ie' : re[1];
+                if (name == 'opr') {
+                    name = 'opera';
+                }
+                browser['name'] = name;
+
                 // re-set 'is' function
-                browser['is'+ (browser['name'] == 'ie'
-                    ? browser['name'].toUpperCase()
-                    : browser['name'].toCapitalCase(false))] = function() { return true; };
+                browser['is'+ (name == 'ie' ? name.toUpperCase()
+                    : name.toCapitalCase(false))] = function() { return true; };
+                browser['isWebkitOpera'] = function() { return re[1] == 'opr'; };
             }
             if (re[2]) {
                 var versionArray = re[2].split('.').map(function(value) {
