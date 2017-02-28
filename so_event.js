@@ -37,7 +37,7 @@
         bubbles: TRUE, cancelable: TRUE, scoped: FALSE, composed: FALSE, // all
         view: window, detail: NULL, // ui, mouse, custom
         relatedNode: NULL, prevValue: NULLS, newValue: NULLS, attrName: NULLS, attrChange: 0, // mutation
-        screenX: 0, screenY: 0, clientX: 0, clientY: 0, ctrlKey: FALSE, altKey: TRUE, shiftKey: FALSE,
+        screenX: 0, screenY: 0, clientX: 0, clientY: 0, ctrlKey: FALSE, altKey: FALSE, shiftKey: FALSE,
             metaKey: FALSE, button: 1, relatedTarget: NULL, // mouse
         useCapture: FALSE, once: FALSE, passive: FALSE, data: {}
     };
@@ -52,9 +52,9 @@
     function createEvent(eventClass, eventType, options) {
         if (!eventType) throw ('Type required.');
 
-        var event, eventClassOrig;
         options = $.extend({}, optionsDefault, options);
 
+        var event, eventClassOrig;
         if (!eventClass) { // autodetect
             $.forEach(re_types, function(_eventClass, re) {
                 re = $.re('^('+ re +')$', 'i');
@@ -66,9 +66,11 @@
         }
 
         eventClass = eventClassOrig = eventClass || 'Event'; // @default
-        if ($.isFunction(window[eventClass]) && eventClass != 'MutationEvent') {
-            event = new window[eventClass](eventType, options);
-        } else {
+        try { // wrong parameters causes error (opera/12)
+            event = (eventClass != 'MutationEvent' && new window[eventClass](eventType, options));
+        } catch(e) {}
+
+        if (!event) {
             // add 's' if needed
             if ($.DOMLevel < 3 && re_typesFix.test(eventClass)) {
                 eventClass += 's';
