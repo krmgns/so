@@ -971,11 +971,11 @@
         /**
          * Json encode / decode.
          * @param  {Any}     input
-         * @param  {Boolean} to @default=parse
+         * @param  {Boolean} parse @default=true
          * @return {String}
          */
-        json: function(input, to) {
-            return to ? JSON.stringify(input) : JSON.parse(input);
+        json: function(input, parse) {
+            return (parse !== FALSE) ? JSON.parse(input) : JSON.stringify(input);
         },
 
         /**
