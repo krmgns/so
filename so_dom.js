@@ -981,9 +981,9 @@
         reader.onload = function(e) {
             fileContents = trims(e.target.result);
             // opera doesn't give base64 for 'html' files or maybe other more..
-            var encode = fileContents.indexOf(';base64') < 0;
+            var encoded = fileContents.indexOf(';base64') > -1;
             fileContents = fileContents.replace(re_data, '');
-            if (encode) {
+            if (!encoded) {
                 fileContents = toBase64(fileContents);
             }
             fileContentsStack.push(fileContents);
@@ -991,12 +991,13 @@
         };
         reader.readAsDataURL(file);
     }
-    function readFileAll(file, callback) {
+    function readFiles(file, callback) {
         if (file.files) {
             var multiple = file.files.length > 1;
             $.for(file.files, function(file) {
                 readFile(file, callback, multiple);
             });
+            fileContentsStack = []; // reset
         } else { // ie >> https://msdn.microsoft.com/en-us/library/314cz14s(v=vs.85).aspx
             var fso, file, fileName = file.value, fileContents = '';
             fso = new ActiveXObject('Scripting.FileSystemObject');
@@ -1007,12 +1008,11 @@
             }
             callback(fileContents);
         }
-        fileContentsStack = []; // reset
     }
 
     // dom: form
     Dom.extendPrototype({
-        serialize: function(fn, opt_plus) {
+        serialize: function(callback, opt_plus) {
             var ret = '';
             if (getTag(this[0]) == 'form') {
                 var data = [];
@@ -1042,9 +1042,9 @@
                             value = el.value != '' ? el.value : type;
                             break;
                         case 'file':
-                            if (fn) {
+                            if (callback) {
                                 done = !(el.files && el.files.length);
-                                readFileAll(el, function(value) {
+                                readFiles(el, function(value) {
                                     if (!isArray(value)) { // single, one read
                                         done = true;
                                         data.push(name +'='+ encode(value));
@@ -1068,8 +1068,6 @@
                     }
                 });
 
-                log(done)
-
                 var _ret = function() {
                     ret = data.join('&');
                     if (!isFalse(opt_plus)) {
@@ -1078,47 +1076,44 @@
                     return ret;
                 };
 
-                if (fn) {
-                    var i = 0;
-                    (function run() {
-                        log("doing", i++)
-                        if (done) {
-                            log("done")
-                            return fn(_ret());
-                        }
-                        setTimeout(run);
-                    })();
+                if (!callback) return _ret();
 
-                    // var id = setInterval(function() {
-                    //     log("doing", i++)
-                    //     if (!done) return;
-                    //     log("done", i)
-                    //     clearInterval(id);
-                    //     ret = data.join('&');
-                    //     if (!isFalse(opt_plus)) {
-                    //         ret = ret.replace(re_plus, '+');
-                    //     }
-                    //     log(data)
-                    //     log(ret)
-                    //     fn(ret)
-                    // }, 1);
-                } else {
-                    return _ret();
-                }
+                ;(function run() {
+                    if (done) {
+                        return callback(_ret());
+                    }
+                    $.fire(1, run);
+                })();
             }
 
             return ret;
         },
-        // serializeArray: function(opt_base64) {
-        //     var ret = []; return this.serialize(opt_base64, false).split('&').forEach(function(item) {
-        //         item = item.split('='), ret.push({name: decode(item[0]), value: decode(item[1])});
-        //     }), ret;
-        // },
-        // serializeJson: function(opt_base64) {
-        //     var ret = {}; return this.serializeArray(opt_base64, false).forEach(function(item) {
-        //         ret[item.name] = item.value;
-        //     }), $.json(ret);
-        // }
+        serializeArray: function(callback) {
+            var _ret = function(data, ret) {
+                return ret = [], data.split('&').forEach(function(item) {
+                    item = item.split('='), ret.push({name: decode(item[0]), value: decode(item[1])});
+                }), ret;
+            };
+            if (!callback) {
+                return _ret(this.serialize(null, false));
+            }
+            this.serialize(function(data) {
+                callback(_ret(data));
+            }, false);
+        },
+        serializeJson: function(callback) {
+            var _ret = function(data, ret) {
+                return ret = {}, data.forEach(function(item) {
+                    ret[item.name] = item.value;
+                }), $.json(ret, true);
+            };
+            if (!callback) {
+                return _ret(this.serializeArray(null, false));
+            }
+            this.serializeArray(function(data) {
+                callback(_ret(data));
+            }, false);
+        }
     });
 
     $.onReady(function() { var doc = document, dom, el, els, body = document.body
@@ -1126,18 +1121,25 @@
         // log(els)
         // log('---')
 
-        el = $.dom("#form")
+        // el = $.dom("#form")
         // log(el.serialize())
         // log(el.serializeArray())
         // log(el.serializeJson())
-        el[0].on("submit", function(e) {
-            e.stop()
-            log(el.serialize(function(data) {
-                log(data)
-                $.http.post('/.dev/so/test/ajax.php', {data:data});
-            }))
-            // log(el.serializeArray())
-        })
+        // el[0].on("submit", function(e) {
+        //     e.stopDefault()
+        //     // log(el.serialize())
+        //     // el.serialize(function(data) {
+        //     //     $.http.post('/.dev/so/test/ajax.php', {data:data});
+        //     // })
+        //     // log(el.serializeArray())
+        //     // el.serializeArray(function(data) {
+        //     //     log(data)
+        //     // })
+        //     log(el.serializeJson())
+        //     el.serializeJson(function(data) {
+        //         log(data)
+        //     })
+        // })
 
         // $.fire(2, function() {
         //     el.data(' @foo ', null)
