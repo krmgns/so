@@ -1182,13 +1182,11 @@
         el = $.dom("#iframe")
 
         $.fire("3s", function() {
-            log(el.getWindow().me.document.body)
-            log(el.getDocument().me.body)
-            log(el.getWindow(true).me.document.body)
-            log(el.getDocument(true).me.body)
+            log(el.window().me.document.body)
+            log(el.document().me.body)
+            log(el.window(true).me.document.body)
+            log(el.document(true).me.body)
         });
-
-
 
         // $.fire('2s', function() {
         //     log(el.checked(true))
