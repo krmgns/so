@@ -384,7 +384,21 @@
             return !!ret;
         },
         hasChild: function(s) { return !!this.children().size;},
-        hasChildren: function(s) { return this.hasChild();}
+        hasChildren: function(s) { return this.hasChild();},
+        window: function(content) {
+            var el = this[0], ret;
+            if (el) {
+                ret = !content ? getWindow(el) : el.contentWindow;
+            }
+            return initDom(ret);
+        },
+        document: function(content) {
+            var el = this[0], ret;
+            if (el) {
+                ret = !content ? getDocument(el) : el.contentDocument;
+            }
+            return initDom(ret);
+        }
     });
 
     var re_rgb = /rgb/i;
