@@ -41,11 +41,11 @@
         return ret;
     }
 
-    function initDom(selector, root, i) {
+    function initDom(selector, root, i, one) {
         if (isDom(selector)) {
             return selector;
         }
-        return new Dom(selector, root, i);
+        return new Dom(selector, root, i, one);
     }
 
     var re_attr = /\[.+\]/;
@@ -55,7 +55,7 @@
     var re_attrState = /(((check|select|disabl)ed|readonly)!?)/gi;
     var re_fln = /(?:(\w+):((fir|la)st|nth\((\d+)\)))(?!-)/gi;
 
-    function select(selector, root) {
+    function select(selector, root, one) {
         if (selector == '') return '';
 
         if (!isNode(root)) {
@@ -111,10 +111,10 @@
             }
         }
 
-        return $.array(ret, querySelectorAll(root, selector));
+        return $.array(ret, one ? querySelector(root, selector) : querySelectorAll(root, selector));
     }
 
-    function Dom(selector, root, i) {
+    function Dom(selector, root, i, one) {
         var elements, size = 0;
 
         if (isNumber(root)) {
@@ -133,7 +133,7 @@
                             });
                         }
                     } else {
-                        elements = select(selector, root);
+                        elements = select(selector, root, one);
                         if (!isNaN(i)) {
                             elements = [elements[i]];
                         }
@@ -1157,8 +1157,8 @@
         return initDom(selector, root, i);
     };
 
-    // Dom.$ => find
-    // Dom.$$ => findAll
+    // Dom.$ => find --> one=true
+    // Dom.$$ => findAll --> one=false
 
     // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
     // HTMLDocument.prototype.$$ = function (selector) { return this.querySelectorAll(selector); };
