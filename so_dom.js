@@ -969,53 +969,50 @@
 
     var re_plus = /%20/g
     var re_data = /^data:(?:.+)(?:;base64)?,/;
-    var fn_encode = encodeURIComponent;
-    var fn_decode = decodeURIComponent;
+    var encode = encodeURIComponent, decode = decodeURIComponent;
 
     function toBase64(input) {
-        return "encoded---"+ input.slice(0, 50) +"...";
+        return $.util.base64Encode(decode(input));
     }
 
     var fileContents, fileContentsStack = [];
-    function readFile(file, callback, multiple, i) {
+    function readFile(file, callback, multiple) {
         var reader = new FileReader();
         reader.onload = function(e) {
-            fileContents = trims(e.target.result).replace(re_data, '');
-            log(e.target.result, fileContents)
-            if (!re_data.test(fileContents)) {
-                fileContents = fn_decode(fileContents);
-                log(fileContents)
+            fileContents = trims(e.target.result);
+            // opera doesn't give base64 for 'html' files or maybe other more..
+            var encode = fileContents.indexOf(';base64') < 0;
+            fileContents = fileContents.replace(re_data, '');
+            if (encode) {
                 fileContents = toBase64(fileContents);
             }
             fileContentsStack.push(fileContents);
-            callback(multiple ? fileContentsStack : fileContents, i--);
+            callback(multiple ? fileContentsStack : fileContents);
         };
         reader.readAsDataURL(file);
     }
     function readFileAll(file, callback) {
         if (file.files) {
             var multiple = file.files.length > 1;
-            $.for(file.files, function(file, i) {
-                readFile(file, callback, multiple, i);
+            $.for(file.files, function(file) {
+                readFile(file, callback, multiple);
             });
         } else { // ie >> https://msdn.microsoft.com/en-us/library/314cz14s(v=vs.85).aspx
             var fso, file, fileName = file.value, fileContents = '';
             fso = new ActiveXObject('Scripting.FileSystemObject');
-            if (fileName) {
-                if (fso.fileExists(fileName)) {
-                    file = fso.openTextFile(fileName, 1);
-                    fileContents = file.readAll();
-                    file.close();
-                }
+            if (fileName && fso.fileExists(fileName)) {
+                file = fso.openTextFile(fileName, 1);
+                fileContents = toBase64(file.readAll());
+                file.close();
             }
-            callback(fileContents)
+            callback(fileContents);
         }
         fileContentsStack = []; // reset
     }
 
     // dom: form
     Dom.extendPrototype({
-        serialize: function(opt_base64, opt_plus) {
+        serialize: function(fn, opt_plus) {
             var ret = '';
             if (getTag(this[0]) == 'form') {
                 var data = [];
@@ -1025,7 +1022,7 @@
                         return;
                     }
                     var type = el.options ? 'select' : el.type ? el.type : getTag(el);
-                    var name = fn_encode(el.name).replace(/%5([BD])/g, function($0, $1) {
+                    var name = encode(el.name).replace(/%5([BD])/g, function($0, $1) {
                         return ($1 == 'B') ? '[' : ']';
                     }), value;
 
@@ -1045,50 +1042,76 @@
                             value = el.value != '' ? el.value : type;
                             break;
                         case 'file':
-                            done = (el.files && !el.files.length) || true;
-                            readFileAll(el, function(value, i) {
-                                done = true;
-                                if (!isArray(value)) {
-                                    data.push(name +'='+ fn_encode(value));
-                                } else { // multiple
-                                    if (i > 0) { // all read
-                                        $.for(value, function(value, i) {
-                                            data.push(name +'['+ i +']='+ fn_encode(value));
-                                        });
+                            if (fn) {
+                                done = !(el.files && el.files.length);
+                                readFileAll(el, function(value) {
+                                    if (!isArray(value)) { // single, one read
+                                        done = true;
+                                        data.push(name +'='+ encode(value));
+                                    } else {
+                                        done = (value.length == el.files.length);
+                                        if (done) { // multiple, wait for all read
+                                            $.for(value, function(value, i) {
+                                                data.push(name +'['+ i +']='+ encode(value));
+                                            });
+                                        }
                                     }
-                                }
-                            });
+                                });
+                            }
                             break;
                         default:
                             value = el.value;
                     }
 
                     if (!isVoid(value)) {
-                        data.push(name +'='+ fn_encode(value));
+                        data.push(name +'='+ encode(value));
                     }
                 });
 
                 log(done)
 
-                var x= 0
-                var i = $.firer(1, function() {
-                    log("doing", x++)
-                    if (!done) return;
-                    log("done", x)
-                    clearInterval(i);
+                var _ret = function() {
                     ret = data.join('&');
                     if (!isFalse(opt_plus)) {
                         ret = ret.replace(re_plus, '+');
                     }
-                    log(ret)
-                    // log(ret.substr(0, ret.indexOf('file=') + 50) +"...")
-                });
+                    return ret;
+                };
+
+                if (fn) {
+                    var i = 0;
+                    (function run() {
+                        log("doing", i++)
+                        if (done) {
+                            log("done")
+                            return fn(_ret());
+                        }
+                        setTimeout(run);
+                    })();
+
+                    // var id = setInterval(function() {
+                    //     log("doing", i++)
+                    //     if (!done) return;
+                    //     log("done", i)
+                    //     clearInterval(id);
+                    //     ret = data.join('&');
+                    //     if (!isFalse(opt_plus)) {
+                    //         ret = ret.replace(re_plus, '+');
+                    //     }
+                    //     log(data)
+                    //     log(ret)
+                    //     fn(ret)
+                    // }, 1);
+                } else {
+                    return _ret();
+                }
             }
+
             return ret;
         },
         // serializeArray: function(opt_base64) {
         //     var ret = []; return this.serialize(opt_base64, false).split('&').forEach(function(item) {
-        //         item = item.split('='), ret.push({name: fn_decode(item[0]), value: fn_decode(item[1])});
+        //         item = item.split('='), ret.push({name: decode(item[0]), value: decode(item[1])});
         //     }), ret;
         // },
         // serializeJson: function(opt_base64) {
@@ -1109,7 +1132,10 @@
         // log(el.serializeJson())
         el[0].on("submit", function(e) {
             e.stop()
-            log(el.serialize())
+            log(el.serialize(function(data) {
+                log(data)
+                $.http.post('/.dev/so/test/ajax.php', {data:data});
+            }))
             // log(el.serializeArray())
         })
 
