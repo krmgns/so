@@ -22,16 +22,17 @@
     var isNumber = $.isNumber, isNumeric = $.isNumeric, isString = $.isString;
     var isWindow = $.isWindow, isDocument = $.isDocument;
     var isNode = $.isNode, isNodeElement = $.isNodeElement;
+    var getWindow = $.getWindow, getDocument = $.getDocument;
     var toStyleName = $.util.toCamelCaseFromDashCase;
     var querySelector = function(root, selector) { return root.querySelector(selector); };
     var querySelectorAll = function(root, selector) { return root.querySelectorAll(selector); };
     var _break = 0 /* loop break tick */, _var /* no define one-var each time (@minify) */;
 
+    function getTag(el) {return (el && el.nodeName) ? el.nodeName.toLowerCase() : isWindow(el) ? '#window' : null;}
+
     function isRoot(el) {return _var = getTag(el), _var == '#window' || _var == '#document';}
     function isRootElement(el) { return _var = getTag(el), _var == 'html' || _var == 'body';}
     function isDom(input) {return (input instanceof Dom);}
-
-    function getTag(el) {return (el && el.nodeName) ? el.nodeName.toLowerCase() : isWindow(el) ? '#window' : null;}
 
     function toKeyValueObject(key, value) {
         var ret = key || {};
@@ -160,7 +161,8 @@
         Object.defineProperties(this, {
                 'size': {value: size},
             'selector': {value: selector},
-                'root': {value: root}
+                'root': {value: root},
+                  'me': {get: function() { return this[0]; }}
         });
     }
 
@@ -372,7 +374,7 @@
         hasParent: function(s) {
             var el = this[0], ret;
             if (!s) {
-                ret = el && el.parentNode;
+                ret = !!(el && el.parentNode);
             } else {
                 s = initDom(s)[0];
                 this.parents().forEach(function(_s) {
@@ -392,8 +394,8 @@
     var nonUnitStyles = ['opacity', 'zoom', 'zIndex', 'columnCount', 'columns', 'fillOpacity', 'fontWeight', 'lineHeight'];
 
     function getStyle(el, name, value) {
-        return _var = $.getWindow(el).getComputedStyle(el),
-            name ? (name = toStyleName(name), _var[name] || value || '') : _var;
+        var style = getWindow(el).getComputedStyle(el);
+        return name ? (name = toStyleName(name), style[name] || value || '') : style;
     }
     function setStyle(el, name, value) {
         name = toStyleName(name), value = trims(value);
@@ -529,7 +531,7 @@
             parent = parent.parentElement;
         }
 
-        var doc = $.getDocument(el);
+        var doc = getDocument(el);
         var css = doc.createElement('style');
         css.textContent = '.'+ sid +'{display:block!important;visibility:hidden!important}';
         doc.body.appendChild(css);
@@ -569,7 +571,7 @@
                 ret.width = el.offsetWidth, ret.height = el.offsetHeight;
             }
         } else if (isRoot(el)) {
-            var win = $.getWindow(el);
+            var win = getWindow(el);
             width = win.innerWidth, height = win.innerHeight;
         }
         return ret;
@@ -645,7 +647,7 @@
     function getOffset(el, relative) {
         var ret = {top: 0, left: 0};
         if (isNodeElement(el)) {
-            var body = $.getDocument(el).body;
+            var body = getDocument(el).body;
             if (isHidden(el) || isHiddenParent(el)) {
                 var properties = getHiddenElementProperties(el, ['offsetTop', 'offsetLeft']);
                 ret.top = properties[0], ret.left = properties[1];
@@ -1136,26 +1138,56 @@
         }
     });
 
+    // dom: checkers
+    Dom.extendPrototype({
+        isWindow: function() {
+            return isWindow(this[0]);
+        },
+        isDocument: function() {
+            return isDocument(this[0]);
+        },
+        isNode: function() {
+            return isNode(this[0]);
+        },
+        isNodeElement: function() {
+            return isNodeElement(this[0]);
+        },
+        isRoot: function() {
+            return isRoot(this[0]);
+        },
+        isRootElement: function() {
+            return isRootElement(this[0]);
+        }
+    });
+
     $.onReady(function() { var doc = document, dom, el, els, body = document.body
         els = new Dom('body')
         // log(els)
         // log('---')
 
-        el = $.dom("#checkbox")
+        el = $.dom("#iframe")
 
-        $.fire('2s', function() {
-            log(el.checked(true))
-            log(el.checked())
-            $.fire('1s', function() {
-                log(el.checked(false))
-                log(el.checked())
-                $.fire('1s', function() {
-                    log(el.checked(true))
-                    log(el.checked())
-                })
-            })
-        })
+        $.fire("3s", function() {
+            log(el.getWindow().me.document.body)
+            log(el.getDocument().me.body)
+            log(el.getWindow(true).me.document.body)
+            log(el.getDocument(true).me.body)
+        });
 
+
+
+        // $.fire('2s', function() {
+        //     log(el.checked(true))
+        //     log(el.checked())
+        //     $.fire('1s', function() {
+        //         log(el.checked(false))
+        //         log(el.checked())
+        //         $.fire('1s', function() {
+        //             log(el.checked(true))
+        //             log(el.checked())
+        //         })
+        //     })
+        // })
 
         // el = $.dom("#form")
         // log(el.serialize())
