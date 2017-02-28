@@ -86,7 +86,7 @@
          * @return {String}
          */
         serialize: function(data) {
-            if (!$.isIterable(data)) {
+            if ($.isString(data) || !$.isIterable(data)) {
                 return data;
             }
 
