@@ -497,10 +497,10 @@
         // shortcuts for element
         [Window, Document, Element].forEach(function(target) {
             $.extendPrototype(target, {
-                on: function(type, fn, options) { return on(this, type, fn, options); },
-                once: function(type, fn, options) { return once(this, type, fn, options); },
-                off: function(type, fn, options) { return off(this, type, fn, options); },
-                fire: function(type, fn, options) { return fire(this, type, fn, options); }
+                on: function(type, fn, options) { on(this, type, fn, options); },
+                once: function(type, fn, options) { once(this, type, fn, options); },
+                off: function(type, fn, options) { off(this, type, fn, options); },
+                fire: function(type, fn, options) { fire(this, type, fn, options); }
             });
         });
 
