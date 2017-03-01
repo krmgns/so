@@ -26,12 +26,12 @@
     var toStyleName = $.util.toCamelCaseFromDashCase;
     var querySelector = function(root, selector) { return root.querySelector(selector); };
     var querySelectorAll = function(root, selector) { return root.querySelectorAll(selector); };
-    var _break = 0 /* loop break tick */, _var /* no define one-var each time (@minify) */;
+    var _break = 0 /* loop break tick */;
 
     function getTag(el) {return (el && el.nodeName) ? el.nodeName.toLowerCase() : isWindow(el) ? '#window' : null;}
 
-    function isRoot(el) {return _var = getTag(el), _var == '#window' || _var == '#document';}
-    function isRootElement(el) { return _var = getTag(el), _var == 'html' || _var == 'body';}
+    function isRoot(el, _var) {return _var = getTag(el), _var == '#window' || _var == '#document';}
+    function isRootElement(el, _var) {return _var = getTag(el), _var == 'html' || _var == 'body';}
     function isDom(input) {return (input instanceof Dom);}
 
     function toKeyValueObject(key, value) {
@@ -280,8 +280,13 @@
     // dom: property
     Dom.extendPrototype({
         property: function(name, value) {
-            var _this = this; return isUndefined(value) ? __(_this, name)
-                : (_this[0] && (_this[0][name] = value), _this);
+            return isUndefined(value) ? this.getProperty(name) : this.setProperty(name, value);
+        },
+        setProperty: function(name, value) {
+            var _this = this; return (_this[0] && (_this[0][name] = value), _this);
+        },
+        getProperty: function(name) {
+            return __(this, name);
         }
     });
 
