@@ -440,6 +440,10 @@
 
     // dom: styles
     Dom.extendPrototype({
+        style: function(name, value, valueDefault, raw) {
+            return !isVoid(value) ? this.setStyle(name, value)
+                : this.getStyle(name, value, valueDefault, raw);
+        },
         setStyle: function(name, value) {
             var styles = name;
             if (isString(styles)) {
