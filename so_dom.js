@@ -1029,11 +1029,11 @@
     // dom: form
     Dom.extendPrototype({
         serialize: function(callback, opt_plus) {
-            var ret = '';
-            if (getTag(this[0]) == 'form') {
+            var el = this[0], ret = '';
+            if (getTag(el) == 'form') {
                 var data = [];
                 var done = true;
-                $.for(this[0], function(el) {
+                $.for(el, function(el) {
                     if (!el.name || el.disabled) {
                         return;
                     }
@@ -1192,6 +1192,28 @@
             }
         });
     }
+
+    // dom: contents
+    Dom.extendPrototype({
+        text: function(input) {
+            return isVoid(input) ? this.getText() : this.setText(input);
+        },
+        setText: function(input) {
+            return this.for(function(el) { el.textContent = (''+ input); });
+        },
+        getText: function() {
+            return __(this, 'textContent');
+        },
+        html: function(input) {
+            return isVoid(input) ? this.getHtml() : this.setHtml(input);
+        },
+        getHtml: function(input) {
+            return this.for(function(el) { el.innerHTML = (''+ input); });
+        },
+        getHtml: function() {
+            return __(this, 'innerHTML');
+        }
+    });
 
     $.onReady(function() { var doc = document, dom, el, els, body = document.body
         // els = new Dom('body')
