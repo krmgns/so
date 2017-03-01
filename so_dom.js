@@ -277,6 +277,13 @@
         return _(_this, 0, property);
     }
 
+    // dom: properties
+    Dom.extendPrototype({
+        property: function(name) {
+            return __(this, name);
+        }
+    });
+
     // dom: contents
     Dom.extendPrototype({
         text: function(input) {
