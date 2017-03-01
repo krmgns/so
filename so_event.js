@@ -30,7 +30,7 @@
         DeviceMotionEvent: 'devicemotion', DeviceOrientationEvent: 'deviceorientation'
     };
     var re_typesFix = /^(UI|Mouse|Mutation|HTML)Event$/i;
-    var re_typesStandard = $.re('('+ Object.values(re_types).join('|') +')', 'i');
+    var re_typesStandard = $.re('('+ Object.values(re_types).join('|') +')', 'i', '1m');
     var re_commaSplit = /,\s*/;
     var fn_defineProperty = Object.defineProperty;
     var optionsDefault = {
@@ -57,7 +57,7 @@
         var event, eventClassOrig;
         if (!eventClass) { // autodetect
             $.forEach(re_types, function(_eventClass, re) {
-                re = $.re('^('+ re +')$', 'i');
+                re = $.re('^('+ re +')$', 'i', '1m');
                 if (re.test(eventType)) {
                     eventClass = eventClassOrig = _eventClass;
                     return 0;
