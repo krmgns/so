@@ -277,6 +277,28 @@
         return _(_this, 0, property);
     }
 
+    // dom: contents
+    Dom.extendPrototype({
+        text: function(input) {
+            return isVoid(input) ? this.getText() : this.setText(input);
+        },
+        setText: function(input) {
+            return this.for(function(el) { el.textContent = (''+ input); });
+        },
+        getText: function() {
+            return __(this, 'textContent');
+        },
+        html: function(input) {
+            return isVoid(input) ? this.getHtml() : this.setHtml(input);
+        },
+        getHtml: function(input) {
+            return this.for(function(el) { el.innerHTML = (''+ input); });
+        },
+        getHtml: function() {
+            return __(this, 'innerHTML');
+        }
+    });
+
     function match(a, b) { // intersect
         var tmp = (b.length > a.length) ? (tmp = b, b = a, a = tmp) : null; // loop over shorter
         return a.filter(function(e) {
@@ -1199,28 +1221,6 @@
         });
     }
 
-    // dom: contents
-    Dom.extendPrototype({
-        text: function(input) {
-            return isVoid(input) ? this.getText() : this.setText(input);
-        },
-        setText: function(input) {
-            return this.for(function(el) { el.textContent = (''+ input); });
-        },
-        getText: function() {
-            return __(this, 'textContent');
-        },
-        html: function(input) {
-            return isVoid(input) ? this.getHtml() : this.setHtml(input);
-        },
-        getHtml: function(input) {
-            return this.for(function(el) { el.innerHTML = (''+ input); });
-        },
-        getHtml: function() {
-            return __(this, 'innerHTML');
-        }
-    });
-
     $.onReady(function() { var doc = document, dom, el, els, body = document.body
         // els = new Dom('body')
         // log(els)
@@ -1230,7 +1230,8 @@
         // el.on("click", log)
 
         function fn(e) {
-            log(e, e.target, this, this.body.textContent)
+            $.dom(this.body).class("*")
+            log(e, e.target, this, this.body)
         }
 
         // window.on("click", function() {
