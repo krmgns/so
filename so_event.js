@@ -496,20 +496,21 @@
             });
         }
 
-        // shortcuts for constructors
-        var prototypes = [Node];
-        if (window.Window) { // fails on safari/5.1
-            prototypes.push(window.Window);
-        } else {
-            // @todo maybe?
+        // shortcuts for Window & Node (Document, Element, ..) objects
+        var objects = [Node];
+        var prototype = 'prototype';
+        var names = ['on', 'once', 'off', 'fire'];
+        if (window.Window) {
+            objects.push(window.Window);
+        } else if (window.__proto__) { // fails on safari/5.1 (maybe others too)
+            prototype = '__proto__';
         }
 
-        prototypes.forEach(function(target) {
-            $.extendPrototype(target, {
-                on: function(type, fn, options) { on(this, type, fn, options); },
-                once: function(type, fn, options) { once(this, type, fn, options); },
-                off: function(type, fn, options) { off(this, type, fn, options); },
-                fire: function(type, fn, options) { fire(this, type, fn, options); }
+        objects.forEach(function(object) {
+            names.forEach(function(name) {
+                object[prototype][name] = function(type, fn, options) {
+                    $.event[name](this, type, fn, options);
+                };
             });
         });
 
