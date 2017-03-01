@@ -7,7 +7,7 @@
     var toStyleName = $.util.toCamelCaseFromDashCase;
     // thanks: http://easings.net/ (easeOutQuad)
     var fn_easing = function(t,b,c,d) { return -c*(t/=d)*(t-2)+b; };
-    var fn_runner = window.requestAnimationFrame || function(fn) { $.fire(opt_fps, fn); };
+    var fn_runner = window.requestAnimationFrame || function(fn) { setTimeout(fn, opt_fps); };
 
     function runner(fn) {
         fn_runner(fn);
