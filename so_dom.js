@@ -17,7 +17,7 @@
     var trim = $.trim, trims = $.trimSpace;
     var split = function split(s, re) {return trims(s).split(re);};
     var isBool = $.isBool, isTrue = $.isTrue, isFalse = $.isFalse;
-    var isVoid = $.isVoid, isNull = $.isNull, isUndefined = $.isUndefined;
+    var isVoid = $.isVoid, isNull = $.isNull, isNulls = $.isNulls, isUndefined = $.isUndefined;
     var isObject = $.isObject, isArray = $.isArray;
     var isNumber = $.isNumber, isNumeric = $.isNumeric, isString = $.isString;
     var isWindow = $.isWindow, isDocument = $.isDocument;
@@ -893,15 +893,17 @@
 
     // dom: class
     Dom.extendPrototype({
-        class: function(name, set) {
-            // el.class('cls') // add
-            // el.class('cls', true) // set
-            // el.class('cls', null) // remove
-            if (name) {
-                return set ? this.setClass(name) : this.addClass(name);
-            } else if (isNull(name)) {
-                return this.removeClass(ALL);
+        class: function(name, option) {
+            if (isUndefined(option)) { // add: ('foo')
+                this.addClass(name);
+            } else if (isNull(option) || isNulls(option)) { // remove: ('foo', '' | null)
+                this.removeClass(name);
+            } else if (isTrue(option)) { // set: ('foo', true)
+                this.setClass(name);
+            } else { // replace: ('foo', 'bar')
+                this.replaceClass(name, (''+ option));
             }
+            return this
         },
         hasClass: function(name) {
             return !!hasClass(this[0], name);
