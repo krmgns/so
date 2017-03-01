@@ -1174,19 +1174,56 @@
         }
     });
 
+    // dom: events
+    var event = $.event;
+    if (event) {
+        Dom.extendPrototype({
+            on: function(type, fn, options) {
+                return this.for(function(el) { event.on(el, type, fn, options); });
+            },
+            once: function(type, fn, options) {
+                return this.for(function(el) { event.once(el, type, fn, options); });
+            },
+            off: function(type, fn, options) {
+                return this.for(function(el) { event.off(el, type, fn, options); });
+            },
+            fire: function(type, fn, options) {
+                return this.for(function(el) { event.fire(el, type, fn, options); });
+            }
+        });
+    }
+
     $.onReady(function() { var doc = document, dom, el, els, body = document.body
-        els = new Dom('body')
+        // els = new Dom('body')
         // log(els)
         // log('---')
 
         el = $.dom("#iframe")
+        // el.on("click", log)
+
+        function fn(e) {
+            log(e, e.target, this, this.body.textContent)
+        }
+
+        // window.on("click", function() {
+        //     log(this.body.textContent)
+        // })
 
         $.fire("3s", function() {
-            log(el.window().me.document.body)
-            log(el.document().me.body)
-            log(el.window(true).me.document.body)
-            log(el.document(true).me.body)
+            // log(el.window().on('click', fn))
+            // log(el.document().on('click', fn))
+            // log(el.window(true).on('click', fn))
+            log(el.document(true).on('click', fn))
         });
+
+        // window.on("click")
+
+        // $.fire("3s", function() {
+        //     log(el.window().me.document.body)
+        //     log(el.document().me.body)
+        //     log(el.window(true).me.document.body)
+        //     log(el.document(true).me.body)
+        // });
 
         // $.fire('2s', function() {
         //     log(el.checked(true))
