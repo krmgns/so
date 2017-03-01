@@ -438,8 +438,8 @@
 
     var re_rgb = /rgb/i;
     var re_color = /color/i;
-    var re_unit = /(?:p[xt]|em|%)/i; // short & quick
-    var re_unitOther = /(?:ex|in|[cm]m|pc|v[hw]?min)/i;
+    var re_unit = /(?:px|em|%)/i; // short & quick
+    var re_unitOther = /(?:ex|in|[cm]m|p[tc]|v[hw]?min)/i;
     var nonUnitStyles = ['opacity', 'zoom', 'zIndex', 'columnCount', 'columns', 'fillOpacity', 'fontWeight', 'lineHeight'];
 
     function getStyle(el, name, value) {
