@@ -496,8 +496,15 @@
             });
         }
 
-        // shortcuts for element
-        [Window, Document, Element].forEach(function(target) {
+        // shortcuts for constructors
+        var prototypes = [Node];
+        if (window.Window) { // fails on safari/5.1
+            prototypes.push(window.Window);
+        } else {
+            // @todo maybe?
+        }
+
+        prototypes.forEach(function(target) {
             $.extendPrototype(target, {
                 on: function(type, fn, options) { on(this, type, fn, options); },
                 once: function(type, fn, options) { once(this, type, fn, options); },
