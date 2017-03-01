@@ -266,21 +266,22 @@
         }
     });
 
-    function _(_this, i, property) {
-        var element = _this[i];
-        if (property) {
-            element = element && element[property];
+    function _(_this, i, name) {
+        var ret = _this[i];
+        if (name) {
+            ret = ret && ret[name];
         }
-        return element;
+        return ret;
     }
-    function __(_this, property) {
-        return _(_this, 0, property);
+    function __(_this, name) {
+        return _(_this, 0, name);
     }
 
-    // dom: properties
+    // dom: property
     Dom.extendPrototype({
-        property: function(name) {
-            return __(this, name);
+        property: function(name, value) {
+            var _this = this; return isUndefined(value) ? __(_this, name)
+                : (_this[0] && (_this[0][name] = value), _this);
         }
     });
 
