@@ -1,4 +1,4 @@
-;(function(window, $, undefined) { 'use strict';
+;(function(window, $) { 'use strict';
 
     var opt_fps = 1000 / 60;
     var opt_durations = {fast: 50, slow: 650, default: 350};
@@ -6,8 +6,12 @@
     var re_scroll = /scroll(?:Top|Left)/i;
     var toStyleName = $.util.toCamelCaseFromDashCase;
     // thanks: http://easings.net/ (easeOutQuad)
-    var fn_easing = function(a,b,c,d) {return -c*(a/=d)*(a-2)+b};
+    var fn_easing = function(t,b,c,d) { return -c*(t/=d)*(t-2)+b; };
+    var fn_runner = window.requestAnimationFrame || function(fn) { $.fire(opt_fps, fn); };
 
+    function runner(fn) {
+        fn_runner(fn);
+    }
 
     function Animation(target, properties, duration, easing, onEnd) {
         var _this = this;
@@ -39,7 +43,7 @@
                 endValue = value;
 
                 _this.tasks.push({
-                    name: name,
+                    property: name,
                     startValue: startValue,
                     endValue: endValue,
                     diff: Math.abs(endValue - startValue),
@@ -53,27 +57,24 @@
     }
 
     Animation.extendPrototype({
-        run: function(onEnd) {
-            if (onEnd) {
-                this.onEnd = onEnd;
-            }
-
+        run: function() {
             this.stop(); // stop if running
 
             this.running = true;
             this.startTime = $.now();
 
-            ;(function run(_this) {
+            var _this = this;
+            ;(function run() {
                 if (!_this.stopped && !_this.ended) {
                     if (_this.elapsedTime < _this.duration) {
-                        $.fire(opt_fps, run, [_this]);
+                        runner(run)
                         _this.start();
                     } else {
                         _this.end();
                         _this.stop();
                     }
                 }
-            })(this);
+            })();
 
             return this;
         },
@@ -86,13 +87,13 @@
 
             var _this = this;
             this.tasks.forEach(function(task) {
-                current = _this.easing(_this.elapsedTime, 0.0, task.diff, _this.duration);
+                current = fn_easing(_this.elapsedTime, 0.00, task.diff, _this.duration);
                 current = task.reverse ? task.startValue - current : task.startValue + current;
                 if (!task.scroll) {
-                    target.setStyle(task.name, current.toFixed(20)); // use 'toFixed' to get max percent
+                    target.setStyle(task.property, current.toFixed(20)); // use 'toFixed' to get max percent
                 } else {
-                    target.setProperty(task.name, root ? current + target.me[task.name]
-                        : current + (target.me[task.name] /= 2));
+                    target.setProperty(task.property, root ? current + target.me[task.property]
+                        : current + (target.me[task.property] /= 2));
                 }
             });
         },
@@ -112,9 +113,9 @@
 
             this.tasks.forEach(function(task) {
                 if (!task.scroll) {
-                    target.setStyle(task.name, task.endValue);
+                    target.setStyle(task.property, task.endValue);
                 } else {
-                    target.setProperty(task.name, task.endValue);
+                    target.setProperty(task.property, task.endValue);
                 }
             });
 
@@ -127,7 +128,10 @@
     }
 
     $.animation = {
+        animate: function(target, properties, duration, easing, onEnd) {
+            return initAnimation(target, properties, duration, easing, onEnd).run();
+        },
         Animation: initAnimation
-    }
+    };
 
 })(window, so);
