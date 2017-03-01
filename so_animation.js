@@ -1,3 +1,4 @@
+
 ;(function(window, $) { 'use strict';
 
     var opt_fps = 1000 / 60;
@@ -43,7 +44,7 @@
                 endValue = value;
 
                 _this.tasks.push({
-                    property: name,
+                    name: name,
                     startValue: startValue,
                     endValue: endValue,
                     diff: Math.abs(endValue - startValue),
@@ -90,10 +91,10 @@
                 current = fn_easing(_this.elapsedTime, 0.00, task.diff, _this.duration);
                 current = task.reverse ? task.startValue - current : task.startValue + current;
                 if (!task.scroll) {
-                    target.setStyle(task.property, current.toFixed(20)); // use 'toFixed' to get max percent
+                    target.setStyle(task.name, current.toFixed(20)); // use 'toFixed' to get max percent
                 } else {
-                    target.setProperty(task.property, root ? current + target.me[task.property]
-                        : current + (target.me[task.property] /= 2));
+                    target.setProperty(task.name, root ? current + target.me[task.name]
+                        : current + (target.me[task.name] /= 2));
                 }
             });
         },
@@ -109,15 +110,15 @@
         end: function() {
             var target = this.target;
 
-            this.ended = true;
-
             this.tasks.forEach(function(task) {
                 if (!task.scroll) {
-                    target.setStyle(task.property, task.endValue);
+                    target.setStyle(task.name, task.endValue);
                 } else {
-                    target.setProperty(task.property, task.endValue);
+                    target.setProperty(task.name, task.endValue);
                 }
             });
+
+            this.ended = true;
 
             $.isFunction(this.onEnd) && this.onEnd(this);
         }
