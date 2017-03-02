@@ -48,6 +48,7 @@
     var _reCache = {};
     var re_dot = /^[-+]?\./;
     var re_time = /(\d+)(\w+)/;
+    var re_numeric = /^[-+]?(?:\.?\d+|\d+\.\d+)$/;
     var re_trimSpace = /^\s+|\s+$/g;
     var RegExp = window.RegExp;
 
@@ -726,7 +727,6 @@
     });
 
     var _id = 0;
-    var re_numeric = /^[-+]?(?:\.?\d+|\d+\.\d+)$/;
     var fn_eval = window.eval; // direct eval breaks minify tool
     var fn_slice = [].slice;
     var fn_toString = {}.toString;
