@@ -440,7 +440,7 @@
     var re_color = /color/i;
     var re_unit = /(?:px|em|%)/i; // short & quick
     var re_unitOther = /(?:ex|in|[cm]m|p[tc]|v[hw]?min)/i;
-    var nonUnitStyles = ['opacity', 'zoom', 'zIndex', 'columnCount', 'columns', 'fillOpacity', 'fontWeight', 'lineHeight'];
+    var re_noneUnitStyles = /((fill)?opacity|z(oom|index)|(fontw|lineh)eight|column(count|s))/i;
 
     function getComputedStyle(el) {
         return getWindow(el).getComputedStyle(el);
@@ -451,7 +451,7 @@
     }
     function setStyle(el, name, value) {
         name = toStyleName(name), value = trims(value);
-        if (value && isNumeric(value) && !nonUnitStyles.has(name)) {
+        if (value && isNumeric(value) && !re_noneUnitStyles.test(name)) {
             value += 'px';
         }
         el.style[name] = value;
@@ -1268,6 +1268,19 @@
                     });
                 }
                 return this;
+            },
+            fade: function(to, duration, onEnd) {
+                return this.animate({opacity: to}, duration, onEnd);
+            },
+            fadeIn: function(duration, onEnd) {
+                return this.fade(1, duration, onEnd);
+            },
+            fadeOut: function(duration, onEnd) {
+                // remove element after fading out
+                if (isTrue(onEnd) || onEnd == 'remove') {
+                    onEnd = function(el) { $.dom(el).remove(); };
+                }
+                return this.fade(0, duration, onEnd);
             }
         });
     }
@@ -1277,18 +1290,22 @@
         // log(els)
         // log('---')
 
-        var el1 = $.dom('#div2')
-        var el2 = $.dom('#div3')
+        var div2 = $.dom('#div2')
+        var div3 = $.dom('#div3')
         var anim = function(e) { e.stop()
-            $.animation.animate("#div1", {scrollTop: 190}, 500)
+            div2.fadeIn()
+            $.fire("1s", function() { div2.fadeOut() })
+            // $.fire("1s", function() { div2.fade(.5) })
 
-            el1.setStyle({"left": "10%", "transition":""})
-            el2.setStyle("left", "10%")
+            // $.animation.animate("#div1", {scrollTop: 190}, 500)
 
-            $.fire("1s", function() {
-                el1.setStyle({transition: 'left 1000ms ease', left: '50%'})
-                $.animation.animate(el2, {left: '50%'}, 1000)
-            })
+            // div2.setStyle({"left": "10%", "transition":""})
+            // div3.setStyle("left", "10%")
+
+            // $.fire("1s", function() {
+            //     div2.setStyle({transition: 'left 1000ms ease', left: '50%'})
+            //     $.animation.animate(div3, {left: '50%'}, 1000)
+            // })
         }
         $.dom("#animate").on("click", anim)
 
