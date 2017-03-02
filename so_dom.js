@@ -450,6 +450,7 @@
         }
         return false;
     };
+    var defaultStyles = {};
 
     function getCssStyle(el) {
         var sheets = el.ownerDocument.styleSheets, rules, ret = [];
@@ -465,6 +466,15 @@
     }
     function getComputedStyle(el) {
         return getWindow(el).getComputedStyle(el);
+    }
+    function getDefaultStyle(tag, name) {
+        if (!defaultStyles[tag]) {
+            var el = document.createElement(tag);
+            document.body.appendChild(el);
+            defaultStyles[tag] = getComputedStyle(el)[toStyleName(name)];
+            document.body.removeChild(el);
+        }
+        return defaultStyles[tag];
     }
     function getStyle(el, name, value) {
         var style = getComputedStyle(el);
@@ -1253,7 +1263,7 @@
     var animation = $.animation;
     if (animation) {
         Dom.extendPrototype({
-            animate: function(properties, duration, easing, onEnd) {
+            animate: function(properties, speed, easing, callback) {
                 if (properties == 'stop') { // stop previous animation
                     this.for(function(el) {
                         var animation = el.$animation;
@@ -1263,23 +1273,55 @@
                     });
                 } else {
                     this.for(function(el) {
-                        animation.animate(el, properties, duration, easing, onEnd);
+                        animation.animate(el, properties, speed, easing, callback);
                     });
                 }
                 return this;
             },
-            fade: function(to, duration, onEnd) {
-                return this.animate({opacity: to}, duration, onEnd);
+            fade: function(to, speed, callback) {
+                return this.animate({opacity: to}, speed, callback);
             },
-            fadeIn: function(duration, onEnd) {
-                return this.fade(1, duration, onEnd);
+            fadeIn: function(speed, callback) {
+                return this.fade(1, speed, callback);
             },
-            fadeOut: function(duration, onEnd) {
+            fadeOut: function(speed, callback) {
                 // remove element after fading out
-                if (isTrue(onEnd) || onEnd == 'remove') {
-                    onEnd = function(el) { $.dom(el).remove(); };
+                if (isTrue(callback) || callback == 'remove') {
+                    callback = function(el) { $.dom(el).remove(); };
                 }
-                return this.fade(0, duration, onEnd);
+                return this.fade(0, speed, callback);
+            },
+            show: function(speed, callback) {
+                return this.for(function(el) {
+                    if (isHidden(el)) {
+                        el.style.display = getDefaultStyle(el.tagName, 'display'); // to default
+                        animation.animate(el, {opacity: 1}, (speed || 0), callback);
+                    }
+                });
+            },
+            hide: function(speed, callback) {
+                return this.for(function(el) {
+                    if (!isHidden(el)) {
+                        animation.animate(el, {opacity: 0}, (speed || 0), function() {
+                            el.style.display = 'none'; // to real display
+                            callback && callback.call(this);
+                        });
+                    }
+                });
+            },
+            toggle: function(speed, callback) {
+                speed = speed || 0;
+                return this.for(function(el) {
+                    if (isHidden(el)) {
+                        el.style.display = getDefaultStyle(el.tagName, 'display'); // to default
+                        animation.animate(el, {opacity: 1}, speed, callback);
+                    } else {
+                        animation.animate(el, {opacity: 0}, speed, function() {
+                            el.style.display = 'none'; // to real display
+                            callback && callback.call(this);
+                        });
+                    }
+                });
             }
         });
     }
@@ -1292,8 +1334,8 @@
         var div2 = $.dom('#div2')
         var div3 = $.dom('#div3')
         var anim = function(e) { e.stop()
-            div2.fadeIn()
-            $.fire("1s", function() { div2.fadeOut() })
+            div2.show(100000)
+            $.fire("3s", function() { div2.hide(100000) })
             // $.fire("1s", function() { div2.fade(.5) })
 
             // $.animation.animate("#div1", {scrollTop: 190}, 500)
