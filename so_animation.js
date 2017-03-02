@@ -147,7 +147,7 @@
                     value = fn_easing(_this.elapsedTime, 0.00, task.diff, _this.duration);
                     value = task.reverse ? task.startValue - value : task.startValue + value;
                     if (!task.scroll) {
-                        target.setStyle(task.name, value.toFixed(20) /* use 'toFixed' to get max percent */
+                        target.setStyle(task.name, value.toFixed(9) /* use 'toFixed' to get a good percent */
                             + task.unit);
                     } else {
                         target.setProperty(task.name, value.toFixed(0));
