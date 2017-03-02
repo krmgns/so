@@ -66,7 +66,7 @@
 
             // assign animation tasks
             $.forEach(properties, function(name, value) {
-                var root, scroll, unit, startValue, endValue, style, styleUnit;
+                var root, scroll, unit = '', startValue, endValue, style;
                 name = toStyleName(name);
                 root = re_root.test(_this.target.tag());
                 scroll = re_scroll.test(name);
@@ -75,9 +75,13 @@
                     style = $.isString(value)
                         ? _this.target.getCssStyle(name)
                         : _this.target.getStyle(name, FALSE);
-                    unit = style.replace(re_digit, NULLS);
+
                     startValue = toFloat(style);
                     endValue = toFloat(value);
+
+                    if ($.dom.isUnitStyle(name)) {
+                        unit = style.replace(re_digit, NULLS);
+                    }
                 } else {
                     startValue = _this.target.scroll()[name.slice(6).toLowerCase()];
                     endValue = value;
