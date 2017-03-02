@@ -7,15 +7,17 @@
  */
 ;(function(window, $) { 'use strict';
 
+    var re_root = /(?:html|body)/;
+    var re_digit = /\d+/;
+    var re_scroll = /scroll(?:Top|Left)/;
     var opt_fps = 1000 / 60;
     var opt_durations = {fast: 50, slow: 650, default: 350};
-    var re_root = /(?:html|body)/i;
-    var re_scroll = /scroll(?:Top|Left)/i;
     // thanks: http://easings.net/ (easeOutQuad)
     var fn_easing = function(t,b,c,d) { return -c*(t/=d)*(t-2)+b; };
     var fn_runner = window.requestAnimationFrame || function(fn) { setTimeout(fn, opt_fps); };
     var now = $.now;
     var toStyleName = $.util.toCamelCaseFromDashCase;
+    var toFloat = function(input) { return parseFloat(input) || 0; };
 
     // shortcut
     function runner(fn) {
@@ -56,20 +58,32 @@
 
         // assign animation tasks
         $.forEach(properties, function(name, value) {
-            var scroll, startValue, endValue;
+            var root, scroll, unit, startValue, endValue, style, styleUnit;
             name = toStyleName(name);
+            root = re_root.test(_this.target.tag());
             scroll = re_scroll.test(name);
-            startValue = !scroll ? _this.target.getStyle(name)
-                : _this.target.scroll()[name.slice().toLowerCase()];
-            endValue = value;
+
+            if (!scroll) {
+                style = $.isString(value)
+                    ? _this.target.getCssStyle(name)
+                    : _this.target.getStyle(name, false);
+                unit = style.replace(re_digit, '');
+                startValue = toFloat(style);
+                endValue = toFloat(value);
+            } else {
+                startValue = _this.target.scroll()[name.slice().toLowerCase()];
+                endValue = value;
+            }
 
             _this.tasks.push({
                 name: name,
+                root: root,
+                scroll: scroll,
+                unit: unit,
                 startValue: startValue,
                 endValue: endValue,
-                diff: Math.abs(endValue - startValue),
                 reverse: startValue > endValue,
-                scroll: scroll
+                diff: Math.abs(endValue - startValue)
             });
         });
 
@@ -113,7 +127,6 @@
          */
         start: function() {
             var target = this.target
-            var root = re_root.test(target.me.tagName);
             var scroll, current;
 
             this.elapsedTime = now() - this.startTime;
@@ -123,9 +136,10 @@
                 current = fn_easing(_this.elapsedTime, 0.00, task.diff, _this.duration);
                 current = task.reverse ? task.startValue - current : task.startValue + current;
                 if (!task.scroll) {
-                    target.setStyle(task.name, current.toFixed(20)); // use 'toFixed' to get max percent
+                    // use 'toFixed' to get max percent
+                    target.setStyle(task.name, current.toFixed(20) + task.unit);
                 } else {
-                    target.setProperty(task.name, root ? current + target.me[task.name]
+                    target.setProperty(task.name, task.root ? current + target.me[task.name]
                         : current + (target.me[task.name] /= 2));
                 }
             });
@@ -136,11 +150,12 @@
          * @return {this}
          */
         stop: function() {
+            this.target.me.$animation = null; // remove animation
+
             if (this.running) {
                 this.running = false;
                 this.stopped = true;
             }
-            this.target.me.$animation = null; // remove animation
 
             return this;
         },
@@ -154,16 +169,17 @@
 
             this.tasks.forEach(function(task) {
                 if (!task.scroll) {
-                    target.setStyle(task.name, task.endValue);
+                    target.setStyle(task.name, task.endValue + task.unit);
                 } else {
                     target.setProperty(task.name, task.endValue);
                 }
             });
 
+            this.ended = true;
+
             if ($.isFunction(this.onEnd)) {
                 this.onEnd(this);
             }
-            this.ended = true;
 
             return this;
         }
