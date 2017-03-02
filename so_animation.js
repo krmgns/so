@@ -7,6 +7,10 @@
  */
 ;(function(window, $) { 'use strict';
 
+    // minify candies
+    var NULL = null, NULLS = '';
+    var TRUE = true, FALSE = false;
+
     var re_root = /(?:html|body)/;
     var re_digit = /\d+/;
     var re_scroll = /scroll(?:Top|Left)/;
@@ -35,30 +39,30 @@
     function Animation(target, properties, duration, easing, onEnd) {
         var _this = this;
 
-        this.target = $.dom(target);
-        this.properties = properties;
-        this.duration = $.isNumber(duration)
+        _this.target = $.dom(target);
+        _this.properties = properties;
+        _this.duration = $.isNumber(duration)
             ? duration : opt_durations[duration] || opt_durations.default;
 
         // swap
         if ($.isFunction(easing)) {
-            onEnd = easing, easing = null;
+            onEnd = easing, easing = NULL;
         }
 
-        this.easing = (easing && $.ext && $.ext.easing && $.ext.easing[easing]) || fn_easing;
-        this.onEnd = onEnd;
+        _this.easing = (easing && $.ext && $.ext.easing && $.ext.easing[easing]) || fn_easing;
+        _this.onEnd = onEnd;
 
-        this.running = false
-        this.stopped = false;
-        this.ended = false;
-        this.startTime = 0;
-        this.elapsedTime = 0;
+        _this.running = FALSE;
+        _this.stopped = FALSE;
+        _this.ended = FALSE;
+        _this.startTime = 0;
+        _this.elapsedTime = 0;
 
-        this.tasks = [];
+        _this.tasks = [];
 
-        if (this.target.size) {
+        if (_this.target.size) {
             // for stop tool
-            this.target.me.$animation = this;
+            _this.target.me.$animation = _this;
 
             // assign animation tasks
             $.forEach(properties, function(name, value) {
@@ -70,8 +74,8 @@
                 if (!scroll) {
                     style = $.isString(value)
                         ? _this.target.getCssStyle(name)
-                        : _this.target.getStyle(name, false);
-                    unit = style.replace(re_digit, '');
+                        : _this.target.getStyle(name, FALSE);
+                    unit = style.replace(re_digit, NULLS);
                     startValue = toFloat(style);
                     endValue = toFloat(value);
                 } else {
@@ -102,12 +106,12 @@
          * @return {this}
          */
         run: function() {
-            this.stop(); // stop if running
-
-            this.running = true;
-            this.startTime = now();
-
             var _this = this;
+
+            _this.stop(); // stop if running
+            _this.running = TRUE;
+            _this.startTime = now();
+
             ;(function run() {
                 if (!_this.stopped && !_this.ended) {
                     if (_this.elapsedTime < _this.duration) {
@@ -120,7 +124,7 @@
                 }
             })();
 
-            return this;
+            return _this;
         },
 
         /**
@@ -129,25 +133,25 @@
          */
         start: function() {
             var _this = this;
-            var target = this.target
-            var scroll, current;
+            var target = _this.target
+            var scroll, value;
 
             if (target.size) {
-                this.elapsedTime = now() - this.startTime;
+                _this.elapsedTime = now() - _this.startTime;
 
-                this.tasks.forEach(function(task) {
-                    current = fn_easing(_this.elapsedTime, 0.00, task.diff, _this.duration);
-                    current = task.reverse ? task.startValue - current : task.startValue + current;
+                _this.tasks.forEach(function(task) {
+                    value = fn_easing(_this.elapsedTime, 0.00, task.diff, _this.duration);
+                    value = task.reverse ? task.startValue - value : task.startValue + value;
                     if (!task.scroll) {
-                        // use 'toFixed' to get max percent
-                        target.setStyle(task.name, current.toFixed(20) + task.unit);
+                        target.setStyle(task.name, value.toFixed(20) /* use 'toFixed' to get max percent */
+                            + task.unit);
                     } else {
-                        target.setProperty(task.name, current.toFixed(0));
+                        target.setProperty(task.name, value.toFixed(0));
                     }
                 });
             }
 
-            return this;
+            return _this;
         },
 
         /**
@@ -155,15 +159,17 @@
          * @return {this}
          */
         stop: function() {
-            if (this.running) {
-                this.running = false;
-                this.stopped = true;
+            var _this = this;
+
+            if (_this.running) {
+                _this.running = FALSE;
+                _this.stopped = TRUE;
             }
 
             // set as null (for isAnimated() etc.)
-            this.target.me && (this.target.me.$animation = null);
+            _this.target.me && (_this.target.me.$animation = NULL);
 
-            return this;
+            return _this;
         },
 
         /**
@@ -171,10 +177,11 @@
          * @return {this}
          */
         end: function() {
-            var target = this.target;
+            var _this = this;
+            var target = _this.target;
 
             if (target.size) {
-                this.tasks.forEach(function(task) {
+                _this.tasks.forEach(function(task) {
                     if (!task.scroll) {
                         target.setStyle(task.name, task.endValue + task.unit);
                     } else {
@@ -183,13 +190,13 @@
                 });
             }
 
-            this.ended = true;
+            _this.ended = TRUE;
 
-            if ($.isFunction(this.onEnd)) {
-                this.onEnd(this);
+            if ($.isFunction(_this.onEnd)) {
+                _this.onEnd(_this);
             }
 
-            return this;
+            return _this;
         }
     });
 
