@@ -755,18 +755,6 @@
     Dom.extendPrototype({
         offset: function() {return getOffset(this[0]);},
         scroll: function() {return getScroll(this[0]);},
-        scrollTo: function(top, left, anim, animDuration, animOnEnd) {
-            var el = this[0];
-            if (el) {
-                top = top || 0, left = left || 0;
-                if (!anim) {
-                    el.scrollTop = top, el.scrollLeft = left;
-                } else {
-                    // @todo
-                }
-            }
-            return initDom(el);
-        },
         box: function() {
             var el = this[0], ret = {};
             if (el) {
@@ -1337,6 +1325,12 @@
                             count++;
                         });
                     }();
+                });
+            },
+            scrollTo: function(top, left, speed, easing, callback) {
+                top = top || 0, left = left || 0;
+                return this.for(function(el) {
+                    animation.animate(el, {scrollTop: top, scrollLeft: left}, speed, easing, callback);
                 });
             }
         });
