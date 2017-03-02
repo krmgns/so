@@ -963,7 +963,7 @@
          * @return {Any}
          */
         int: function(input, base) { return toInt(input, base); },
-        float: function(input) { return toInt(input); },
+        float: function(input) { return toFloat(input); },
         string: function(input) { return toString(input); },
         bool: function(input) { return toBool(input); },
         value: function(input, valueDefault) { return toValue(input, valueDefault); },
