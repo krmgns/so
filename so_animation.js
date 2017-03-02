@@ -116,7 +116,7 @@
             _this.running = TRUE;
             _this.startTime = now();
 
-            ;(function run() {
+            !function run() {
                 if (!_this.stopped && !_this.ended) {
                     if (_this.elapsedTime < _this.speed) {
                         runner(run)
@@ -126,7 +126,7 @@
                         _this.stop();
                     }
                 }
-            })();
+            }();
 
             return _this;
         },
