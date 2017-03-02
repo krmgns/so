@@ -20,8 +20,8 @@
     var fn_easing = function(t,b,c,d) { return -c*(t/=d)*(t-2)+b; };
     var fn_runner = window.requestAnimationFrame || function(fn) { setTimeout(fn, opt_fps); };
     var now = $.now;
+    var toFloat = $.float;
     var toStyleName = $.util.toCamelCaseFromDashCase;
-    var toFloat = function(input) { return parseFloat(input) || 0; };
 
     // shortcut
     function runner(fn) {
@@ -66,15 +66,15 @@
 
             // assign animation tasks
             $.forEach(properties, function(name, value) {
-                var root, scroll, unit = '', startValue, endValue, style;
+                var root, scroll, startValue, endValue, style, unit = NULLS;
                 name = toStyleName(name);
                 root = re_root.test(_this.target.tag());
                 scroll = re_scroll.test(name);
 
                 if (!scroll) {
                     style = $.isString(value)
-                        ? _this.target.getCssStyle(name)
-                        : _this.target.getStyle(name, FALSE);
+                        ? _this.target.getCssStyle(name) // get original style to catch unit sign
+                        : _this.target.getComputedStyle(name);
 
                     startValue = toFloat(style);
                     endValue = toFloat(value);
@@ -91,11 +91,11 @@
                     name: name,
                     root: root,
                     scroll: scroll,
-                    unit: unit,
                     startValue: startValue,
                     endValue: endValue,
                     reverse: startValue > endValue,
-                    diff: Math.abs(endValue - startValue)
+                    diff: Math.abs(endValue - startValue),
+                    unit: unit
                 });
             });
         }
