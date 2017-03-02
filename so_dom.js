@@ -1391,6 +1391,12 @@
     $.dom = function(selector, root, i) {
         return initDom(selector, root, i);
     };
+    // add static methods
+    $.dom.extend({
+        isUnitStyle: function(value) {
+            return !re_noneUnitStyles.test(value);
+        }
+    });
 
     // Dom.$ => find --> one=true
     // Dom.$$ => findAll --> one=false
