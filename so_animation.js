@@ -71,7 +71,7 @@
                 startValue = toFloat(style);
                 endValue = toFloat(value);
             } else {
-                startValue = _this.target.scroll()[name.slice().toLowerCase()];
+                startValue = _this.target.scroll()[name.slice(6).toLowerCase()];
                 endValue = value;
             }
 
