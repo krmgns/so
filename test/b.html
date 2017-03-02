@@ -1,7 +1,7 @@
 <!doctype html><html>
 <head>
 <meta http-equiv="x-ua-compatible" content="ie=9" />
-<style>body{margin:0; padding:0;}</style>
+<style>body{margin:0; padding:0; height: !1000px}</style>
 <!-- <script src="so-all.php"></script> -->
 <script src="../so.js"></script>
 <script src="../so_list.js"></script>
@@ -10,19 +10,12 @@
 <script src="../so_browser.js"></script>
 <script src="../so_event.js"></script>
 <script src="../so_http.js"></script>
+<script src="../ext/so.ext.easing.js"></script>
+<script src="../so_animation.js"></script>
 <script src="../so_dom.js"></script>
 </head>
 <body class="body">
-<!-- <div id="div0" style="position:relative; border:1px solid; top:5px; left:1px; display:">
-    <div id="div1" style="position:relative; width:300px; height:500px; border:1px solid red; top:5px; left:2px; display:none1">
-        <div id="div2" style="position:absolute; width:150px; height:100px; border:1px solid blue; top:50px; left:20px; padding:; margin:">
-            <div id="div3" style="width:100%; height:100%"></div>
-        </div>
-    </div>
-</div> -->
-<!-- <style>#div1{ width: 1000px!important; height: 1000px!important; max-width: 300px; max-height: 500px; overflow-y: auto; } #div2{ width: 1500px!important; height: 1500px!important }</style> -->
 
-<br>
 <form id="form" attr="attr-foo" acceptcharset="utf8" src="?foo=1" class="cls1 cls2">
     <input so:v="1" id="form_i" name="form_i" value="123">
     <select id="form_s" name="form_s">
@@ -43,6 +36,7 @@
 <hr>
 <a id="a1" href="#" onclick="alert(1); return !1">a 1</a>
 <a id="a2" href="#">a 2</a>
+<a href="#" id="animate">animate</a>
 
 <div id="div-out" style="padding:">
     <!-- <div id="div" style="width: 200px; color:red; margin:10px; padding:10px; border:1px solid; min-height:10px; transform: scale(0.5); display:none; position:relative"> -->
@@ -71,10 +65,18 @@
         </div>
     </div>
 </div> -->
-
+<div id="div0" style="position:relative; border:1px solid; top:5px; left:1px; display:">
+    <div id="div1" style="position:relative; width:300px; height:1300px; border:1px solid red; top:5px; left:2px; display:;">
+        <div id="div2" style="position:absolute; width:50px; height:50px; border:1px solid blue; background:!blue; top:10px; padding:; margin:; "></div>
+        <!-- <div id="div3" style="position:absolute; width:50px; height:50px; border:1px solid blue; background:blue; top:63px; padding:; margin:; "></div> -->
+    </div>
+</div>
+<style>#div2,#div3{left:10%;}</style>
+<!-- <style>#div1{ width: 1000px!important; height: 1000px!important; max-width: 300px; max-height: 500px; overflow-y: auto; } #div2{ width: 1500px!important; height: 1500px!important }</style> -->
+<style>#div1{ max-width: 300px; max-height: 500px; overflow-y: auto; } #div2{ width: 1500px!important; height: 1500px!important }</style>
 <script>
 so.onReady(function($) {
-    var uri = '/.dev/so/test/ajax.php', a
+    // var uri = '/.dev/so/test/ajax.php', a
     // var onDone = function onDone() { log('done', arguments) },
     //     onSuccess = function onSuccess() { log('success') },
     //     onFailure = function onFailure() { log('failure') }
@@ -237,6 +239,6 @@ so.onReady(function($) {
 });
 </script>
 
-<iframe id="iframe" src="iframe.html"></iframe>
+<!-- <iframe id="iframe" src="iframe.html"></iframe> -->
 
 </body></html>

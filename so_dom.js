@@ -15,7 +15,7 @@
     var re_htmlContent = /^<([a-z-]+).*\/?>(?:.*<\/\1>)?$/i;
     var isNaN = window.isNaN;
     var trim = $.trim, trims = $.trimSpace;
-    var split = function split(s, re) {return trims(s).split(re);};
+    var split = function split(s, re) { return trims(s).split(re); };
     var isBool = $.isBool, isTrue = $.isTrue, isFalse = $.isFalse;
     var isVoid = $.isVoid, isNull = $.isNull, isNulls = $.isNulls, isUndefined = $.isUndefined;
     var isObject = $.isObject, isArray = $.isArray;
@@ -304,7 +304,7 @@
         html: function(input) {
             return isVoid(input) ? this.getHtml() : this.setHtml(input);
         },
-        getHtml: function(input) {
+        setHtml: function(input) {
             return this.for(function(el) { el.innerHTML = (''+ input); });
         },
         getHtml: function() {
@@ -442,8 +442,11 @@
     var re_unitOther = /(?:ex|in|[cm]m|p[tc]|v[hw]?min)/i;
     var nonUnitStyles = ['opacity', 'zoom', 'zIndex', 'columnCount', 'columns', 'fillOpacity', 'fontWeight', 'lineHeight'];
 
+    function getComputedStyle(el) {
+        return getWindow(el).getComputedStyle(el);
+    }
     function getStyle(el, name, value) {
-        var style = getWindow(el).getComputedStyle(el);
+        var style = getComputedStyle(el);
         return name ? (name = toStyleName(name), style[name] || value || '') : style;
     }
     function setStyle(el, name, value) {
@@ -473,66 +476,6 @@
         return ret;
     }
 
-    // dom: styles
-    Dom.extendPrototype({
-        style: function(name, value, valueDefault, raw) {
-            return !isVoid(value) ? this.setStyle(name, value)
-                : this.getStyle(name, value, valueDefault, raw);
-        },
-        setStyle: function(name, value) {
-            var styles = name;
-            if (isString(styles)) {
-                styles = !isVoid(value) ? toKeyValueObject(name, value) : parseStyleText(name);
-            }
-            this.for(function(el) {
-                $.forEach(styles, function(name, value) {
-                    setStyle(el, name, value);
-                });
-            });
-        },
-        getStyle: function(name, valueDefault, raw) {
-            var el = this[0];
-            var convert = isVoid(valueDefault) || isTrue(valueDefault);
-            var value, valueDefault = !isBool(valueDefault) ? valueDefault : '';
-            if (el) {
-                if (raw) {
-                    return el.style[toStyleName(name)] || valueDefault;
-                }
-                value = getStyle(el, name);
-                if (value && convert) {
-                    value = re_rgb.test(value) ? $.util.toHexFromRgb(value) // convert rgb to hex
-                        : re_unit.test(value) || re_unitOther.test(value) // convert px etc. to float
-                        ? value.toFloat() : value;
-                } else if (!value) {
-                    value = valueDefault;
-                }
-            }
-            return value;
-        },
-        getComputedStyle: function() {
-            var el = this[0], ret = {};
-            if (el) {
-                $.forEach(getStyle(el), function(name, value) {
-                    if (!isNumeric(name)) {
-                        ret[name] = value;
-                    }
-                }, null, false);
-            }
-            return ret;
-        },
-        removeStyle: function(name) {
-            return this.for(function(el) {
-                if (name == ALL) {
-                    el.removeAttribute('style');
-                } else {
-                    name.split(re_comma).forEach(function(name) {
-                        setStyle(el, name, '');
-                    });
-                }
-            });
-        }
-    });
-
     var matchesSelector = document.documentElement.matches || function(selector) {
         var i = 0, all = querySelectorAll(this.ownerDocument, selector);
         while (i < all.length) {
@@ -555,6 +498,79 @@
         });
         return ret[ret.length - 1] /* return last rule */ || {};
     }
+    function toStyleObject(style) {
+        var name, ret = {};
+        for (name in style) {
+            if (!isNumeric(name) && isString(style[name]) /* has own doesn't work (firefox/51) */) {
+                ret[name] = style[name];
+            }
+        }
+        return ret;
+    }
+
+    // dom: styles
+    Dom.extendPrototype({
+        style: function(name, value, valueDefault, raw) {
+            return !isVoid(value) ? this.setStyle(name, value)
+                : this.getStyle(name, value, valueDefault, raw);
+        },
+        setStyle: function(name, value) {
+            var styles = name;
+            if (isString(styles)) {
+                styles = !isVoid(value) ? toKeyValueObject(name, value) : parseStyleText(name);
+            }
+            this.for(function(el) {
+                $.forEach(styles, function(name, value) {
+                    setStyle(el, name, value);
+                });
+            });
+        },
+        getStyle: function(name, valueDefault, raw) {
+            var el = this[0], value = '', convert;
+            if (el) {
+                convert = isVoid(valueDefault) || isTrue(valueDefault);
+                valueDefault = !isBool(valueDefault) ? valueDefault : '';
+                if (raw) {
+                    return el.style[toStyleName(name)] || valueDefault;
+                }
+                value = getStyle(el, name);
+                if (value && convert) {
+                    value = re_rgb.test(value) ? $.util.toHexFromRgb(value) // convert rgb to hex
+                        : re_unit.test(value) || re_unitOther.test(value) // convert px etc. to float
+                        ? value.toFloat() : value;
+                } else if (!value) {
+                    value = valueDefault;
+                }
+            }
+            return value;
+        },
+        getCssStyle: function(name) { // original style
+            var el = this[0], ret = {};
+            if (el) {
+                ret = toStyleObject(getCssStyle(el));
+            }
+            return name ? ret[name] || '' : ret;
+        },
+        getComputedStyle: function(name) { // rendered style
+            var el = this[0], ret = {};
+            if (el) {
+                ret = toStyleObject(getComputedStyle(el));
+            }
+            return name ? ret[name] || '' : ret;
+        },
+        removeStyle: function(name) {
+            return this.for(function(el) {
+                if (name == ALL) {
+                    el.removeAttribute('style');
+                } else {
+                    name.split(re_comma).forEach(function(name) {
+                        setStyle(el, name, '');
+                    });
+                }
+            });
+        }
+    });
+
     function isHidden(el) {
         return el && !(el.offsetWidth || el.offsetHeight);
     }
@@ -1234,29 +1250,72 @@
         });
     }
 
+    // dom: animations
+    var animation = $.animation;
+    if (animation) {
+        Dom.extendPrototype({
+            animate: function(properties, duration, easing, onEnd) {
+                if (properties == 'stop') { // stop previous animation
+                    this.for(function(el) {
+                        var animation = el.$animation;
+                        if (animation && animation.running) {
+                            animation.stop();
+                        }
+                    });
+                } else {
+                    this.for(function(el) {
+                        animation.animate(el, properties, duration, easing, onEnd);
+                    });
+                }
+                return this;
+            }
+        });
+    }
+
     $.onReady(function() { var doc = document, dom, el, els, body = document.body
         // els = new Dom('body')
         // log(els)
         // log('---')
 
-        el = $.dom("#iframe")
+        var el1 = $.dom('#div2')
+        var el2 = $.dom('#div3')
+        var anim = function(e) { e.stop()
+            $.animation.animate("#div1", {scrollTop: 190}, 500)
+
+            el1.setStyle({"left": "10%", "transition":""})
+            el2.setStyle("left", "10%")
+
+            $.fire("1s", function() {
+                el1.setStyle({transition: 'left 1000ms ease', left: '50%'})
+                $.animation.animate(el2, {left: '50%'}, 1000)
+            })
+        }
+        $.dom("#animate").on("click", anim)
+
+        // $.fire("2s", function() {
+        //     anim.run(function() {
+        //         log(arguments)
+        //     })
+        // })
+
+        // el = $.dom("#iframe")
         // el.on("click", log)
 
-        function fn(e) {
-            $.dom(this.body).class("*")
-            log(e, e.target, this, this.body)
-        }
+        // function fn(e) {
+        //     $.dom(this.body).class("*")
+        //     log(e, e.target, this, this.body)
+        // }
 
         // window.on("click", function() {
         //     log(this.body.textContent)
         // })
 
-        $.fire("3s", function() {
-            // log(el.window().on('click', fn))
-            // log(el.document().on('click', fn))
-            // log(el.window(true).on('click', fn))
-            log(el.document(true).on('click', fn))
-        });
+        // $.fire("3s", function() {
+        //     // log(el.window().on('click', fn))
+        //     // log(el.document().on('click', fn))
+        //     // log(el.window(true).on('click', fn))
+        //     log(el.document(true).on('click', fn))
+        // });
 
         // window.on("click")
 
