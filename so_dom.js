@@ -1322,6 +1322,22 @@
                         });
                     }
                 });
+            },
+            blip: function(times, speed) {
+                times = times || 10;
+                speed = speed || 155;
+                var count = times > 0 ? 1 : 0;
+                return this.for(function(el) {
+                    !function callback() {
+                        if (count && count > times) {
+                            return;
+                        }
+                        animation.animate(el, {opacity: 0}, speed, function() {
+                            animation.animate(el, {opacity: 1}, speed, callback);
+                            count++;
+                        });
+                    }();
+                });
             }
         });
     }
@@ -1334,8 +1350,8 @@
         var div2 = $.dom('#div2')
         var div3 = $.dom('#div3')
         var anim = function(e) { e.stop()
-            div2.show(100000)
-            $.fire("3s", function() { div2.hide(100000) })
+            div2.blip()
+            // $.fire("3s", function() { div2.hide() })
             // $.fire("1s", function() { div2.fade(.5) })
 
             // $.animation.animate("#div1", {scrollTop: 190}, 500)
