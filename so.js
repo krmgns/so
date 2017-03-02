@@ -1197,4 +1197,7 @@
         }, FALSE);
     };
 
+    // for later
+    $.ext = {};
+
 })(window, {});
