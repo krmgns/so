@@ -15,7 +15,7 @@
     var re_digit = /\d+/;
     var re_scroll = /scroll(?:Top|Left)/;
     var opt_fps = 1000 / 60;
-    var opt_durations = {fast: 50, slow: 650, default: 350};
+    var opt_speeds = {fast: 50, slow: 650, default: 350};
     // thanks: http://easings.net/ (easeOutQuad)
     var fn_easing = function(t,b,c,d) { return -c*(t/=d)*(t-2)+b; };
     var fn_runner = window.requestAnimationFrame || function(fn) { setTimeout(fn, opt_fps); };
@@ -32,25 +32,25 @@
      * Animation.
      * @param {Element}            target
      * @param {Object}             properties
-     * @param {Int}                duration
+     * @param {Int}                speed
      * @param {String|undefined}   easing
-     * @param {Function|undefined} onEnd
+     * @param {Function|undefined} callback
      */
-    function Animation(target, properties, duration, easing, onEnd) {
+    function Animation(target, properties, speed, easing, callback) {
         var _this = this;
 
         _this.target = $.dom(target);
         _this.properties = properties;
-        _this.duration = $.isNumber(duration)
-            ? duration : opt_durations[duration] || opt_durations.default;
+        _this.speed = $.isNumber(speed)
+            ? speed : opt_speeds[speed] || opt_speeds.default;
 
         // swap
         if ($.isFunction(easing)) {
-            onEnd = easing, easing = NULL;
+            callback = easing, easing = NULL;
         }
 
         _this.easing = (easing && $.ext && $.ext.easing && $.ext.easing[easing]) || fn_easing;
-        _this.onEnd = onEnd;
+        _this.callback = callback;
 
         _this.running = FALSE;
         _this.stopped = FALSE;
@@ -118,7 +118,7 @@
 
             ;(function run() {
                 if (!_this.stopped && !_this.ended) {
-                    if (_this.elapsedTime < _this.duration) {
+                    if (_this.elapsedTime < _this.speed) {
                         runner(run)
                         _this.start();
                     } else {
@@ -144,7 +144,7 @@
                 _this.elapsedTime = now() - _this.startTime;
 
                 _this.tasks.forEach(function(task) {
-                    value = fn_easing(_this.elapsedTime, 0.00, task.diff, _this.duration);
+                    value = fn_easing(_this.elapsedTime, 0.00, task.diff, _this.speed);
                     value = task.reverse ? task.startValue - value : task.startValue + value;
                     if (!task.scroll) {
                         target.setStyle(task.name, value.toFixed(9) /* use 'toFixed' to get a good percent */
@@ -196,8 +196,8 @@
 
             _this.ended = TRUE;
 
-            if ($.isFunction(_this.onEnd)) {
-                _this.onEnd(_this);
+            if ($.isFunction(_this.callback)) {
+                _this.callback(_this);
             }
 
             return _this;
@@ -205,14 +205,14 @@
     });
 
     // shortcut
-    function initAnimation(target, properties, duration, easing, onEnd) {
-        return new Animation(target, properties, duration, easing, onEnd);
+    function initAnimation(target, properties, speed, easing, callback) {
+        return new Animation(target, properties, speed, easing, callback);
     }
 
     // return animation object
     $.animation = {
-        animate: function(target, properties, duration, easing, onEnd) {
-            return initAnimation(target, properties, duration, easing, onEnd).run();
+        animate: function(target, properties, speed, easing, callback) {
+            return initAnimation(target, properties, speed, easing, callback).run();
         },
         Animation: initAnimation
     };
