@@ -1291,32 +1291,32 @@
                 }
                 return this.fade(0, speed, callback);
             },
-            show: function(speed, callback) {
+            show: function(speed, easing, callback) {
                 return this.for(function(el) {
                     if (isHidden(el)) {
                         el.style.display = getDefaultStyle(el.tagName, 'display'); // to default
-                        animation.animate(el, {opacity: 1}, (speed || 0), callback);
+                        animation.animate(el, {opacity: 1}, (speed || 0), easing, callback);
                     }
                 });
             },
-            hide: function(speed, callback) {
+            hide: function(speed, easing, callback) {
                 return this.for(function(el) {
                     if (!isHidden(el)) {
-                        animation.animate(el, {opacity: 0}, (speed || 0), function() {
+                        animation.animate(el, {opacity: 0}, (speed || 0), easing, function() {
                             el.style.display = 'none'; // to real display
                             callback && callback.call(this);
                         });
                     }
                 });
             },
-            toggle: function(speed, callback) {
+            toggle: function(speed, easing, callback) {
                 speed = speed || 0;
                 return this.for(function(el) {
                     if (isHidden(el)) {
                         el.style.display = getDefaultStyle(el.tagName, 'display'); // to default
-                        animation.animate(el, {opacity: 1}, speed, callback);
+                        animation.animate(el, {opacity: 1}, speed, easing, callback);
                     } else {
-                        animation.animate(el, {opacity: 0}, speed, function() {
+                        animation.animate(el, {opacity: 0}, speed, easing, function() {
                             el.style.display = 'none'; // to real display
                             callback && callback.call(this);
                         });
