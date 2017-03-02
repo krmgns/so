@@ -56,39 +56,41 @@
 
         this.tasks = [];
 
-        // assign animation tasks
-        $.forEach(properties, function(name, value) {
-            var root, scroll, unit, startValue, endValue, style, styleUnit;
-            name = toStyleName(name);
-            root = re_root.test(_this.target.tag());
-            scroll = re_scroll.test(name);
+        if (this.target.size) {
+            // for stop tool
+            this.target.me.$animation = this;
 
-            if (!scroll) {
-                style = $.isString(value)
-                    ? _this.target.getCssStyle(name)
-                    : _this.target.getStyle(name, false);
-                unit = style.replace(re_digit, '');
-                startValue = toFloat(style);
-                endValue = toFloat(value);
-            } else {
-                startValue = _this.target.scroll()[name.slice(6).toLowerCase()];
-                endValue = value;
-            }
+            // assign animation tasks
+            $.forEach(properties, function(name, value) {
+                var root, scroll, unit, startValue, endValue, style, styleUnit;
+                name = toStyleName(name);
+                root = re_root.test(_this.target.tag());
+                scroll = re_scroll.test(name);
 
-            _this.tasks.push({
-                name: name,
-                root: root,
-                scroll: scroll,
-                unit: unit,
-                startValue: startValue,
-                endValue: endValue,
-                reverse: startValue > endValue,
-                diff: Math.abs(endValue - startValue)
+                if (!scroll) {
+                    style = $.isString(value)
+                        ? _this.target.getCssStyle(name)
+                        : _this.target.getStyle(name, false);
+                    unit = style.replace(re_digit, '');
+                    startValue = toFloat(style);
+                    endValue = toFloat(value);
+                } else {
+                    startValue = _this.target.scroll()[name.slice(6).toLowerCase()];
+                    endValue = value;
+                }
+
+                _this.tasks.push({
+                    name: name,
+                    root: root,
+                    scroll: scroll,
+                    unit: unit,
+                    startValue: startValue,
+                    endValue: endValue,
+                    reverse: startValue > endValue,
+                    diff: Math.abs(endValue - startValue)
+                });
             });
-        });
-
-        // for stop tool
-        this.target.me.$animation = this;
+        }
     }
 
     /**
@@ -126,23 +128,26 @@
          * @return {this}
          */
         start: function() {
+            var _this = this;
             var target = this.target
             var scroll, current;
 
-            this.elapsedTime = now() - this.startTime;
+            if (target.size) {
+                this.elapsedTime = now() - this.startTime;
 
-            var _this = this;
-            this.tasks.forEach(function(task) {
-                current = fn_easing(_this.elapsedTime, 0.00, task.diff, _this.duration);
-                current = task.reverse ? task.startValue - current : task.startValue + current;
-                if (!task.scroll) {
-                    // use 'toFixed' to get max percent
-                    target.setStyle(task.name, current.toFixed(20) + task.unit);
-                } else {
-                    target.setProperty(task.name, task.root ? current + target.me[task.name]
-                        : current + (target.me[task.name] /= 2));
-                }
-            });
+                this.tasks.forEach(function(task) {
+                    current = fn_easing(_this.elapsedTime, 0.00, task.diff, _this.duration);
+                    current = task.reverse ? task.startValue - current : task.startValue + current;
+                    if (!task.scroll) {
+                        // use 'toFixed' to get max percent
+                        target.setStyle(task.name, current.toFixed(20) + task.unit);
+                    } else {
+                        target.setProperty(task.name, current.toFixed(0));
+                    }
+                });
+            }
+
+            return this;
         },
 
         /**
@@ -150,12 +155,13 @@
          * @return {this}
          */
         stop: function() {
-            this.target.me.$animation = null; // remove animation
-
             if (this.running) {
                 this.running = false;
                 this.stopped = true;
             }
+
+            // set as null (for isAnimated() etc.)
+            this.target.me && (this.target.me.$animation = null);
 
             return this;
         },
@@ -167,13 +173,15 @@
         end: function() {
             var target = this.target;
 
-            this.tasks.forEach(function(task) {
-                if (!task.scroll) {
-                    target.setStyle(task.name, task.endValue + task.unit);
-                } else {
-                    target.setProperty(task.name, task.endValue);
-                }
-            });
+            if (target.size) {
+                this.tasks.forEach(function(task) {
+                    if (!task.scroll) {
+                        target.setStyle(task.name, task.endValue + task.unit);
+                    } else {
+                        target.setProperty(task.name, task.endValue);
+                    }
+                });
+            }
 
             this.ended = true;
 
