@@ -441,7 +441,28 @@
     var re_unit = /(?:px|em|%)/i; // short & quick
     var re_unitOther = /(?:ex|in|[cm]m|p[tc]|v[hw]?min)/i;
     var re_noneUnitStyles = /((fill)?opacity|z(oom|index)|(fontw|lineh)eight|column(count|s))/i;
+    var matchesSelector = document.documentElement.matches || function(selector) {
+        var i = 0, all = querySelectorAll(this.ownerDocument, selector);
+        while (i < all.length) {
+            if (all[i++] == this) {
+                return true;
+            }
+        }
+        return false;
+    };
 
+    function getCssStyle(el) {
+        var sheets = el.ownerDocument.styleSheets, rules, ret = [];
+        $.for(sheets, function(sheet) {
+            rules = sheet.rules || sheet.cssRules;
+            $.for(rules, function(rule) {
+                if (matchesSelector.call(el, rule.selectorText)) {
+                    ret.push(rule.style); // loop over all until last
+                }
+            });
+        });
+        return ret[ret.length - 1] /* return last rule */ || {};
+    }
     function getComputedStyle(el) {
         return getWindow(el).getComputedStyle(el);
     }
@@ -475,33 +496,11 @@
         }
         return ret;
     }
-
-    var matchesSelector = document.documentElement.matches || function(selector) {
-        var i = 0, all = querySelectorAll(this.ownerDocument, selector);
-        while (i < all.length) {
-            if (all[i++] == this) {
-                return true;
-            }
-        }
-        return false;
-    };
-
-    function getCssStyle(el) {
-        var sheets = el.ownerDocument.styleSheets, ret = [];
-        $.for(sheets, function(sheet) {
-            var rules = sheet.rules || sheet.cssRules;
-            $.for(rules, function(rule) {
-                if (matchesSelector.call(el, rule.selectorText)) {
-                    ret.push(rule.style); // loop over all until last
-                }
-            });
-        });
-        return ret[ret.length - 1] /* return last rule */ || {};
-    }
     function toStyleObject(style) {
         var name, ret = {};
         for (name in style) {
-            if (!isNumeric(name) && isString(style[name]) /* has own doesn't work (firefox/51) */) {
+            if (!isNumeric(name) /* skip '"0": "width"' etc. */ &&
+                 isString(style[name]) /* has own doesn't work (firefox/51) */) {
                 ret[name] = style[name];
             }
         }
