@@ -215,6 +215,31 @@
         tags: function() {var ret = [];return this.for(function(element) {ret.push(getTag(element))}), ret;}
     });
 
+    function create(content, doc, attributes) {
+        if (isDom(content)) {
+            return content.toArray();
+        }
+        if (isNodeElement()) {
+            return [content];
+        }
+        doc = doc && isDocument(doc) ? doc : document;
+        var tmp = doc.createElement('so-tmp');
+        var fragment = doc.createDocumentFragment();
+        tmp.innerHTML = content;
+        while (tmp.firstChild) {
+            fragment.appendChild(tmp.firstChild);
+        }
+        if (attributes && isObject(attributes)) {
+            $.for(fragment.childNodes, function(node) {
+                if (isNodeElement(node)) {
+                    $.forEach(attributes, function(name, value) {
+                        node.setAttribute(name, value);
+                    });
+                }
+            });
+        }
+        return $.array(fragment.childNodes);
+    }
     function cloneElement(el, deep) {
         var clone = el.cloneNode();
         clone.setAttribute && clone.setAttribute('so:id', $.sid('clone-'));
@@ -245,6 +270,16 @@
         }
         return el;
     }
+    function createFor(el, content, attributes) {
+        return create(content, getDocument(el), attributes);
+    }
+    function cloneIf(cloning, node) {
+        if (!isFalse(cloning)) { // inserts only once without `clone`
+            node = cloneElement(node);
+        }
+        return node;
+    }
+
     // dom: modifiers
     Dom.extendPrototype({
         clone: function(deep) {
@@ -269,6 +304,97 @@
             return this.for(function(el) {
                 $.dom(selector).find(el).remove();
             });
+        },
+        append: function(content, attributes, cloning) {
+            return this.for(function(el) {
+                createFor(el, content, attributes).forEach(function(node) {
+                    el.appendChild(cloneIf(cloning, node));
+                });
+            });
+        },
+        appendTo: function(selector, cloning) {
+            if (!isDom(selector)) selector = initDom(selector);
+            return this.for(function(el) {
+                selector.for(function(node) {
+                    node.appendChild(cloneIf(cloning, el));
+                });
+            });
+        },
+        prepend: function(content, attributes, cloning) {
+            return this.for(function(el) {
+                createFor(el, content, attributes).forEach(function(node) {
+                    el.insertBefore(cloneIf(cloning, node), el.firstChild);
+                });
+            });
+        },
+        prependTo: function(selector, cloning) {
+            if (!isDom(selector)) selector = initDom(selector);
+            return this.for(function(el) {
+                selector.for(function(node) {
+                    node.insertBefore(cloneIf(cloning, el), node.firstChild);
+                });
+            });
+        },
+        insert: function(content, attributes, cloning) {
+            return this.append(content, attributes, cloning);
+        },
+        insertTo: function(selector, cloning) {
+            return this.appendTo(selector, cloning);
+        },
+        insertBefore: function(selector, cloning) {
+            if (!isDom(selector)) selector = initDom(selector);
+            return this.for(function(el) {
+                selector.for(function(node) {
+                    node.parentNode.insertBefore(cloneIf(cloning, el), node);
+                });
+            });
+        },
+        insertAfter: function(selector, cloning) {
+            if (!isDom(selector)) selector = initDom(selector);
+            return this.for(function(el) {
+                selector.for(function(node) {
+                    node.parentNode.insertBefore(cloneIf(cloning, el), node.nextSibling)
+                });
+            });
+        },
+        replaceWith: function(selector, cloning) {
+            if (!isDom(selector)) selector = initDom(selector);
+            return this.for(function(el) {
+                selector.for(function(node) {
+                    el.parentNode.replaceChild(cloneIf(cloning, node), el);
+                });
+            });
+        },
+        wrap: function(content, attributes) {
+            var me = this[0], parent = me && me.parentNode,
+                wrapper, replace, clone, clones = [];
+            if (parent) {
+                wrapper = createFor(me, content, attributes)[0];
+                replace = createFor(parent, '<so-tmp>', {style: 'display:none'})[0];
+                parent.insertBefore(replace, me);
+                this.for(function(el) {
+                    clone = cloneElement(el);
+                    clones.push(clone);
+                    wrapper.appendChild(clone), parent.removeChild(cleanElement(el));
+                });
+                parent.replaceChild(wrapper, replace);
+            }
+            return initDom(clones);
+        },
+        unwrap: function(remove) {
+            var me = this[0], parent = me && me.parentNode,
+                parentParent = parent && parent.parentNode, clone, clones = [];
+            if (parentParent) {
+                this.for(function(el) {
+                    clone = cloneElement(el);
+                    clones.push(clone);
+                    parentParent.insertBefore(clone, parent), parent.removeChild(cleanElement(el));
+                });
+                if (remove || !parentParent.hasChildNodes()) {
+                    parentParent.removeChild(cleanElement(parent));
+                }
+            }
+            return initDom(clones);
         }
     });
 
@@ -1338,147 +1464,7 @@
         });
     }
 
-    function create(content, doc, attributes) { // hem insert hem selector
-        if (isDom(content)) {
-            return content.toArray();
-        }
-        if (isNodeElement()) {
-            return [content];
-        }
-        doc = doc && isDocument(doc) ? doc : document;
-        var tmp = doc.createElement('so-tmp');
-        var fragment = doc.createDocumentFragment();
-        tmp.innerHTML = content;
-        while (tmp.firstChild) {
-            fragment.appendChild(tmp.firstChild);
-        }
-        if (attributes && isObject(attributes)) {
-            $.for(fragment.childNodes, function(node) {
-                if (isNodeElement(node)) {
-                    $.forEach(attributes, function(name, value) {
-                        node.setAttribute(name, value);
-                    });
-                }
-            });
-        }
-        return $.array(fragment.childNodes);
-    }
-
-    // var inserts = {
-    //     append: function(node) { this.appendChild(node); },
-    //     prepend: function(node) { this.insertBefore(node, this.firstChild); },
-    // //     before: function(node) { this.parentNode.insertBefore(node, this); },
-    // //     after: function(node) { this.parentNode.insertBefore(node, this.nextSibling); },
-    //     appendTo: function(node) { node.appendChild(this); },
-    //     prependTo: function(node) { node.insertBefore(this, node.firstChild); },
-    //     insertBefore: function(node) { node.parentNode.insertBefore(this, node); },
-    //     insertAfter: function(node) { node.parentNode.insertBefore(this, node.nextSibling); }
-    //     replace: function(node) { this.parentNode.replaceChild(node, this); },
-    //     wrap, unwrap
-    // };
-
-    function createFor(el, content, attributes) {
-        return create(content, getDocument(el), attributes);
-    }
-    function cloneIf(cloning, node) {
-        if (!isFalse(cloning)) { // inserts only once without `clone`
-            node = cloneElement(node);
-        }
-        return node;
-    }
-
-    // dom: modifiers
-    Dom.extendPrototype({
-        append: function(content, attributes, cloning) {
-            return this.for(function(el) {
-                createFor(el, content, attributes).forEach(function(node) {
-                    el.appendChild(cloneIf(cloning, node));
-                });
-            });
-        },
-        appendTo: function(selector, cloning) {
-            if (!isDom(selector)) selector = initDom(selector);
-            return this.for(function(el) {
-                selector.for(function(node) {
-                    node.appendChild(cloneIf(cloning, el));
-                });
-            });
-        },
-        prepend: function(content, attributes, cloning) {
-            return this.for(function(el) {
-                createFor(el, content, attributes).forEach(function(node) {
-                    el.insertBefore(cloneIf(cloning, node), el.firstChild);
-                });
-            });
-        },
-        prependTo: function(selector, cloning) {
-            if (!isDom(selector)) selector = initDom(selector);
-            return this.for(function(el) {
-                selector.for(function(node) {
-                    node.insertBefore(cloneIf(cloning, el), node.firstChild);
-                });
-            });
-        },
-        insert: function(content, attributes, cloning) {
-            return this.append(content, attributes, cloning);
-        },
-        insertTo: function(selector, cloning) {
-            return this.appendTo(selector, cloning);
-        },
-        insertBefore: function(selector, cloning) {
-            if (!isDom(selector)) selector = initDom(selector);
-            return this.for(function(el) {
-                selector.for(function(node) {
-                    node.parentNode.insertBefore(cloneIf(cloning, el), node);
-                });
-            });
-        },
-        insertAfter: function(selector, cloning) {
-            if (!isDom(selector)) selector = initDom(selector);
-            return this.for(function(el) {
-                selector.for(function(node) {
-                    node.parentNode.insertBefore(cloneIf(cloning, el), node.nextSibling)
-                });
-            });
-        },
-        replaceWith: function(selector, cloning) {
-            if (!isDom(selector)) selector = initDom(selector);
-            return this.for(function(el) {
-                selector.for(function(node) {
-                    el.parentNode.replaceChild(cloneIf(cloning, node), el);
-                });
-            });
-        },
-        wrap: function(content, attributes) {
-            var me = this[0], parent = me && me.parentNode,
-                wrapper, replace, clone, clones = [];
-            if (parent) {
-                wrapper = createFor(me, content, attributes)[0];
-                replace = createFor(parent, '<so-tmp>', {style: 'display:none'})[0];
-                parent.insertBefore(replace, me);
-                this.for(function(el) {
-                    clone = cloneElement(el);
-                    clones.push(clone);
-                    wrapper.appendChild(clone), parent.removeChild(cleanElement(el));
-                });
-                parent.replaceChild(wrapper, replace);
-            }
-            return initDom(clones);
-        },
-        unwrap: function() {
-            var me = this[0], parent = me && me.parentNode,
-                parentParent = parent && parent.parentNode, clone, clones = [];
-            if (parentParent) {
-                this.for(function(el) {
-                    clone = cloneElement(el);
-                    clones.push(clone);
-                    parentParent.insertBefore(clone, parent);
-                });
-                parentParent.removeChild(cleanElement(parent));
-            }
-            return initDom(clones);
-        }
-    });
+    function kerem() {} // @tmp go-to
 
     $.onReady(function() { var doc = document, dom, el, els, body = document.body
         $.fire('3s', function() {
