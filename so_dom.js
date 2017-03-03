@@ -223,6 +223,9 @@
             $.for(element.childNodes, function(child) {
                 clone.appendChild(cloneElement(child, deep));
             });
+            // if (element.$data) {
+            //     clone.$data =
+            // }
             if (element.$events) {
                 element.$events.forAll(function(event) {
                     event.copy().bindTo(clone);
@@ -240,6 +243,7 @@
             }
             element.removeChild(child);
         }
+        return element;
     }
     // dom: modifiers
     Dom.extendPrototype({
@@ -1439,15 +1443,27 @@
                     el.parentNode.replaceChild(cloneIf(cloning, node), el);
                 });
             });
+        },
+        wrap: function(content, attributes) {
+            var me = this[0], parent = me && me.parentNode, replace, wrapper;
+            if (parent) {
+                wrapper = createFor(me, content, attributes)[0];
+                replace = createFor(parent, '<so-tmp>', {style: 'display:none'})[0];
+                parent.insertBefore(replace, me);
+                this.for(function(el) {
+                    wrapper.appendChild(cloneElement(el)), parent.removeChild(cleanElement(el));
+                });
+                parent.replaceChild(wrapper, replace);
+            }
+            return this;
         }
     });
 
     $.onReady(function() { var doc = document, dom, el, els, body = document.body
         $.fire('3s', function() {
-            var click = function(e) {log(e.target)}
-            var em = $.dom("<em>hellö!</em>").on("click", click)
-            // el = $.dom(em).insertAfter(".inject")
-            el = $.dom(".inject").replaceWith(em)
+            var click = function(e) {log(e.target, e.event.target)}
+            var foo = $.dom("<em>hellö!</em>").on("click", click).data("foo", 1)
+            el = $.dom(".inject").wrap(foo)
             log(el)
         })
     })
