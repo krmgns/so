@@ -252,6 +252,11 @@
                 clones[i] = cloneElement(element, deep);
             }), initDom(clones);
         },
+        empty: function() {
+            return this.for(function(element) {
+                cleanElement(element);
+            });
+        },
         remove: function() {
             return this.for(function(element) {
                 cleanElement(element);
@@ -260,9 +265,9 @@
                 }
             });
         },
-        empty: function() {
-            return this.for(function(element) {
-                cleanElement(element);
+        removeFrom: function(selector) {
+            return this.for(function(el) {
+                $.dom(selector).find(el).remove();
             });
         }
     });
@@ -1446,7 +1451,7 @@
         },
         wrap: function(content, attributes) {
             var me = this[0], parent = me && me.parentNode,
-                replace, wrapper, clone, clones = [];
+                wrapper, replace, clone, clones = [];
             if (parent) {
                 wrapper = createFor(me, content, attributes)[0];
                 replace = createFor(parent, '<so-tmp>', {style: 'display:none'})[0];
@@ -1477,12 +1482,7 @@
 
     $.onReady(function() { var doc = document, dom, el, els, body = document.body
         $.fire('3s', function() {
-            var click = function(e) {log(e.target, e.event.target)}
-            var foo = $.dom("<em>hellö!</em>").on("click", click).data("foo", 1)
-            // el = $.dom(".inject").wrap(foo)
-            el = $.dom(".inject").on("click", click)
-            el = $.dom(".inject").unwrap()
-            log(el)
+            // log(el)
         })
     })
 
