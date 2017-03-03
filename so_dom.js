@@ -1371,16 +1371,19 @@
     function createFor(el, content, attributes) {
         return create(content, getDocument(el), attributes);
     }
+    function cloneIf(cloning, node) {
+        if (!isFalse(cloning)) { // inserts only once without `clone`
+            node = cloneElement(node);
+        }
+        return node;
+    }
 
     // dom: modifiers
     Dom.extendPrototype({
         append: function(content, attributes, cloning) {
             return this.for(function(el) {
                 createFor(el, content, attributes).forEach(function(node) {
-                    if (!isFalse(cloning)) { // inserts only once without `clone`
-                        node = cloneElement(node);
-                    }
-                    el.appendChild(node);
+                    el.appendChild(cloneIf(cloning, node));
                 });
             });
         },
@@ -1388,20 +1391,14 @@
             if (!isDom(selector)) selector = initDom(selector);
             return this.for(function(el) {
                 selector.for(function(node) {
-                    if (!isFalse(cloning)) { // inserts only once without `clone`
-                        el = cloneElement(el);
-                    }
-                    node.appendChild(el);
+                    node.appendChild(cloneIf(cloning, el));
                 });
             });
         },
         prepend: function(content, attributes, cloning) {
             return this.for(function(el) {
                 createFor(el, content, attributes).forEach(function(node) {
-                    if (!isFalse(cloning)) { // inserts only once without `clone`
-                        node = cloneElement(node);
-                    }
-                    el.insertBefore(node, el.firstChild);
+                    el.insertBefore(cloneIf(cloning, node), el.firstChild);
                 });
             });
         },
@@ -1409,23 +1406,41 @@
             if (!isDom(selector)) selector = initDom(selector);
             return this.for(function(el) {
                 selector.for(function(node) {
-                    if (!isFalse(cloning)) { // inserts only once without `clone`
-                        el = cloneElement(el);
-                    }
-                    node.insertBefore(el, node.firstChild);
+                    node.insertBefore(cloneIf(cloning, el), node.firstChild);
                 });
             });
+        },
+        insert: function(content, attributes, cloning) {
+            return this.append(content, attributes, cloning);
         }
+        insertTo: function(selector, cloning) {
+            return this.appendTo(selector, cloning);
+        }
+        insertBefore: function(selector, cloning) {
+            if (!isDom(selector)) selector = initDom(selector);
+            return this.for(function(el) {
+                selector.for(function(node) {
+                    node.parentNode.insertBefore(cloneIf(cloning, el), node);
+                });
+            });
+        },
+        insertAfter: function(selector, cloning) {
+            if (!isDom(selector)) selector = initDom(selector);
+            return this.for(function(el) {
+                selector.for(function(node) {
+                    node.parentNode.insertBefore(cloneIf(cloning, el), node.nextSibling)
+                });
+            });
+        },
     });
 
     $.onReady(function() { var doc = document, dom, el, els, body = document.body
-        // $.fire('2s', function() {
+        $.fire('2s', function() {
             var click = function(e) {log(e.target)}
             var em = $.dom("<em>hellö!</em>").on("click", click)
-            el = $.dom(".inject").append(em);
-            el = em.appendTo(".inject");
+            el = $.dom(em).insertAfter(".inject")
             log(el)
-        // })
+        })
     })
 
     // var DomPrototype = {}; extendPrototype lari azaltmak icin?
