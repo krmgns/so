@@ -900,15 +900,6 @@
         id: function(id) {
             return !isUndefined(id) ? this.setId(id) : this.getId();
         },
-        sid: function() {
-            var el = this[0], ret;
-            if (hasAttribute(el, 'sid')) {
-                ret = getAttribute(el, 'sid');
-            } else {
-                ret = $.sid(), setAttribute(el, 'sid', ret);
-            }
-            return ret;
-        },
         setId: function(id) {
             return setAttribute(this[0], 'id', id);
         },
@@ -1429,9 +1420,10 @@
 
     $.onReady(function() { var doc = document, dom, el, els, body = document.body
         // $.fire('2s', function() {
-            var click = function(e) {log(e.event.target)}
-            el = $.dom(".inject").append($.dom("<em>hellö!</em>").on("click", click));
-            // el = $.dom("<em>hellö!</em>").on("click", click).appendTo(".inject");
+            var click = function(e) {log(e.target)}
+            var em = $.dom("<em>hellö!</em>").on("click", click)
+            el = $.dom(".inject").append(em);
+            el = em.appendTo(".inject");
             log(el)
         // })
     })
