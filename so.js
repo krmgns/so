@@ -797,10 +797,11 @@
 
         /**
          * Sid.
+         * @param  {String} prefix
          * @return {String}
          */
-        sid: function() {
-            return '__so_sid_'+ $.id();
+        sid: function(prefix) {
+            return (prefix || '__so_sid__') + $.id();
         },
 
         /**
