@@ -12,7 +12,7 @@
     var re_space = /\s+/g;
     var re_comma = /,\s*/;
     var re_trim = /^\s+|\s+$/g;
-    var re_htmlContent = /^<([a-z-]+).*\/?>(?:.*<\/\1>)?$/i;
+    var re_tag = /^<[a-z-][^>]*>/i;
     var isNaN = window.isNaN;
     var trim = $.trim, trims = $.trimSpace;
     var split = function split(s, re) { return trims(s).split(re); };
@@ -112,7 +112,8 @@
             }
         }
 
-        return $.array(ret, one ? querySelector(root, selector) : querySelectorAll(root, selector));
+        return $.array(ret, one ? querySelector(root, selector) // speed issues..
+            : querySelectorAll(root, selector));
     }
 
     function Dom(selector, root, i, one) {
@@ -125,14 +126,9 @@
         if (!isVoid(selector)) {
             if (isString(selector)) {
                 selector = trims(selector);
-                if (selector) {
-                    if (re_htmlContent.test(selector)) {
-                        elements = createElement(selector);
-                        if (isObject(root)) {
-                            $.forEach(elements, function(name, value){
-                                elements.setAttribute(name, value);
-                            });
-                        }
+                if (selector) { // prevent empty selector error
+                    if (re_tag.test(selector)) {
+                        elements = create(selector, root, root); // 'root' could be document or attribute(s)
                     } else {
                         elements = select(selector, root, one);
                         if (!isNaN(i)) {
@@ -1336,107 +1332,36 @@
         });
     }
 
-    $.onReady(function() { var doc = document, dom, el, els, body = document.body
-        // els = new Dom('body')
-        // log(els)
-        // log('---')
-
-        var div2 = $.dom('#div2')
-        var div3 = $.dom('#div3')
-        var anim = function(e) { e.stop()
-            div2.blip()
-            // $.fire("3s", function() { div2.hide() })
-            // $.fire("1s", function() { div2.fade(.5) })
-
-            // $.animation.animate("#div1", {scrollTop: 190}, 500)
-
-            // div2.setStyle({"left": "10%", "transition":""})
-            // div3.setStyle("left", "10%")
-
-            // $.fire("1s", function() {
-            //     div2.setStyle({transition: 'left 1000ms ease', left: '50%'})
-            //     $.animation.animate(div3, {left: '50%'}, 1000)
-            // })
+    function create(content, doc, attributes) { // hem insert hem selector
+        doc = doc && isDocument(doc) ? doc : document;
+        var tmp = doc.createElement('so-tmp');
+        var fragment = doc.createDocumentFragment();
+        tmp.innerHTML = content;
+        while (tmp.firstChild) {
+            fragment.appendChild(tmp.firstChild);
         }
-        $.dom("#animate").on("click", anim)
+        if (attributes && isObject(attributes)) {
+            $.for(fragment.childNodes, function(node) {
+                if (isNodeElement(node)) {
+                    $.forEach(attributes, function(name, value) {
+                        node.setAttribute(name, value);
+                    });
+                }
+            });
+        }
+        return fragment.childNodes;
+    }
 
-        // $.fire("2s", function() {
-        //     anim.run(function() {
-        //         log(arguments)
-        //     })
-        // })
-
-        // el = $.dom("#iframe")
-        // el.on("click", log)
-
-        // function fn(e) {
-        //     $.dom(this.body).class("*")
-        //     log(e, e.target, this, this.body)
-        // }
-
-        // window.on("click", function() {
-        //     log(this.body.textContent)
-        // })
-
-        // $.fire("3s", function() {
-        //     // log(el.window().on('click', fn))
-        //     // log(el.document().on('click', fn))
-        //     // log(el.window(true).on('click', fn))
-        //     log(el.document(true).on('click', fn))
-        // });
-
-        // window.on("click")
-
-        // $.fire("3s", function() {
-        //     log(el.window().me.document.body)
-        //     log(el.document().me.body)
-        //     log(el.window(true).me.document.body)
-        //     log(el.document(true).me.body)
-        // });
-
+    $.onReady(function() { var doc = document, dom, el, els, body = document.body
         // $.fire('2s', function() {
-        //     log(el.checked(true))
-        //     log(el.checked())
-        //     $.fire('1s', function() {
-        //         log(el.checked(false))
-        //         log(el.checked())
-        //         $.fire('1s', function() {
-        //             log(el.checked(true))
-        //             log(el.checked())
-        //         })
-        //     })
+            // el = create('a<em>hellö!</em>', null, {class:"foo"});
+            // el = $.dom.create('<em id="foo">hellö!</em>', {class:"foo"});
+            el = $.dom.create('<em>', {class:"foo"});
+            log(el)
+            // el.nodes.forEach(function(node) {
+            //     doc.body.appendChild(node)
+            // })
         // })
-
-        // el = $.dom("#form")
-        // log(el.serialize())
-        // log(el.serializeArray())
-        // log(el.serializeJson())
-        // el[0].on("submit", function(e) {
-        //     e.stopDefault()
-        //     // log(el.serialize())
-        //     // el.serialize(function(data) {
-        //     //     $.http.post('/.dev/so/test/ajax.php', {data:data});
-        //     // })
-        //     // log(el.serializeArray())
-        //     // el.serializeArray(function(data) {
-        //     //     log(data)
-        //     // })
-        //     log(el.serializeJson())
-        //     el.serializeJson(function(data) {
-        //         log(data)
-        //     })
-        // })
-
-        // $.fire(2, function() {
-        //     el.data(' @foo ', null)
-        // });
-
-        // els = els.find('input[so:v=1]')
-        // els = els.find('input:not([checked])')
-        // els = els.find('input:checked!)')
-        // els = els.find('p:nth(1)')
-        // els = els.find('input:first, input:last, p:nth(1), a, button')
-        // els = els.find('#div-target')
     })
 
     $.dom = function(selector, root, i) {
@@ -1444,6 +1369,9 @@
     };
     // add static methods
     $.dom.extend({
+        create: function(content, attributes) {
+            return create(content, null, attributes);
+        },
         isUnitStyle: function(value) {
             return !re_noneUnitStyles.test(value);
         }
