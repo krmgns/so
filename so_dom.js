@@ -1412,10 +1412,10 @@
         },
         insert: function(content, attributes, cloning) {
             return this.append(content, attributes, cloning);
-        }
+        },
         insertTo: function(selector, cloning) {
             return this.appendTo(selector, cloning);
-        }
+        },
         insertBefore: function(selector, cloning) {
             if (!isDom(selector)) selector = initDom(selector);
             return this.for(function(el) {
@@ -1432,13 +1432,22 @@
                 });
             });
         },
+        replaceWith: function(selector, cloning) {
+            if (!isDom(selector)) selector = initDom(selector);
+            return this.for(function(el) {
+                selector.for(function(node) {
+                    el.parentNode.replaceChild(cloneIf(cloning, node), el);
+                });
+            });
+        }
     });
 
     $.onReady(function() { var doc = document, dom, el, els, body = document.body
-        $.fire('2s', function() {
+        $.fire('3s', function() {
             var click = function(e) {log(e.target)}
             var em = $.dom("<em>hellö!</em>").on("click", click)
-            el = $.dom(em).insertAfter(".inject")
+            // el = $.dom(em).insertAfter(".inject")
+            el = $.dom(".inject").replaceWith(em)
             log(el)
         })
     })
