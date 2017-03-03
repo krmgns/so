@@ -162,6 +162,7 @@
         });
     }
 
+    // dom: base
     Dom.extendPrototype({
         // init: initDom,
         find: function(selector, i) {return this[0] ? initDom(selector, this[0], i) : this;},
@@ -216,8 +217,8 @@
 
     function cloneElement(element, deep) {
         var clone = element.cloneNode();
-        // clone.cloneOf = function() { return element; }; // @wait
-        clone.id += ':clone-'+ $.id();
+        clone.setAttribute && clone.setAttribute('so:id', $.sid('clone-'));
+        // clone.cloneOf = element; // @debug
         if (!isFalse(deep)) {
             $.for(element.childNodes, function(child) {
                 clone.appendChild(cloneElement(child, deep));
@@ -783,10 +784,10 @@
             name.replace(re_attrNameRemove, '-').trimSpace();
     }
     function hasAttribute(el, name) {
-        return el && el.hasAttribute(toAttributeName(name));
+        return !!(el && el.hasAttribute(toAttributeName(name)));
     }
     function setAttribute(el, name, value) {
-        if (el) {
+        if (isNodeElement(el)) {
             name = toAttributeName(name);
             if (isNull(value)) {
                 el.removeAttribute(name);
@@ -897,7 +898,7 @@
     // dom: id
     Dom.extendPrototype({
         id: function(id) {
-            return (id || isNull(id)) ? this.setId(id) : this.getId();
+            return !isUndefined(id) ? this.setId(id) : this.getId();
         },
         sid: function() {
             var el = this[0], ret;
@@ -909,10 +910,10 @@
             return ret;
         },
         setId: function(id) {
-            return this.setAttribute('id', id);
+            return setAttribute(this[0], 'id', id);
         },
         getId: function() {
-            return this.getAttribute('id');
+            return getAttribute(this[0], 'id');
         }
     });
 
@@ -938,6 +939,8 @@
     // dom: class
     Dom.extendPrototype({
         class: function(name, option) {
+            if (!name) return this.getClass();
+
             if (isUndefined(option)) { // add: ('foo')
                 this.addClass(name);
             } else if (isNull(option) || isNulls(option)) { // remove: ('foo', '' | null)
@@ -958,6 +961,9 @@
         removeClass: function(name) {
             return (name == ALL) ? this.setClass('')
                 : this.for(function(el) { removeClass(el, name); });
+        },
+        getClass: function() {
+            return getAttribute(this[0], 'class');
         },
         setClass: function(name) {
             return this.for(function(el) { el.className = name; });
@@ -1333,6 +1339,12 @@
     }
 
     function create(content, doc, attributes) { // hem insert hem selector
+        if (isDom(content)) {
+            return content.toArray();
+        }
+        if (isNodeElement()) {
+            return [content];
+        }
         doc = doc && isDocument(doc) ? doc : document;
         var tmp = doc.createElement('so-tmp');
         var fragment = doc.createDocumentFragment();
@@ -1349,20 +1361,82 @@
                 }
             });
         }
-        return fragment.childNodes;
+        return $.array(fragment.childNodes);
     }
+
+    // var inserts = {
+    //     append: function(node) { this.appendChild(node); },
+    //     prepend: function(node) { this.insertBefore(node, this.firstChild); },
+    // //     before: function(node) { this.parentNode.insertBefore(node, this); },
+    // //     after: function(node) { this.parentNode.insertBefore(node, this.nextSibling); },
+    //     appendTo: function(node) { node.appendChild(this); },
+    //     prependTo: function(node) { node.insertBefore(this, node.firstChild); },
+    //     insertBefore: function(node) { node.parentNode.insertBefore(this, node); },
+    //     insertAfter: function(node) { node.parentNode.insertBefore(this, node.nextSibling); }
+    //     replace: function(node) { this.parentNode.replaceChild(node, this); },
+    //     wrap, unwrap
+    // };
+
+    function createFor(el, content, attributes) {
+        return create(content, getDocument(el), attributes);
+    }
+
+    // dom: modifiers
+    Dom.extendPrototype({
+        append: function(content, attributes, cloning) {
+            return this.for(function(el) {
+                createFor(el, content, attributes).forEach(function(node) {
+                    if (!isFalse(cloning)) { // inserts only once without `clone`
+                        node = cloneElement(node);
+                    }
+                    el.appendChild(node);
+                });
+            });
+        },
+        appendTo: function(selector, cloning) {
+            if (!isDom(selector)) selector = initDom(selector);
+            return this.for(function(el) {
+                selector.for(function(node) {
+                    if (!isFalse(cloning)) { // inserts only once without `clone`
+                        el = cloneElement(el);
+                    }
+                    node.appendChild(el);
+                });
+            });
+        },
+        prepend: function(content, attributes, cloning) {
+            return this.for(function(el) {
+                createFor(el, content, attributes).forEach(function(node) {
+                    if (!isFalse(cloning)) { // inserts only once without `clone`
+                        node = cloneElement(node);
+                    }
+                    el.insertBefore(node, el.firstChild);
+                });
+            });
+        },
+        prependTo: function(selector, cloning) {
+            if (!isDom(selector)) selector = initDom(selector);
+            return this.for(function(el) {
+                selector.for(function(node) {
+                    if (!isFalse(cloning)) { // inserts only once without `clone`
+                        el = cloneElement(el);
+                    }
+                    node.insertBefore(el, node.firstChild);
+                });
+            });
+        }
+    });
 
     $.onReady(function() { var doc = document, dom, el, els, body = document.body
         // $.fire('2s', function() {
-            // el = create('a<em>hellö!</em>', null, {class:"foo"});
-            // el = $.dom.create('<em id="foo">hellö!</em>', {class:"foo"});
-            el = $.dom.create('<em>', {class:"foo"});
+            var click = function(e) {log(e.event.target)}
+            el = $.dom(".inject").append($.dom("<em>hellö!</em>").on("click", click));
+            // el = $.dom("<em>hellö!</em>").on("click", click).appendTo(".inject");
             log(el)
-            // el.nodes.forEach(function(node) {
-            //     doc.body.appendChild(node)
-            // })
         // })
     })
+
+    // var DomPrototype = {}; extendPrototype lari azaltmak icin?
 
     $.dom = function(selector, root, i) {
         return initDom(selector, root, i);
