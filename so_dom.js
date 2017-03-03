@@ -215,35 +215,35 @@
         tags: function() {var ret = [];return this.for(function(element) {ret.push(getTag(element))}), ret;}
     });
 
-    function cloneElement(element, deep) {
-        var clone = element.cloneNode();
+    function cloneElement(el, deep) {
+        var clone = el.cloneNode();
         clone.setAttribute && clone.setAttribute('so:id', $.sid('clone-'));
-        // clone.cloneOf = element; // @debug
+        // clone.cloneOf = el; // @debug
         if (!isFalse(deep)) {
-            $.for(element.childNodes, function(child) {
-                clone.appendChild(cloneElement(child, deep));
-            });
-            // if (element.$data) {
-            //     clone.$data =
-            // }
-            if (element.$events) {
-                element.$events.forAll(function(event) {
+            if (el.$data) clone.$data = el.$data;
+            if (el.$events) {
+                el.$events.forAll(function(event) {
                     event.copy().bindTo(clone);
+                });
+            }
+            if (el.childNodes) {
+                $.for(el.childNodes, function(child) {
+                    clone.appendChild(cloneElement(child, deep));
                 });
             }
         }
         return clone;
     }
-    function cleanElement(element) {
-        element.$data = element.$events = null;
+    function cleanElement(el) {
+        el.$data = el.$events = null;
         var child;
-        while (child = element.firstChild) {
+        while (child = el.firstChild) {
             if (isNodeElement(child)) {
                 cleanElement(child);
             }
-            element.removeChild(child);
+            el.removeChild(child);
         }
-        return element;
+        return el;
     }
     // dom: modifiers
     Dom.extendPrototype({
@@ -1445,17 +1445,33 @@
             });
         },
         wrap: function(content, attributes) {
-            var me = this[0], parent = me && me.parentNode, replace, wrapper;
+            var me = this[0], parent = me && me.parentNode,
+                replace, wrapper, clone, clones = [];
             if (parent) {
                 wrapper = createFor(me, content, attributes)[0];
                 replace = createFor(parent, '<so-tmp>', {style: 'display:none'})[0];
                 parent.insertBefore(replace, me);
                 this.for(function(el) {
-                    wrapper.appendChild(cloneElement(el)), parent.removeChild(cleanElement(el));
+                    clone = cloneElement(el);
+                    clones.push(clone);
+                    wrapper.appendChild(clone), parent.removeChild(cleanElement(el));
                 });
                 parent.replaceChild(wrapper, replace);
             }
-            return this;
+            return initDom(clones);
+        },
+        unwrap: function() {
+            var me = this[0], parent = me && me.parentNode,
+                parentParent = parent && parent.parentNode, clone, clones = [];
+            if (parentParent) {
+                this.for(function(el) {
+                    clone = cloneElement(el);
+                    clones.push(clone);
+                    parentParent.insertBefore(clone, parent);
+                });
+                parentParent.removeChild(cleanElement(parent));
+            }
+            return initDom(clones);
         }
     });
 
@@ -1463,7 +1479,9 @@
         $.fire('3s', function() {
             var click = function(e) {log(e.target, e.event.target)}
             var foo = $.dom("<em>hellö!</em>").on("click", click).data("foo", 1)
-            el = $.dom(".inject").wrap(foo)
+            // el = $.dom(".inject").wrap(foo)
+            el = $.dom(".inject").on("click", click)
+            el = $.dom(".inject").unwrap()
             log(el)
         })
     })
