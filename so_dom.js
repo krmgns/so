@@ -1088,12 +1088,6 @@
             return (name == ALL) ? this.setClass('')
                 : this.for(function(el) { removeClass(el, name); });
         },
-        getClass: function() {
-            return getAttribute(this[0], 'class');
-        },
-        setClass: function(name) {
-            return this.for(function(el) { el.className = name; });
-        },
         replaceClass: function(oldName, newName) {
             return this.for(function(el) {
                 el.className = el.className.replace(toClassRegExp(oldName), ' '+ newName +' ');
@@ -1103,6 +1097,12 @@
             return this.for(function(el) {
                 hasClass(el, name) ? removeClass(el, name) : addClass(el, name);
             });
+        },
+        setClass: function(name) {
+            return this.for(function(el) { el.className = name; });
+        },
+        getClass: function() {
+            return getAttribute(this[0], 'class');
         }
     });
 
@@ -1467,9 +1467,9 @@
     function kerem() {} // @tmp go-to
 
     $.onReady(function() { var doc = document, dom, el, els, body = document.body
-        $.fire('3s', function() {
-            // log(el)
-        })
+        // $.fire('3s', function() {
+        //     // log(el)
+        // })
     })
 
     // var DomPrototype = {}; extendPrototype lari azaltmak icin?
