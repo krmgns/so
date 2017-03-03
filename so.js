@@ -801,7 +801,7 @@
          * @return {String}
          */
         sid: function(prefix) {
-            return (prefix || '__so_sid__') + $.id();
+            return (prefix || '__so_sid_') + $.id();
         },
 
         /**
