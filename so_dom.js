@@ -1468,20 +1468,11 @@
         });
     }
 
-    function kerem() {} // @tmp go-to
-
-    $.onReady(function() { var doc = document, dom, el, els, body = document.body
-        // $.fire('3s', function() {
-        //     // log(el)
-        // })
-    })
-
-    // var DomPrototype = {}; extendPrototype lari azaltmak icin?
-
     $.dom = function(selector, root, i) {
         return initDom(selector, root, i);
     };
-    // add static methods
+
+    // static methods
     $.dom.extend({
         create: function(content, attributes) {
             return create(content, null, attributes);
@@ -1491,10 +1482,20 @@
         }
     });
 
-    // Dom.$ => find --> one=true
-    // Dom.$$ => findAll --> one=false
+    $.$ = function(selector, root, i) { // one
+        return initDom(selector, root, i, true);
+    };
+    $.$$ = function(selector, root, i) { // all
+        return initDom(selector, root, i, false);
+    };
 
-    // HTMLDocument.prototype.$ = function (selector) { return this.querySelector(selector); };
-    // HTMLDocument.prototype.$$ = function (selector) { return this.querySelectorAll(selector); };
+    extendPrototype(Node, {
+        find: function(selector, init) {
+            return $.$(selector, this).get(null, init);
+        },
+        findAll: function(selector, init) {
+            return $.$$(selector, this).getAll(null, init);
+        }
+    });
 
 })(window, so);
