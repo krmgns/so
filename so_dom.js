@@ -57,7 +57,7 @@
     var re_fln = /(?:(\w+):((fir|la)st|nth\((\d+)\)))(?!-)/gi;
 
     function select(selector, root, one) {
-        if (selector == '') return '';
+        if (selector == '') return;
 
         if (!isNode(root)) {
             root = document;
