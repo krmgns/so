@@ -436,16 +436,10 @@
         }
     });
 
-    function match(a, b) { // intersect
+    function intersect(a, b) {
         var tmp = (b.length > a.length) ? (tmp = b, b = a, a = tmp) : null; // loop over shorter
         return a.filter(function(e) {
             return b.indexOf(e) > -1;
-        });
-    }
-    function unmatch(a, b) { // diff
-        var tmp = (b.length > a.length) ? (tmp = b, b = a, a = tmp) : null; // loop over shorter
-        return a.filter(function(e) {
-            return b.indexOf(e) < 0;
         });
     }
 
@@ -501,7 +495,7 @@
                 if (isNumber(i)) {
                     rets = rets.item(i);
                 } else if (isString(i)) {
-                    rets = match(rets, this.parent().find(i).toArray());
+                    rets = intersect(rets, this.parent().find(i).toArray());
                 }
             }
             return rets;
@@ -513,7 +507,7 @@
             if (el) {
                 rets = walk(el, 'previousElementSibling').reverse();
                 if (s && rets.length) {
-                    rets = match(rets, this.parent().find(s).toArray());
+                    rets = intersect(rets, this.parent().find(s).toArray());
                 }
             }
             return initDom(rets);
@@ -524,7 +518,7 @@
             if (el) {
                 rets = walk(el, 'nextElementSibling');
                 if (s && rets.length) {
-                    rets = match(rets, this.parent().find(s).toArray());
+                    rets = intersect(rets, this.parent().find(s).toArray());
                 }
             }
             return initDom(rets);
