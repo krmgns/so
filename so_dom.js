@@ -411,6 +411,9 @@
         property: function(name, value) {
             return isUndefined(value) ? this.getProperty(name) : this.setProperty(name, value);
         },
+        hasProperty: function(name) {
+            return (this[0] && name in this[0]);
+        },
         setProperty: function(name, value) {
             var _this = this; return (_this[0] && (_this[0][name] = value), _this);
         },
