@@ -183,7 +183,7 @@
 
     // dom: base
     extendPrototype(Dom, {
-        // init: initDom,
+        constructor: Dom,
         find: function(selector, i) {return this[0] ? initDom(selector, this[0], i) : this;},
         all: function() {return this.toArray()},
         copy: function() {return initDom(this.toArray())},
