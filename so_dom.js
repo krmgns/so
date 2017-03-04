@@ -10,8 +10,8 @@
     var isVoid = $.isVoid, isNull = $.isNull, isNulls = $.isNulls, isUndefined = $.isUndefined;
     var isObject = $.isObject, isArray = $.isArray;
     var isNumber = $.isNumber, isNumeric = $.isNumeric, isString = $.isString;
-    var isWindow = $.isWindow, isDocument = $.isDocument;
     var isNode = $.isNode, isNodeElement = $.isNodeElement;
+    var isWindow = $.isWindow, isDocument = $.isDocument;
     var getWindow = $.getWindow, getDocument = $.getDocument;
     var toStyleName = $.util.toCamelCaseFromDashCase;
     var _break = 0; // break tick: for, forEach
