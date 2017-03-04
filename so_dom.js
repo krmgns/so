@@ -1357,16 +1357,24 @@
     if (event) {
         extendPrototype(Dom, {
             on: function(type, fn, options) {
-                return this.for(function(el) { event.on(el, type, fn, options); });
+                return this.for(function(el) {
+                    event.on(el, type, fn, options);
+                });
             },
             once: function(type, fn, options) {
-                return this.for(function(el) { event.once(el, type, fn, options); });
+                return this.for(function(el) {
+                    event.once(el, type, fn, options);
+                });
             },
             off: function(type, fn, options) {
-                return this.for(function(el) { event.off(el, type, fn, options); });
+                return this.for(function(el) {
+                    event.off(el, type, fn, options);
+                });
             },
             fire: function(type, fn, options) {
-                return this.for(function(el) { event.fire(el, type, fn, options); });
+                return this.for(function(el) {
+                    event.fire(el, type, fn, options);
+                });
             }
         });
     }
