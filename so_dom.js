@@ -6,7 +6,6 @@
     var re_trim = /^\s+|\s+$/g;
     var re_tag = /^<[a-z-][^>]*>/i;
     var trim = $.trim, trims = $.trimSpace;
-    var split = function split(s, re) { return trims(s).split(re); };
     var isBool = $.isBool, isTrue = $.isTrue, isFalse = $.isFalse;
     var isVoid = $.isVoid, isNull = $.isNull, isNulls = $.isNulls, isUndefined = $.isUndefined;
     var isObject = $.isObject, isArray = $.isArray;
@@ -15,6 +14,7 @@
     var isNode = $.isNode, isNodeElement = $.isNodeElement;
     var getWindow = $.getWindow, getDocument = $.getDocument;
     var toStyleName = $.util.toCamelCaseFromDashCase;
+    var split = function split(s, re) { return trims(s).split(re); };
     var querySelector = function(root, selector) { return root.querySelector(selector); };
     var querySelectorAll = function(root, selector) { return root.querySelectorAll(selector); };
     var _break = 0 /* loop break tick */;
