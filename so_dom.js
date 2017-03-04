@@ -3,12 +3,6 @@
 
     var ALL = '*';
 
-    var NODE_TYPE_ELEMENT = 1,
-        NODE_TYPE_TEXT = 3,
-        NODE_TYPE_COMMENT = 8,
-        NODE_TYPE_DOCUMENT = 9,
-        NODE_TYPE_DOCUMENT_FRAGMENT = 11;
-
     var re_space = /\s+/g;
     var re_comma = /,\s*/;
     var re_trim = /^\s+|\s+$/g;
@@ -493,7 +487,7 @@
             var el = this[0], node, nodes = [], i = 0;
             if (el) {
                 while (node = el.childNodes[i++]) {
-                    if (node.nodeType === NODE_TYPE_COMMENT) {
+                    if (node.nodeType === 8) {
                         nodes.push(node);
                     }
                 }
