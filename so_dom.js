@@ -40,6 +40,7 @@
     var getWindow = $.getWindow, getDocument = $.getDocument;
     var extend = $.extend, extendPrototype = $.extendPrototype;
     var toStyleName = $.util.toCamelCaseFromDashCase;
+    var _for = $.for, _forEach = $.forEach;
     var _break = 0; // break tick: for, forEach
 
     function split(s, re) { return trims(s).split(re); };
@@ -166,7 +167,7 @@
                 elements = selector;
             }
 
-            $.for(elements, function(element) {
+            _for(elements, function(element) {
                 if (element) this[size++] = element;
             }, this);
         }
@@ -188,8 +189,8 @@
         copy: function() {return initDom(this.toArray())},
         toArray: function() {var ret = [], i = 0; while (i < this.size) {ret.push(this[i++]);} return ret;},
         toList: function() { return $.list(this.toArray()); },
-        for: function(fn) { return $.for(this.toArray(), fn, this); },
-        forEach: function(fn) { return $.forEach(this.toArray(), fn, this); },
+        for: function(fn) { return _for(this.toArray(), fn, this); },
+        forEach: function(fn) { return _forEach(this.toArray(), fn, this); },
         has: function(search, strict) {return this.toArray().has(search, strict);},
         isEmpty: function() {return !this.size;},
         map: function(fn) {return initDom(this.toArray().map(fn));},
@@ -247,9 +248,9 @@
             fragment.appendChild(tmp[FIRST_CHILD]);
         }
         if (attributes && isObject(attributes)) {
-            $.for(fragment[CHILD_NODES], function(node) {
+            _for(fragment[CHILD_NODES], function(node) {
                 if (isNodeElement(node)) {
-                    $.forEach(attributes, function(name, value) {
+                    _forEach(attributes, function(name, value) {
                         node.setAttribute(name, value);
                     });
                 }
@@ -260,7 +261,7 @@
     function createElement(doc, tag, properties) {
         var el = doc.createElement(tag);
         if (properties) {
-            $.forEach(properties, function(name, value) {
+            _forEach(properties, function(name, value) {
                 el[name] = value;
             });
         }
@@ -278,7 +279,7 @@
                 });
             }
             if (el[CHILD_NODES]) {
-                $.for(el[CHILD_NODES], function(child) {
+                _for(el[CHILD_NODES], function(child) {
                     clone.appendChild(cloneElement(child, deep));
                 });
             }
@@ -608,9 +609,9 @@
 
     function getCssStyle(el) {
         var sheets = el.ownerDocument.styleSheets, rules, ret = [];
-        $.for(sheets, function(sheet) {
+        _for(sheets, function(sheet) {
             rules = sheet.rules || sheet.cssRules;
-            $.for(rules, function(rule) {
+            _for(rules, function(rule) {
                 if (matchesSelector.call(el, rule.selectorText)) {
                     ret.push(rule.style); // loop over all until last
                 }
@@ -686,7 +687,7 @@
                 styles = !isVoid(value) ? toKeyValueObject(name, value) : parseStyleText(name);
             }
             this.for(function(el) {
-                $.forEach(styles, function(name, value) {
+                _forEach(styles, function(name, value) {
                     setStyle(el, name, value);
                 });
             });
@@ -979,7 +980,7 @@
         attributes: function() {
             var el = this[0], ret = {};
             if (el) {
-                $.for(el.attributes, function(attribute) {
+                _for(el.attributes, function(attribute) {
                     ret[attribute.name] = re_attrStateName.test(attribute.name)
                         ? attribute.name :  attribute.value;
                 });
@@ -1001,7 +1002,7 @@
             return this.for(function(el) {
                 var names = [];
                 if (name == '*') {
-                    $.for(el.attributes, function(attribute) {
+                    _for(el.attributes, function(attribute) {
                         names.push(attribute.name);
                     });
                 } else {
@@ -1032,7 +1033,7 @@
             value += ''; // @important
             return this.for(function(el) {
                 if (el.options) { // <select>
-                    $.for(el.options, function(option) {
+                    _for(el.options, function(option) {
                         if (option.value === value) {
                             option.selected = true;
                         }
@@ -1218,7 +1219,7 @@
     function readFiles(file, callback) {
         if (file.files) {
             var multiple = file.files.length > 1;
-            $.for(file.files, function(file) {
+            _for(file.files, function(file) {
                 readFile(file, callback, multiple);
             });
             fileContentsStack = []; // reset
@@ -1241,7 +1242,7 @@
             if (getTag(el) == 'form') {
                 var data = [];
                 var done = true;
-                $.for(el, function(el) {
+                _for(el, function(el) {
                     if (!el.name || el.disabled) {
                         return;
                     }
@@ -1252,7 +1253,7 @@
 
                     switch (type) {
                         case 'select':
-                            $.for(el.options, function(option, i) {
+                            _for(el.options, function(option, i) {
                                 if (option.selected && option.hasAttribute('value')) {
                                     value = option.value; return _break;
                                 }
@@ -1275,7 +1276,7 @@
                                     } else {
                                         done = (value.length == el.files.length);
                                         if (done) { // multiple, wait for all read
-                                            $.for(value, function(value, i) {
+                                            _for(value, function(value, i) {
                                                 data.push(name +'['+ i +']='+ encode(value));
                                             });
                                         }
