@@ -184,7 +184,8 @@
     // dom: base
     extendPrototype(Dom, {
         constructor: Dom,
-        find: function(selector, i) {return this[0] ? initDom(selector, this[0], i) : this;},
+        find: function(selector, i) {return this[0] ? initDom(selector, this[0], i, true) : this;},
+        findAll: function(selector, i) {return this[0] ? initDom(selector, this[0], i) : this;},
         all: function() {return this.toArray()},
         copy: function() {return initDom(this.toArray())},
         toArray: function() {var ret = [], i = 0; while (i < this.size) {ret.push(this[i++]);} return ret;},
