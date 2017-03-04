@@ -241,9 +241,8 @@
             return [content];
         }
         doc = doc && isDocument(doc) ? doc : document;
-        var tmp = createElement(doc, 'so-tmp');
+        var tmp = createElement(doc, 'so-tmp', {innerHTML: content});
         var fragment = doc.createDocumentFragment();
-        tmp[INNER_HTML] = content;
         while (tmp[FIRST_CHILD]) {
             fragment.appendChild(tmp[FIRST_CHILD]);
         }
@@ -259,7 +258,13 @@
         return $.array(fragment[CHILD_NODES]);
     }
     function createElement(doc, tag, properties) {
-        return doc.createElement(tag);
+        var el = doc.createElement(tag);
+        if (properties) {
+            $.forEach(properties, function(name, value) {
+                el[name] = value;
+            });
+        }
+        return el;
     }
     function cloneElement(el, deep) {
         var clone = el.cloneNode();
@@ -762,8 +767,9 @@
         }
 
         var doc = getDocument(el);
-        var css = createElement(doc, 'style');
-        css[TEXT_CONTENT] = '.'+ sid +'{display:block!important;visibility:hidden!important}';
+        var css = createElement(doc, 'style', {
+            textContent: '.'+ sid +'{display:block!important;visibility:hidden!important}'
+        });
         doc.body.appendChild(css);
 
         el.className += className;
