@@ -909,7 +909,7 @@
             name.replace(re_attrNameRemove, '-').trimSpace();
     }
     function hasAttribute(el, name) {
-        return !!(el && el.hasAttribute(toAttributeName(name)));
+        return !!(el && el.hasAttribute && el.hasAttribute(toAttributeName(name)));
     }
     function setAttribute(el, name, value) {
         if (isNodeElement(el)) {
