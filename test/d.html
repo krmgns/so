@@ -1,0 +1,67 @@
+<!doctype html>
+<html><head></head><body class="body">
+
+<div id="foo"></div>
+<div id="first"></div>
+<div id="last"></div>
+
+<script>
+(function() {
+    function qry(selector, all) {
+        var ret = [];
+        if (selector[0] == '#' && /^#[a-z-_]$/i.test(selector)) {
+            ret = [document.getElementById(selector)];
+        } else if (selector[0] == '.' && /^\.[a-z-_]$/i.test(selector)) {
+            ret = document.getElementsByClassName(selector);
+        }
+        return all ? ret : ret[0];
+    }
+    function qsa(selector) {
+        return document.querySelectorAll(selector);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var i, il = 10000;
+        var start, end;
+        var now = function() { return +new Date; };
+        var fun_1, fun_2;
+
+        // @notes
+        // if element exists: qry() wins
+        // if element not exists: qsa() wins
+        console.log('test: query')
+        fun_1 = function() { qry("#foo") }
+        fun_2 = function() { qsa("#foo") }
+        start = now(); for (i = 0; i < il; i++) fun_1(); end = now()
+        console.log(end, start, end - start)
+        start = now(); for (i = 0; i < il; i++) fun_2(); end = now()
+        console.log(end, start, end - start)
+
+        // console.log('test: id')
+        // fun_1 = function() { document.getElementById('foo') }
+        // fun_2 = function() { document.querySelectorAll('#foo') }
+        // start = now(); for (i = 0; i < il; i++) fun_1(); end = now()
+        // console.log(end, start, end - start)
+        // start = now(); for (i = 0; i < il; i++) fun_2(); end = now()
+        // console.log(end, start, end - start)
+
+        // console.log('test: class')
+        // fun_1 = function() { document.getElementsByClassName('foo') }
+        // fun_2 = function() { document.querySelectorAll('.foo') }
+        // start = now(); for (i = 0; i < il; i++) fun_1(); end = now()
+        // console.log(end, start, end - start)
+        // start = now(); for (i = 0; i < il; i++) fun_2(); end = now()
+        // console.log(end, start, end - start)
+
+        // console.log('test: tag')
+        // fun_1 = function() { document.getElementsByTagName('div') }
+        // fun_2 = function() { document.querySelectorAll('div') }
+        // start = now(); for (i = 0; i < il; i++) fun_1(); end = now()
+        // console.log(end, start, end - start)
+        // start = now(); for (i = 0; i < il; i++) fun_2(); end = now()
+        // console.log(end, start, end - start)
+    }, false);
+})();
+</script>
+
+</body></html>
