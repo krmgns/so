@@ -1,6 +1,30 @@
 // deps: so, so.list, so.util
 ;(function(window, $, undefined) { 'use strict';
 
+    // minify candies
+    var PARENT_NODE  = 'parentNode';
+    var CHILDREN  = 'children';
+    var CHILD_NODES = 'childNodes';
+    var FIRST_CHILD  = 'firstChild';
+    var PARENT_ELEMENT = 'parentElement';
+    var NEXT_ELEMENT_SIBLING = 'nextElementSibling';
+    var PREVIOUS_ELEMENT_SIBLING = 'previousElementSibling';
+    var PADDING_TOP = 'paddingTop';
+    var PADDING_BOTTOM = 'paddingBottom';
+    var PADDING_LEFT = 'paddingLeft';
+    var PADDING_RIGHT = 'paddingRight';
+    var MARGIN_TOP = 'marginTop';
+    var MARGIN_BOTTOM = 'marginBottom';
+    var MARGIN_LEFT = 'marginLeft';
+    var MARGIN_RIGHT = 'marginRight';
+    var BORDER_TOP_WIDTH = 'borderTopWidth';
+    var BORDER_BOTTOM_WIDTH = 'borderBottomWidth';
+    var BORDER_LEFT_WIDTH = 'borderLeftWidth';
+    var BORDER_RIGHT_WIDTH = 'borderRightWidth';
+    var INNER_HTML = 'innerHTML';
+    var TEXT_CONTENT = 'textContent';
+
+
     var re_space = /\s+/g;
     var re_comma = /,\s*/;
     var re_trim = /^\s+|\s+$/g;
@@ -133,7 +157,7 @@
             } else if (isWindow(selector) || isDocument(selector)) {
                 elements = [selector];
             } else if (isNode(selector)) {
-                if (root && root != selector.parentNode) {
+                if (root && root != selector[PARENT_NODE]) {
                     // pass (check root reliability)
                 } else {
                     elements = [selector];
@@ -219,12 +243,12 @@
         doc = doc && isDocument(doc) ? doc : document;
         var tmp = createElement(doc, 'so-tmp');
         var fragment = doc.createDocumentFragment();
-        tmp.innerHTML = content;
-        while (tmp.firstChild) {
-            fragment.appendChild(tmp.firstChild);
+        tmp[INNER_HTML] = content;
+        while (tmp[FIRST_CHILD]) {
+            fragment.appendChild(tmp[FIRST_CHILD]);
         }
         if (attributes && isObject(attributes)) {
-            $.for(fragment.childNodes, function(node) {
+            $.for(fragment[CHILD_NODES], function(node) {
                 if (isNodeElement(node)) {
                     $.forEach(attributes, function(name, value) {
                         node.setAttribute(name, value);
@@ -232,7 +256,7 @@
                 }
             });
         }
-        return $.array(fragment.childNodes);
+        return $.array(fragment[CHILD_NODES]);
     }
     function createElement(doc, tag, properties) {
         return doc.createElement(tag);
@@ -248,8 +272,8 @@
                     event.copy().bindTo(clone);
                 });
             }
-            if (el.childNodes) {
-                $.for(el.childNodes, function(child) {
+            if (el[CHILD_NODES]) {
+                $.for(el[CHILD_NODES], function(child) {
                     clone.appendChild(cloneElement(child, deep));
                 });
             }
@@ -259,7 +283,7 @@
     function cleanElement(el) {
         el.$data = el.$events = null;
         var child;
-        while (child = el.firstChild) {
+        while (child = el[FIRST_CHILD]) {
             if (isNodeElement(child)) {
                 cleanElement(child);
             }
@@ -292,8 +316,8 @@
         remove: function() {
             return this.for(function(element) {
                 cleanElement(element);
-                if (element.parentNode) {
-                    element.parentNode.removeChild(element);
+                if (element[PARENT_NODE]) {
+                    element[PARENT_NODE].removeChild(element);
                 }
             });
         },
@@ -320,7 +344,7 @@
         prepend: function(content, attributes, cloning) {
             return this.for(function(el) {
                 createFor(el, content, attributes).forEach(function(node) {
-                    el.insertBefore(cloneIf(cloning, node), el.firstChild);
+                    el.insertBefore(cloneIf(cloning, node), el[FIRST_CHILD]);
                 });
             });
         },
@@ -328,7 +352,7 @@
             if (!isDom(selector)) selector = initDom(selector);
             return this.for(function(el) {
                 selector.for(function(node) {
-                    node.insertBefore(cloneIf(cloning, el), node.firstChild);
+                    node.insertBefore(cloneIf(cloning, el), node[FIRST_CHILD]);
                 });
             });
         },
@@ -342,7 +366,7 @@
             if (!isDom(selector)) selector = initDom(selector);
             return this.for(function(el) {
                 selector.for(function(node) {
-                    node.parentNode.insertBefore(cloneIf(cloning, el), node);
+                    node[PARENT_NODE].insertBefore(cloneIf(cloning, el), node);
                 });
             });
         },
@@ -350,7 +374,7 @@
             if (!isDom(selector)) selector = initDom(selector);
             return this.for(function(el) {
                 selector.for(function(node) {
-                    node.parentNode.insertBefore(cloneIf(cloning, el), node.nextSibling)
+                    node[PARENT_NODE].insertBefore(cloneIf(cloning, el), node.nextSibling)
                 });
             });
         },
@@ -358,12 +382,12 @@
             if (!isDom(selector)) selector = initDom(selector);
             return this.for(function(el) {
                 selector.for(function(node) {
-                    el.parentNode.replaceChild(cloneIf(cloning, node), el);
+                    el[PARENT_NODE].replaceChild(cloneIf(cloning, node), el);
                 });
             });
         },
         wrap: function(content, attributes) {
-            var me = this[0], parent = me && me.parentNode,
+            var me = this[0], parent = me && me[PARENT_NODE],
                 wrapper, replace, clone, clones = [];
             if (parent) {
                 wrapper = createFor(me, content, attributes)[0];
@@ -379,8 +403,8 @@
             return initDom(clones);
         },
         unwrap: function(remove) {
-            var me = this[0], parent = me && me.parentNode,
-                parentParent = parent && parent.parentNode, clone, clones = [];
+            var me = this[0], parent = me && me[PARENT_NODE],
+                parentParent = parent && parent[PARENT_NODE], clone, clones = [];
             if (parentParent) {
                 this.for(function(el) {
                     clone = cloneElement(el);
@@ -395,15 +419,15 @@
         }
     });
 
-    function _(_this, i, name) {
-        var ret = _this[i];
+    function _(dom, i, name) {
+        var ret = dom[i];
         if (name) {
             ret = ret && ret[name];
         }
         return ret;
     }
-    function __(_this, name) {
-        return _(_this, 0, name);
+    function __(dom, name) {
+        return _(dom, 0, name);
     }
 
     // dom: property
@@ -428,19 +452,19 @@
             return isVoid(input) ? this.getText() : this.setText(input);
         },
         setText: function(input) {
-            return this.for(function(el) { el.textContent = (''+ input); });
+            return this.for(function(el) { el[TEXT_CONTENT] = input; });
         },
         getText: function() {
-            return __(this, 'textContent');
+            return __(this, TEXT_CONTENT);
         },
         html: function(input) {
             return isVoid(input) ? this.getHtml() : this.setHtml(input);
         },
         setHtml: function(input) {
-            return this.for(function(el) { el.innerHTML = (''+ input); });
+            return this.for(function(el) { el[INNER_HTML] = input; });
         },
         getHtml: function() {
-            return __(this, 'innerHTML');
+            return __(this, INNER_HTML);
         }
     });
 
@@ -480,12 +504,12 @@
                 }), paths = paths.reverse(), join ? paths.join(' > ') : paths;
             }
         },
-        parent: function() { return initDom(__(this, 'parentNode')); },
-        parents: function() { return initDom(walk(this[0], 'parentNode')); },
+        parent: function() { return initDom(__(this, PARENT_NODE)); },
+        parents: function() { return initDom(walk(this[0], PARENT_NODE)); },
         comments: function() {
             var el = this[0], node, nodes = [], i = 0;
             if (el) {
-                while (node = el.childNodes[i++]) {
+                while (node = el[CHILD_NODES][i++]) {
                     if (node.nodeType === 8) {
                         nodes.push(node);
                     }
@@ -494,9 +518,9 @@
             return initDom(nodes);
         },
         siblings: function(i) {
-            var el = __(this), elp = el && el.parentNode, rets;
+            var el = __(this), elp = el && el[PARENT_NODE], rets;
             if (el && elp) {
-                rets = walk(elp, 'children').filter(function(_el) {
+                rets = walk(elp, CHILDREN).filter(function(_el) {
                     return _el != el;
                 });
                 if (isNumber(i)) {
@@ -507,23 +531,23 @@
             }
             return rets;
         },
-        children: function() { return initDom(__(this, 'children')); },
-        prev: function() { return initDom(__(this, 'previousElementSibling')); },
+        children: function() { return initDom(__(this, CHILDREN)); },
+        prev: function() { return initDom(__(this, PREVIOUS_ELEMENT_SIBLING)); },
         prevAll: function(s) {
             var el = this[0], rets = [];
             if (el) {
-                rets = walk(el, 'previousElementSibling').reverse();
+                rets = walk(el, PREVIOUS_ELEMENT_SIBLING).reverse();
                 if (s && rets.length) {
                     rets = intersect(rets, this.parent().find(s).toArray());
                 }
             }
             return initDom(rets);
         },
-        next: function() { return initDom(__(this, 'nextElementSibling')); },
+        next: function() { return initDom(__(this, NEXT_ELEMENT_SIBLING)); },
         nextAll: function(s) {
             var el = this[0], rets = [], found;
             if (el) {
-                rets = walk(el, 'nextElementSibling');
+                rets = walk(el, NEXT_ELEMENT_SIBLING);
                 if (s && rets.length) {
                     rets = intersect(rets, this.parent().find(s).toArray());
                 }
@@ -534,7 +558,7 @@
         hasParent: function(s) {
             var el = this[0], ret;
             if (!s) {
-                ret = !!(el && el.parentNode);
+                ret = el && el[PARENT_NODE];
             } else {
                 s = initDom(s)[0];
                 this.parents().forEach(function(_s) {
@@ -712,12 +736,12 @@
         return el && !(el.offsetWidth || el.offsetHeight);
     }
     function isHiddenParent(el) {
-        var parent = el && el.parentElement;
+        var parent = el && el[PARENT_ELEMENT];
         while (parent) {
             if (isHidden(parent)) {
                 return true;
             }
-            parent = parent.parentElement;
+            parent = parent[PARENT_ELEMENT];
         }
         return false;
     }
@@ -725,7 +749,7 @@
         var ret = [];
         var sid = $.sid(), className = ' '+ sid;
         var styleText = el.style.cssText;
-        var parent = el.parentElement, parents = [], parentStyle;
+        var parent = el[PARENT_ELEMENT], parents = [], parentStyle;
 
         while (parent) { // doesn't give if parents are hidden
             if (isHidden(parent)) {
@@ -734,12 +758,12 @@
                 parent.className += className;
                 parent.style.display = '', parent.style.visibility = ''; // for `!important` annots
             }
-            parent = parent.parentElement;
+            parent = parent[PARENT_ELEMENT];
         }
 
         var doc = getDocument(el);
         var css = createElement(doc, 'style');
-        css.textContent = '.'+ sid +'{display:block!important;visibility:hidden!important}';
+        css[TEXT_CONTENT] = '.'+ sid +'{display:block!important;visibility:hidden!important}';
         doc.body.appendChild(css);
 
         el.className += className;
@@ -792,32 +816,32 @@
         if (isNodeElement(el)) {
             style = getStyle(el);
             if ((!by || by == 'width') && dim.width) {
-                ret.width -= sumStyleValue(null, style, 'paddingLeft', 'paddingRight')
-                           + sumStyleValue(null, style, 'borderLeftWidth', 'borderRightWidth');
+                ret.width -= sumStyleValue(null, style, PADDING_LEFT, PADDING_RIGHT)
+                           + sumStyleValue(null, style, BORDER_LEFT_WIDTH, BORDER_RIGHT_WIDTH);
                 if (by) return ret.width;
             }
             if ((!by || by == 'innerWidth') && dim.width) {
-                ret.innerWidth -= sumStyleValue(null, style, 'borderLeftWidth', 'borderRightWidth');;
+                ret.innerWidth -= sumStyleValue(null, style, BORDER_LEFT_WIDTH, BORDER_RIGHT_WIDTH);;
                 if (by) return ret.innerWidth;
             }
             if ((!by || by == 'outerWidth') && dim.width) {
                 if (options.margined) {
-                    ret.outerWidth += sumStyleValue(null, style, 'marginLeft', 'marginRight');
+                    ret.outerWidth += sumStyleValue(null, style, MARGIN_LEFT, MARGIN_RIGHT);
                 }
                 if (by) return ret.outerWidth;
             }
             if ((!by || by == 'height') && dim.height) {
-                ret.height -= sumStyleValue(null, style, 'paddingTop', 'paddingBottom')
-                            + sumStyleValue(null, style, 'borderTopWidth', 'borderBottomWidth');
+                ret.height -= sumStyleValue(null, style, PADDING_TOP, PADDING_BOTTOM)
+                            + sumStyleValue(null, style, BORDER_TOP_WIDTH, BORDER_BOTTOM_WIDTH);
                 if (by) return ret.height;
             }
             if ((!by || by == 'innerHeight') && dim.height) {
-                ret.innerHeight -= sumStyleValue(null, style, 'borderTopWidth', 'borderBottomWidth');
+                ret.innerHeight -= sumStyleValue(null, style, BORDER_TOP_WIDTH, BORDER_BOTTOM_WIDTH);
                 if (by) return ret.innerHeight;
             }
             if ((!by || by == 'outerHeight') && dim.height) {
                 if (options.margined) {
-                    ret.outerHeight += sumStyleValue(null, style, 'marginTop', 'marginBottom');
+                    ret.outerHeight += sumStyleValue(null, style, MARGIN_TOP, MARGIN_BOTTOM);
                 }
                 if (by) return ret.outerHeight;
             }
@@ -862,7 +886,7 @@
             }
             ret.top += body.scrollTop, ret.left += body.scrollLeft;
             if (relative) {
-                var parentOffset = getOffset(el.parentElement, relative);
+                var parentOffset = getOffset(el[PARENT_ELEMENT], relative);
                 ret.top += parentOffset.top, ret.left += parentOffset.left;
             }
         }
@@ -887,11 +911,11 @@
             var el = this[0], ret = {};
             if (el) {
                 var style = getStyle(el);
-                var borderXSize = sumStyleValue(null, style, 'borderLeftWidth', 'borderRightWidth');
-                var borderYSize = sumStyleValue(null, style, 'borderTopWidth', 'borderBottomWidth');
-                var marginXSize = sumStyleValue(null, style, 'marginLeft', 'marginRight');
-                var marginYSize = sumStyleValue(null, style, 'marginTop', 'marginBottom');
-                var dim = getDimensionsBy(el), parentDim = getDimensions(el.parentElement);
+                var borderXSize = sumStyleValue(null, style, BORDER_LEFT_WIDTH, BORDER_RIGHT_WIDTH);
+                var borderYSize = sumStyleValue(null, style, BORDER_TOP_WIDTH, BORDER_BOTTOM_WIDTH);
+                var marginXSize = sumStyleValue(null, style, MARGIN_LEFT, MARGIN_RIGHT);
+                var marginYSize = sumStyleValue(null, style, MARGIN_TOP, MARGIN_BOTTOM);
+                var dim = getDimensionsBy(el), parentDim = getDimensions(el[PARENT_ELEMENT]);
                 var offset = getOffset(el), scroll = getScroll(el);
                 ret = dim;
                 ret.outerWidthMargined = dim.width + marginXSize;
@@ -1017,7 +1041,7 @@
             if (el) {
                 if (el.options && !isVoid(option = el.options[el.selectedIndex])) {
                     ret = hasAttribute(option, 'value')
-                        ? (option.disabled || option.parentElement.disabled ? '' : option.value) : '';
+                        ? (option.disabled || option[PARENT_ELEMENT].disabled ? '' : option.value) : '';
                 } else {
                     ret = el.value;
                 }
