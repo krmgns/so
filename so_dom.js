@@ -5,7 +5,7 @@
     var re_comma = /,\s*/;
     var re_trim = /^\s+|\s+$/g;
     var re_tag = /^<[a-z-][^>]*>/i;
-    var trim = $.trim, trims = $.trimSpace;
+    var trims = $.trimSpace;
     var isBool = $.isBool, isTrue = $.isTrue, isFalse = $.isFalse;
     var isVoid = $.isVoid, isNull = $.isNull, isNulls = $.isNulls, isUndefined = $.isUndefined;
     var isObject = $.isObject, isArray = $.isArray;
