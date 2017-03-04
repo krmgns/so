@@ -1,8 +1,6 @@
 // deps: so, so.list, so.util
 ;(function(window, $, undefined) { 'use strict';
 
-    var ALL = '*';
-
     var re_space = /\s+/g;
     var re_comma = /,\s*/;
     var re_trim = /^\s+|\s+$/g;
@@ -695,7 +693,7 @@
         },
         removeStyle: function(name) {
             return this.for(function(el) {
-                if (name == ALL) {
+                if (name == '*') {
                     el.removeAttribute('style');
                 } else {
                     name.split(re_comma).forEach(function(name) {
@@ -968,7 +966,7 @@
         removeAttribute: function(name) {
             return this.for(function(el) {
                 var names = [];
-                if (name == ALL) {
+                if (name == '*') {
                     $.for(el.attributes, function(attribute) {
                         names.push(attribute.name);
                     });
@@ -1079,7 +1077,7 @@
             return this.for(function(el) { addClass(el, name); });
         },
         removeClass: function(name) {
-            return (name == ALL) ? this.setClass('')
+            return (name == '*') ? this.setClass('')
                 : this.for(function(el) { removeClass(el, name); });
         },
         replaceClass: function(oldName, newName) {
@@ -1121,7 +1119,7 @@
                     checkData(el);
                     if (!key) {
                         ret = el.$data;
-                    } else if (key == ALL) {
+                    } else if (key == '*') {
                         ret = el.$data.data;
                     } else {
                         ret = el.$data.get(key);
@@ -1148,7 +1146,7 @@
 
             return this.for(function(el) {
                 checkData(el);
-                if (key == ALL) {
+                if (key == '*') {
                     el.$data.empty();
                 } else {
                     split(key, re_comma).forEach(function(key) {
