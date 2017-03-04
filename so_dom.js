@@ -817,7 +817,7 @@
             }
             if ((!by || by == 'outerHeight') && dim.height) {
                 if (options.margined) {
-                    ret.outerHeight += sumStyleValue(dim.el, style, 'marginTop', 'marginBottom');
+                    ret.outerHeight += sumStyleValue(null, style, 'marginTop', 'marginBottom');
                 }
                 if (by) return ret.outerHeight;
             }
