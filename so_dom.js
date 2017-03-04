@@ -217,7 +217,7 @@
                 elements = this.toArray();
             } else {
                 var _this = this;
-                is.split(re_comma).forEach(function(i) {
+                split(is, re_comma).forEach(function(i) {
                     element = _this.get(i);
                     if (element && !elements.has(element)) {
                         elements.push(element);
@@ -730,7 +730,7 @@
                 if (name == '*') {
                     el.removeAttribute('style');
                 } else {
-                    name.split(re_comma).forEach(function(name) {
+                    split(name, re_comma).forEach(function(name) {
                         setStyle(el, name, '');
                     });
                 }
@@ -1006,7 +1006,7 @@
                         names.push(attribute.name);
                     });
                 } else {
-                    names = name.split(re_comma);
+                    names = split(name, re_comma);
                 }
 
                 while (name = names.shift()) {
@@ -1181,13 +1181,10 @@
 
             return this.for(function(el) {
                 checkData(el);
-                if (key == '*') {
-                    el.$data.empty();
-                } else {
+                (key == '*') ? el.$data.empty() :
                     split(key, re_comma).forEach(function(key) {
                         el.$data.removeAt(key);
                     });
-                }
             });
         }
     });
@@ -1316,7 +1313,9 @@
         serializeArray: function(callback) {
             var _ret = function(data, ret) {
                 return ret = [], data.split('&').forEach(function(item) {
-                    item = item.split('='), ret.push({name: decode(item[0]), value: decode(item[1])});
+                    item = item.split('='), ret.push({
+                        name: decode(item[0]), value: decode(item[1])
+                    });
                 }), ret;
             };
             if (!callback) {
