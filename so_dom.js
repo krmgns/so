@@ -14,6 +14,7 @@
     var isNode = $.isNode, isNodeElement = $.isNodeElement;
     var isWindow = $.isWindow, isDocument = $.isDocument;
     var getWindow = $.getWindow, getDocument = $.getDocument;
+    var extend = $.extend, extendPrototype = $.extendPrototype;
     var toStyleName = $.util.toCamelCaseFromDashCase;
     var _break = 0; // break tick: for, forEach
 
@@ -156,7 +157,7 @@
     }
 
     // dom: base
-    Dom.extendPrototype({
+    extendPrototype(Dom, {
         // init: initDom,
         find: function(selector, i) {return this[0] ? initDom(selector, this[0], i) : this;},
         all: function() {return this.toArray()},
@@ -277,7 +278,7 @@
     }
 
     // dom: modifiers
-    Dom.extendPrototype({
+    extendPrototype(Dom, {
         clone: function(deep) {
             var clones = []; return this.for(function(element, i) {
                 clones[i] = cloneElement(element, deep);
@@ -406,7 +407,7 @@
     }
 
     // dom: property
-    Dom.extendPrototype({
+    extendPrototype(Dom, {
         property: function(name, value) {
             return isUndefined(value) ? this.getProperty(name) : this.setProperty(name, value);
         },
@@ -419,7 +420,7 @@
     });
 
     // dom: contents
-    Dom.extendPrototype({
+    extendPrototype(Dom, {
         text: function(input) {
             return isVoid(input) ? this.getText() : this.setText(input);
         },
@@ -460,7 +461,7 @@
     }
 
     // dom: walkers
-    Dom.extendPrototype({
+    extendPrototype(Dom, {
         path: function(join) {
             var el = this[0], path, paths = [];
             if (el) {
@@ -639,7 +640,7 @@
     }
 
     // dom: styles
-    Dom.extendPrototype({
+    extendPrototype(Dom, {
         style: function(name, value, valueDefault, raw) {
             return !isVoid(value) ? this.setStyle(name, value)
                 : this.getStyle(name, value, valueDefault, raw);
@@ -778,7 +779,7 @@
     function getDimensionsBy(el, by, options) {
         options = options || {};
         var dim = getDimensions(el);
-        var ret = $.extend(dim, {
+        var ret = extend(dim, {
             innerWidth: dim.width, outerWidth: dim.width,
             innerHeight: dim.height, outerHeight: dim.height
         }), style;
@@ -819,7 +820,7 @@
     }
 
     // dom: dimensions
-    Dom.extendPrototype({
+    extendPrototype(Dom, {
         dimensions: function() {
             return getDimensions(this[0]);
         },
@@ -873,7 +874,7 @@
     }
 
     // dom: offset, scroll, scrollTo, box
-    Dom.extendPrototype({
+    extendPrototype(Dom, {
         offset: function() {return getOffset(this[0]);},
         scroll: function() {return getScroll(this[0]);},
         box: function() {
@@ -927,7 +928,7 @@
     }
 
     // dom: attributes
-    Dom.extendPrototype({
+    extendPrototype(Dom, {
         attribute: function(name, value) {
             var ret;
             if (isNull(value)) {
@@ -979,7 +980,7 @@
     });
 
     // dom: values
-    Dom.extendPrototype({
+    extendPrototype(Dom, {
         value: function(value) {
             var ret;
             if (isNull(value)) {
@@ -1020,7 +1021,7 @@
     });
 
     // dom: id
-    Dom.extendPrototype({
+    extendPrototype(Dom, {
         id: function(id) {
             return !isUndefined(id) ? this.setId(id) : this.getId();
         },
@@ -1052,7 +1053,7 @@
     }
 
     // dom: class
-    Dom.extendPrototype({
+    extendPrototype(Dom, {
         class: function(name, option) {
             if (!name) return this.getClass();
 
@@ -1100,7 +1101,7 @@
     }
 
     // dom: data
-    Dom.extendPrototype({
+    extendPrototype(Dom, {
         data: function(key, value) {
             key = trims(key);
 
@@ -1198,7 +1199,7 @@
     }
 
     // dom: form
-    Dom.extendPrototype({
+    extendPrototype(Dom, {
         serialize: function(callback, opt_plus) {
             var el = this[0], ret = '';
             if (getTag(el) == 'form') {
@@ -1304,7 +1305,7 @@
     });
 
     // dom: form element states
-    Dom.extendPrototype({
+    extendPrototype(Dom, {
         checked: function(option) {
             var _this = this; return isVoid(option) ?
                 _this[0].checked : (setAttribute(_this[0], 'checked', option), _this);
@@ -1324,7 +1325,7 @@
     });
 
     // dom: checkers
-    Dom.extendPrototype({
+    extendPrototype(Dom, {
         isWindow: function() {
             return isWindow(this[0]);
         },
@@ -1348,7 +1349,7 @@
     // dom: events
     var event = $.event;
     if (event) {
-        Dom.extendPrototype({
+        extendPrototype(Dom, {
             on: function(type, fn, options) {
                 return this.for(function(el) { event.on(el, type, fn, options); });
             },
@@ -1367,7 +1368,7 @@
     // dom: animations
     var animation = $.animation;
     if (animation) {
-        Dom.extendPrototype({
+        extendPrototype(Dom, {
             animate: function(properties, speed, easing, callback) {
                 if (properties == 'stop') { // stop previous animation
                     this.for(function(el) {
