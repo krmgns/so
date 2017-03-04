@@ -14,7 +14,7 @@
     var isNode = $.isNode, isNodeElement = $.isNodeElement;
     var getWindow = $.getWindow, getDocument = $.getDocument;
     var toStyleName = $.util.toCamelCaseFromDashCase;
-    var _break = 0 /* loop break tick */;
+    var _break = 0; // break tick: for, forEach
 
     function split(s, re) { return trims(s).split(re); };
     function querySelector(root, selector) { return root.querySelector(selector); };
