@@ -14,10 +14,11 @@
     var isNode = $.isNode, isNodeElement = $.isNodeElement;
     var getWindow = $.getWindow, getDocument = $.getDocument;
     var toStyleName = $.util.toCamelCaseFromDashCase;
-    var split = function split(s, re) { return trims(s).split(re); };
-    var querySelector = function(root, selector) { return root.querySelector(selector); };
-    var querySelectorAll = function(root, selector) { return root.querySelectorAll(selector); };
     var _break = 0 /* loop break tick */;
+
+    function split(s, re) { return trims(s).split(re); };
+    function querySelector(root, selector) { return root.querySelector(selector); };
+    function querySelectorAll(root, selector) { return root.querySelectorAll(selector); };
 
     function getTag(el) {return (el && el.nodeName) ? el.nodeName.toLowerCase() : isWindow(el) ? '#window' : null;}
 
