@@ -215,7 +215,7 @@
             return [content];
         }
         doc = doc && isDocument(doc) ? doc : document;
-        var tmp = doc.createElement('so-tmp');
+        var tmp = createElement(doc, 'so-tmp');
         var fragment = doc.createDocumentFragment();
         tmp.innerHTML = content;
         while (tmp.firstChild) {
@@ -231,6 +231,9 @@
             });
         }
         return $.array(fragment.childNodes);
+    }
+    function createElement(doc, tag, properties) {
+        return doc.createElement(tag);
     }
     function cloneElement(el, deep) {
         var clone = el.cloneNode();
@@ -587,10 +590,10 @@
     }
     function getDefaultStyle(tag, name) {
         if (!defaultStyles[tag]) {
-            var el = document.createElement(tag);
-            document.body.appendChild(el);
+            var doc = document, el = createElement(doc, tag);
+            doc.body.appendChild(el);
             defaultStyles[tag] = getComputedStyle(el)[toStyleName(name)];
-            document.body.removeChild(el);
+            doc.body.removeChild(el);
         }
         return defaultStyles[tag];
     }
@@ -728,7 +731,7 @@
         }
 
         var doc = getDocument(el);
-        var css = doc.createElement('style');
+        var css = createElement(doc, 'style');
         css.textContent = '.'+ sid +'{display:block!important;visibility:hidden!important}';
         doc.body.appendChild(css);
 
