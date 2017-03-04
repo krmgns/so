@@ -5,7 +5,6 @@
     var re_comma = /,\s*/;
     var re_trim = /^\s+|\s+$/g;
     var re_tag = /^<[a-z-][^>]*>/i;
-    var isNaN = window.isNaN;
     var trim = $.trim, trims = $.trimSpace;
     var split = function split(s, re) { return trims(s).split(re); };
     var isBool = $.isBool, isTrue = $.isTrue, isFalse = $.isFalse;
