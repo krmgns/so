@@ -601,10 +601,6 @@
         }
         return defaultStyles[tag];
     }
-    function getStyle(el, name, value) {
-        var style = getComputedStyle(el);
-        return name ? (name = toStyleName(name), style[name] || value || '') : style;
-    }
     function setStyle(el, name, value) {
         name = toStyleName(name), value = trims(value);
         if (value && isNumeric(value) && !re_noneUnitStyles.test(name)) {
@@ -612,7 +608,10 @@
         }
         el.style[name] = value;
     }
-    function hasStyle(el, name) {return el && el.style.cssText.indexOf(name) > -1;}
+    function getStyle(el, name, value) {
+        var style = getComputedStyle(el);
+        return name ? (name = toStyleName(name), style[name] || value || '') : style;
+    }
     function parseStyleText(text) {
         var styles = {}, s;
         text = (''+ text).split($.re('\\s*;\\s*'));
@@ -647,6 +646,10 @@
         style: function(name, value, valueDefault, raw) {
             return !isVoid(value) ? this.setStyle(name, value)
                 : this.getStyle(name, value, valueDefault, raw);
+        },
+        hasStyle: function(name) {
+            var el = this[0];
+            return !!(el && el.style && el.style.cssText.indexOf(name) > -1);
         },
         setStyle: function(name, value) {
             var styles = name;
