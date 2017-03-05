@@ -8,26 +8,20 @@
 
     // minify candies
     var PARENT_NODE  = 'parentNode';
-    var CHILDREN  = 'children';
-    var CHILD_NODES = 'childNodes';
-    var FIRST_CHILD  = 'firstChild';
     var PARENT_ELEMENT = 'parentElement';
+    var FIRST_CHILD = 'firstChild';
+    var CHILDREN = 'children', CHILD_NODES = 'childNodes';
     var NEXT_ELEMENT_SIBLING = 'nextElementSibling';
     var PREVIOUS_ELEMENT_SIBLING = 'previousElementSibling';
-    var PADDING_TOP = 'paddingTop';
-    var PADDING_BOTTOM = 'paddingBottom';
-    var PADDING_LEFT = 'paddingLeft';
-    var PADDING_RIGHT = 'paddingRight';
-    var MARGIN_TOP = 'marginTop';
-    var MARGIN_BOTTOM = 'marginBottom';
-    var MARGIN_LEFT = 'marginLeft';
-    var MARGIN_RIGHT = 'marginRight';
-    var BORDER_TOP_WIDTH = 'borderTopWidth';
-    var BORDER_BOTTOM_WIDTH = 'borderBottomWidth';
-    var BORDER_LEFT_WIDTH = 'borderLeftWidth';
-    var BORDER_RIGHT_WIDTH = 'borderRightWidth';
-    var INNER_HTML = 'innerHTML';
-    var TEXT_CONTENT = 'textContent';
+    var PADDING_TOP = 'paddingTop', PADDING_BOTTOM = 'paddingBottom';
+    var PADDING_LEFT = 'paddingLeft', PADDING_RIGHT = 'paddingRight';
+    var MARGIN_TOP = 'marginTop', MARGIN_BOTTOM = 'marginBottom';
+    var MARGIN_LEFT = 'marginLeft', MARGIN_RIGHT = 'marginRight';
+    var BORDER_TOP_WIDTH = 'borderTopWidth', BORDER_BOTTOM_WIDTH = 'borderBottomWidth';
+    var BORDER_LEFT_WIDTH = 'borderLeftWidth', BORDER_RIGHT_WIDTH = 'borderRightWidth';
+    var WIDTH = 'width', INNER_WIDTH = 'innerWidth', OUTER_WIDTH = 'outerWidth';
+    var HEIGHT = 'height', INNER_HEIGHT = 'innerHeight', OUTER_HEIGHT = 'outerHeight';
+    var INNER_HTML = 'innerHTML', TEXT_CONTENT = 'textContent';
 
     var re_space = /\s+/g;
     var re_comma = /,\s*/;
@@ -86,8 +80,8 @@
     /**
      * Select.
      * @param  {String|Object} selector
-     * @param  {?Object}       root
-     * @param  {?Boolean}      one
+     * @param  {Object}        ?root
+     * @param  {Boolean}       ?one
      * @return {Array}
      */
     function select(selector, root, one) {
@@ -174,9 +168,9 @@
     /**
      * Dom.
      * @param {String|Object} selector
-     * @param {?Object}       root
-     * @param {?Int}          i
-     * @param {?Boolean}      one
+     * @param {Object}        ?root
+     * @param {Int}           ?i
+     * @param {Boolean}       ?one
      */
     function Dom(selector, root, i, one) {
         var elements, size = 0;
@@ -229,7 +223,7 @@
         /**
          * Find.
          * @param  {String|Object} selector
-         * @param  {?Int)          i
+         * @param  {Int)           ?i
          * @return {Dom}
          */
         find: function(selector, i) {
@@ -239,7 +233,7 @@
         /**
          * Find all.
          * @param  {String|Object} selector
-         * @param  {?Int)          i
+         * @param  {Int)           ?i
          * @return {Dom}
          */
         findAll: function(selector, i) {
@@ -346,8 +340,8 @@
 
         /**
          * Get.
-         * @param  {?Int}     i
-         * @param  {?Boolean} init
+         * @param  {Int}     ?i
+         * @param  {Boolean} ?init
          * @return {Object|Dom}
          */
         get: function(i, init) {
@@ -362,8 +356,8 @@
 
         /**
          * Get all.
-         * @param  {?Int|Array} i
-         * @param  {?Boolean}   init
+         * @param  {Int|Array} ?i
+         * @param  {Boolean}   ?init
          * @return {Array|Dom}
          */
         getAll: function(i, init) {
@@ -513,16 +507,31 @@
 
     // dom: modifiers
     extendPrototype(Dom, {
+        /**
+         * Colne.
+         * @param  {Boolean} ?deep
+         * @return {Dom}
+         */
         clone: function(deep) {
             var clones = []; return this.for(function(element, i) {
                 clones[i] = cloneElement(element, deep);
             }), initDom(clones);
         },
+
+        /**
+         * Empty.
+         * @return {this}
+         */
         empty: function() {
             return this.for(function(element) {
                 cleanElement(element);
             });
         },
+
+        /**
+         * Remove
+         * @return {this}
+         */
         remove: function() {
             return this.for(function(element) {
                 cleanElement(element);
@@ -531,11 +540,25 @@
                 }
             });
         },
+
+        /**
+         * Remove from.
+         * @param  {String} selector
+         * @return {this}
+         */
         removeFrom: function(selector) {
             return this.for(function(el) {
-                $.dom(selector).find(el).remove();
+                initDom(selector).find(el).remove();
             });
         },
+
+        /**
+         * Append.
+         * @param  {String|Object|Dom}  content
+         * @param  {Object}            ?attributes
+         * @param  {Boolean}           ?cloning
+         * @return {this}
+         */
         append: function(content, attributes, cloning) {
             return this.for(function(el) {
                 createFor(el, content, attributes).forEach(function(node) {
@@ -543,14 +566,32 @@
                 });
             });
         },
+
+        /**
+         * Append to.
+         * @param  {String}   selector
+         * @param  {Boolean} ?cloning
+         * @return {this}
+         */
         appendTo: function(selector, cloning) {
-            if (!isDom(selector)) selector = initDom(selector);
+            if (!isDom(selector)) {
+                selector = initDom(selector);
+            }
+
             return this.for(function(el) {
                 selector.for(function(node) {
                     node.appendChild(cloneIf(cloning, el));
                 });
             });
         },
+
+        /**
+         * Prepend.
+         * @param  {String|Object|Dom}  content
+         * @param  {Object}            ?attributes
+         * @param  {Boolean}           ?cloning
+         * @return {this}
+         */
         prepend: function(content, attributes, cloning) {
             return this.for(function(el) {
                 createFor(el, content, attributes).forEach(function(node) {
@@ -558,47 +599,105 @@
                 });
             });
         },
+
+        /**
+         * Prepend to.
+         * @param  {String}   selector
+         * @param  {Boolean} ?cloning
+         * @return {this}
+         */
         prependTo: function(selector, cloning) {
-            if (!isDom(selector)) selector = initDom(selector);
+            if (!isDom(selector)) {
+                selector = initDom(selector);
+            }
+
             return this.for(function(el) {
                 selector.for(function(node) {
                     node.insertBefore(cloneIf(cloning, el), node[FIRST_CHILD]);
                 });
             });
         },
+
+        /**
+         * Insert. Alias of append().
+         * @inheritDoc
+         */
         insert: function(content, attributes, cloning) {
             return this.append(content, attributes, cloning);
         },
+
+        /**
+         * Insert to. Alias of appendTo().
+         * @inheritDoc
+         */
         insertTo: function(selector, cloning) {
             return this.appendTo(selector, cloning);
         },
+
+        /**
+         * Insert before.
+         * @param  {String}   selector
+         * @param  {Boolean} ?cloning
+         * @return {this}
+         */
         insertBefore: function(selector, cloning) {
-            if (!isDom(selector)) selector = initDom(selector);
+            if (!isDom(selector)) {
+                selector = initDom(selector);
+            }
+
             return this.for(function(el) {
                 selector.for(function(node) {
                     node[PARENT_NODE].insertBefore(cloneIf(cloning, el), node);
                 });
             });
         },
+
+        /**
+         * Insert before.
+         * @param  {String}   selector
+         * @param  {Boolean} ?cloning
+         * @return {this}
+         */
         insertAfter: function(selector, cloning) {
-            if (!isDom(selector)) selector = initDom(selector);
+            if (!isDom(selector)) {
+                selector = initDom(selector);
+            }
+
             return this.for(function(el) {
                 selector.for(function(node) {
                     node[PARENT_NODE].insertBefore(cloneIf(cloning, el), node.nextSibling)
                 });
             });
         },
+
+        /**
+         * Replace with.
+         * @param  {String}   selector
+         * @param  {Boolean} ?cloning
+         * @return {this}
+         */
         replaceWith: function(selector, cloning) {
-            if (!isDom(selector)) selector = initDom(selector);
+            if (!isDom(selector)) {
+                selector = initDom(selector);
+            }
+
             return this.for(function(el) {
                 selector.for(function(node) {
                     el[PARENT_NODE].replaceChild(cloneIf(cloning, node), el);
                 });
             });
         },
+
+        /**
+         * Wrap.
+         * @param  {String|Object|Dom}  content
+         * @param  {Object}            ?attributes
+         * @return {Dom}
+         */
         wrap: function(content, attributes) {
             var me = this[0], parent = me && me[PARENT_NODE],
                 wrapper, replace, clone, clones = [];
+
             if (parent) {
                 wrapper = createFor(me, content, attributes)[0];
                 replace = createFor(parent, '<so-tmp>', {style: 'display:none'})[0];
@@ -610,31 +709,38 @@
                 });
                 parent.replaceChild(wrapper, replace);
             }
+
             return initDom(clones);
         },
+
+        /**
+         * Unwrap
+         * @param  {Boolean} ?remove
+         * @return {Dom}
+         */
         unwrap: function(remove) {
             var me = this[0], parent = me && me[PARENT_NODE],
                 parentParent = parent && parent[PARENT_NODE], clone, clones = [];
+
             if (parentParent) {
                 this.for(function(el) {
                     clone = cloneElement(el);
                     clones.push(clone);
                     parentParent.insertBefore(clone, parent), parent.removeChild(cleanElement(el));
                 });
+                // removes if remove=true or no child anymore
                 if (remove || !parentParent.hasChildNodes()) {
                     parentParent.removeChild(cleanElement(parent));
                 }
             }
+
             return initDom(clones);
         }
     });
 
+    // shortcut getter helpers
     function _(dom, i, name) {
-        var ret = dom[i];
-        if (name) {
-            ret = ret && ret[name];
-        }
-        return ret;
+        return name ? dom[i] && dom[i][name] : dom[i];
     }
     function __(dom, name) {
         return _(dom, 0, name);
@@ -642,15 +748,39 @@
 
     // dom: property
     extendPrototype(Dom, {
+        /**
+         * Property.
+         * @param  {String}  name
+         * @param  {Any}    ?value
+         * @return {Any|this}
+         */
         property: function(name, value) {
             return isUndefined(value) ? this.getProperty(name) : this.setProperty(name, value);
         },
+
+        /**
+         * Has property
+         * @param  {String} name
+         * @return {Boolean}
+         */
         hasProperty: function(name) {
             return (this[0] && name in this[0]);
         },
+
+        /**
+         * Set property.
+         * @param {String} name
+         * @param {Any}    value
+         */
         setProperty: function(name, value) {
-            var _this = this; return (_this[0] && (_this[0][name] = value), _this);
+            return (this[0] && (this[0][name] = value), this);
         },
+
+        /**
+         * Get property.
+         * @param  {String} name
+         * @return {Any}
+         */
         getProperty: function(name) {
             return __(this, name);
         }
@@ -658,34 +788,68 @@
 
     // dom: contents
     extendPrototype(Dom, {
+        /**
+         * Text.
+         * @param  {String} ?input
+         * @return {String|this}
+         */
         text: function(input) {
             return isVoid(input) ? this.getText() : this.setText(input);
         },
+
+        /**
+         * Set text.
+         * @param {String} input
+         */
         setText: function(input) {
             return this.for(function(el) { el[TEXT_CONTENT] = input; });
         },
+
+        /**
+         * Get text.
+         * @return {String}
+         */
         getText: function() {
             return __(this, TEXT_CONTENT);
         },
+
+        /**
+         * Html.
+         * @param  {String} ?input
+         * @return {String|Any}
+         */
         html: function(input) {
             return isVoid(input) ? this.getHtml() : this.setHtml(input);
         },
+
+        /**
+         * Set html
+         * @param {String} input
+         */
         setHtml: function(input) {
             return this.for(function(el) { el[INNER_HTML] = input; });
         },
+
+        /**
+         * Get html.
+         * @return {String}
+         */
         getHtml: function() {
             return __(this, INNER_HTML);
         }
     });
 
-    function intersect(a, b, match) { // intersect
-        var tmp = (b.length > a.length) ? (tmp = b, b = a, a = tmp) : null; // loop over shorter
-        log("a:",a, "b",b)
+    // array intersect helper
+    function intersect(a, b, match) {
+        var tmp = (b.length > a.length)
+            ? (tmp = b, b = a, a = tmp) : null; // loop over shorter
+
         return a.filter(function(search) {
             return !match ? b.indexOf(search) < 0 : b.indexOf(search) > -1;
         });
     }
 
+    // walker helper
     function walk(root, property) {
         var node = root, nodes = [];
         while (node && (node = node[property])) {
@@ -700,22 +864,36 @@
 
     // dom: walkers
     extendPrototype(Dom, {
+        /**
+         * Not.
+         * @param  {Int|Array|String|Object} selector
+         * @return {Dom}
+         */
         not: function(selector) {
             var ret = [], els;
+
             // eg: $.dom("p").not(0) or $.dom("p").not([0,1])
             if (isNumber(selector) || isArray(selector)) {
                 ret = this.filter(function(_, i) {
                     return (selector != i + 1);
                 });
-            } else {
-                // eg: $.dom("p").not(".red") or $.dom("p").not(this)
+            }
+            // eg: $.dom("p").not(".red") or $.dom("p").not(this)
+            else {
                 els = this.parent().findAll(selector);
                 ret = this.filter(function(el) {
                     return !els.has(el);
                 });
             }
+
             return initDom(ret);
         },
+
+        /**
+         * Path.
+         * @param  {Boolean} ?join
+         * @return {Array|String}
+         */
         path: function(join) {
             var el = this[0], path, paths = [];
             if (el) {
@@ -723,16 +901,38 @@
                 if (el.id) path += '#'+ el.id;
                 if (el.className) path += '.'+ el.className.split(re_space).join('.');
                 paths.push(path);
-                return this.parents().for(function(node) {
+
+                this.parents().for(function(node) {
                     path = node.nodeName.toLowerCase();
                     if (node.id) path += '#'+ node.id;
                     if (node.className) path += '.'+ node.className.split(re_space).join('.');
                     paths.push(path);
-                }), paths = paths.reverse(), join ? paths.join(' > ') : paths;
+                })
+
+                return paths = paths.reverse(), join ? paths.join(' > ') : paths;
             }
         },
-        parent: function() { return initDom(__(this, PARENT_NODE)); },
-        parents: function() { return initDom(walk(this[0], PARENT_NODE)); },
+
+        /**
+         * Parent.
+         * @return {Dom}
+         */
+        parent: function() {
+            return initDom(__(this, PARENT_NODE));
+        },
+
+        /**
+         * Parents.
+         * @return {Dom}
+         */
+        parents: function() {
+            return initDom(walk(this[0], PARENT_NODE));
+        },
+
+        /**
+         * Comments.
+         * @return {Dom}
+         */
         comments: function() {
             var el = this[0], node, nodes = [], i = 0;
             if (el) {
@@ -744,71 +944,142 @@
             }
             return initDom(nodes);
         },
-        siblings: function(i) {
-            var el = __(this), elp = el && el[PARENT_NODE], ret;
-            if (el && elp) {
-                ret = walk(elp, CHILDREN).filter(function(_el) {
+
+        /**
+         * Siblings.
+         * @param  {Int|String} ?selector
+         * @return {Dom}
+         */
+        siblings: function(selector) {
+            var el = __(this), ret;
+            if (el) {
+                ret = walk(el[PARENT_NODE], CHILDREN).filter(function(_el) {
                     return _el != el;
                 });
-                if (isNumber(i)) {
-                    ret = ret.item(i);
-                } else if (isString(i)) {
-                    ret = intersect(ret, this.parent().find(i).toArray());
+                if (selector && ret.length) {
+                    ret = intersect(ret, this.parent().find(selector).toArray());
                 }
             }
             return initDom(ret);
         },
-        children: function() { return initDom(__(this, CHILDREN)); },
-        prev: function() { return initDom(__(this, PREVIOUS_ELEMENT_SIBLING)); },
-        prevAll: function(s) {
+
+        /**
+         * Children.
+         * @return {Dom}
+         */
+        children: function() {
+            return initDom(__(this, CHILDREN));
+        },
+
+        /**
+         * Prev.
+         * @return {Dom}
+         */
+        prev: function() {
+            return initDom(__(this, PREVIOUS_ELEMENT_SIBLING));
+        },
+
+        /**
+         * Prev all.
+         * @param  {String} ?selector
+         * @return {Dom}
+         */
+        prevAll: function(selector) {
             var el = this[0], ret = [];
             if (el) {
                 ret = walk(el, PREVIOUS_ELEMENT_SIBLING).reverse();
-                if (s && ret.length) {
-                    ret = intersect(ret, this.parent().find(s).toArray());
+                if (selector && ret.length) {
+                    ret = intersect(ret, this.parent().find(selector).toArray());
                 }
             }
             return initDom(ret);
         },
-        next: function() { return initDom(__(this, NEXT_ELEMENT_SIBLING)); },
-        nextAll: function(s) {
+
+        /**
+         * Next.
+         * @return {Dom}
+         */
+        next: function() {
+            return initDom(__(this, NEXT_ELEMENT_SIBLING));
+        },
+
+        /**
+         * Next all.
+         * @param  {String} selector
+         * @return {Dom}
+         */
+        nextAll: function(selector) {
             var el = this[0], ret = [], found;
             if (el) {
                 ret = walk(el, NEXT_ELEMENT_SIBLING);
-                if (s && ret.length) {
-                    ret = intersect(ret, this.parent().find(s).toArray());
+                if (selector && ret.length) {
+                    ret = intersect(ret, this.parent().find(selector).toArray());
                 }
             }
             return initDom(ret);
         },
-        contains: function(s) {var el = this[0]; return !!(el && initDom(s, el).size);},
-        hasParent: function(s) {
+
+        /**
+         * Contains.
+         * @param  {String} selector
+         * @return {Boolean}
+         */
+        contains: function(selector) {
+            return !!(this[0] && initDom(selector, this[0]).size);
+        },
+
+        /**
+         * Has parent.
+         * @param  {String} ?selector
+         * @return {Boolean}
+         */
+        hasParent: function(selector) {
             var el = this[0], ret;
-            if (!s) {
+
+            if (!selector) {
                 ret = el && el[PARENT_NODE];
             } else {
-                s = initDom(s)[0];
-                this.parents().forEach(function(_s) {
-                    if (s && s == _s) ret = true; return _break;
+                selector = initDom(selector)[0];
+                this.parents().forEach(function(_el) {
+                    if (el && el == _el) ret = true; return _break;
                 });
             }
+
             return !!ret;
         },
-        hasChild: function(s) { return this.children().size > 0;},
-        hasChildren: function(s) { return this.hasChild();},
-        window: function(content) {
-            var el = this[0], ret;
-            if (el) {
-                ret = !content ? getWindow(el) : el.contentWindow;
-            }
-            return initDom(ret);
+
+        /**
+         * Has child.
+         * @return {Boolean}
+         */
+        hasChild: function() {
+            return this.children().size > 0;
         },
+
+        /**
+         * Has children. Alias of hasChild().
+         * @inheritDoc
+         */
+        hasChildren: function() {
+            return this.hasChild();
+        },
+
+        /**
+         * Window.
+         * @param  {Boolean} ?content
+         * @return {Dom}
+         */
+        window: function(content) {
+            return initDom(this[0] && (content ? this[0].contentWindow : getWindow(this[0])));
+        },
+
+        /**
+         * document.
+         * @param  {Boolean} ?content
+         * @return {Dom}
+         */
         document: function(content) {
-            var el = this[0], ret;
-            if (el) {
-                ret = !content ? getDocument(el) : el.contentDocument;
-            }
-            return initDom(ret);
+            return initDom(this[0] && (content ? this[0].contentDocument : getDocument(this[0])));
         }
     });
 
@@ -817,6 +1088,7 @@
     var re_unit = /(?:px|em|%)/i; // short & quick
     var re_unitOther = /(?:ex|in|[cm]m|p[tc]|v[hw]?min)/i;
     var re_noneUnitStyles = /((fill)?opacity|z(oom|index)|(fontw|lineh)eight|column(count|s))/i;
+    var defaultStyles = {};
     var matchesSelector = document.documentElement.matches || function(selector) {
         var i = 0, all = querySelectorAll(this.ownerDocument, selector);
         while (i < all.length) {
@@ -826,8 +1098,8 @@
         }
         return false;
     };
-    var defaultStyles = {};
 
+    // style helpers
     function getCssStyle(el) {
         var sheets = el.ownerDocument.styleSheets, rules, ret = [];
         _for(sheets, function(sheet) {
@@ -840,9 +1112,11 @@
         });
         return ret[ret.length - 1] /* return last rule */ || {};
     }
+
     function getComputedStyle(el) {
         return getWindow(el).getComputedStyle(el);
     }
+
     function getDefaultStyle(tag, name) {
         if (!defaultStyles[tag]) {
             var doc = document, el = createElement(doc, tag);
@@ -852,6 +1126,7 @@
         }
         return defaultStyles[tag];
     }
+
     function setStyle(el, name, value) {
         name = toStyleName(name), value = trims(value);
         if (value && isNumeric(value) && !re_noneUnitStyles.test(name)) {
@@ -859,10 +1134,12 @@
         }
         el.style[name] = value;
     }
+
     function getStyle(el, name, value) {
         var style = getComputedStyle(el);
         return name ? (name = toStyleName(name), style[name] || value || '') : style;
     }
+
     function parseStyleText(text) {
         var styles = {}, s;
         text = (''+ text).split(_re('\\s*;\\s*'));
@@ -874,13 +1151,15 @@
         }
         return styles;
     }
+
     function sumStyleValue(el, style) {
-        var i = 2, args = arguments, ret = 0, style = style || getStyle(el);
-        while (i < args.length) {
-            ret += style[args[i++]].toFloat();
+        var i = 2, args = arguments, ret = 0, style = style || getStyle(el), name;
+        while (name = args[i++]) {
+            ret += style[name].toFloat();
         }
         return ret;
     }
+
     function toStyleObject(style) {
         var name, ret = {};
         for (name in style) {
@@ -894,25 +1173,56 @@
 
     // dom: styles
     extendPrototype(Dom, {
+        /**
+         * Style.
+         * @param  {String}  name
+         * @param  {String}  ?value
+         * @param  {String}  ?valueDefault
+         * @param  {Boolean} raw
+         * @return {String}
+         */
         style: function(name, value, valueDefault, raw) {
             return !isVoid(value) ? this.setStyle(name, value)
                 : this.getStyle(name, value, valueDefault, raw);
         },
+
+        /**
+         * Has style.
+         * @param  {String} name
+         * @return {Boolean}
+         */
         hasStyle: function(name) {
             var el = this[0];
             return !!(el && el.style && el.style.cssText.indexOf(name) > -1);
         },
+
+        /**
+         * Set style.
+         * @param  {String|Object} name
+         * @param  {String}        ?value
+         * @return {this}
+         */
         setStyle: function(name, value) {
             var styles = name;
             if (isString(styles)) {
-                styles = !isVoid(value) ? toKeyValueObject(name, value) : parseStyleText(name);
+                styles = !isVoid(value)
+                    ? toKeyValueObject(name, value) : parseStyleText(name);
             }
-            this.for(function(el) {
+
+            return this.for(function(el) {
                 _forEach(styles, function(name, value) {
                     setStyle(el, name, value);
                 });
             });
         },
+
+        /**
+         * Get style.
+         * @param  {String}          name
+         * @param  {String|Boolean} ?valueDefault
+         * @param  {Boolean}         raw
+         * @return {String}
+         */
         getStyle: function(name, valueDefault, raw) {
             var el = this[0], value = '', convert;
             if (el) {
@@ -921,6 +1231,7 @@
                 if (raw) {
                     return el.style[toStyleName(name)] || valueDefault;
                 }
+
                 value = getStyle(el, name);
                 if (value && convert) {
                     value = re_rgb.test(value) ? $.util.toHexFromRgb(value) // convert rgb to hex
@@ -930,22 +1241,41 @@
                     value = valueDefault;
                 }
             }
+
             return value;
         },
-        getCssStyle: function(name) { // original style
+
+        /**
+         * Get css (original) style.
+         * @param  {String} ?name
+         * @return {String}
+         */
+        getCssStyle: function(name) {
             var el = this[0], ret = {};
             if (el) {
                 ret = toStyleObject(getCssStyle(el));
             }
             return name ? ret[name] || '' : ret;
         },
-        getComputedStyle: function(name) { // rendered style
+
+        /**
+         * Get computed (rendered) style.
+         * @param  {String} ?name
+         * @return {String}
+         */
+        getComputedStyle: function(name) {
             var el = this[0], ret = {};
             if (el) {
                 ret = toStyleObject(getComputedStyle(el));
             }
             return name ? ret[name] || '' : ret;
         },
+
+        /**
+         * Remove style.
+         * @param  {String} name
+         * @return {this}
+         */
         removeStyle: function(name) {
             return this.for(function(el) {
                 if (name == '*') {
@@ -959,9 +1289,11 @@
         }
     });
 
+    // hidden, dimension, offset, scroll helpers
     function isHidden(el) {
         return el && !(el.offsetWidth || el.offsetHeight);
     }
+
     function isHiddenParent(el) {
         var parent = el && el[PARENT_ELEMENT];
         while (parent) {
@@ -972,6 +1304,7 @@
         }
         return false;
     }
+
     function getHiddenElementProperties(el, properties) {
         var ret = [];
         var sid = $.sid(), className = ' '+ sid;
@@ -1018,9 +1351,10 @@
         return ret;
     }
 
-    // @note: offset(width|height) = (width|height) + padding + border
     function getDimensions(el) {
+        // @note: offset(width|height) = (width|height) + padding + border
         var ret = {width: 0, height: 0};
+
         if (isNodeElement(el)) {
             if (isHidden(el) || isHiddenParent(el)) {
                 var properties = getHiddenElementProperties(el, ['offsetWidth', 'offsetHeight']);
@@ -1032,78 +1366,57 @@
             var win = getWindow(el);
             width = win.innerWidth, height = win.innerHeight;
         }
+
         return ret;
     }
+
     function getDimensionsBy(el, by, options) {
-        options = options || {};
         var dim = getDimensions(el);
         var ret = extend(dim, {
             innerWidth: dim.width, outerWidth: dim.width,
             innerHeight: dim.height, outerHeight: dim.height
         }), style;
+
         if (isNodeElement(el)) {
-            style = getStyle(el);
-            if ((!by || by == 'width') && dim.width) {
+            style = getStyle(el), options = options || {};
+            if ((!by || by == WIDTH) && dim.width) {
                 ret.width -= sumStyleValue(null, style, PADDING_LEFT, PADDING_RIGHT)
                            + sumStyleValue(null, style, BORDER_LEFT_WIDTH, BORDER_RIGHT_WIDTH);
                 if (by) return ret.width;
             }
-            if ((!by || by == 'innerWidth') && dim.width) {
+            if ((!by || by == INNER_WIDTH) && dim.width) {
                 ret.innerWidth -= sumStyleValue(null, style, BORDER_LEFT_WIDTH, BORDER_RIGHT_WIDTH);;
                 if (by) return ret.innerWidth;
             }
-            if ((!by || by == 'outerWidth') && dim.width) {
+            if ((!by || by == OUTER_WIDTH) && dim.width) {
                 if (options.margined) {
                     ret.outerWidth += sumStyleValue(null, style, MARGIN_LEFT, MARGIN_RIGHT);
                 }
                 if (by) return ret.outerWidth;
             }
-            if ((!by || by == 'height') && dim.height) {
+            if ((!by || by == HEIGHT) && dim.height) {
                 ret.height -= sumStyleValue(null, style, PADDING_TOP, PADDING_BOTTOM)
                             + sumStyleValue(null, style, BORDER_TOP_WIDTH, BORDER_BOTTOM_WIDTH);
                 if (by) return ret.height;
             }
-            if ((!by || by == 'innerHeight') && dim.height) {
+            if ((!by || by == INNER_HEIGHT) && dim.height) {
                 ret.innerHeight -= sumStyleValue(null, style, BORDER_TOP_WIDTH, BORDER_BOTTOM_WIDTH);
                 if (by) return ret.innerHeight;
             }
-            if ((!by || by == 'outerHeight') && dim.height) {
+            if ((!by || by == OUTER_HEIGHT) && dim.height) {
                 if (options.margined) {
                     ret.outerHeight += sumStyleValue(null, style, MARGIN_TOP, MARGIN_BOTTOM);
                 }
                 if (by) return ret.outerHeight;
             }
         }
+
         return ret; // all
     }
 
-    // dom: dimensions
-    extendPrototype(Dom, {
-        dimensions: function() {
-            return getDimensions(this[0]);
-        },
-        width: function() {
-            return getDimensionsBy(this[0], 'width');
-        },
-        innerWidth: function() {
-            return getDimensionsBy(this[0], 'innerWidth');
-        },
-        outerWidth: function(margined) {
-            return getDimensionsBy(this[0], 'outerWidth', {margined: margined});
-        },
-        height: function() {
-            return getDimensionsBy(this[0], 'height');
-        },
-        innerHeight: function() {
-            return getDimensionsBy(this[0], 'innerHeight');
-        },
-        outerHeight: function(margined) {
-            return getDimensionsBy(this[0], 'outerHeight', {margined: margined});
-        }
-    });
-
     function getOffset(el, relative) {
         var ret = {top: 0, left: 0};
+
         if (isNodeElement(el)) {
             var body = getDocument(el).body;
             if (isHidden(el) || isHiddenParent(el)) {
@@ -1112,28 +1425,94 @@
             } else {
                 ret.top = el.offsetTop, ret.left = el.offsetLeft;
             }
+
             ret.top += body.scrollTop, ret.left += body.scrollLeft;
             if (relative) {
                 var parentOffset = getOffset(el[PARENT_ELEMENT], relative);
                 ret.top += parentOffset.top, ret.left += parentOffset.left;
             }
         }
+
         return ret;
     }
+
     function getScroll(el) {
         var ret = {top: 0, left: 0};
+
         if (isNodeElement(el)) {
             ret.top = el.scrollTop, ret.left = el.scrollLeft;
         } else if (isRoot(el) || isRootElement(el)) {
             var win = $.win(el);
             ret.top = win.pageYOffset, ret.left = win.pageXOffset;
         }
+
         return ret;
     }
 
-    // dom: offset, scroll, scrollTo, box
+    // dom: dimensions
     extendPrototype(Dom, {
-        offset: function() {return getOffset(this[0]);},
+        /**
+         * Dimensions.
+         * @return {Object}
+         */
+        dimensions: function() {
+            return getDimensions(this[0]);
+        },
+
+        /**
+         * Width.
+         * @return {Int}
+         */
+        width: function() {
+            return getDimensionsBy(this[0], WIDTH);
+        },
+
+        /**
+         * Inner width.
+         * @return {Int}
+         */
+        innerWidth: function() {
+            return getDimensionsBy(this[0], INNER_WIDTH);
+        },
+
+        /**
+         * Outer width.
+         * @param  {Boolean} margined
+         * @return {Int}
+         */
+        outerWidth: function(margined) {
+            return getDimensionsBy(this[0], OUTER_WIDTH, {margined: margined});
+        },
+
+        /**
+         * Height.
+         * @return {Int}
+         */
+        height: function() {
+            return getDimensionsBy(this[0], HEIGHT);
+        },
+
+        /**
+         * Outer height.
+         * @return {Int}
+         */
+        innerHeight: function() {
+            return getDimensionsBy(this[0], INNER_HEIGHT);
+        },
+
+        /**
+         * Outer height.
+         * @param  {Boolean} margined
+         * @return {Int}
+         */
+        outerHeight: function(margined) {
+            return getDimensionsBy(this[0], OUTER_HEIGHT, {margined: margined});
+        }
+    });
+
+    // dom: offset, scroll, box
+    extendPrototype(Dom, {
+        offset: function(relative) {return getOffset(this[0], relative);},
         scroll: function() {return getScroll(this[0]);},
         box: function() {
             var el = this[0], ret = {};
