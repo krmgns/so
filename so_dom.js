@@ -574,7 +574,7 @@
                     ret = intersect(ret, this.parent().find(i).toArray());
                 }
             }
-            return ret;
+            return initDom(ret);
         },
         children: function() { return initDom(__(this, CHILDREN)); },
         prev: function() { return initDom(__(this, PREVIOUS_ELEMENT_SIBLING)); },
@@ -612,7 +612,7 @@
             }
             return !!ret;
         },
-        hasChild: function(s) { return !!this.children().size;},
+        hasChild: function(s) { return this.children().size > 0;},
         hasChildren: function(s) { return this.hasChild();},
         window: function(content) {
             var el = this[0], ret;
