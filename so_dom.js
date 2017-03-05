@@ -39,7 +39,7 @@
     var getWindow = $.getWindow, getDocument = $.getDocument;
     var extend = $.extend, extendPrototype = $.extendPrototype;
     var toStyleName = $.util.toCamelCaseFromDashCase;
-    var _for = $.for, _forEach = $.forEach;
+    var _re = $.re, _for = $.for, _forEach = $.forEach;
     var _break = 0; // break tick: for, forEach
 
     function split(s, re) { return trims(s).split(re); };
@@ -144,7 +144,7 @@
         var search, replace, not = '!';
         // shortcut for input:not([checked]) as input:checked!
         if (re = selector.match(re_attrState)) {
-            search = $.re(re[0], 'g'), replace = re[0].replace(not, '');
+            search = _re(re[0], 'g'), replace = re[0].replace(not, '');
             if (re[0].has(not)) {
                 selector = selector.replace(search, 'not([%s])'.format(replace));
             } else {
@@ -666,10 +666,10 @@
     }
     function parseStyleText(text) {
         var styles = {}, s;
-        text = (''+ text).split($.re('\\s*;\\s*'));
+        text = (''+ text).split(_re('\\s*;\\s*'));
         while (text.length) {
             // wtf! :)
-            (s = text.shift().split($.re('\\s*:\\s*')))
+            (s = text.shift().split(_re('\\s*:\\s*')))
                 && (s[0] = trims(s[0]))
                     && (styles[s[0]] = s[1] || '');
         }
@@ -1093,7 +1093,7 @@
     });
 
     function toClassRegExp(name) {
-        return $.re('(^| )'+ name +'( |$)', null, '1m');
+        return _re('(^| )'+ name +'( |$)', null, '1m');
     }
     function hasClass(el, name) {
         return el && el.className && toClassRegExp(name).test(el.className);
