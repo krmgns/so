@@ -563,41 +563,41 @@
             return initDom(nodes);
         },
         siblings: function(i) {
-            var el = __(this), elp = el && el[PARENT_NODE], rets;
+            var el = __(this), elp = el && el[PARENT_NODE], ret;
             if (el && elp) {
-                rets = walk(elp, CHILDREN).filter(function(_el) {
+                ret = walk(elp, CHILDREN).filter(function(_el) {
                     return _el != el;
                 });
                 if (isNumber(i)) {
-                    rets = rets.item(i);
+                    ret = ret.item(i);
                 } else if (isString(i)) {
-                    rets = intersect(rets, this.parent().find(i).toArray());
+                    ret = intersect(ret, this.parent().find(i).toArray());
                 }
             }
-            return rets;
+            return ret;
         },
         children: function() { return initDom(__(this, CHILDREN)); },
         prev: function() { return initDom(__(this, PREVIOUS_ELEMENT_SIBLING)); },
         prevAll: function(s) {
-            var el = this[0], rets = [];
+            var el = this[0], ret = [];
             if (el) {
-                rets = walk(el, PREVIOUS_ELEMENT_SIBLING).reverse();
-                if (s && rets.length) {
-                    rets = intersect(rets, this.parent().find(s).toArray());
+                ret = walk(el, PREVIOUS_ELEMENT_SIBLING).reverse();
+                if (s && ret.length) {
+                    ret = intersect(ret, this.parent().find(s).toArray());
                 }
             }
-            return initDom(rets);
+            return initDom(ret);
         },
         next: function() { return initDom(__(this, NEXT_ELEMENT_SIBLING)); },
         nextAll: function(s) {
-            var el = this[0], rets = [], found;
+            var el = this[0], ret = [], found;
             if (el) {
-                rets = walk(el, NEXT_ELEMENT_SIBLING);
-                if (s && rets.length) {
-                    rets = intersect(rets, this.parent().find(s).toArray());
+                ret = walk(el, NEXT_ELEMENT_SIBLING);
+                if (s && ret.length) {
+                    ret = intersect(ret, this.parent().find(s).toArray());
                 }
             }
-            return initDom(rets);
+            return initDom(ret);
         },
         contains: function(s) {var el = this[0]; return !!(el && initDom(s, el).size);},
         hasParent: function(s) {
