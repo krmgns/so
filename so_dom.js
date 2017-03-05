@@ -496,10 +496,11 @@
         }
     });
 
-    function intersect(a, b) {
+    function intersect(a, b, match) { // intersect
         var tmp = (b.length > a.length) ? (tmp = b, b = a, a = tmp) : null; // loop over shorter
-        return a.filter(function(e) {
-            return b.indexOf(e) > -1;
+        log("a:",a, "b",b)
+        return a.filter(function(search) {
+            return !match ? b.indexOf(search) < 0 : b.indexOf(search) > -1;
         });
     }
 
@@ -517,6 +518,22 @@
 
     // dom: walkers
     extendPrototype(Dom, {
+        not: function(selector) {
+            var ret = [], els;
+            // eg: $.dom("p").not(0) or $.dom("p").not([0,1])
+            if (isNumber(selector) || isArray(selector)) {
+                ret = this.filter(function(_, i) {
+                    return (selector != i + 1);
+                });
+            } else {
+                // eg: $.dom("p").not(".red") or $.dom("p").not(this)
+                els = this.parent().findAll(selector);
+                ret = this.filter(function(el) {
+                    return !els.has(el);
+                });
+            }
+            return initDom(ret);
+        },
         path: function(join) {
             var el = this[0], path, paths = [];
             if (el) {
