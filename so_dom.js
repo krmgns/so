@@ -171,7 +171,7 @@
                         elements = create(selector, root, root); // 'root' could be document or attribute(s)
                     } else {
                         elements = select(selector, root, one);
-                        if (!isNaN(i)) {
+                        if (isNumber(i)) {
                             elements = [elements[i]];
                         }
                     }
@@ -204,7 +204,6 @@
 
     // dom: base
     extendPrototype(Dom, {
-        constructor: Dom,
         find: function(selector, i) {return this[0] ? initDom(selector, this[0], i, true) : this;},
         findAll: function(selector, i) {return this[0] ? initDom(selector, this[0], i) : this;},
         all: function() {return this.toArray()},
