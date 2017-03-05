@@ -73,10 +73,11 @@
     var re_attrEscape = /([.:])/g;
     var re_attrQuotes = /(^['"]|['"]$)/g;
     var re_attrState = /(((check|select|disabl)ed|readonly)!?)/gi;
-    var re_fln = /(?:(\w+):((fir|la)st|nth\((\d+)\)))(?!-)/gi;
+    var re_firstLast = /^((?:fir|la)st)$/;
+    var re_select = /([.#>\s\w-]*)?@([\w-]+)(?:\(?:?((?:fir|la)st|odd|even|\d+n?)\)?)?(?:,\s*)?/gi;
 
     function select(selector, root, one) {
-        if (selector == '') return;
+        if (!selector) return;
 
         if (!isNode(root)) {
             root = document;
@@ -84,25 +85,46 @@
 
         selector = selector.replace(re_space, ' ');
 
-        var re, ret = [], reRemove = [];
-        if (re = selector.matchAll(re_fln)) {
+        var re, ret = [];
+        // check so directives
+        if (re = selector.matchAll(re_select)) {
+            var rem = [];
             re.forEach(function(re) {
-                var tag = re[1], dir = re[2], all;
+                var all, sel = re[1], tag = re[2],
+                    dir = re[3] ? re[3].replace(':', '') : dir = tag; // @first etc..
 
-                if (dir == 'first') { // p:first
-                    all = querySelector(root, tag);
-                } else if (dir == 'last') { // p:last
-                    all = querySelectorAll(root, tag), all = all[all.length - 1];
-                } else { // p:nth(..)
-                    all = querySelectorAll(root, tag), all = all[re[4] - 1];
+                if (tag.test(re_firstLast)) {
+                    dir = tag, tag = '*';
                 }
-                ret.push(all);
+                all = $.array(querySelectorAll(root, sel +' '+ tag));
 
-                reRemove.push($.util.escapeRegExpInput(re[0]));
+                if (dir == 'first') all = all[0];
+                else if (dir == 'last')  all = all[all.length - 1];
+                else if (isNumeric(dir)) all = all[dir - 1];
+                else if (dir == 'odd' || dir == 'even') {
+                    // odd / even
+                    var odd = [], even = [];
+                    all.forEach(function(node, i) {
+                        (i & 1) ? odd.push(node) : even.push(node);
+                    });
+                    (dir == 'odd') ? (all = odd) : (all = even);
+                } else if (dir = dir.toInt()) {
+                    // @div(3n) etc..
+                    all = all.filter(function(node, i) {
+                        return !((i + 1) % +dir);
+                    });
+                }
+
+                ret = ret.concat(all), rem.push(re[0]);
             });
 
+            // for find()'s
+            if (one) ret = [ret[0]];
+
             // remove processed selectors
-            selector = selector.replace('('+ reRemove.join('|') +'),?\\s*'.toRegExp('gi'), '');
+            if (rem.length) {
+                rem.forEach(function(re) { selector = selector.replace(re, ''); });
+            }
         }
 
         // could be empty after processe above
