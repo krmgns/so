@@ -1,4 +1,9 @@
-// deps: so, so.list, so.util
+/**
+ * @object  so.dom
+ * @depends so, so.list, so.util
+ * @author  Kerem Güneş <k-gun@mail.com>
+ * @license The MIT License <https://opensource.org/licenses/MIT>
+ */
 ;(function(window, $, undefined) { 'use strict';
 
     // minify candies
@@ -24,7 +29,6 @@
     var INNER_HTML = 'innerHTML';
     var TEXT_CONTENT = 'textContent';
 
-
     var re_space = /\s+/g;
     var re_comma = /,\s*/;
     var re_trim = /^\s+|\s+$/g;
@@ -42,29 +46,33 @@
     var _re = $.re, _array = $.array, _for = $.for, _forEach = $.forEach;
     var _break = 0; // break tick: for, forEach
 
-    function split(s, re) { return trims(s).split(re); };
-    function querySelector(root, selector) { return root.querySelector(selector); };
-    function querySelectorAll(root, selector) { return root.querySelectorAll(selector); };
-
-    function getTag(el) {return (el && el.nodeName) ? el.nodeName.toLowerCase() : isWindow(el) ? '#window' : null;}
-
-    function isRoot(el, _var) {return _var = getTag(el), _var == '#window' || _var == '#document';}
-    function isRootElement(el, _var) {return _var = getTag(el), _var == 'html' || _var == 'body';}
-    function isDom(input) {return (input instanceof Dom);}
-
-    function toKeyValueObject(key, value) {
-        var ret = key || {};
-        if (isString(ret)) {
-            ret = {}, ret[key] = value;
-        }
-        return ret;
+    // shortcut helpers
+    function split(s, re) {
+        return trims(s).split(re);
     }
-
+    function querySelector(root, selector) {
+        return root.querySelector(selector);
+    }
+    function querySelectorAll(root, selector) {
+        return root.querySelectorAll(selector);
+    }
+    function getTag(el) {
+        return (el && el.nodeName) ? el.nodeName.toLowerCase() : isWindow(el) ? '#window' : null;
+    }
+    function isDom(input) {
+        return (input instanceof Dom);
+    }
+    function isRoot(el, _var) {
+        return _var = getTag(el), _var == '#window' || _var == '#document';
+    }
+    function isRootElement(el, _var) {
+        return _var = getTag(el), _var == 'html' || _var == 'body';
+    }
+    function toKeyValueObject(key, value) {
+        var ret = key || {}; if (isString(ret)) ret = {}, ret[key] = value; return ret;
+    }
     function initDom(selector, root, i, one) {
-        if (isDom(selector)) {
-            return selector;
-        }
-        return new Dom(selector, root, i, one);
+        return isDom(selector) ? selector : new Dom(selector, root, i, one);
     }
 
     var re_attr = /\[.+\]/;
@@ -75,6 +83,13 @@
     var re_firstLast = /^((?:fir|la)st)$/;
     var re_select = /([.#>\s\w-]*)?@([\w-]+)(?:\(?:?((?:fir|la)st|odd|even|\d+n?)\)?)?(?:,\s*)?/gi;
 
+    /**
+     * Select.
+     * @param  {String|Object} selector
+     * @param  {?Object}       root
+     * @param  {?Boolean}      one
+     * @return {Array}
+     */
     function select(selector, root, one) {
         if (!selector) return;
 
@@ -156,6 +171,13 @@
             : querySelectorAll(root, selector));
     }
 
+    /**
+     * Dom.
+     * @param {String|Object} selector
+     * @param {?Object}       root
+     * @param {?Int}          i
+     * @param {?Boolean}      one
+     */
     function Dom(selector, root, i, one) {
         var elements, size = 0;
 
@@ -204,57 +226,207 @@
 
     // dom: base
     extendPrototype(Dom, {
-        find: function(selector, i) {return this[0] ? initDom(selector, this[0], i, true) : this;},
-        findAll: function(selector, i) {return this[0] ? initDom(selector, this[0], i) : this;},
-        all: function() {return this.toArray()},
-        copy: function() {return initDom(this.toArray())},
-        toArray: function() {var ret = [], i = 0; while (i < this.size) {ret.push(this[i++]);} return ret;},
-        toList: function() { return $.list(this.toArray()); },
-        for: function(fn) { return _for(this.toArray(), fn, this); },
-        forEach: function(fn) { return _forEach(this.toArray(), fn, this); },
-        has: function(search, strict) {return this.toArray().has(search, strict);},
-        isEmpty: function() {return !this.size;},
-        map: function(fn) {return initDom(this.toArray().map(fn));},
-        filter: function(fn) {return initDom(this.toArray().filter(fn));},
-        reverse: function() {return initDom(this.toArray().reverse());},
-        get: function(i, init) {
-            var element;
-            if (isVoid(i)) {
-                element = this[0];
-            } else if (isNumeric(i)) {
-                element = this[i - 1];
-            } else if (isString(i)) {
-                this.for(function(_element) {
-                    if (i == getTag(_element)) {
-                        element = _element; return _break;
-                    }
-                });
-            }
-            return init ? initDom(element) : element;
+        /**
+         * Find.
+         * @param  {String|Object} selector
+         * @param  {?Int)          i
+         * @return {Dom}
+         */
+        find: function(selector, i) {
+            return this[0] ? initDom(selector, this[0], i, true) : this;
         },
-        getAll: function(is, init) {
-            var elements = [], element;
-            if (isVoid(is)) {
-                elements = this.toArray();
+
+        /**
+         * Find all.
+         * @param  {String|Object} selector
+         * @param  {?Int)          i
+         * @return {Dom}
+         */
+        findAll: function(selector, i) {
+            return this[0] ? initDom(selector, this[0], i) : this;
+        },
+
+        /**
+         * All.
+         * @return {Array}
+         */
+        all: function() {
+            return this.toArray();
+        },
+
+        /**
+         * Copy.
+         * @return {Dom}
+         */
+        copy: function() {
+            return initDom(this.toArray());
+        },
+
+        /**
+         * To array.
+         * @return {Array}
+         */
+        toArray: function() {
+            var ret = [], i = 0;
+            while (i < this.size) {
+                ret.push(this[i++]);
+            } return ret;
+        },
+
+        /**
+         * To list.
+         * @return {List}
+         */
+        toList: function() {
+            return $.list(this.toArray());
+        },
+
+        /**
+         * For.
+         * @param  {Function} fn
+         * @return {this}
+         */
+        for: function(fn) {
+            return _for(this.toArray(), fn, this);
+        },
+
+        /**
+         * For each.
+         * @param  {Function} fn
+         * @return {this}
+         */
+        forEach: function(fn) {
+            return _forEach(this.toArray(), fn, this);
+        },
+
+        /**
+         * Has.
+         * @param  {Object} search
+         * @return {Boolean}
+         */
+        has: function(search) {
+            var ret; return this.for(function(el) {
+                if (search == el) ret = true; return _break;
+            }), !!ret;
+        },
+
+        /**
+         * Is empty.
+         * @return {Boolean}
+         */
+        isEmpty: function() {
+            return !this.size;
+        },
+
+        /**
+         * Map.
+         * @param  {Function} fn
+         * @return {Dom}
+         */
+        map: function(fn) {
+            return initDom(this.toArray().map(fn));
+        },
+
+        /**
+         * Filter.
+         * @param  {Function} fn
+         * @return {Dom}
+         */
+        filter: function(fn) {
+            return initDom(this.toArray().filter(fn));
+        },
+
+        /**
+         * Reverse.
+         * @return {Dom}
+         */
+        reverse: function() {
+            return initDom(this.toArray().reverse());
+        },
+
+        /**
+         * Get.
+         * @param  {?Int}     i
+         * @param  {?Boolean} init
+         * @return {Object|Dom}
+         */
+        get: function(i, init) {
+            var el;
+            if (isVoid(i)) {
+                el = this[0];
+            } else if (isNumber(i)) {
+                el = this[i - 1];
+            }
+            return init ? initDom(el) : el;
+        },
+
+        /**
+         * Get all.
+         * @param  {?Int|Array} i
+         * @param  {?Boolean}   init
+         * @return {Array|Dom}
+         */
+        getAll: function(i, init) {
+            var el, els = [];
+            if (isVoid(i)) {
+                els = this.toArray();
             } else {
                 var _this = this;
-                split(is, re_comma).forEach(function(i) {
-                    element = _this.get(i);
-                    if (element && !elements.has(element)) {
-                        elements.push(element);
+                (isNumber(i) ? [i] : i).forEach(function(i) {
+                    el = _this.get(i);
+                    if (el && !els.has(el)) {
+                        els.push(el);
                     }
                 });
             }
-            return init ? initDom(elements) : elements;
+            return init ? initDom(els) : els;
         },
-        item: function(i) {return initDom(this[i - 1])},
-        first: function() {return this.item(1)},
-        last: function() {return this.item(this.size)},
-        nth: function(i) {return this.item(i)},
-        tag: function() {return getTag(this[0])},
-        tags: function() {var ret = [];return this.for(function(element) {ret.push(getTag(element))}), ret;}
+
+        /**
+         * Item.
+         * @param  {Int) i
+         * @return {Dom}
+         */
+        item: function(i) { return initDom(this[i - 1]); },
+
+        /**
+         * First.
+         * @return {Dom}
+         */
+        first: function() { return this.item(1); },
+
+        /**
+         * Last.
+         * @return {Dom}
+         */
+        last: function() { return this.item(this.size); },
+
+        /**
+         * Nth.
+         * @return {Dom}
+         */
+        nth: function(i) { return this.item(i); },
+
+        /**
+         * Tag.
+         * @return {String}
+         */
+        tag: function() {
+            return getTag(this[0])
+        },
+
+        /**
+         * Tags.
+         * @return {Array}
+         */
+        tags: function() {
+            var ret = []; return this.for(function(el) {
+                ret.push(getTag(el))
+            }), ret;
+        }
     });
 
+    // create helpers
     function create(content, doc, attributes) {
         if (isDom(content)) {
             return content.toArray();
@@ -262,12 +434,14 @@
         if (isNodeElement()) {
             return [content];
         }
+
         doc = doc && isDocument(doc) ? doc : document;
         var tmp = createElement(doc, 'so-tmp', {innerHTML: content});
         var fragment = doc.createDocumentFragment();
         while (tmp[FIRST_CHILD]) {
             fragment.appendChild(tmp[FIRST_CHILD]);
         }
+
         if (attributes && isObject(attributes)) {
             _for(fragment[CHILD_NODES], function(node) {
                 if (isNodeElement(node)) {
@@ -277,8 +451,10 @@
                 }
             });
         }
+
         return _array(fragment[CHILD_NODES]);
     }
+
     function createElement(doc, tag, properties) {
         var el = doc.createElement(tag);
         if (properties) {
@@ -288,25 +464,30 @@
         }
         return el;
     }
+
     function cloneElement(el, deep) {
         var clone = el.cloneNode();
         clone.setAttribute && clone.setAttribute('so:id', $.sid('clone-'));
         // clone.cloneOf = el; // @debug
         if (!isFalse(deep)) {
             if (el.$data) clone.$data = el.$data;
+
             if (el.$events) {
                 el.$events.forAll(function(event) {
                     event.copy().bindTo(clone);
                 });
             }
+
             if (el[CHILD_NODES]) {
                 _for(el[CHILD_NODES], function(child) {
                     clone.appendChild(cloneElement(child, deep));
                 });
             }
         }
+
         return clone;
     }
+
     function cleanElement(el) {
         el.$data = el.$events = null;
         var child;
@@ -318,9 +499,11 @@
         }
         return el;
     }
+
     function createFor(el, content, attributes) {
         return create(content, getDocument(el), attributes);
     }
+
     function cloneIf(cloning, node) {
         if (!isFalse(cloning)) { // inserts only once without `clone`
             node = cloneElement(node);
@@ -1558,11 +1741,11 @@
     };
 
     extendPrototype(Node, {
-        find: function(selector, init) {
-            return $.$(selector, this).get(null, init);
+        find: function(selector) {
+            return $.$(selector, this).get();
         },
         findAll: function(selector, init) {
-            return $.$$(selector, this).getAll(null, init);
+            return $.$$(selector, this).getAll();
         }
     });
 
