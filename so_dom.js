@@ -39,7 +39,7 @@
     var getWindow = $.getWindow, getDocument = $.getDocument;
     var extend = $.extend, extendPrototype = $.extendPrototype;
     var toStyleName = $.util.toCamelCaseFromDashCase;
-    var _re = $.re, _for = $.for, _forEach = $.forEach;
+    var _re = $.re, _array = $.array, _for = $.for, _forEach = $.forEach;
     var _break = 0; // break tick: for, forEach
 
     function split(s, re) { return trims(s).split(re); };
@@ -95,7 +95,7 @@
                 if (tag.test(re_firstLast)) {
                     dir = tag, tag = '*';
                 }
-                all = $.array(querySelectorAll(root, sel +' '+ tag));
+                all = _array(querySelectorAll(root, sel +' '+ tag));
 
                 if (dir == 'first') all = all[0];
                 else if (dir == 'last')  all = all[all.length - 1];
@@ -152,7 +152,7 @@
             }
         }
 
-        return $.array(ret, one ? querySelector(root, selector) // speed issues..
+        return _array(ret, one ? querySelector(root, selector) // speed issues..
             : querySelectorAll(root, selector));
     }
 
@@ -278,7 +278,7 @@
                 }
             });
         }
-        return $.array(fragment[CHILD_NODES]);
+        return _array(fragment[CHILD_NODES]);
     }
     function createElement(doc, tag, properties) {
         var el = doc.createElement(tag);
@@ -507,7 +507,7 @@
         var node = root, nodes = [];
         while (node && (node = node[property])) {
             if (!isNode(node)) { // handle nodelist etc.
-                nodes = nodes.concat($.array(node));
+                nodes = nodes.concat(_array(node));
             } else {
                 nodes.push(node);
             }
