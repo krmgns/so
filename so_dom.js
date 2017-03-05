@@ -29,7 +29,6 @@
     var re_comma = /,\s*/;
     var re_trim = /^\s+|\s+$/g;
     var re_tag = /^<[a-z-][^>]*>/i;
-    var fn_slice = [].slice;
     var trims = $.trimSpace;
     var isBool = $.isBool, isTrue = $.isTrue, isFalse = $.isFalse;
     var isVoid = $.isVoid, isNull = $.isNull, isNulls = $.isNulls, isUndefined = $.isUndefined;
@@ -508,7 +507,7 @@
         var node = root, nodes = [];
         while (node && (node = node[property])) {
             if (!isNode(node)) { // handle nodelist etc.
-                nodes = nodes.concat(fn_slice.call(node));
+                nodes = nodes.concat($.array(node));
             } else {
                 nodes.push(node);
             }
