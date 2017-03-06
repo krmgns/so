@@ -27,7 +27,7 @@
     };
     var re_typesFix = /^(UI|Mouse|Mutation|HTML)Event$/i;
     var re_typesStandard = $.re('('+ Object.values(re_types).join('|') +')', 'i');
-    var re_commaSplit = /,\s*/;
+    var re_comma = /,\s*/;
     var fn_defineProperty = Object.defineProperty;
     var optionsDefault = {
         bubbles: true, cancelable: true, scoped: false, composed: false, // all
@@ -258,7 +258,7 @@
                 if (!type) {
                     initEventTarget(_this.target).addEvent(_this);
                 } else {
-                    type.split(re_commaSplit).forEach(function(type) {
+                    type.split(re_comma).forEach(function(type) {
                         _this.type = type;
                         initEventTarget(_this.target).addEvent(_this);
                     });
@@ -298,7 +298,7 @@
                 if (!type) {
                     initEventTarget(_this.target).removeEvent(_this);
                 } else {
-                    type.split(re_commaSplit).forEach(function(type) {
+                    type.split(re_comma).forEach(function(type) {
                         _this.type = type;
                         initEventTarget(_this.target).removeEvent(_this);
                     });
@@ -319,7 +319,7 @@
                 if (!type) {
                     initEventTarget(_this.target).dispatch(_this, data);
                 } else {
-                    type.split(re_commaSplit).forEach(function(type) {
+                    type.split(re_comma).forEach(function(type) {
                         _this.type = type;
                         initEventTarget(_this.target).dispatch(_this, data);
                     });
@@ -355,13 +355,13 @@
              * @return {void}
              */
             addEvent: function(event) {
-                var target = checkTarget(this.target, event.type);
+                // var target = checkTarget(this.target, event.type);
 
-                event.target = target;
-                event.eventTarget = this;
-                event.i = target.$events.get(event.type).append(event).size - 1;
+                // event.target = target;
+                // event.eventTarget = this;
+                // event.i = target.$events.get(event.type).append(event).size - 1;
 
-                target.addEventListener(event.type, event.fn, event.useCapture);
+                // target.addEventListener(event.type, event.fn, event.useCapture);
             },
 
             /**
@@ -464,14 +464,14 @@
         function on(target, type, fn, options) {
             var args = prepareArgs(fn, options, target);
 
-            type.split(re_commaSplit).forEach(function(type) {
+            type.split(re_comma).forEach(function(type) {
                 initEvent(type, args.fn, args.options).bind(type);
             });
         }
         function once(target, type, fn, options) {
             var args = prepareArgs(fn, options, target, true);
 
-            type.split(re_commaSplit).forEach(function(type) {
+            type.split(re_comma).forEach(function(type) {
                 initEvent(type, function(e) {
                     return e.event.unbind(), args.fn.apply(target, arguments);
                 }, args.options).bind(type);
@@ -480,14 +480,14 @@
         function off(target, type, fn, options) {
             var args = prepareArgs(fn, options, target);
 
-            type.split(re_commaSplit).forEach(function(type) {
+            type.split(re_comma).forEach(function(type) {
                 initEvent(type, args.fn, args.options).unbind(type);
             });
         }
         function fire(target, type, fn, options) {
             var args = prepareArgs(fn, options, target);
 
-            type.split(re_commaSplit).forEach(function(type) {
+            type.split(re_comma).forEach(function(type) {
                 initEvent(type, args.fn, args.options).fire(type, args.options.data);
             });
         }
