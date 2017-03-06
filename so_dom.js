@@ -2481,11 +2481,12 @@
         });
     }
 
+    // add Dom to so
     $.dom = function(selector, root, i) {
         return initDom(selector, root, i);
     };
 
-    // static methods
+    // add static methods to Dom
     $.dom.extend({
         create: function(content, attributes) {
             return create(content, null, attributes);
@@ -2501,13 +2502,15 @@
         }
     });
 
+    // add Dom as shortcut to so
     $.$ = function(selector, root, i) { // one
         return initDom(selector, root, i, true);
     };
     $.$$ = function(selector, root, i) { // all
-        return initDom(selector, root, i, false);
+        return initDom(selector, root, i);
     };
 
+    // add find, findAll to Node
     extendPrototype(Node, {
         find: function(selector) {
             return $.$(selector, this).get();
