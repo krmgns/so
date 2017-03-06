@@ -1853,21 +1853,9 @@
          * @return {Boolean|this}
          */
         class: function(name, option) {
-            if (!name) {
-                return this.hasClass();
-            }
-
-            if (isUndefined(option)) { // add: ('foo')
-                this.addClass(name);
-            } else if (isNull(option) || isNulls(option)) { // remove: ('foo', '' | null)
-                this.removeClass(name);
-            } else if (isTrue(option)) { // set: ('foo', true)
-                this.setClass(name);
-            } else { // replace: ('foo', 'bar')
-                this.replaceClass(name, (''+ option));
-            }
-
-            return this
+            return isUndefined(option) ? this.addClass(name)
+                : isNull(option) || isNulls(option) ? this.removeClass(name)
+                : isTrue(option) ? this.setClass(name) : this.replaceClass(name, (''+ option));
         },
 
         /**
@@ -1906,7 +1894,7 @@
          */
         replaceClass: function(oldName, newName) {
             return this.for(function(el) {
-                el.className = el.className.replace(toClassRegExp(oldName), ' '+ newName +' ');
+                el.className = trims(el.className.replace(toClassRegExp(oldName), ' '+ newName +' '));
             });
         },
 
