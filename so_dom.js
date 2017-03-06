@@ -1890,18 +1890,19 @@
         }
     });
 
-    // data helper
+    // data helpers
     function checkData(el) {
         el.$data = el.$data || $.list();
     }
+
     function setData(el, key, value) {
         if (el) {
+            checkData(el);
             if (isString(key)) {
                 key = trims(key);
                 if (key[0] == '@') {
                     setAttribute(el, key, value);
                 } else {
-                    checkData(el);
                     el.$data.set(key, value);
                 }
             } else {
@@ -1912,18 +1913,17 @@
             }
         }
     }
+
     function getData(el, key) {
         if (el) {
+            checkData(el);
             if (isString(key)) {
                 key = trims(key);
                 if (key.startsWith('@')) {
                     return getAttribute(el, key);
                 }
-
-                checkData(el);
                 return (key == '*') ? el.$data.data : el.$data.get(key);
             }
-
             if (isTrue(key)) {
                 return el.$data; // get list object
             }
