@@ -291,18 +291,18 @@
          * @return {this}
          */
         unbind: function(type) {
-            var _this = this.copy();
+            var event = this.copy();
 
             if (!type) {
-                initEventTarget(_this.target).removeEvent(_this);
+                initEventTarget(event.target).removeEvent(event);
             } else {
                 type.split(re_comma).forEach(function(type) {
-                    _this.type = type;
-                    initEventTarget(_this.target).removeEvent(_this);
+                    event.type = type;
+                    initEventTarget(event.target).removeEvent(event);
                 });
             }
 
-            return _this;
+            return event;
         },
 
         /**
@@ -312,18 +312,18 @@
          * @return {this}
          */
         fire: function(type, data) {
-            var _this = this.copy();
+            var event = this.copy();
 
             if (!type) {
-                initEventTarget(_this.target).dispatch(_this, data);
+                initEventTarget(event.target).dispatch(event, data);
             } else {
                 type.split(re_comma).forEach(function(type) {
-                    _this.type = type;
-                    initEventTarget(_this.target).dispatch(_this, data);
+                    event.type = type;
+                    initEventTarget(event.target).dispatch(event, data);
                 });
             }
 
-            return _this;
+            return event;
         },
 
         /**
