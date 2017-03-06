@@ -1,6 +1,0 @@
-// add user defined methods to elements
-- $.dom.defineMethod(function(element){ ... })
-
-// etc
-- add so_query.js
-- use so.query() in so_dom.js
