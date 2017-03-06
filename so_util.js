@@ -86,7 +86,7 @@
 
     // Base64
     (function(){'Base64';
-        var w=window, ab=w.atob, ba=w.btoa, s=String, r='replace', ca='charAt', cca='charCodeAt', fcc='fromCharCode';
+        var w=window, ab=w.atob, ba=w.btoa, s=String, r="replace", ca="charAt", cca="charCodeAt", fcc="fromCharCode";
         var c="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
         // https://developer.mozilla.org/en/docs/Web/API/WindowBase64/Base64_encoding_and_decoding
         var d=function(a){return encodeURIComponent(a)[r](/%([0-9A-F]{2})/g,function(a,b){return s[fcc]("0x"+b)})};
