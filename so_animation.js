@@ -15,8 +15,6 @@
     // thanks: http://easings.net/ (easeOutQuad)
     var fn_easing = function(t,b,c,d) { return -c*(t/=d)*(t-2)+b; };
     var fn_runner = window.requestAnimationFrame || function(fn) { setTimeout(fn, opt_fps); };
-    var now = $.now;
-    var toFloat = $.float;
     var toStyleName = $.util.toCamelCaseFromDashCase;
 
     // shortcut
@@ -33,34 +31,32 @@
      * @param {Function|undefined} callback
      */
     function Animation(target, properties, speed, easing, callback) {
-        var _this = this;
-
-        _this.target = $.dom(target);
-        _this.properties = properties;
-        _this.speed = $.isNumber(speed)
-            ? speed : opt_speeds[speed] || opt_speeds.default;
+        this.target = $.dom(target);
+        this.properties = properties;
+        this.speed = $.isNumber(speed) ? speed : opt_speeds[speed] || opt_speeds.default;
 
         // swap
         if ($.isFunction(easing)) {
             callback = easing, easing = null;
         }
 
-        _this.easing = (easing && $.ext && $.ext.easing && $.ext.easing[easing]) || fn_easing;
-        _this.callback = callback;
+        this.easing = (easing && $.ext && $.ext.easing && $.ext.easing[easing]) || fn_easing;
+        this.callback = callback;
 
-        _this.running = false;
-        _this.stopped = false;
-        _this.ended = false;
-        _this.startTime = 0;
-        _this.elapsedTime = 0;
+        this.running = false;
+        this.stopped = false;
+        this.ended = false;
+        this.startTime = 0;
+        this.elapsedTime = 0;
 
-        _this.tasks = [];
+        this.tasks = [];
 
-        if (_this.target.size) {
+        if (this.target.size) {
             // for stop tool
-            _this.target.me.$animation = _this;
+            this.target[0].$animation = this;
 
             // assign animation tasks
+            var _this = this;
             $.forEach(properties, function(name, value) {
                 var root, scroll, startValue, endValue, style, unit = '';
                 name = toStyleName(name);
@@ -72,8 +68,8 @@
                         ? _this.target.getCssStyle(name) // get original style to catch unit sign
                         : _this.target.getComputedStyle(name);
 
-                    startValue = toFloat(style);
-                    endValue = toFloat(value);
+                    startValue = $.float(style);
+                    endValue = $.float(value);
 
                     if ($.dom.isUnitStyle(name)) {
                         unit = style.replace(re_digit, '');
@@ -106,12 +102,11 @@
          * @return {this}
          */
         run: function() {
+            this.stop(); // stop if running
+            this.running = true;
+            this.startTime = $.now();
+
             var _this = this;
-
-            _this.stop(); // stop if running
-            _this.running = true;
-            _this.startTime = now();
-
             !function run() {
                 if (!_this.stopped && !_this.ended) {
                     if (_this.elapsedTime < _this.speed) {
@@ -124,7 +119,7 @@
                 }
             }();
 
-            return _this;
+            return this;
         },
 
         /**
@@ -132,26 +127,25 @@
          * @return {this}
          */
         start: function() {
-            var _this = this;
-            var target = _this.target
             var scroll, value;
 
-            if (target.size) {
-                _this.elapsedTime = now() - _this.startTime;
+            if (this.target.size) {
+                this.elapsedTime = $.now() - this.startTime;
 
-                _this.tasks.forEach(function(task) {
+                var _this = this;
+                this.tasks.forEach(function(task) {
                     value = fn_easing(_this.elapsedTime, 0.00, task.diff, _this.speed);
                     value = task.reverse ? task.startValue - value : task.startValue + value;
                     if (!task.scroll) {
-                        target.setStyle(task.name, value.toFixed(9) /* use 'toFixed' to get a good percent */
+                        _this.target.setStyle(task.name, value.toFixed(9) /* use 'toFixed' to get a good percent */
                             + task.unit);
                     } else {
-                        target.setProperty(task.name, value.toFixed(0));
+                        _this.target.setProperty(task.name, value.toFixed(0));
                     }
                 });
             }
 
-            return _this;
+            return this;
         },
 
         /**
@@ -159,17 +153,15 @@
          * @return {this}
          */
         stop: function() {
-            var _this = this;
-
-            if (_this.running) {
-                _this.running = false;
-                _this.stopped = true;
+            if (this.running) {
+                this.running = false;
+                this.stopped = true;
             }
 
             // set as null (for isAnimated() etc.)
-            _this.target.me && (_this.target.me.$animation = null);
+            this.target[0] && (this.target[0].$animation = null);
 
-            return _this;
+            return this;
         },
 
         /**
@@ -177,11 +169,10 @@
          * @return {this}
          */
         end: function() {
-            var _this = this;
-            var target = _this.target;
+            var target = this.target;
 
             if (target.size) {
-                _this.tasks.forEach(function(task) {
+                this.tasks.forEach(function(task) {
                     if (!task.scroll) {
                         target.setStyle(task.name, task.endValue + task.unit);
                     } else {
@@ -190,13 +181,13 @@
                 });
             }
 
-            _this.ended = true;
+            this.ended = true;
 
-            if ($.isFunction(_this.callback)) {
-                _this.callback(_this);
+            if ($.isFunction(this.callback)) {
+                this.callback(this);
             }
 
-            return _this;
+            return this;
         }
     });
 
