@@ -904,6 +904,26 @@
         },
 
         /**
+         * Odd.
+         * @return {Dom}
+         */
+        odd: function() {
+            return initDom(this.filter(function(el, i) {
+                return (i & 1);
+            }));
+        },
+
+        /**
+         * Odd.
+         * @return {Dom}
+         */
+        even: function() {
+            return initDom(this.filter(function(el, i) {
+                return !(i & 1);
+            }));
+        },
+
+        /**
          * Path.
          * @param  {Boolean} join?
          * @return {Array|String}
