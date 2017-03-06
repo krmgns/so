@@ -355,13 +355,13 @@
              * @return {void}
              */
             addEvent: function(event) {
-                // var target = checkTarget(this.target, event.type);
+                var target = checkTarget(this.target, event.type);
 
-                // event.target = target;
-                // event.eventTarget = this;
-                // event.i = target.$events.get(event.type).append(event).size - 1;
+                event.target = target;
+                event.eventTarget = this;
+                event.i = target.$events.get(event.type).append(event).size - 1;
 
-                // target.addEventListener(event.type, event.fn, event.useCapture);
+                target.addEventListener(event.type, event.fn, event.useCapture);
             },
 
             /**
