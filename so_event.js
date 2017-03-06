@@ -335,7 +335,9 @@
         },
 
         // for chaining, eg: el.on(...).fire().off()
-        off: function(type) { return this.unbind(type); }
+        off: function(type) {
+            return this.unbind(type);
+        }
     });
 
     /**
