@@ -234,7 +234,7 @@
         _this.custom = event.eventClass == 'CustomEvent' || !re_typesStandard.test(type);
     }
 
-    $.extendPrototype(Event, {
+    Event.extendPrototype({
         /**
          * Copy.
          * @return {Event}
@@ -347,7 +347,7 @@
         this.target = checkTarget(target);
     }
 
-    $.extendPrototype(EventTarget, {
+    EventTarget.extendPrototype({
         /**
          * Add event.
          * @param  {Event} event
