@@ -7,6 +7,7 @@
 ;(function(window, $, undefined) { 'use strict';
 
     // minify candies
+    var NODE_TYPE = 'nodeType';
     var PARENT_NODE  = 'parentNode';
     var PARENT_ELEMENT = 'parentElement';
     var FIRST_CHILD = 'firstChild';
@@ -32,7 +33,6 @@
     var isVoid = $.isVoid, isNull = $.isNull, isNulls = $.isNulls, isUndefined = $.isUndefined;
     var isObject = $.isObject, isArray = $.isArray;
     var isNumber = $.isNumber, isNumeric = $.isNumeric, isString = $.isString;
-    var isNode = $.isNode, isNodeElement = $.isNodeElement;
     var isWindow = $.isWindow, isDocument = $.isDocument;
     var getWindow = $.getWindow, getDocument = $.getDocument;
     var extend = $.extend, extendPrototype = $.extendPrototype;
@@ -61,6 +61,12 @@
     }
     function isRootElement(el, _var) {
         return _var = getTag(el), _var == 'html' || _var == 'body';
+    }
+    function isNode(el) {
+        return !!(el && (el[NODE_TYPE] === 1 || el[NODE_TYPE] === 9 || el[NODE_TYPE] === 11));
+    }
+    function isNodeElement(el) {
+        return !!(el && el[NODE_TYPE] === 1);
     }
     function toKeyValueObject(key, value) {
         var ret = key || {}; if (isString(ret)) ret = {}, ret[key] = value; return ret;
@@ -1988,24 +1994,24 @@
     var re_plus = /%20/g
     var re_data = /^data:(?:.+)(?:;base64)?,/;
     var encode = encodeURIComponent, decode = decodeURIComponent;
+    var fileContent, fileContentStack = [];
 
     function toBase64(input) {
         return $.util.base64Encode(decode(input));
     }
 
-    var fileContents, fileContentsStack = [];
     function readFile(file, callback, multiple) {
         var reader = new FileReader();
         reader.onload = function(e) {
-            fileContents = trims(e.target.result);
+            fileContent = trims(e.target.result);
             // opera doesn't give base64 for 'html' files or maybe other more..
-            var encoded = fileContents.indexOf(';base64') > -1;
-            fileContents = fileContents.replace(re_data, '');
+            var encoded = fileContent.indexOf(';base64') > -1;
+            fileContent = fileContent.replace(re_data, '');
             if (!encoded) {
-                fileContents = toBase64(fileContents);
+                fileContent = toBase64(fileContent);
             }
-            fileContentsStack.push(fileContents);
-            callback(multiple ? fileContentsStack : fileContents);
+            fileContentStack.push(fileContent);
+            callback(multiple ? fileContentStack : fileContent);
         };
         reader.readAsDataURL(file);
     }
@@ -2015,16 +2021,16 @@
             _for(file.files, function(file) {
                 readFile(file, callback, multiple);
             });
-            fileContentsStack = []; // reset
+            fileContentStack = []; // reset
         } else { // ie >> https://msdn.microsoft.com/en-us/library/314cz14s(v=vs.85).aspx
-            var fso, file, fileName = file.value, fileContents = '';
+            var fso, file, fileName = file.value, fileContent = '';
             fso = new ActiveXObject('Scripting.FileSystemObject');
             if (fileName && fso.fileExists(fileName)) {
                 file = fso.openTextFile(fileName, 1);
-                fileContents = toBase64(file.readAll());
+                fileContent = toBase64(file.readAll());
                 file.close();
             }
-            callback(fileContents);
+            callback(fileContent);
         }
     }
 
@@ -2302,6 +2308,12 @@
     $.dom.extend({
         create: function(content, attributes) {
             return create(content, null, attributes);
+        },
+        isNode: function(el) {
+            return isNode(el);
+        },
+        isNodeElement: function(el) {
+            return isNodeElement(el);
         },
         isUnitStyle: function(value) {
             return !re_noneUnitStyles.test(value);

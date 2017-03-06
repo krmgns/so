@@ -297,20 +297,6 @@
         /** Is document. @param {Any} input @return {Boolean} */
         isDocument: function(input) {
             return !!(input && input[NAME_NODE_TYPE] === NODE_TYPE_DOCUMENT);
-        },
-
-        /** Is node. @param {Any} input @return {Boolean} */
-        isNode: function(input) {
-            return !!(input && (
-                   input[NAME_NODE_TYPE] === NODE_TYPE_ELEMENT
-                || input[NAME_NODE_TYPE] === NODE_TYPE_DOCUMENT
-                || input[NAME_NODE_TYPE] === NODE_TYPE_DOCUMENT_FRAGMENT
-            ));
-        },
-
-        /** Is node element. @param {Any} input @return {Boolean} */
-        isNodeElement: function(input) {
-            return !!(input && input[NAME_NODE_TYPE] === NODE_TYPE_ELEMENT);
         }
     });
 
@@ -850,7 +836,7 @@
                     ret = input;
                 } else if ($.isDocument(input)) {
                     ret = input[NAME_DEFAULT_VIEW]; // document window
-                } else if ($.isNode(input)) {
+                } else if (input[NAME_NODE_TYPE] === 1 || input[NAME_NODE_TYPE] === 9 || input[NAME_NODE_TYPE] === 11) {
                     ret = input[NAME_OWNER_DOCUMENT][NAME_DEFAULT_VIEW]; // node document window
                 }
             }
@@ -950,8 +936,6 @@
             else if ($.isUndefined(input))   type = 'undefined';
             else if ($.isWindow(input))      type = NAME_WINDOW;
             else if ($.isDocument(input))    type = NAME_DOCUMENT;
-            else if ($.isNodeElement(input)) type = 'element';
-            else if ($.isNode(input))        type = 'node';
             else if ($.isList(input))        type = 'list';
             else type = fn_toString.call(input).slice(8, -1).toLowerCase();
 
