@@ -2267,21 +2267,52 @@
     var event = $.event;
     if (event) {
         extendPrototype(Dom, {
+            /**
+             * On.
+             * @param  {String}    type
+             * @param  {Function}  fn
+             * @param  {Object}   ?options
+             * @return {this}
+             */
             on: function(type, fn, options) {
                 return this.for(function(el) {
                     event.on(el, type, fn, options);
                 });
             },
+
+            /**
+             * Once.
+             * @param  {String}    type
+             * @param  {Function}  fn
+             * @param  {Object}   ?options
+             * @return {this}
+             */
             once: function(type, fn, options) {
                 return this.for(function(el) {
                     event.once(el, type, fn, options);
                 });
             },
+
+            /**
+             * Off.
+             * @param  {String}    type
+             * @param  {Function}  fn
+             * @param  {Object}   ?options
+             * @return {this}
+             */
             off: function(type, fn, options) {
                 return this.for(function(el) {
                     event.off(el, type, fn, options);
                 });
             },
+
+            /**
+             * Fire.
+             * @param  {String}    type
+             * @param  {Function}  fn
+             * @param  {Object}   ?options
+             * @return {this}
+             */
             fire: function(type, fn, options) {
                 return this.for(function(el) {
                     event.fire(el, type, fn, options);
