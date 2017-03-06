@@ -196,7 +196,7 @@
         return new Animation(target, properties, speed, easing, callback);
     }
 
-    // return animation object
+    // add animation to so
     $.animation = {
         animate: function(target, properties, speed, easing, callback) {
             return initAnimation(target, properties, speed, easing, callback).run();

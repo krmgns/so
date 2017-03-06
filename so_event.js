@@ -1,7 +1,7 @@
 /**
  * @package so
  * @object  so.event
- * @depends so, so.list
+ * @depends so
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
@@ -176,11 +176,10 @@
         if (!target) throw ('No target given.');
 
         if (!target.$events) {
-            target.$events = $.list();
+            target.$events = {};
         }
-
-        if (eventType && !target.$events.has(eventType)) {
-            target.$events.set(eventType, $.list());
+        if (eventType && !target.$events[eventType]) {
+            target.$events[eventType] = [];
         }
 
         return target;
@@ -247,17 +246,18 @@
         /**
          * Bind.
          * @param  {String} type?
-         * @return {this}
+         * @return {Event}
          */
         bind: function(type) {
             var event = this.copy();
+            var eventTarget = initEventTarget(event.target);
 
             if (!type) {
-                initEventTarget(event.target).addEvent(event);
+                eventTarget.addEvent(event);
             } else {
                 type.split(re_comma).forEach(function(type) {
                     event.type = type;
-                    initEventTarget(event.target).addEvent(event);
+                    eventTarget.addEvent(event);
                 });
             }
 
@@ -271,7 +271,6 @@
          */
         bindTo: function(target) {
             var event = this.copy();
-
             event.target = event.options.target = target;
 
             // add fn after target set
@@ -287,17 +286,18 @@
         /**
          * Unbind.
          * @param  {String} type?
-         * @return {this}
+         * @return {Event}
          */
         unbind: function(type) {
             var event = this.copy();
+            var eventTarget = initEventTarget(event.target);
 
             if (!type) {
-                initEventTarget(event.target).removeEvent(event);
+                eventTarget.removeEvent(event);
             } else {
                 type.split(re_comma).forEach(function(type) {
                     event.type = type;
-                    initEventTarget(event.target).removeEvent(event);
+                    eventTarget.removeEvent(event);
                 });
             }
 
@@ -308,17 +308,18 @@
          * Fire.
          * @param  {String} type?
          * @param  {Object} data
-         * @return {this}
+         * @return {Event}
          */
         fire: function(type, data) {
             var event = this.copy();
+            var eventTarget = initEventTarget(event.target);
 
             if (!type) {
-                initEventTarget(event.target).dispatch(event, data);
+                eventTarget.dispatch(event, data);
             } else {
                 type.split(re_comma).forEach(function(type) {
                     event.type = type;
-                    initEventTarget(event.target).dispatch(event, data);
+                    eventTarget.dispatch(event, data);
                 });
             }
 
@@ -358,7 +359,7 @@
 
             event.target = target;
             event.eventTarget = this;
-            event.i = target.$events.get(event.type).append(event).size - 1;
+            event.i = target.$events[event.type].push(event) - 1;
 
             target.addEventListener(event.type, event.fn, event.useCapture);
         },
@@ -369,50 +370,69 @@
          * @return {void}
          */
         removeEvent: function(event) {
-            var target = checkTarget(this.target),
-                events = target.$events, eventsRemove, type = event.type,
-                filter = function(event) { return !!event; };
+            var target = checkTarget(this.target);
+            var remove;
 
-            if (events) {
-                eventsRemove = $.list();
-                if (type == '*') { // all
-                    eventsRemove = events.selectAll(filter);
-                } else if (type == '**') { // all fired 'x' types, eg: .off('**')
-                    eventsRemove = events.selectAll(function(_event) {
-                        return _event && _event.fired;
-                    });
-                } else if (type.has('**')) { // all fired 'x' types, eg: .off('click**')
-                    type = type.slice(0, -2);
-                    eventsRemove = events.selectAll(function(_event) {
-                        return _event && _event.type == type && _event.fired;
-                    });
-                } else if (events.data[type]) {
-                    events = events.data[type];
-                    if (event.fnOrig) { // all matched fn's, eg: .off('x', fn)
-                        eventsRemove = events.select(function(_event) {
-                            return _event && _event.fnOrig == event.fnOrig;
+            if (target.$events) {
+                remove = [];
+                if (event.type == '*') { // all
+                    $.for(target.$events, function(events) {
+                        $.for(events, function(event, i) {
+                            remove.push(event);
                         });
-                    } else { // all 'x' types, eg: .off('x')
-                        eventsRemove = events.selectAll(filter);
+                    });
+                } else if (event.type == '**') { // all fired
+                    $.for(target.$events, function(events) {
+                        $.for(events, function(event, i) {
+                            if (event && event.fired) {
+                                remove.push(event);
+                            }
+                        });
+                    });
+                } else if (event.type.has('**')) { // all fired 'x' types, eg: .off('click**')
+                    var type = event.type.slice(0, -2);
+                    $.for(target.$events, function(events) {
+                        $.for(events, function(event, i) {
+                            if (event && event.fired && event.type == type) {
+                                remove.push(event);
+                            }
+                        });
+                    });
+                } else if (target.$events[event.type]) {
+                    var fnOrig = event.fnOrig;
+                    if (fnOrig) { // all matched fn's, eg: .off('click', fn)
+                        $.for(target.$events, function(events) {
+                            $.for(events, function(event, i) {
+                                if (event && event.fnOrig == fnOrig) {
+                                    remove.push(event);
+                                }
+                            });
+                        });
+                    } else { // all matched type's, eg: .off('click')
+                        $.for(target.$events[event.type], function(event, i) {
+                            remove.push(event);
+                        });
                     }
+                }
+
+
+                if (remove.length) {
+                    $.for(remove, function(event) {
+                        delete target.$events[event.type][event.i];
+                        target.removeEventListener(event.type, event.fn, event.useCapture);
+                    });
+
+                    // think memory!
+                    $.forEach(target.$events, function(type, events) {
+                        if ($.isEmpty(events)) {
+                            target.$events[type] = null;
+                        } else {
+                            target.$events[type] = Object.values(target.$events[type]);
+                        }
+                    });
                 }
             } else {
                 $.logWarn('No `%s` events found to fire.'.format(event.type));
-            }
-
-            if (eventsRemove) {
-                events = target.$events;
-                eventsRemove.for(function(event) {
-                    events.data[event.type].removeAt(event.i);
-                    target.removeEventListener(event.type, event.fn, event.useCapture);
-                });
-
-                // think memory!
-                events.forEach(function(key, list) {
-                    if (list && !list.size) {
-                        events.replaceAt(key, null);
-                    }
-                });
             }
         },
 
@@ -423,14 +443,13 @@
          * @return {void}
          */
         dispatch: function(event, data) {
-            var target = checkTarget(this.target),
-                events = target.$events.get(event.type);
+            var target = checkTarget(this.target);
 
-            if (events) {
-                events.for(function(event) {
+            if (target.$events[event.type]) {
+                $.for(target.$events[event.type], function(event) {
                     // call-time data
                     if (data) {
-                        event.event.data = event.event.data || {}; // ensure
+                        event.event.data = event.event.data || {};
                         for (var key in data) {
                             event.data[key] = event.event.data[key] = data[key];
                         }
@@ -462,39 +481,42 @@
      */
     function on(target, type, fn, options) {
         var args = prepareArgs(fn, options, target);
-
+        var event, eventTarget;
         type.split(re_comma).forEach(function(type) {
-            initEvent(type, args.fn, args.options).bind(type);
+            event = initEvent(type, args.fn, args.options);
+            eventTarget = initEventTarget(target);
+            eventTarget.addEvent(event);
         });
     }
     function once(target, type, fn, options) {
         var args = prepareArgs(fn, options, target, true);
-
+        var event, eventTarget;
         type.split(re_comma).forEach(function(type) {
-            initEvent(type, function(e) {
-                return e.event.unbind(), args.fn.apply(target, arguments);
-            }, args.options).bind(type);
+            event = initEvent(type, args.fn, args.options);
+            eventTarget = initEventTarget(target);
+            eventTarget.addEvent(event);
         });
     }
     function off(target, type, fn, options) {
         var args = prepareArgs(fn, options, target);
-
+        var event, eventTarget;
         type.split(re_comma).forEach(function(type) {
-            initEvent(type, args.fn, args.options).unbind(type);
+            event = initEvent(type, args.fn, args.options);
+            eventTarget = initEventTarget(target);
+            eventTarget.removeEvent(event);
         });
     }
     function fire(target, type, fn, options) {
         var args = prepareArgs(fn, options, target);
-
+        var event;
         type.split(re_comma).forEach(function(type) {
-            initEvent(type, args.fn, args.options).fire(type, args.options.data);
+            event = initEvent(type, args.fn, args.options);
+            event.fire(type, args.options.data);
         });
     }
 
     // shortcuts for Window & Node (Document, Element, ..) objects
-    var objects = [Node];
-    var prototype = 'prototype';
-    var names = ['on', 'once', 'off', 'fire'];
+    var objects = [Node], prototype = 'prototype', names = ['on', 'once', 'off', 'fire'];
     if (window.Window) {
         objects.push(window.Window);
     } else if (window.__proto__) { // fails on safari/5.1 (maybe others too)
@@ -509,6 +531,7 @@
         });
     });
 
+    // add event to so
     $.event = {
         on: on,
         once: once,

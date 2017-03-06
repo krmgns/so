@@ -2506,7 +2506,7 @@
         return initDom(selector, root, i);
     };
 
-    // add static methods to Dom
+    // add static methods to dom
     $.dom.extend({
         create: function(content, attributes) {
             return create(content, null, attributes);
@@ -2519,10 +2519,11 @@
         },
         isUnitStyle: function(value) {
             return !re_noneUnitStyles.test(value);
-        }
+        },
+        method: function(name, args) {} // @todo
     });
 
-    // add Dom as shortcut to so
+    // add dom as shortcut to so
     $.$ = function(selector, root, i) { // one
         return initDom(selector, root, i, true);
     };
