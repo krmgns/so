@@ -914,7 +914,7 @@
         },
 
         /**
-         * Odd.
+         * Even.
          * @return {Dom}
          */
         even: function() {
