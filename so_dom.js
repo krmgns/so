@@ -2506,11 +2506,16 @@
         return initDom(selector, root, i);
     };
 
+    // add dom as shortcut to so
+    $.$ = function(selector, root, i) { // one
+        return initDom(selector, root, i, true);
+    };
+    $.$$ = function(selector, root, i) { // all
+        return initDom(selector, root, i);
+    };
+
     // add static methods to dom
     $.dom.extend({
-        create: function(content, attributes) {
-            return create(content, null, attributes);
-        },
         isNode: function(el) {
             return isNode(el);
         },
@@ -2520,16 +2525,17 @@
         isUnitStyle: function(value) {
             return !re_noneUnitStyles.test(value);
         },
-        method: function(name, args) {} // @todo
+        create: function(content, attributes) {
+            return create(content, null, attributes);
+        },
+        define: function(name, value) {
+            var names = Object.keys(Dom.prototype);
+            if (names.indexOf(name) > -1) {
+                throw ('Cannot overwrite on `Dom.'+ name +'`!');
+            }
+            return extendPrototype(Dom, toKeyValueObject(name, value));
+        }
     });
-
-    // add dom as shortcut to so
-    $.$ = function(selector, root, i) { // one
-        return initDom(selector, root, i, true);
-    };
-    $.$$ = function(selector, root, i) { // all
-        return initDom(selector, root, i);
-    };
 
     // add find, findAll to Node
     extendPrototype(Node, {
