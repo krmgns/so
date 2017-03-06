@@ -125,7 +125,7 @@
                 } else if (dir = dir.toInt()) {
                     // @div(3n) etc..
                     all = all.filter(function(node, i) {
-                        return !((i + 1) % +dir);
+                        return !((i + 1) % dir);
                     });
                 }
 
@@ -352,11 +352,13 @@
          */
         get: function(i, init) {
             var el;
+
             if (isVoid(i)) {
                 el = this[0];
             } else if (isNumber(i)) {
                 el = this[i - 1];
             }
+
             return init ? initDom(el) : el;
         },
 
@@ -368,6 +370,7 @@
          */
         getAll: function(i, init) {
             var el, els = [];
+
             if (isVoid(i)) {
                 els = this.toArray();
             } else {
@@ -379,12 +382,13 @@
                     }
                 });
             }
+
             return init ? initDom(els) : els;
         },
 
         /**
          * Item.
-         * @param  {Int) i
+         * @param  {Int} i
          * @return {Dom}
          */
         item: function(i) {
@@ -409,10 +413,18 @@
 
         /**
          * Nth.
+         * @param  {Int|String} i
          * @return {Dom}
          */
         nth: function(i) {
-            return this.item(i);
+            if (isNumber(i)) {
+                return this.item(i);
+            }
+
+            i = i.toInt();
+            return initDom(this.filter(function(node, _i) {
+                return !((_i + 1) % i);
+            }));
         },
 
         /**
