@@ -1662,15 +1662,8 @@
          * @return {Any}
          */
         attribute: function(name, value) {
-            var ret;
-            if ($.isNull(value)) {
-                ret = this.removeAttribute(name);
-            } else if ($.isUndefined(value)) {
-                ret = this.getAttribute(name);
-            } else {
-                ret = this.setAttribute(name, value);
-            }
-            return ret;
+            return $.isNull(value) ? this.removeAttribute(name)
+                : $.isUndefined(value) ? this.getAttribute(name) : this.setAttribute(name, value);
         },
 
         /**
