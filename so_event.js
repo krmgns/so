@@ -28,7 +28,6 @@
     var re_typesFix = /^(UI|Mouse|Mutation|HTML)Event$/i;
     var re_typesStandard = $.re('('+ Object.values(re_types).join('|') +')', 'i');
     var re_comma = /,\s*/;
-    var fn_defineProperty = Object.defineProperty;
     var optionsDefault = {
         bubbles: true, cancelable: true, scoped: false, composed: false, // all
         view: window, detail: null, // ui, mouse, custom
@@ -122,7 +121,7 @@
                 e.data = event.data;
             }
             if (!e.target) {
-                e = fn_defineProperty(e, 'target', {value: event.target});
+                e = Object.defineProperty(e, 'target', {value: event.target});
             }
 
             // sugars..
