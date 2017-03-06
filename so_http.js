@@ -195,10 +195,8 @@
                 }
                 client.response.dataType = dataType;
 
-                // on('data', ...) if data exist
-                if (!$.isNulls(client.response.data)) {
-                    client.fire('data', client.response.data);
-                }
+                // on('data', ...)
+                client.fire('data', client.response.data);
 
                 // specials, eg: 200: function(){...}
                 client.fire(client.response.statusCode);
