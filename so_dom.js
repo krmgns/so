@@ -7,22 +7,22 @@
 ;(function(window, $, undefined) { 'use strict';
 
     // minify candies
-    var NODE_TYPE = 'nodeType';
-    var PARENT_NODE  = 'parentNode';
-    var PARENT_ELEMENT = 'parentElement';
-    var FIRST_CHILD = 'firstChild';
-    var CHILDREN = 'children', CHILD_NODES = 'childNodes';
-    var NEXT_ELEMENT_SIBLING = 'nextElementSibling';
-    var PREVIOUS_ELEMENT_SIBLING = 'previousElementSibling';
-    var PADDING_TOP = 'paddingTop', PADDING_BOTTOM = 'paddingBottom';
-    var PADDING_LEFT = 'paddingLeft', PADDING_RIGHT = 'paddingRight';
-    var MARGIN_TOP = 'marginTop', MARGIN_BOTTOM = 'marginBottom';
-    var MARGIN_LEFT = 'marginLeft', MARGIN_RIGHT = 'marginRight';
-    var BORDER_TOP_WIDTH = 'borderTopWidth', BORDER_BOTTOM_WIDTH = 'borderBottomWidth';
-    var BORDER_LEFT_WIDTH = 'borderLeftWidth', BORDER_RIGHT_WIDTH = 'borderRightWidth';
-    var WIDTH = 'width', INNER_WIDTH = 'innerWidth', OUTER_WIDTH = 'outerWidth';
-    var HEIGHT = 'height', INNER_HEIGHT = 'innerHeight', OUTER_HEIGHT = 'outerHeight';
-    var INNER_HTML = 'innerHTML', TEXT_CONTENT = 'textContent';
+    var NAME_NODE_TYPE = 'nodeType';
+    var NAME_PARENT_NODE  = 'parentNode';
+    var NAME_PARENT_ELEMENT = 'parentElement';
+    var NAME_FIRST_CHILD = 'firstChild';
+    var NAME_CHILDREN = 'children', NAME_CHILD_NODES = 'childNodes';
+    var NAME_NEXT_ELEMENT_SIBLING = 'nextElementSibling';
+    var NAME_PREVIOUS_ELEMENT_SIBLING = 'previousElementSibling';
+    var NAME_PADDING_TOP = 'paddingTop', NAME_PADDING_BOTTOM = 'paddingBottom';
+    var NAME_PADDING_LEFT = 'paddingLeft', NAME_PADDING_RIGHT = 'paddingRight';
+    var NAME_MARGIN_TOP = 'marginTop', NAME_MARGIN_BOTTOM = 'marginBottom';
+    var NAME_MARGIN_LEFT = 'marginLeft', NAME_MARGIN_RIGHT = 'marginRight';
+    var NAME_BORDER_TOP_WIDTH = 'borderTopWidth', NAME_BORDER_BOTTOM_WIDTH = 'borderBottomWidth';
+    var NAME_BORDER_LEFT_WIDTH = 'borderLeftWidth', NAME_BORDER_RIGHT_WIDTH = 'borderRightWidth';
+    var NAME_WIDTH = 'width', NAME_INNER_WIDTH = 'innerWidth', NAME_OUTER_WIDTH = 'outerWidth';
+    var NAME_HEIGHT = 'height', NAME_INNER_HEIGHT = 'innerHeight', NAME_OUTER_HEIGHT = 'outerHeight';
+    var NAME_INNER_HTML = 'innerHTML', NAME_TEXT_CONTENT = 'textContent';
 
     var re_space = /\s+/g;
     var re_comma = /,\s*/;
@@ -63,10 +63,10 @@
         return _var = getTag(el), _var == 'html' || _var == 'body';
     }
     function isNode(el) {
-        return !!(el && (el[NODE_TYPE] === 1 || el[NODE_TYPE] === 9 || el[NODE_TYPE] === 11));
+        return !!(el && (el[NAME_NODE_TYPE] === 1 || el[NAME_NODE_TYPE] === 9 || el[NAME_NODE_TYPE] === 11));
     }
     function isNodeElement(el) {
-        return !!(el && el[NODE_TYPE] === 1);
+        return !!(el && el[NAME_NODE_TYPE] === 1);
     }
     function toKeyValueObject(key, value) {
         var ret = key || {}; if (isString(ret)) ret = {}, ret[key] = value; return ret;
@@ -201,7 +201,7 @@
             } else if (isWindow(selector) || isDocument(selector)) {
                 elements = [selector];
             } else if (isNode(selector)) {
-                if (root && root != selector[PARENT_NODE]) {
+                if (root && root != selector[NAME_PARENT_NODE]) {
                     // pass (check root reliability)
                 } else {
                     elements = [selector];
@@ -438,12 +438,12 @@
         doc = doc && isDocument(doc) ? doc : document;
         var tmp = createElement(doc, 'so-tmp', {innerHTML: content});
         var fragment = doc.createDocumentFragment();
-        while (tmp[FIRST_CHILD]) {
-            fragment.appendChild(tmp[FIRST_CHILD]);
+        while (tmp[NAME_FIRST_CHILD]) {
+            fragment.appendChild(tmp[NAME_FIRST_CHILD]);
         }
 
         if (attributes && isObject(attributes)) {
-            _for(fragment[CHILD_NODES], function(node) {
+            _for(fragment[NAME_CHILD_NODES], function(node) {
                 if (isNodeElement(node)) {
                     _forEach(attributes, function(name, value) {
                         node.setAttribute(name, value);
@@ -452,7 +452,7 @@
             });
         }
 
-        return _array(fragment[CHILD_NODES]);
+        return _array(fragment[NAME_CHILD_NODES]);
     }
 
     function createElement(doc, tag, properties) {
@@ -478,8 +478,8 @@
                 });
             }
 
-            if (el[CHILD_NODES]) {
-                _for(el[CHILD_NODES], function(child) {
+            if (el[NAME_CHILD_NODES]) {
+                _for(el[NAME_CHILD_NODES], function(child) {
                     clone.appendChild(cloneElement(child, deep));
                 });
             }
@@ -491,7 +491,7 @@
     function cleanElement(el) {
         el.$data = el.$events = null;
         var child;
-        while (child = el[FIRST_CHILD]) {
+        while (child = el[NAME_FIRST_CHILD]) {
             if (isNodeElement(child)) {
                 cleanElement(child);
             }
@@ -541,8 +541,8 @@
         remove: function() {
             return this.for(function(element) {
                 cleanElement(element);
-                if (element[PARENT_NODE]) {
-                    element[PARENT_NODE].removeChild(element);
+                if (element[NAME_PARENT_NODE]) {
+                    element[NAME_PARENT_NODE].removeChild(element);
                 }
             });
         },
@@ -601,7 +601,7 @@
         prepend: function(content, attributes, cloning) {
             return this.for(function(el) {
                 createFor(el, content, attributes).forEach(function(node) {
-                    el.insertBefore(cloneIf(cloning, node), el[FIRST_CHILD]);
+                    el.insertBefore(cloneIf(cloning, node), el[NAME_FIRST_CHILD]);
                 });
             });
         },
@@ -619,7 +619,7 @@
 
             return this.for(function(el) {
                 selector.for(function(node) {
-                    node.insertBefore(cloneIf(cloning, el), node[FIRST_CHILD]);
+                    node.insertBefore(cloneIf(cloning, el), node[NAME_FIRST_CHILD]);
                 });
             });
         },
@@ -653,7 +653,7 @@
 
             return this.for(function(el) {
                 selector.for(function(node) {
-                    node[PARENT_NODE].insertBefore(cloneIf(cloning, el), node);
+                    node[NAME_PARENT_NODE].insertBefore(cloneIf(cloning, el), node);
                 });
             });
         },
@@ -671,7 +671,7 @@
 
             return this.for(function(el) {
                 selector.for(function(node) {
-                    node[PARENT_NODE].insertBefore(cloneIf(cloning, el), node.nextSibling)
+                    node[NAME_PARENT_NODE].insertBefore(cloneIf(cloning, el), node.nextSibling)
                 });
             });
         },
@@ -689,7 +689,7 @@
 
             return this.for(function(el) {
                 selector.for(function(node) {
-                    el[PARENT_NODE].replaceChild(cloneIf(cloning, node), el);
+                    el[NAME_PARENT_NODE].replaceChild(cloneIf(cloning, node), el);
                 });
             });
         },
@@ -701,7 +701,7 @@
          * @return {Dom}
          */
         wrap: function(content, attributes) {
-            var me = this[0], parent = me && me[PARENT_NODE],
+            var me = this[0], parent = me && me[NAME_PARENT_NODE],
                 wrapper, replace, clone, clones = [];
 
             if (parent) {
@@ -725,8 +725,8 @@
          * @return {Dom}
          */
         unwrap: function(remove) {
-            var me = this[0], parent = me && me[PARENT_NODE],
-                parentParent = parent && parent[PARENT_NODE], clone, clones = [];
+            var me = this[0], parent = me && me[NAME_PARENT_NODE],
+                parentParent = parent && parent[NAME_PARENT_NODE], clone, clones = [];
 
             if (parentParent) {
                 this.for(function(el) {
@@ -808,7 +808,7 @@
          * @param {String} input
          */
         setText: function(input) {
-            return this.for(function(el) { el[TEXT_CONTENT] = input; });
+            return this.for(function(el) { el[NAME_TEXT_CONTENT] = input; });
         },
 
         /**
@@ -816,7 +816,7 @@
          * @return {String}
          */
         getText: function() {
-            return __(this, TEXT_CONTENT);
+            return __(this, NAME_TEXT_CONTENT);
         },
 
         /**
@@ -833,7 +833,7 @@
          * @param {String} input
          */
         setHtml: function(input) {
-            return this.for(function(el) { el[INNER_HTML] = input; });
+            return this.for(function(el) { el[NAME_INNER_HTML] = input; });
         },
 
         /**
@@ -841,7 +841,7 @@
          * @return {String}
          */
         getHtml: function() {
-            return __(this, INNER_HTML);
+            return __(this, NAME_INNER_HTML);
         }
     });
 
@@ -924,7 +924,7 @@
          * @return {Dom}
          */
         parent: function() {
-            return initDom(__(this, PARENT_NODE));
+            return initDom(__(this, NAME_PARENT_NODE));
         },
 
         /**
@@ -932,7 +932,7 @@
          * @return {Dom}
          */
         parents: function() {
-            return initDom(walk(this[0], PARENT_NODE));
+            return initDom(walk(this[0], NAME_PARENT_NODE));
         },
 
         /**
@@ -942,7 +942,7 @@
         comments: function() {
             var el = this[0], node, nodes = [], i = 0;
             if (el) {
-                while (node = el[CHILD_NODES][i++]) {
+                while (node = el[NAME_CHILD_NODES][i++]) {
                     if (node.nodeType === 8) {
                         nodes.push(node);
                     }
@@ -959,7 +959,7 @@
         siblings: function(selector) {
             var el = __(this), ret;
             if (el) {
-                ret = walk(el[PARENT_NODE], CHILDREN).filter(function(_el) {
+                ret = walk(el[NAME_PARENT_NODE], NAME_CHILDREN).filter(function(_el) {
                     return _el != el;
                 });
                 if (selector && ret.length) {
@@ -974,7 +974,7 @@
          * @return {Dom}
          */
         children: function() {
-            return initDom(__(this, CHILDREN));
+            return initDom(__(this, NAME_CHILDREN));
         },
 
         /**
@@ -982,7 +982,7 @@
          * @return {Dom}
          */
         prev: function() {
-            return initDom(__(this, PREVIOUS_ELEMENT_SIBLING));
+            return initDom(__(this, NAME_PREVIOUS_ELEMENT_SIBLING));
         },
 
         /**
@@ -993,7 +993,7 @@
         prevAll: function(selector) {
             var el = this[0], ret = [];
             if (el) {
-                ret = walk(el, PREVIOUS_ELEMENT_SIBLING).reverse();
+                ret = walk(el, NAME_PREVIOUS_ELEMENT_SIBLING).reverse();
                 if (selector && ret.length) {
                     ret = intersect(ret, this.parent().find(selector).toArray());
                 }
@@ -1006,7 +1006,7 @@
          * @return {Dom}
          */
         next: function() {
-            return initDom(__(this, NEXT_ELEMENT_SIBLING));
+            return initDom(__(this, NAME_NEXT_ELEMENT_SIBLING));
         },
 
         /**
@@ -1017,7 +1017,7 @@
         nextAll: function(selector) {
             var el = this[0], ret = [], found;
             if (el) {
-                ret = walk(el, NEXT_ELEMENT_SIBLING);
+                ret = walk(el, NAME_NEXT_ELEMENT_SIBLING);
                 if (selector && ret.length) {
                     ret = intersect(ret, this.parent().find(selector).toArray());
                 }
@@ -1043,7 +1043,7 @@
             var el = this[0], ret;
 
             if (!selector) {
-                ret = el && el[PARENT_NODE];
+                ret = el && el[NAME_PARENT_NODE];
             } else {
                 selector = initDom(selector)[0];
                 this.parents().forEach(function(_el) {
@@ -1301,12 +1301,12 @@
     }
 
     function isHiddenParent(el) {
-        var parent = el && el[PARENT_ELEMENT];
+        var parent = el && el[NAME_PARENT_ELEMENT];
         while (parent) {
             if (isHidden(parent)) {
                 return true;
             }
-            parent = parent[PARENT_ELEMENT];
+            parent = parent[NAME_PARENT_ELEMENT];
         }
         return false;
     }
@@ -1315,7 +1315,7 @@
         var ret = [];
         var sid = $.sid(), className = ' '+ sid;
         var styleText = el.style.cssText;
-        var parent = el[PARENT_ELEMENT], parents = [], parentStyle;
+        var parent = el[NAME_PARENT_ELEMENT], parents = [], parentStyle;
 
         while (parent) { // doesn't give if parents are hidden
             if (isHidden(parent)) {
@@ -1324,7 +1324,7 @@
                 parent.className += className;
                 parent.style.display = '', parent.style.visibility = ''; // for `!important` annots
             }
-            parent = parent[PARENT_ELEMENT];
+            parent = parent[NAME_PARENT_ELEMENT];
         }
 
         var doc = getDocument(el);
@@ -1385,33 +1385,33 @@
 
         if (isNodeElement(el)) {
             style = getStyle(el);
-            if ((!by || by == WIDTH) && dim.width) {
-                ret.width -= sumStyleValue(null, style, PADDING_LEFT, PADDING_RIGHT)
-                           + sumStyleValue(null, style, BORDER_LEFT_WIDTH, BORDER_RIGHT_WIDTH);
+            if ((!by || by == NAME_WIDTH) && dim.width) {
+                ret.width -= sumStyleValue(null, style, NAME_PADDING_LEFT, NAME_PADDING_RIGHT)
+                           + sumStyleValue(null, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);
                 if (by) return ret.width;
             }
-            if ((!by || by == INNER_WIDTH) && dim.width) {
-                ret.innerWidth -= sumStyleValue(null, style, BORDER_LEFT_WIDTH, BORDER_RIGHT_WIDTH);;
+            if ((!by || by == NAME_INNER_WIDTH) && dim.width) {
+                ret.innerWidth -= sumStyleValue(null, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);;
                 if (by) return ret.innerWidth;
             }
-            if ((!by || by == OUTER_WIDTH) && dim.width) {
+            if ((!by || by == NAME_OUTER_WIDTH) && dim.width) {
                 if (margined) {
-                    ret.outerWidth += sumStyleValue(null, style, MARGIN_LEFT, MARGIN_RIGHT);
+                    ret.outerWidth += sumStyleValue(null, style, NAME_MARGIN_LEFT, NAME_MARGIN_RIGHT);
                 }
                 if (by) return ret.outerWidth;
             }
-            if ((!by || by == HEIGHT) && dim.height) {
-                ret.height -= sumStyleValue(null, style, PADDING_TOP, PADDING_BOTTOM)
-                            + sumStyleValue(null, style, BORDER_TOP_WIDTH, BORDER_BOTTOM_WIDTH);
+            if ((!by || by == NAME_HEIGHT) && dim.height) {
+                ret.height -= sumStyleValue(null, style, NAME_PADDING_TOP, NAME_PADDING_BOTTOM)
+                            + sumStyleValue(null, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
                 if (by) return ret.height;
             }
-            if ((!by || by == INNER_HEIGHT) && dim.height) {
-                ret.innerHeight -= sumStyleValue(null, style, BORDER_TOP_WIDTH, BORDER_BOTTOM_WIDTH);
+            if ((!by || by == NAME_INNER_HEIGHT) && dim.height) {
+                ret.innerHeight -= sumStyleValue(null, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
                 if (by) return ret.innerHeight;
             }
-            if ((!by || by == OUTER_HEIGHT) && dim.height) {
+            if ((!by || by == NAME_OUTER_HEIGHT) && dim.height) {
                 if (margined) {
-                    ret.outerHeight += sumStyleValue(null, style, MARGIN_TOP, MARGIN_BOTTOM);
+                    ret.outerHeight += sumStyleValue(null, style, NAME_MARGIN_TOP, NAME_MARGIN_BOTTOM);
                 }
                 if (by) return ret.outerHeight;
             }
@@ -1434,7 +1434,7 @@
 
             ret.top += body.scrollTop, ret.left += body.scrollLeft;
             if (relative) {
-                var parentOffset = getOffset(el[PARENT_ELEMENT], relative);
+                var parentOffset = getOffset(el[NAME_PARENT_ELEMENT], relative);
                 ret.top += parentOffset.top, ret.left += parentOffset.left;
             }
         }
@@ -1470,7 +1470,7 @@
          * @return {Int}
          */
         width: function() {
-            return getDimensionsBy(this[0], WIDTH);
+            return getDimensionsBy(this[0], NAME_WIDTH);
         },
 
         /**
@@ -1478,7 +1478,7 @@
          * @return {Int}
          */
         innerWidth: function() {
-            return getDimensionsBy(this[0], INNER_WIDTH);
+            return getDimensionsBy(this[0], NAME_INNER_WIDTH);
         },
 
         /**
@@ -1487,7 +1487,7 @@
          * @return {Int}
          */
         outerWidth: function(margined) {
-            return getDimensionsBy(this[0], OUTER_WIDTH, margined);
+            return getDimensionsBy(this[0], NAME_OUTER_WIDTH, margined);
         },
 
         /**
@@ -1495,7 +1495,7 @@
          * @return {Int}
          */
         height: function() {
-            return getDimensionsBy(this[0], HEIGHT);
+            return getDimensionsBy(this[0], NAME_HEIGHT);
         },
 
         /**
@@ -1503,7 +1503,7 @@
          * @return {Int}
          */
         innerHeight: function() {
-            return getDimensionsBy(this[0], INNER_HEIGHT);
+            return getDimensionsBy(this[0], NAME_INNER_HEIGHT);
         },
 
         /**
@@ -1512,7 +1512,7 @@
          * @return {Int}
          */
         outerHeight: function(margined) {
-            return getDimensionsBy(this[0], OUTER_HEIGHT, margined);
+            return getDimensionsBy(this[0], NAME_OUTER_HEIGHT, margined);
         }
     });
 
@@ -1544,11 +1544,11 @@
 
             if (el) {
                 var style = getStyle(el);
-                var borderXSize = sumStyleValue(null, style, BORDER_LEFT_WIDTH, BORDER_RIGHT_WIDTH);
-                var borderYSize = sumStyleValue(null, style, BORDER_TOP_WIDTH, BORDER_BOTTOM_WIDTH);
-                var marginXSize = sumStyleValue(null, style, MARGIN_LEFT, MARGIN_RIGHT);
-                var marginYSize = sumStyleValue(null, style, MARGIN_TOP, MARGIN_BOTTOM);
-                var dim = getDimensionsBy(el), parentDim = getDimensions(el[PARENT_ELEMENT]);
+                var borderXSize = sumStyleValue(null, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);
+                var borderYSize = sumStyleValue(null, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
+                var marginXSize = sumStyleValue(null, style, NAME_MARGIN_LEFT, NAME_MARGIN_RIGHT);
+                var marginYSize = sumStyleValue(null, style, NAME_MARGIN_TOP, NAME_MARGIN_BOTTOM);
+                var dim = getDimensionsBy(el), parentDim = getDimensions(el[NAME_PARENT_ELEMENT]);
                 var offset = getOffset(el), scroll = getScroll(el);
 
                 ret = dim;
@@ -1741,7 +1741,7 @@
             if (el) {
                 if (el.options && !isVoid(option = el.options[el.selectedIndex])) {
                     ret = hasAttribute(option, 'value')
-                        ? (option.disabled || option[PARENT_ELEMENT].disabled ? '' : option.value) : '';
+                        ? (option.disabled || option[NAME_PARENT_ELEMENT].disabled ? '' : option.value) : '';
                 } else {
                     ret = el.value;
                 }
