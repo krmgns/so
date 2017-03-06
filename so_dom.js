@@ -4,7 +4,7 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function(window, $, undefined) { 'use strict';
+;(function(window, document, $, undefined) { 'use strict';
 
     // minify candies
     var NAME_NODE_TYPE = 'nodeType';
@@ -2522,6 +2522,28 @@
         findAll: function(selector, init) {
             return $.$$(selector, root, i);
         },
+        define: function(name, value) {
+            var names = Object.keys(Dom.prototype);
+            if (names.indexOf(name) > -1) {
+                throw ('Cannot overwrite on `Dom.'+ name +'`!');
+            }
+            return extendPrototype(Dom, toKeyValueObject(name, value));
+        },
+        create: function(content, attributes) {
+            return create(content, null, attributes);
+        },
+        loadStyle: function(src, onload, attributes) {
+            var s = document.createElement('link');
+            s.href = src, s.onload = onload, s.rel = 'stylesheet';
+            document.head.appendChild(s);
+            return this;
+        },
+        loadScript: function(src, onload, attributes) {
+            var s = document.createElement('script');
+            s.src = src, s.onload = onload;
+            document.head.appendChild(s);
+            return this;
+        },
         isNode: function(el) {
             return isNode(el);
         },
@@ -2530,16 +2552,6 @@
         },
         isUnitStyle: function(value) {
             return !re_noneUnitStyles.test(value);
-        },
-        create: function(content, attributes) {
-            return create(content, null, attributes);
-        },
-        define: function(name, value) {
-            var names = Object.keys(Dom.prototype);
-            if (names.indexOf(name) > -1) {
-                throw ('Cannot overwrite on `Dom.'+ name +'`!');
-            }
-            return extendPrototype(Dom, toKeyValueObject(name, value));
         }
     });
 
@@ -2553,4 +2565,4 @@
         }
     });
 
-})(window, so);
+})(window, document, so);
