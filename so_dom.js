@@ -1766,10 +1766,10 @@
         /**
          * Id.
          * @param  {String} id?
-         * @return {this|String}
+         * @return {String|this}
          */
         id: function(id) {
-            return !isUndefined(id) ? this.setId(id) : this.getId();
+            return isUndefined(id) ? this.getId() : this.setId(id);
         },
 
         /**
@@ -1782,10 +1782,10 @@
 
         /**
          * Get id.
-         * @return {String|undefined}
+         * @return {String}
          */
         getId: function() {
-            return getAttribute(this[0], 'id');
+            return getAttribute(this[0], 'id', '');
         }
     });
 
