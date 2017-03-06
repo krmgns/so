@@ -1054,7 +1054,7 @@
         extendPrototype: function(target, prototype) {
             if ($.isArray(target)) {
                 while (target.length) {
-                    $.extendPrototype(target.shift(), source);
+                    $.extendPrototype(target.shift(), prototype);
                 }
             } else {
                 return extend(target[NAME_PROTOTYPE], prototype);
