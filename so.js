@@ -24,6 +24,13 @@
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
     window.so.DOMLevel = window[NAME_DOCUMENT].adoptNode ? 3 : 2;
+
+    // safe bind for ie9 (yes, still ie..)
+    function consoleBind(fn, args) {
+        Function[NAME_PROTOTYPE].bind.call(window.console[fn], window.console)
+            .apply(window.console, args);
+    }
+
     // shortcut for 'console.log'
     window.log = function() {
         var args = arguments, i = 0;
@@ -33,8 +40,7 @@
             }
             i++;
         }
-        Function[NAME_PROTOTYPE].bind.call(window.console.log, window.console) // safe for ie9
-            .apply(window.console, args);
+        consoleBind('log', args);
     };
 
     var _reCache = {};
@@ -45,7 +51,7 @@
     var re_primitive = /^(string|number|boolean)$/;
     var RegExp = window.RegExp;
 
-    // faster trim
+    // faster trim for space only
     function trimSpace(input) {
         return (input != null) ? (''+ input).replace(re_trimSpace, '') : '';
     }
@@ -383,6 +389,7 @@
         return toRegExp((opt_isLeft ? '^[%s]+' : '[%s]+$')
             .format(chars ? chars.replace(/([\[\]\\])/g, '\\$1') : '\\s'));
     }
+
     function prepareSearchStuff(str, search, index, opt_noCase) {
         if (str && search) {
             // swap arguments
@@ -736,7 +743,7 @@
 
     // shortcut
     function _log(fn, args) {
-        window.console[fn].apply(null, ['>> so:'].concat(makeArray(args)));
+        consoleBind(fn, ['>> so:'].concat(makeArray(args)));
     }
 
     // so: base functions.
