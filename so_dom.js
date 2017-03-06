@@ -40,7 +40,7 @@
     var _re = $.re, _array = $.array, _for = $.for, _forEach = $.forEach;
     var _break = 0; // break tick: for, forEach
 
-    // shortcut helpers
+    // general helpers
     function split(s, re) {
         return trims(s).split(re);
     }
