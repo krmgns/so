@@ -1570,7 +1570,7 @@
     function toAttributeName(name) {
         return name = name.startsWith('@')
             ? 'data-'+ name.slice(1) /* @foo => data-foo */ : name,
-                name.replace(re_attrNameRemove, '-').trimSpace();
+                trims(name.replace(re_attrNameRemove, '-'));
     }
 
     function hasAttribute(el, name) {
@@ -1592,8 +1592,10 @@
     }
 
     function getAttribute(el, name, valueDefault) {
-        return name = toAttributeName(name),
-            hasAttribute(el, name) ? el.getAttribute(name) : valueDefault;
+        if (isNodeElement(el)) {
+            name = toAttributeName(name);
+            return hasAttribute(el, name) ? el.getAttribute(name) : valueDefault;
+        }
     }
 
     // dom: attributes
@@ -1892,40 +1894,52 @@
     function checkData(el) {
         el.$data = el.$data || $.list();
     }
+    function setData(el, key, value) {
+        if (el) {
+            if (isString(key)) {
+                key = trims(key);
+                if (key[0] == '@') {
+                    setAttribute(el, key, value);
+                } else {
+                    checkData(el);
+                    el.$data.set(key, value);
+                }
+            } else {
+                var data = toKeyValueObject(key, value);
+                for (key in data) {
+                    el.$data.set(key, data[key]);
+                }
+            }
+        }
+    }
+    function getData(el, key) {
+        if (el) {
+            if (isString(key)) {
+                key = trims(key);
+                if (key.startsWith('@')) {
+                    return getAttribute(el, key);
+                }
+
+                checkData(el);
+                return (key == '*') ? el.$data.data : el.$data.get(key);
+            }
+
+            if (isTrue(key)) {
+                return el.$data; // get list object
+            }
+        }
+    }
 
     // dom: data
     extendPrototype(Dom, {
         data: function(key, value) {
-            key = trims(key);
-
-            // data-*
-            if (key.startsWith('@')) {
-                return this.attribute(key, value);
-            }
-
-            // get, get all
-            if (isUndefined(value)) {
-                var el = this[0], ret;
-                if (el) {
-                    checkData(el);
-                    if (!key) {
-                        ret = el.$data;
-                    } else if (key == '*') {
-                        ret = el.$data.data;
-                    } else {
-                        ret = el.$data.get(key);
-                    }
-                }
-                return ret;
-            }
-            // set
-            var data = toKeyValueObject(key, value);
-            return this.for(function(el) {
-                checkData(el);
-                for (key in data) {
-                    el.$data.set(key, data[key]);
-                }
-            });
+            return isUndefined(value) ? this.getData(key) : this.setData(key, value);
+        },
+        setData: function(key, value) {
+            return this.for(function(el) { setData(el, key, value); });
+        },
+        getData: function(key, valueDefault) {
+            return this[0] && getData(this[0], key, valueDefault);
         },
         removeData: function(key) {
             key = trims(key);
