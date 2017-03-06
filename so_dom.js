@@ -2177,8 +2177,8 @@
          * @return {Boolean|this}
          */
         checked: function(option) {
-            var _this = this; return isVoid(option) ? !!(_this[0] && _this[0].checked)
-                : (setAttribute(_this[0], 'checked', option), _this);
+            return isVoid(option) ? !!(this[0] && this[0].checked)
+                : (setAttribute(this[0], 'checked', option), this);
         },
 
         /**
@@ -2187,8 +2187,8 @@
          * @return {Boolean|this}
          */
         selected: function(option) {
-            var _this = this; return isVoid(option) ? !!(_this[0] && _this[0].selected)
-                : (setAttribute(_this[0], 'selected', option), _this);
+            return isVoid(option) ? !!(this[0] && this[0].selected)
+                : (setAttribute(this[0], 'selected', option), this);
         },
 
         /**
@@ -2197,8 +2197,8 @@
          * @return {Boolean|this}
          */
         disabled: function(option) {
-            var _this = this; return isVoid(option) ? !!(_this[0] && _this[0].disabled)
-                : (setAttribute(_this[0], 'disabled', option), _this);
+            return isVoid(option) ? !!(this[0] && this[0].disabled)
+                : (setAttribute(this[0], 'disabled', option), this);
         },
 
         /**
@@ -2207,8 +2207,8 @@
          * @return {Boolean|this}
          */
         readonly: function(option) {
-            var _this = this; return isVoid(option) ? !!(_this[0] && _this[0].readOnly)
-                : (setAttribute(_this[0], 'readOnly', option), _this);
+            return isVoid(option) ? !!(this[0] && this[0].readOnly)
+                : (setAttribute(this[0], 'readOnly', option), this);
         }
     });
 
