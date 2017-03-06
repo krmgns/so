@@ -1370,7 +1370,7 @@
         return ret;
     }
 
-    function getDimensionsBy(el, by, options) {
+    function getDimensionsBy(el, by, margined) {
         var dim = getDimensions(el);
         var ret = extend(dim, {
             innerWidth: dim.width, outerWidth: dim.width,
@@ -1378,7 +1378,7 @@
         }), style;
 
         if (isNodeElement(el)) {
-            style = getStyle(el), options = options || {};
+            style = getStyle(el);
             if ((!by || by == WIDTH) && dim.width) {
                 ret.width -= sumStyleValue(null, style, PADDING_LEFT, PADDING_RIGHT)
                            + sumStyleValue(null, style, BORDER_LEFT_WIDTH, BORDER_RIGHT_WIDTH);
@@ -1389,7 +1389,7 @@
                 if (by) return ret.innerWidth;
             }
             if ((!by || by == OUTER_WIDTH) && dim.width) {
-                if (options.margined) {
+                if (margined) {
                     ret.outerWidth += sumStyleValue(null, style, MARGIN_LEFT, MARGIN_RIGHT);
                 }
                 if (by) return ret.outerWidth;
@@ -1404,7 +1404,7 @@
                 if (by) return ret.innerHeight;
             }
             if ((!by || by == OUTER_HEIGHT) && dim.height) {
-                if (options.margined) {
+                if (margined) {
                     ret.outerHeight += sumStyleValue(null, style, MARGIN_TOP, MARGIN_BOTTOM);
                 }
                 if (by) return ret.outerHeight;
@@ -1481,7 +1481,7 @@
          * @return {Int}
          */
         outerWidth: function(margined) {
-            return getDimensionsBy(this[0], OUTER_WIDTH, {margined: margined});
+            return getDimensionsBy(this[0], OUTER_WIDTH, margined);
         },
 
         /**
@@ -1506,7 +1506,7 @@
          * @return {Int}
          */
         outerHeight: function(margined) {
-            return getDimensionsBy(this[0], OUTER_HEIGHT, {margined: margined});
+            return getDimensionsBy(this[0], OUTER_HEIGHT, margined);
         }
     });
 
