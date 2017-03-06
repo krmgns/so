@@ -2345,19 +2345,16 @@
              * @return {this}
              */
             animate: function(properties, speed, easing, callback) {
-                if (properties == 'stop') { // stop previous animation
-                    this.for(function(el) {
+                return (properties == 'stop') // stop previous animation
+                    ? this.for(function(el) {
                         var animation = el.$animation;
                         if (animation && animation.running) {
                             animation.stop();
                         }
-                    });
-                } else {
-                    this.for(function(el) {
+                    })
+                    : this.for(function(el) {
                         animation.animate(el, properties, speed, easing, callback);
                     });
-                }
-                return this;
             },
 
             /**
