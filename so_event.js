@@ -249,7 +249,7 @@
 
             /**
              * Bind.
-             * @param  {String|undefined} type
+             * @param  {String} type?
              * @return {this}
              */
             bind: function(type) {
@@ -289,7 +289,7 @@
 
             /**
              * Unbind.
-             * @param  {String|undefined} type
+             * @param  {String} type?
              * @return {this}
              */
             unbind: function(type) {
@@ -309,7 +309,7 @@
 
             /**
              * Fire.
-             * @param  {String|undefined} type
+             * @param  {String} type?
              * @param  {Object}           data
              * @return {this}
              */
