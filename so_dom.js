@@ -2325,6 +2325,14 @@
     var animation = $.animation;
     if (animation) {
         extendPrototype(Dom, {
+            /**
+             * Animate.
+             * @param  {Object}      properties
+             * @param  {Int|String} ?speed
+             * @param  {String}      easing
+             * @param  {Function}    callback
+             * @return {this}
+             */
             animate: function(properties, speed, easing, callback) {
                 if (properties == 'stop') { // stop previous animation
                     this.for(function(el) {
@@ -2340,12 +2348,34 @@
                 }
                 return this;
             },
+
+            /**
+             * Fade.
+             * @param  {Float}       to
+             * @param  {Int|String} ?speed
+             * @param  {Function}    callback
+             * @return {this}
+             */
             fade: function(to, speed, callback) {
                 return this.animate({opacity: to}, speed, callback);
             },
+
+            /**
+             * Fade in.
+             * @param  {Int|String} ?speed
+             * @param  {Function}    callback
+             * @return {this}
+             */
             fadeIn: function(speed, callback) {
                 return this.fade(1, speed, callback);
             },
+
+            /**
+             * Fade out.
+             * @param  {Int|String} ?speed
+             * @param  {Function}    callback
+             * @return {this}
+             */
             fadeOut: function(speed, callback) {
                 // remove element after fading out
                 if (isTrue(callback) || callback == 'remove') {
@@ -2353,6 +2383,14 @@
                 }
                 return this.fade(0, speed, callback);
             },
+
+            /**
+             * Show.
+             * @param  {Int|String} ?speed
+             * @param  {String}      easing
+             * @param  {Function}    callback
+             * @return {this}
+             */
             show: function(speed, easing, callback) {
                 return this.for(function(el) {
                     if (isHidden(el)) {
@@ -2361,6 +2399,14 @@
                     }
                 });
             },
+
+            /**
+             * Hide.
+             * @param  {Int|String} ?speed
+             * @param  {String}      easing
+             * @param  {Function}    callback
+             * @return {this}
+             */
             hide: function(speed, easing, callback) {
                 return this.for(function(el) {
                     if (!isHidden(el)) {
@@ -2371,6 +2417,14 @@
                     }
                 });
             },
+
+            /**
+             * Toggle.
+             * @param  {Int|String} ?speed
+             * @param  {String}      easing
+             * @param  {Function}    callback
+             * @return {this}
+             */
             toggle: function(speed, easing, callback) {
                 speed = speed || 0;
                 return this.for(function(el) {
@@ -2385,6 +2439,13 @@
                     }
                 });
             },
+
+            /**
+             * Blip.
+             * @param  {Int}        ?times
+             * @param  {Int|String} ?speed
+             * @return {this}
+             */
             blip: function(times, speed) {
                 times = times || 10;
                 speed = speed || 155;
@@ -2401,6 +2462,16 @@
                     }();
                 });
             },
+
+            /**
+             * Scroll to.
+             * @param  {Int}         top
+             * @param  {Int}         left
+             * @param  {Int|String} ?speed
+             * @param  {[type]}   easing
+             * @param  {Function} callback
+             * @return {[type]}
+             */
             scrollTo: function(top, left, speed, easing, callback) {
                 top = top || 0, left = left || 0;
                 return this.for(function(el) {
