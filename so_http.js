@@ -162,7 +162,7 @@
 
         // hold trigger button
         if (client.options.trigger) {
-            client.options.trigger.disabled = 1;
+            client.options.trigger.disabled = true;
         }
 
         // handle states
@@ -212,7 +212,7 @@
 
                 // release trigger button
                 if (client.options.trigger) {
-                    client.options.trigger.disabled = 0;
+                    client.options.trigger.disabled = false;
                 }
 
                 removeReadyStateChange(client);
