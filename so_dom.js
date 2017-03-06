@@ -2214,21 +2214,50 @@
 
     // dom: checkers
     extendPrototype(Dom, {
+        /**
+         * Is window.
+         * @return {Boolean}
+         */
         isWindow: function() {
             return isWindow(this[0]);
         },
+
+        /**
+         * Is document.
+         * @return {Boolean}
+         */
         isDocument: function() {
             return isDocument(this[0]);
         },
+
+        /**
+         * Is node.
+         * @return {Boolean}
+         */
         isNode: function() {
             return isNode(this[0]);
         },
+
+        /**
+         * Is node element.
+         * @return {Boolean}
+         */
         isNodeElement: function() {
             return isNodeElement(this[0]);
         },
+
+        /**
+         * Is root.
+         * @return {Boolean}
+         */
         isRoot: function() {
             return isRoot(this[0]);
         },
+
+        /**
+         * Is root element.
+         * @return {Boolean}
+         */
         isRootElement: function() {
             return isRootElement(this[0]);
         }
