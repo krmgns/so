@@ -1713,21 +1713,11 @@
     extendPrototype(Dom, {
         /**
          * Value.
-         * @param  {String} value
-         * @return {Any}
+         * @param  {String} value?
+         * @return {String|this}
          */
         value: function(value) {
-            var ret;
-
-            if (isNull(value)) {
-                ret = this.setValue('');
-            } else if (isUndefined(value)) {
-                ret = this.getValue();
-            } else {
-                ret = this.setValue(value);
-            }
-
-            return ret;
+            return isUndefined(value) ? this.getValue() : this.setValue(value);
         },
 
         /**
