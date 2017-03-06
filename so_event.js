@@ -190,7 +190,7 @@
      * Event.
      * @param {String}   type
      * @param {Function} fn
-     * @param {Object}   options
+     * @param {Object}   options?
      */
     function Event(type, fn, options) {
         if (!type) throw ('Type required.');
@@ -200,37 +200,36 @@
             options = fn, fn = options.fn;
         }
 
-        var _this = this, event;
 
-        _this.type = type.toLowerCase();
-        _this.options = $.extend({}, optionsDefault, options);
-        _this.data = _this.options.data;
+        this.type = type.toLowerCase();
+        this.options = $.extend({}, optionsDefault, options);
+        this.data = this.options.data;
 
-        _this.custom = $.pick(_this.options, 'custom');
-        if (_this.custom) {
-            _this.options.eventClass = 'CustomEvent';
+        this.custom = $.pick(this.options, 'custom');
+        if (this.custom) {
+            this.options.eventClass = 'CustomEvent';
         }
 
-        event = createEvent(_this.options.eventClass, _this.type, _this.options);
-        _this.event = event.event;
-        _this.eventClass = event.eventClass;
-        _this.eventTarget = null;
+        var event = createEvent(this.options.eventClass, this.type, this.options);
+        this.event = event.event;
+        this.eventClass = event.eventClass;
+        this.eventTarget = null;
 
-         options = $.pickAll(_this.options, 'target', 'useCapture');
-        _this.target = options.target;
-        _this.useCapture = !!options.useCapture;
+         options = $.pickAll(this.options, 'target', 'useCapture');
+        this.target = options.target;
+        this.useCapture = !!options.useCapture;
 
-        _this.fn = extendFn(_this, fn);
-        _this.fnOrig = fn;
+        this.fn = extendFn(this, fn);
+        this.fnOrig = fn;
 
-        options = $.pickAll(_this.options, 'once', 'passive');
-        _this.once = !!options.once;
-        _this.passive = !!options.passive;
+        options = $.pickAll(this.options, 'once', 'passive');
+        this.once = !!options.once;
+        this.passive = !!options.passive;
 
-        _this.i = -1; // no bind yet
-        _this.fired = 0;
-        _this.cancalled = false;
-        _this.custom = event.eventClass == 'CustomEvent' || !re_typesStandard.test(type);
+        this.i = -1; // no bind yet
+        this.fired = 0;
+        this.cancalled = false;
+        this.custom = event.eventClass == 'CustomEvent' || !re_typesStandard.test(type);
     }
 
     Event.extendPrototype({
@@ -239,10 +238,10 @@
          * @return {Event}
          */
         copy: function() {
-            var _this = this,
-                event = initEvent(_this.type, _this.fnOrig, _this.options);
+            var event = this;
+            var eventCopy = initEvent(event.type, event.fnOrig, event.options);
 
-            return $.extend(event, _this);
+            return $.extend(eventCopy, event);
         },
 
         /**
@@ -271,12 +270,12 @@
          * @return {Event}
          */
         bindTo: function(target) {
-            var event = this.copy(), fn;
+            var event = this.copy();
 
             event.target = event.options.target = target;
 
             // add fn after target set
-            fn = this.fnOrig.bind(target);
+            var fn = this.fnOrig.bind(target);
             event.fn = extendFn(event, fn);
             event.fnOrig = fn;
 
@@ -389,7 +388,7 @@
                     });
                 } else if (events.data[type]) {
                     events = events.data[type];
-                    if (event.fn) { // all matched fn's, eg: .off('x', fn)
+                    if (event.fnOrig) { // all matched fn's, eg: .off('x', fn)
                         eventsRemove = events.select(function(_event) {
                             return _event && _event.fnOrig == event.fnOrig;
                         });
