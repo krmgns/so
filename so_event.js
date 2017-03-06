@@ -251,18 +251,18 @@
          * @return {this}
          */
         bind: function(type) {
-            var _this = this.copy();
+            var event = this.copy();
 
             if (!type) {
-                initEventTarget(_this.target).addEvent(_this);
+                initEventTarget(event.target).addEvent(event);
             } else {
                 type.split(re_comma).forEach(function(type) {
-                    _this.type = type;
-                    initEventTarget(_this.target).addEvent(_this);
+                    event.type = type;
+                    initEventTarget(event.target).addEvent(event);
                 });
             }
 
-            return _this;
+            return event;
         },
 
         /**
