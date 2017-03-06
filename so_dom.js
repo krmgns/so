@@ -821,7 +821,7 @@
          * @return {String|this}
          */
         text: function(input) {
-            return $.isVoid(input) ? this.getText() : this.setText(input);
+            return $.isUndefined(input) ? this.getText() : this.setText($.trimSpace(input));
         },
 
         /**
@@ -846,7 +846,7 @@
          * @return {String|Any}
          */
         html: function(input) {
-            return $.isVoid(input) ? this.getHtml() : this.setHtml(input);
+            return $.isUndefined(input) ? this.getHtml() : this.setHtml($.trimSpace(input));
         },
 
         /**
