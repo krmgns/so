@@ -2473,9 +2473,9 @@
              * @return {[type]}
              */
             scrollTo: function(top, left, speed, easing, callback) {
-                top = top || 0, left = left || 0;
                 return this.for(function(el) {
-                    animation.animate(el, {scrollTop: top, scrollLeft: left}, speed, easing, callback);
+                    animation.animate(el, {scrollTop: top || el.scrollTop, scrollLeft: left || el.scrollLeft},
+                        speed, easing, callback);
                 });
             }
         });
