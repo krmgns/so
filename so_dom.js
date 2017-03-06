@@ -2468,9 +2468,9 @@
              * @param  {Int}         top
              * @param  {Int}         left
              * @param  {Int|String} ?speed
-             * @param  {[type]}   easing
-             * @param  {Function} callback
-             * @return {[type]}
+             * @param  {String}      easing
+             * @param  {Function}    callback
+             * @return {this}
              */
             scrollTo: function(top, left, speed, easing, callback) {
                 return this.for(function(el) {
