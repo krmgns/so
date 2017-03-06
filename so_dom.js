@@ -86,8 +86,8 @@
     /**
      * Select.
      * @param  {String|Object} selector
-     * @param  {Object}        ?root
-     * @param  {Boolean}       ?one
+     * @param  {Object}        root?
+     * @param  {Boolean}       one?
      * @return {Array}
      */
     function select(selector, root, one) {
@@ -174,9 +174,9 @@
     /**
      * Dom.
      * @param {String|Object} selector
-     * @param {Object}        ?root
-     * @param {Int}           ?i
-     * @param {Boolean}       ?one
+     * @param {Object}        root?
+     * @param {Int}           i?
+     * @param {Boolean}       one?
      */
     function Dom(selector, root, i, one) {
         var elements, size = 0;
@@ -346,8 +346,8 @@
 
         /**
          * Get.
-         * @param  {Int}     ?i
-         * @param  {Boolean} ?init
+         * @param  {Int}     i?
+         * @param  {Boolean} init?
          * @return {Object|Dom}
          */
         get: function(i, init) {
@@ -362,8 +362,8 @@
 
         /**
          * Get all.
-         * @param  {Int|Array} ?i
-         * @param  {Boolean}   ?init
+         * @param  {Int|Array} i?
+         * @param  {Boolean}   init?
          * @return {Array|Dom}
          */
         getAll: function(i, init) {
@@ -387,25 +387,33 @@
          * @param  {Int) i
          * @return {Dom}
          */
-        item: function(i) { return initDom(this[i - 1]); },
+        item: function(i) {
+            return initDom(this[i - 1]);
+        },
 
         /**
          * First.
          * @return {Dom}
          */
-        first: function() { return this.item(1); },
+        first: function() {
+            return this.item(1);
+        },
 
         /**
          * Last.
          * @return {Dom}
          */
-        last: function() { return this.item(this.size); },
+        last: function() {
+            return this.item(this.size);
+        },
 
         /**
          * Nth.
          * @return {Dom}
          */
-        nth: function(i) { return this.item(i); },
+        nth: function(i) {
+            return this.item(i);
+        },
 
         /**
          * Tag.
@@ -515,7 +523,7 @@
     extendPrototype(Dom, {
         /**
          * Colne.
-         * @param  {Boolean} ?deep
+         * @param  {Boolean} deep?
          * @return {Dom}
          */
         clone: function(deep) {
@@ -560,9 +568,9 @@
 
         /**
          * Append.
-         * @param  {String|Object|Dom}  content
-         * @param  {Object}            ?attributes
-         * @param  {Boolean}           ?cloning
+         * @param  {String|Object|Dom} content
+         * @param  {Object}            attributes?
+         * @param  {Boolean}           cloning?
          * @return {this}
          */
         append: function(content, attributes, cloning) {
@@ -575,8 +583,8 @@
 
         /**
          * Append to.
-         * @param  {String}   selector
-         * @param  {Boolean} ?cloning
+         * @param  {String}  selector
+         * @param  {Boolean} cloning?
          * @return {this}
          */
         appendTo: function(selector, cloning) {
@@ -593,9 +601,9 @@
 
         /**
          * Prepend.
-         * @param  {String|Object|Dom}  content
-         * @param  {Object}            ?attributes
-         * @param  {Boolean}           ?cloning
+         * @param  {String|Object|Dom} content
+         * @param  {Object}            attributes?
+         * @param  {Boolean}           cloning?
          * @return {this}
          */
         prepend: function(content, attributes, cloning) {
@@ -608,8 +616,8 @@
 
         /**
          * Prepend to.
-         * @param  {String}   selector
-         * @param  {Boolean} ?cloning
+         * @param  {String}  selector
+         * @param  {Boolean} cloning?
          * @return {this}
          */
         prependTo: function(selector, cloning) {
@@ -642,8 +650,8 @@
 
         /**
          * Insert before.
-         * @param  {String}   selector
-         * @param  {Boolean} ?cloning
+         * @param  {String}  selector
+         * @param  {Boolean} cloning?
          * @return {this}
          */
         insertBefore: function(selector, cloning) {
@@ -660,8 +668,8 @@
 
         /**
          * Insert before.
-         * @param  {String}   selector
-         * @param  {Boolean} ?cloning
+         * @param  {String}  selector
+         * @param  {Boolean} cloning?
          * @return {this}
          */
         insertAfter: function(selector, cloning) {
@@ -678,8 +686,8 @@
 
         /**
          * Replace with.
-         * @param  {String}   selector
-         * @param  {Boolean} ?cloning
+         * @param  {String}  selector
+         * @param  {Boolean} cloning?
          * @return {this}
          */
         replaceWith: function(selector, cloning) {
@@ -696,8 +704,8 @@
 
         /**
          * Wrap.
-         * @param  {String|Object|Dom}  content
-         * @param  {Object}            ?attributes
+         * @param  {String|Object|Dom} content
+         * @param  {Object}            attributes?
          * @return {Dom}
          */
         wrap: function(content, attributes) {
@@ -721,7 +729,7 @@
 
         /**
          * Unwrap
-         * @param  {Boolean} ?remove
+         * @param  {Boolean} remove?
          * @return {Dom}
          */
         unwrap: function(remove) {
@@ -756,8 +764,8 @@
     extendPrototype(Dom, {
         /**
          * Property.
-         * @param  {String}  name
-         * @param  {Any}    ?value
+         * @param  {String} name
+         * @param  {Any}    value?
          * @return {Any|this}
          */
         property: function(name, value) {
@@ -796,7 +804,7 @@
     extendPrototype(Dom, {
         /**
          * Text.
-         * @param  {String} ?input
+         * @param  {String} input?
          * @return {String|this}
          */
         text: function(input) {
@@ -821,7 +829,7 @@
 
         /**
          * Html.
-         * @param  {String} ?input
+         * @param  {String} input?
          * @return {String|Any}
          */
         html: function(input) {
@@ -897,7 +905,7 @@
 
         /**
          * Path.
-         * @param  {Boolean} ?join
+         * @param  {Boolean} join?
          * @return {Array|String}
          */
         path: function(join) {
@@ -953,7 +961,7 @@
 
         /**
          * Siblings.
-         * @param  {Int|String} ?selector
+         * @param  {Int|String} selector?
          * @return {Dom}
          */
         siblings: function(selector) {
@@ -987,17 +995,19 @@
 
         /**
          * Prev all.
-         * @param  {String} ?selector
+         * @param  {String} selector?
          * @return {Dom}
          */
         prevAll: function(selector) {
             var el = this[0], ret = [];
+
             if (el) {
                 ret = walk(el, NAME_PREVIOUS_ELEMENT_SIBLING).reverse();
                 if (selector && ret.length) {
                     ret = intersect(ret, this.parent().find(selector).toArray());
                 }
             }
+
             return initDom(ret);
         },
 
@@ -1011,17 +1021,19 @@
 
         /**
          * Next all.
-         * @param  {String} selector
+         * @param  {String} selector?
          * @return {Dom}
          */
         nextAll: function(selector) {
             var el = this[0], ret = [], found;
+
             if (el) {
                 ret = walk(el, NAME_NEXT_ELEMENT_SIBLING);
                 if (selector && ret.length) {
                     ret = intersect(ret, this.parent().find(selector).toArray());
                 }
             }
+
             return initDom(ret);
         },
 
@@ -1036,7 +1048,7 @@
 
         /**
          * Has parent.
-         * @param  {String} ?selector
+         * @param  {String} selector?
          * @return {Boolean}
          */
         hasParent: function(selector) {
@@ -1072,7 +1084,7 @@
 
         /**
          * Window.
-         * @param  {Boolean} ?content
+         * @param  {Boolean} content?
          * @return {Dom}
          */
         window: function(content) {
@@ -1081,7 +1093,7 @@
 
         /**
          * document.
-         * @param  {Boolean} ?content
+         * @param  {Boolean} content?
          * @return {Dom}
          */
         document: function(content) {
@@ -1182,8 +1194,8 @@
         /**
          * Style.
          * @param  {String}  name
-         * @param  {String}  ?value
-         * @param  {String}  ?valueDefault
+         * @param  {String}  value?
+         * @param  {String}  valueDefault?
          * @param  {Boolean} raw
          * @return {String}
          */
@@ -1205,7 +1217,7 @@
         /**
          * Set style.
          * @param  {String|Object} name
-         * @param  {String}        ?value
+         * @param  {String}        value?
          * @return {this}
          */
         setStyle: function(name, value) {
@@ -1224,9 +1236,9 @@
 
         /**
          * Get style.
-         * @param  {String}          name
-         * @param  {String|Boolean} ?valueDefault
-         * @param  {Boolean}         raw
+         * @param  {String}         name
+         * @param  {String|Boolean} valueDefault?
+         * @param  {Boolean}        raw
          * @return {String}
          */
         getStyle: function(name, valueDefault, raw) {
@@ -1253,27 +1265,31 @@
 
         /**
          * Get css (original) style.
-         * @param  {String} ?name
+         * @param  {String} name?
          * @return {String}
          */
         getCssStyle: function(name) {
             var el = this[0], ret = {};
+
             if (el) {
                 ret = toStyleObject(getCssStyle(el));
             }
+
             return name ? ret[name] || '' : ret;
         },
 
         /**
          * Get computed (rendered) style.
-         * @param  {String} ?name
+         * @param  {String} name?
          * @return {String}
          */
         getComputedStyle: function(name) {
             var el = this[0], ret = {};
+
             if (el) {
                 ret = toStyleObject(getComputedStyle(el));
             }
+
             return name ? ret[name] || '' : ret;
         },
 
@@ -1520,7 +1536,7 @@
     extendPrototype(Dom, {
         /**
          * Offset.
-         * @param  {Boolean} ?relative
+         * @param  {Boolean} relative?
          * @return {Object}
          */
         offset: function(relative) {
@@ -1609,7 +1625,7 @@
         /**
          * Attribute.
          * @param  {String} name
-         * @param  {String} ?value
+         * @param  {String} value?
          * @return {Any}
          */
         attribute: function(name, value) {
@@ -1651,7 +1667,7 @@
         /**
          * Set attribute.
          * @param  {String} name
-         * @param  {String} ?value
+         * @param  {String} value?
          * @return {this}
          */
         setAttribute: function(name, value) {
@@ -1702,6 +1718,7 @@
          */
         value: function(value) {
             var ret;
+
             if (isNull(value)) {
                 ret = this.setValue('');
             } else if (isUndefined(value)) {
@@ -1709,15 +1726,17 @@
             } else {
                 ret = this.setValue(value);
             }
+
             return ret;
         },
 
         /**
          * Set value.
-         * @param {String} ?value
+         * @param {String} value?
          */
         setValue: function(value) {
             value += ''; // @important
+
             return this.for(function(el) {
                 if (el.options) { // <select>
                     _for(el.options, function(option) {
@@ -1733,11 +1752,12 @@
 
         /**
          * Get value.
-         * @param  {String} ?valueDefault
+         * @param  {String} valueDefault?
          * @return {String|undefined}
          */
         getValue: function(valueDefault) {
             var el = this[0], ret = valueDefault, option;
+
             if (el) {
                 if (el.options && !isVoid(option = el.options[el.selectedIndex])) {
                     ret = hasAttribute(option, 'value')
@@ -1746,6 +1766,7 @@
                     ret = el.value;
                 }
             }
+
             return ret;
         }
     });
@@ -1754,7 +1775,7 @@
     extendPrototype(Dom, {
         /**
          * Id.
-         * @param  {String} ?id
+         * @param  {String} id?
          * @return {this|String}
          */
         id: function(id) {
@@ -1805,8 +1826,8 @@
     extendPrototype(Dom, {
         /**
          * Class.
-         * @param  {String}      ?name
-         * @param  {String|null} ?option
+         * @param  {String}      name?
+         * @param  {String|null} option?
          * @return {Boolean|this}
          */
         class: function(name, option) {
@@ -1940,8 +1961,8 @@
     extendPrototype(Dom, {
         /**
          * Data.
-         * @param  {String|Object}  key
-         * @param  {Any}           ?value
+         * @param  {String|Object} key
+         * @param  {Any}           value?
          * @return {Any}
          */
         data: function(key, value) {
@@ -1961,7 +1982,7 @@
         /**
          * Get data.
          * @param  {String} key
-         * @param  {Any}    valueDefault
+         * @param  {Any}    valueDefault?
          * @return {Any}
          */
         getData: function(key, valueDefault) {
@@ -2040,11 +2061,11 @@
     extendPrototype(Dom, {
         /**
          * Serialize.
-         * @param  {Function} ?callback
-         * @param  {Boolean}  ?opt_plus
+         * @param  {Function} callback?
+         * @param  {Boolean}  plus?
          * @return {String}
          */
-        serialize: function(callback, opt_plus) {
+        serialize: function(callback, plus) {
             var el = this[0], ret = '';
             if (getTag(el) == 'form') {
                 var data = [];
@@ -2104,7 +2125,7 @@
 
                 var _ret = function() {
                     ret = data.join('&');
-                    if (!isFalse(opt_plus)) {
+                    if (!isFalse(plus)) {
                         ret = ret.replace(re_plus, '+');
                     }
                     return ret;
@@ -2126,7 +2147,7 @@
 
         /**
          * Serialize array.
-         * @param  {Function} ?callback
+         * @param  {Function} callback?
          * @return {Array}
          */
         serializeArray: function(callback) {
@@ -2149,7 +2170,7 @@
 
         /**
          * Serialize json.
-         * @param  {Function} ?callback
+         * @param  {Function} callback?
          * @return {String}
          */
         serializeJson: function(callback) {
@@ -2173,7 +2194,7 @@
     extendPrototype(Dom, {
         /**
          * Checked.
-         * @param  {Boolean} ?option
+         * @param  {Boolean} option?
          * @return {Boolean|this}
          */
         checked: function(option) {
@@ -2183,7 +2204,7 @@
 
         /**
          * Selected.
-         * @param  {Boolean} ?option
+         * @param  {Boolean} option?
          * @return {Boolean|this}
          */
         selected: function(option) {
@@ -2193,7 +2214,7 @@
 
         /**
          * Disabled.
-         * @param  {Boolean} ?option
+         * @param  {Boolean} option?
          * @return {Boolean|this}
          */
         disabled: function(option) {
@@ -2203,7 +2224,7 @@
 
         /**
          * Readonly.
-         * @param  {Boolean} ?option
+         * @param  {Boolean} option?
          * @return {Boolean|this}
          */
         readonly: function(option) {
@@ -2269,9 +2290,9 @@
         extendPrototype(Dom, {
             /**
              * On.
-             * @param  {String}    type
-             * @param  {Function}  fn
-             * @param  {Object}   ?options
+             * @param  {String}   type
+             * @param  {Function} fn
+             * @param  {Object}   options?
              * @return {this}
              */
             on: function(type, fn, options) {
@@ -2282,9 +2303,9 @@
 
             /**
              * Once.
-             * @param  {String}    type
-             * @param  {Function}  fn
-             * @param  {Object}   ?options
+             * @param  {String}   type
+             * @param  {Function} fn
+             * @param  {Object}   options?
              * @return {this}
              */
             once: function(type, fn, options) {
@@ -2295,9 +2316,9 @@
 
             /**
              * Off.
-             * @param  {String}    type
-             * @param  {Function}  fn
-             * @param  {Object}   ?options
+             * @param  {String}   type
+             * @param  {Function} fn
+             * @param  {Object}   options?
              * @return {this}
              */
             off: function(type, fn, options) {
@@ -2308,9 +2329,9 @@
 
             /**
              * Fire.
-             * @param  {String}    type
-             * @param  {Function}  fn
-             * @param  {Object}   ?options
+             * @param  {String}   type
+             * @param  {Function} fn
+             * @param  {Object}   options?
              * @return {this}
              */
             fire: function(type, fn, options) {
@@ -2327,10 +2348,10 @@
         extendPrototype(Dom, {
             /**
              * Animate.
-             * @param  {Object}      properties
-             * @param  {Int|String} ?speed
-             * @param  {String}      easing
-             * @param  {Function}    callback
+             * @param  {Object}     properties
+             * @param  {Int|String} speed?
+             * @param  {String}     easing?
+             * @param  {Function}   callback?
              * @return {this}
              */
             animate: function(properties, speed, easing, callback) {
@@ -2351,9 +2372,9 @@
 
             /**
              * Fade.
-             * @param  {Float}       to
-             * @param  {Int|String} ?speed
-             * @param  {Function}    callback
+             * @param  {Float}      to
+             * @param  {Int|String} speed?
+             * @param  {Function}   callback?
              * @return {this}
              */
             fade: function(to, speed, callback) {
@@ -2362,8 +2383,8 @@
 
             /**
              * Fade in.
-             * @param  {Int|String} ?speed
-             * @param  {Function}    callback
+             * @param  {Int|String} speed?
+             * @param  {Function}   callback?
              * @return {this}
              */
             fadeIn: function(speed, callback) {
@@ -2372,8 +2393,8 @@
 
             /**
              * Fade out.
-             * @param  {Int|String} ?speed
-             * @param  {Function}    callback
+             * @param  {Int|String} speed?
+             * @param  {Function}   callback?
              * @return {this}
              */
             fadeOut: function(speed, callback) {
@@ -2386,9 +2407,9 @@
 
             /**
              * Show.
-             * @param  {Int|String} ?speed
-             * @param  {String}      easing
-             * @param  {Function}    callback
+             * @param  {Int|String} speed?
+             * @param  {String}     easing?
+             * @param  {Function}   callback?
              * @return {this}
              */
             show: function(speed, easing, callback) {
@@ -2402,9 +2423,9 @@
 
             /**
              * Hide.
-             * @param  {Int|String} ?speed
-             * @param  {String}      easing
-             * @param  {Function}    callback
+             * @param  {Int|String} speed?
+             * @param  {String}     easing?
+             * @param  {Function}   callback?
              * @return {this}
              */
             hide: function(speed, easing, callback) {
@@ -2420,9 +2441,9 @@
 
             /**
              * Toggle.
-             * @param  {Int|String} ?speed
-             * @param  {String}      easing
-             * @param  {Function}    callback
+             * @param  {Int|String} speed?
+             * @param  {String}     easing?
+             * @param  {Function}   callback?
              * @return {this}
              */
             toggle: function(speed, easing, callback) {
@@ -2442,8 +2463,8 @@
 
             /**
              * Blip.
-             * @param  {Int}        ?times
-             * @param  {Int|String} ?speed
+             * @param  {Int}        times?
+             * @param  {Int|String} speed?
              * @return {this}
              */
             blip: function(times, speed) {
@@ -2467,9 +2488,9 @@
              * Scroll to.
              * @param  {Int}         top
              * @param  {Int}         left
-             * @param  {Int|String} ?speed
-             * @param  {String}      easing
-             * @param  {Function}    callback
+             * @param  {Int|String}  speed?
+             * @param  {String}      easing?
+             * @param  {Function}    callback?
              * @return {this}
              */
             scrollTo: function(top, left, speed, easing, callback) {
@@ -2481,7 +2502,13 @@
         });
     }
 
-    // add Dom to so
+    /**
+     * So Dom.
+     * @param  {String} selector
+     * @param  {Object} root?
+     * @param  {Int}    i?
+     * @return {Dom}
+     */
     $.dom = function(selector, root, i) {
         return initDom(selector, root, i);
     };
