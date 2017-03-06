@@ -28,13 +28,14 @@
     var re_comma = /,\s*/;
     var re_trim = /^\s+|\s+$/g;
     var re_tag = /^<[a-z-][^>]*>/i;
-    var isBool = $.isBool, isTrue = $.isTrue, isFalse = $.isFalse;
-    var isVoid = $.isVoid, isNull = $.isNull, isNulls = $.isNulls, isUndefined = $.isUndefined;
-    var isObject = $.isObject, isArray = $.isArray;
-    var isNumber = $.isNumber, isNumeric = $.isNumeric, isString = $.isString;
-    var isWindow = $.isWindow, isDocument = $.isDocument;
-    var getWindow = $.getWindow, getDocument = $.getDocument;
-    var trimSpace = $.trimSpace;
+    // var isBool = $.isBool, $.isTrue = $.$.isTrue, $.isFalse  = $.$.isFalse;
+    // var $.isVoid = $.$.isVoid, $.isNull = $.$.isNull, $.isNulls = $.$.isNulls, $.isUndefined = $.$.isUndefined;
+    // var $.isObject = $.$.isObject, $.isArray = $.$.isArray;
+    // var $.isNumber = $.$.isNumber, $.isNumeric = $.$.isNumeric, $.isString = $.$.isString;
+    // var $.isWindow = $.$.isWindow, $.isDocument = $.$.isDocument;
+    // var $.getWindow = $.$.getWindow, $.getDocument = $.$.getDocument;
+    // var $.trimSpace = $.$.trimSpace;
+
     var toStyleName = $.util.toCamelCaseFromDashCase;
     var extend = $.extend, extendPrototype = $.extendPrototype;
     var _re = $.re, _array = $.array, _for = $.for, _forEach = $.forEach;
@@ -42,7 +43,7 @@
 
     // general helpers
     function split(s, re) {
-        return trimSpace(s).split(re);
+        return $.trimSpace(s).split(re);
     }
     function querySelector(root, selector) {
         return root.querySelector(selector);
@@ -51,7 +52,7 @@
         return root.querySelectorAll(selector);
     }
     function getTag(el) {
-        return (el && el.nodeName) ? el.nodeName.toLowerCase() : isWindow(el) ? '#window' : null;
+        return (el && el.nodeName) ? el.nodeName.toLowerCase() : $.isWindow(el) ? '#window' : null;
     }
     function isDom(input) {
         return (input instanceof Dom);
@@ -69,7 +70,7 @@
         return !!(el && el[NAME_NODE_TYPE] === 1);
     }
     function toKeyValueObject(key, value) {
-        var ret = key || {}; if (isString(ret)) ret = {}, ret[key] = value; return ret;
+        var ret = key || {}; if ($.isString(ret)) ret = {}, ret[key] = value; return ret;
     }
     function initDom(selector, root, i, one) {
         return isDom(selector) ? selector : new Dom(selector, root, i, one);
@@ -114,7 +115,7 @@
 
                 if (dir == 'first') all = all[0];
                 else if (dir == 'last')  all = all[all.length - 1];
-                else if (isNumeric(dir)) all = all[dir - 1];
+                else if ($.isNumeric(dir)) all = all[dir - 1];
                 else if (dir == 'odd' || dir == 'even') {
                     // odd / even
                     var odd = [], even = [];
@@ -181,24 +182,24 @@
     function Dom(selector, root, i, one) {
         var elements, size = 0;
 
-        if (isNumber(root)) {
+        if ($.isNumber(root)) {
             i = root, root = undefined;
         }
 
-        if (!isVoid(selector)) {
-            if (isString(selector)) {
-                selector = trimSpace(selector);
+        if (!$.isVoid(selector)) {
+            if ($.isString(selector)) {
+                selector = $.trimSpace(selector);
                 if (selector) { // prevent empty selector error
                     if (re_tag.test(selector)) {
                         elements = create(selector, root, root); // 'root' could be document or attribute(s)
                     } else {
                         elements = select(selector, root, one);
-                        if (isNumber(i)) {
+                        if ($.isNumber(i)) {
                             elements = [elements[i]];
                         }
                     }
                 }
-            } else if (isWindow(selector) || isDocument(selector)) {
+            } else if ($.isWindow(selector) || $.isDocument(selector)) {
                 elements = [selector];
             } else if (isNode(selector)) {
                 if (root && root != selector[NAME_PARENT_NODE]) {
@@ -353,9 +354,9 @@
         get: function(i, init) {
             var el;
 
-            if (isVoid(i)) {
+            if ($.isVoid(i)) {
                 el = this[0];
-            } else if (isNumber(i)) {
+            } else if ($.isNumber(i)) {
                 el = this[i - 1];
             }
 
@@ -371,11 +372,11 @@
         getAll: function(i, init) {
             var el, els = [];
 
-            if (isVoid(i)) {
+            if ($.isVoid(i)) {
                 els = this.toArray();
             } else {
                 var _this = this;
-                (isNumber(i) ? [i] : i).forEach(function(i) {
+                ($.isNumber(i) ? [i] : i).forEach(function(i) {
                     el = _this.get(i);
                     if (el && !els.has(el)) {
                         els.push(el);
@@ -417,7 +418,7 @@
          * @return {Dom}
          */
         nth: function(i) {
-            if (isNumber(i)) {
+            if ($.isNumber(i)) {
                 return this.item(i);
             }
 
@@ -455,14 +456,14 @@
             return [content];
         }
 
-        doc = doc && isDocument(doc) ? doc : document;
+        doc = doc && $.isDocument(doc) ? doc : document;
         var tmp = createElement(doc, 'so-tmp', {innerHTML: content});
         var fragment = doc.createDocumentFragment();
         while (tmp[NAME_FIRST_CHILD]) {
             fragment.appendChild(tmp[NAME_FIRST_CHILD]);
         }
 
-        if (attributes && isObject(attributes)) {
+        if (attributes && $.isObject(attributes)) {
             _for(fragment[NAME_CHILD_NODES], function(node) {
                 if (isNodeElement(node)) {
                     _forEach(attributes, function(name, value) {
@@ -489,7 +490,7 @@
         var clone = el.cloneNode();
         clone.setAttribute && clone.setAttribute('so:id', $.sid('clone-'));
         // clone.cloneOf = el; // @debug
-        if (!isFalse(deep)) {
+        if (!$.isFalse(deep)) {
             if (el.$data) clone.$data = el.$data;
 
             if (el.$events) {
@@ -521,11 +522,11 @@
     }
 
     function createFor(el, content, attributes) {
-        return create(content, getDocument(el), attributes);
+        return create(content, $.getDocument(el), attributes);
     }
 
     function cloneIf(cloning, node) {
-        if (!isFalse(cloning)) { // inserts only once without `clone`
+        if (!$.isFalse(cloning)) { // inserts only once without `clone`
             node = cloneElement(node);
         }
         return node;
@@ -781,7 +782,7 @@
          * @return {Any|this}
          */
         property: function(name, value) {
-            return isUndefined(value) ? this.getProperty(name) : this.setProperty(name, value);
+            return $.isUndefined(value) ? this.getProperty(name) : this.setProperty(name, value);
         },
 
         /**
@@ -820,7 +821,7 @@
          * @return {String|this}
          */
         text: function(input) {
-            return isVoid(input) ? this.getText() : this.setText(input);
+            return $.isVoid(input) ? this.getText() : this.setText(input);
         },
 
         /**
@@ -845,7 +846,7 @@
          * @return {String|Any}
          */
         html: function(input) {
-            return isVoid(input) ? this.getHtml() : this.setHtml(input);
+            return $.isVoid(input) ? this.getHtml() : this.setHtml(input);
         },
 
         /**
@@ -899,7 +900,7 @@
             var ret = [], els;
 
             // eg: $.dom("p").not(0) or $.dom("p").not([0,1])
-            if (isNumber(selector) || isArray(selector)) {
+            if ($.isNumber(selector) || $.isArray(selector)) {
                 ret = this.filter(function(_, i) {
                     return (selector != i + 1);
                 });
@@ -1120,7 +1121,7 @@
          * @return {Dom}
          */
         window: function(content) {
-            return initDom(this[0] && (content ? this[0].contentWindow : getWindow(this[0])));
+            return initDom(this[0] && (content ? this[0].contentWindow : $.getWindow(this[0])));
         },
 
         /**
@@ -1129,7 +1130,7 @@
          * @return {Dom}
          */
         document: function(content) {
-            return initDom(this[0] && (content ? this[0].contentDocument : getDocument(this[0])));
+            return initDom(this[0] && (content ? this[0].contentDocument : $.getDocument(this[0])));
         }
     });
 
@@ -1164,7 +1165,7 @@
     }
 
     function getComputedStyle(el) {
-        return getWindow(el).getComputedStyle(el);
+        return $.getWindow(el).getComputedStyle(el);
     }
 
     function getDefaultStyle(tag, name) {
@@ -1178,8 +1179,8 @@
     }
 
     function setStyle(el, name, value) {
-        name = toStyleName(name), value = trimSpace(value);
-        if (value && isNumeric(value) && !re_noneUnitStyles.test(name)) {
+        name = toStyleName(name), value = $.trimSpace(value);
+        if (value && $.isNumeric(value) && !re_noneUnitStyles.test(name)) {
             value += 'px';
         }
         el.style[name] = value;
@@ -1196,7 +1197,7 @@
         while (text.length) {
             // wtf! :)
             (s = text.shift().split(_re('\\s*:\\s*')))
-                && (s[0] = trimSpace(s[0]))
+                && (s[0] = $.trimSpace(s[0]))
                     && (styles[s[0]] = s[1] || '');
         }
         return styles;
@@ -1213,8 +1214,8 @@
     function toStyleObject(style) {
         var name, ret = {};
         for (name in style) {
-            if (!isNumeric(name) /* skip '"0": "width"' etc. */ &&
-                 isString(style[name]) /* has own doesn't work (firefox/51) */) {
+            if (!$.isNumeric(name) /* skip '"0": "width"' etc. */ &&
+                 $.isString(style[name]) /* has own doesn't work (firefox/51) */) {
                 ret[name] = style[name];
             }
         }
@@ -1232,7 +1233,7 @@
          * @return {String}
          */
         style: function(name, value, valueDefault, raw) {
-            return !isVoid(value) ? this.setStyle(name, value)
+            return !$.isVoid(value) ? this.setStyle(name, value)
                 : this.getStyle(name, value, valueDefault, raw);
         },
 
@@ -1254,8 +1255,8 @@
          */
         setStyle: function(name, value) {
             var styles = name;
-            if (isString(styles)) {
-                styles = !isVoid(value)
+            if ($.isString(styles)) {
+                styles = !$.isVoid(value)
                     ? toKeyValueObject(name, value) : parseStyleText(name);
             }
 
@@ -1276,8 +1277,8 @@
         getStyle: function(name, valueDefault, raw) {
             var el = this[0], value = '', convert;
             if (el) {
-                convert = isVoid(valueDefault) || isTrue(valueDefault);
-                valueDefault = !isBool(valueDefault) ? valueDefault : '';
+                convert = $.isVoid(valueDefault) || $.isTrue(valueDefault);
+                valueDefault = !$.isBool(valueDefault) ? valueDefault : '';
                 if (raw) {
                     return el.style[toStyleName(name)] || valueDefault;
                 }
@@ -1375,7 +1376,7 @@
             parent = parent[NAME_PARENT_ELEMENT];
         }
 
-        var doc = getDocument(el);
+        var doc = $.getDocument(el);
         var css = createElement(doc, 'style', {
             textContent: '.'+ sid +'{display:block!important;visibility:hidden!important}'
         });
@@ -1417,7 +1418,7 @@
                 ret.width = el.offsetWidth, ret.height = el.offsetHeight;
             }
         } else if (isRoot(el)) {
-            var win = getWindow(el);
+            var win = $.getWindow(el);
             width = win.innerWidth, height = win.innerHeight;
         }
 
@@ -1472,7 +1473,7 @@
         var ret = {top: 0, left: 0};
 
         if (isNodeElement(el)) {
-            var body = getDocument(el).body;
+            var body = $.getDocument(el).body;
             if (isHidden(el) || isHiddenParent(el)) {
                 var properties = getHiddenElementProperties(el, ['offsetTop', 'offsetLeft']);
                 ret.top = properties[0], ret.left = properties[1];
@@ -1624,7 +1625,7 @@
     function toAttributeName(name) {
         return name = name.startsWith('@')
             ? 'data-'+ name.slice(1) /* @foo => data-foo */ : name,
-                trimSpace(name.replace(re_attrNameRemove, '-'));
+                $.trimSpace(name.replace(re_attrNameRemove, '-'));
     }
 
     function hasAttribute(el, name) {
@@ -1634,10 +1635,10 @@
     function setAttribute(el, name, value) {
         if (isNodeElement(el)) {
             name = toAttributeName(name);
-            if (isNull(value)) {
+            if ($.isNull(value)) {
                 el.removeAttribute(name);
             } else if (re_attrStateName.test(name)) {
-                isUndefined(value) || value ?
+                $.isUndefined(value) || value ?
                     el.setAttribute(name, name) : el.removeAttribute(name);
             } else {
                 el.setAttribute(name, value);
@@ -1662,9 +1663,9 @@
          */
         attribute: function(name, value) {
             var ret;
-            if (isNull(value)) {
+            if ($.isNull(value)) {
                 ret = this.removeAttribute(name);
-            } else if (isUndefined(value)) {
+            } else if ($.isUndefined(value)) {
                 ret = this.getAttribute(name);
             } else {
                 ret = this.setAttribute(name, value);
@@ -1749,7 +1750,7 @@
          * @return {String|this}
          */
         value: function(value) {
-            return isUndefined(value) ? this.getValue() : this.setValue(value);
+            return $.isUndefined(value) ? this.getValue() : this.setValue(value);
         },
 
         /**
@@ -1781,7 +1782,7 @@
             var el = this[0], ret = valueDefault, option;
 
             if (el) {
-                if (el.options && !isVoid(option = el.options[el.selectedIndex])) {
+                if (el.options && !$.isVoid(option = el.options[el.selectedIndex])) {
                     ret = hasAttribute(option, 'value')
                         ? (option.disabled || option[NAME_PARENT_ELEMENT].disabled ? '' : option.value) : '';
                 } else {
@@ -1801,7 +1802,7 @@
          * @return {String|this}
          */
         id: function(id) {
-            return isUndefined(id) ? this.getId() : this.setId(id);
+            return $.isUndefined(id) ? this.getId() : this.setId(id);
         },
 
         /**
@@ -1853,9 +1854,9 @@
          * @return {Boolean|this}
          */
         class: function(name, option) {
-            return isUndefined(option) ? this.addClass(name)
-                : isNull(option) || isNulls(option) ? this.removeClass(name)
-                : isTrue(option) ? this.setClass(name) : this.replaceClass(name, (''+ option));
+            return $.isUndefined(option) ? this.addClass(name)
+                : $.isNull(option) || $.isNulls(option) ? this.removeClass(name)
+                : $.isTrue(option) ? this.setClass(name) : this.replaceClass(name, (''+ option));
         },
 
         /**
@@ -1894,7 +1895,7 @@
          */
         replaceClass: function(oldName, newName) {
             return this.for(function(el) {
-                el.className = trimSpace(el.className.replace(toClassRegExp(oldName), ' '+ newName +' '));
+                el.className = $.trimSpace(el.className.replace(toClassRegExp(oldName), ' '+ newName +' '));
             });
         },
 
@@ -1935,8 +1936,8 @@
     function setData(el, key, value) {
         if (el) {
             checkData(el);
-            if (isString(key)) {
-                key = trimSpace(key);
+            if ($.isString(key)) {
+                key = $.trimSpace(key);
                 if (key[0] == '@') {
                     setAttribute(el, key, value);
                 } else {
@@ -1954,14 +1955,14 @@
     function getData(el, key) {
         if (el) {
             checkData(el);
-            if (isString(key)) {
-                key = trimSpace(key);
+            if ($.isString(key)) {
+                key = $.trimSpace(key);
                 if (key.startsWith('@')) {
                     return getAttribute(el, key);
                 }
                 return (key == '*') ? el.$data.data : el.$data.get(key);
             }
-            if (isTrue(key)) {
+            if ($.isTrue(key)) {
                 return el.$data; // get list object
             }
         }
@@ -1976,8 +1977,8 @@
          * @return {Any}
          */
         data: function(key, value) {
-            return isObject(key) ? this.setData(key) :
-                isUndefined(value) ? this.getData(key) : this.setData(key, value);
+            return $.isObject(key) ? this.setData(key) :
+                $.isUndefined(value) ? this.getData(key) : this.setData(key, value);
         },
 
         /**
@@ -2005,7 +2006,7 @@
          * @return {this}
          */
         removeData: function(key) {
-            key = trimSpace(key);
+            key = $.trimSpace(key);
 
             // data-*
             if (key.startsWith('@')) {
@@ -2035,7 +2036,7 @@
     function readFile(file, callback, multiple) {
         var reader = new FileReader();
         reader.onload = function(e) {
-            fileContent = trimSpace(e.target.result);
+            fileContent = $.trimSpace(e.target.result);
             // opera doesn't give base64 for 'html' files or maybe other more..
             var encoded = fileContent.indexOf(';base64') > -1;
             fileContent = fileContent.replace(re_data, '');
@@ -2110,7 +2111,7 @@
                             if (callback) {
                                 done = !(el.files && el.files.length);
                                 readFiles(el, function(value) {
-                                    if (!isArray(value)) { // single, one read
+                                    if (!$.isArray(value)) { // single, one read
                                         done = true;
                                         data.push(name +'='+ encode(value));
                                     } else {
@@ -2128,14 +2129,14 @@
                             value = el.value;
                     }
 
-                    if (!isVoid(value)) {
+                    if (!$.isVoid(value)) {
                         data.push(name +'='+ encode(value));
                     }
                 });
 
                 var _ret = function() {
                     ret = data.join('&');
-                    if (!isFalse(plus)) {
+                    if (!$.isFalse(plus)) {
                         ret = ret.replace(re_plus, '+');
                     }
                     return ret;
@@ -2208,7 +2209,7 @@
          * @return {Boolean|this}
          */
         checked: function(option) {
-            return isVoid(option) ? !!(this[0] && this[0].checked)
+            return $.isVoid(option) ? !!(this[0] && this[0].checked)
                 : (setAttribute(this[0], 'checked', option), this);
         },
 
@@ -2218,7 +2219,7 @@
          * @return {Boolean|this}
          */
         selected: function(option) {
-            return isVoid(option) ? !!(this[0] && this[0].selected)
+            return $.isVoid(option) ? !!(this[0] && this[0].selected)
                 : (setAttribute(this[0], 'selected', option), this);
         },
 
@@ -2228,7 +2229,7 @@
          * @return {Boolean|this}
          */
         disabled: function(option) {
-            return isVoid(option) ? !!(this[0] && this[0].disabled)
+            return $.isVoid(option) ? !!(this[0] && this[0].disabled)
                 : (setAttribute(this[0], 'disabled', option), this);
         },
 
@@ -2238,7 +2239,7 @@
          * @return {Boolean|this}
          */
         readonly: function(option) {
-            return isVoid(option) ? !!(this[0] && this[0].readOnly)
+            return $.isVoid(option) ? !!(this[0] && this[0].readOnly)
                 : (setAttribute(this[0], 'readOnly', option), this);
         }
     });
@@ -2250,7 +2251,7 @@
          * @return {Boolean}
          */
         isWindow: function() {
-            return isWindow(this[0]);
+            return $.isWindow(this[0]);
         },
 
         /**
@@ -2258,7 +2259,7 @@
          * @return {Boolean}
          */
         isDocument: function() {
-            return isDocument(this[0]);
+            return $.isDocument(this[0]);
         },
 
         /**
@@ -2406,7 +2407,7 @@
              */
             fadeOut: function(speed, callback) {
                 // remove element after fading out
-                if (isTrue(callback) || callback == 'remove') {
+                if ($.isTrue(callback) || callback == 'remove') {
                     callback = function(el) { $.dom(el).remove(); };
                 }
                 return this.fade(0, speed, callback);
