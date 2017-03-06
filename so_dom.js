@@ -1996,6 +1996,7 @@
     var encode = encodeURIComponent, decode = decodeURIComponent;
     var fileContent, fileContentStack = [];
 
+    // file reader helpers
     function toBase64(input) {
         return $.util.base64Encode(decode(input));
     }
@@ -2015,6 +2016,7 @@
         };
         reader.readAsDataURL(file);
     }
+
     function readFiles(file, callback) {
         if (file.files) {
             var multiple = file.files.length > 1;
@@ -2036,6 +2038,12 @@
 
     // dom: form
     extendPrototype(Dom, {
+        /**
+         * Serialize.
+         * @param  {Function} ?callback
+         * @param  {Boolean}  ?opt_plus
+         * @return {String}
+         */
         serialize: function(callback, opt_plus) {
             var el = this[0], ret = '';
             if (getTag(el) == 'form') {
@@ -2045,6 +2053,7 @@
                     if (!el.name || el.disabled) {
                         return;
                     }
+
                     var type = el.options ? 'select' : el.type ? el.type : getTag(el);
                     var name = encode(el.name).replace(/%5([BD])/g, function($0, $1) {
                         return ($1 == 'B') ? '[' : ']';
@@ -2053,6 +2062,7 @@
                     switch (type) {
                         case 'select':
                             _for(el.options, function(option, i) {
+                                // find selected option thas has 'value' attribute
                                 if (option.selected && option.hasAttribute('value')) {
                                     value = option.value; return _break;
                                 }
@@ -2102,16 +2112,23 @@
 
                 if (!callback) return _ret();
 
-                ;(function run() {
+                // callback waiter
+                ;(function wait() {
                     if (done) {
                         return callback(_ret());
                     }
-                    $.fire(1, run);
+                    $.fire(1, wait);
                 })();
             }
 
             return ret;
         },
+
+        /**
+         * Serialize array.
+         * @param  {Function} ?callback
+         * @return {Array}
+         */
         serializeArray: function(callback) {
             var _ret = function(data, ret) {
                 return ret = [], data.split('&').forEach(function(item) {
@@ -2120,22 +2137,32 @@
                     });
                 }), ret;
             };
+
             if (!callback) {
                 return _ret(this.serialize(null, false));
             }
+
             this.serialize(function(data) {
                 callback(_ret(data));
             }, false);
         },
+
+        /**
+         * Serialize json.
+         * @param  {Function} ?callback
+         * @return {String}
+         */
         serializeJson: function(callback) {
             var _ret = function(data, ret) {
                 return ret = {}, data.forEach(function(item) {
                     ret[item.name] = item.value;
                 }), $.json(ret, true);
             };
+
             if (!callback) {
                 return _ret(this.serializeArray(null, false));
             }
+
             this.serializeArray(function(data) {
                 callback(_ret(data));
             }, false);
