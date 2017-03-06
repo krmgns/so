@@ -12,19 +12,11 @@
     }
 
     // minify candies
-    var NULL = null, NULLS = '';
-    var TRUE = true, FALSE = false;
-
-    var NAME_WINDOW = 'window';
-    var NAME_DOCUMENT = 'document';
-    var NAME_OWNER_DOCUMENT = 'ownerDocument';
-    var NAME_DEFAULT_VIEW = 'defaultView';
-    var NAME_PROTOTYPE = 'prototype';
     var NAME_NODE_TYPE = 'nodeType';
-
-    var NODE_TYPE_ELEMENT = 1;
-    var NODE_TYPE_DOCUMENT = 9;
-    var NODE_TYPE_DOCUMENT_FRAGMENT = 11;
+    var NAME_PROTOTYPE = 'prototype';
+    var NAME_DEFAULT_VIEW = 'defaultView';
+    var NAME_OWNER_DOCUMENT = 'ownerDocument';
+    var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
 
     // globals
     window.so = $;
@@ -50,26 +42,27 @@
     var re_time = /(\d+)(\w+)/;
     var re_numeric = /^[-+]?(?:\.?\d+|\d+\.\d+)$/;
     var re_trimSpace = /^\s+|\s+$/g;
+    var re_primitive = /^(string|number|boolean)$/;
     var RegExp = window.RegExp;
 
     // faster trim
     function trimSpace(input) {
-        return (input == NULL) ? NULLS : (NULLS + input).replace(re_trimSpace, NULLS);
+        return (input != null) ? (''+ input).replace(re_trimSpace, '') : '';
     }
 
     // shortcut convert helpers
     function toValue(input, valueDefault) {
-        return (input != NULL) ? input : valueDefault;
+        return (input != null) ? input : valueDefault;
     }
     function toInt(input, base) {
         return input = input.replace(re_dot, '0.'),
-            ((base == NULL) ? parseInt(input) : parseInt(input, base)) || 0;
+            ((base == null) ? parseInt(input) : parseInt(input, base)) || 0;
     }
     function toFloat(input) {
         return parseFloat(input) || 0;
     }
     function toString(input) {
-        return ((input != NULL) && input.toString) ? input.toString() : (NULLS + input);
+        return ((input != null) && input.toString) ? input.toString() : (''+ input);
     }
     function toBool(input) {
         return !!input;
@@ -90,9 +83,9 @@
 
     // cacheable regexp stuff
     function toRegExp(pattern, flags, ttl) {
-        flags = flags || NULLS;
+        flags = flags || '';
         if ($.isInt(flags)) {
-            ttl = flags, flags = NULLS;
+            ttl = flags, flags = '';
         }
 
         if (!ttl) { // no cache
@@ -100,7 +93,7 @@
         }
 
         if ($.isString(ttl)) {
-            ttl = toTimeInt(ttl, TRUE);
+            ttl = toTimeInt(ttl, true);
         }
         ttl = (ttl > -1) ? ttl : 60 * 60 * 24; // one day
 
@@ -148,7 +141,7 @@
     function loop(input, fn, opt__this, useKey, useLength) {
         var _this = opt__this || input, length = input && input.length, i = 0, key, value;
 
-        if (length != NULL && useLength != FALSE) {
+        if (length != null && useLength != false) {
             for (; i < length; i++) {
                 value = input[i];
                 if (0 === fn.apply(_this, !useKey ?
@@ -179,14 +172,14 @@
          * @inheritDoc
          */
         for: function(input, fn, opt__this, useLength) {
-            return loop(input, fn, opt__this, FALSE, useLength);
+            return loop(input, fn, opt__this, false, useLength);
         },
         /**
          * For each: key, value, i
          * @inheritDoc
          */
         forEach: function(input, fn, opt__this, useLength) {
-            return loop(input, fn, opt__this, TRUE, useLength);
+            return loop(input, fn, opt__this, true, useLength);
         }
     });
 
@@ -194,17 +187,17 @@
     extend($, {
         /** Is void. @param {Any} input @return {Boolean} */
         isVoid: function(input) {
-            return (input == NULL);
+            return (input == null);
         },
 
         /** Is null. @param {Any} input @return {Boolean} */
         isNull: function(input) {
-            return (input === NULL);
+            return (input === null);
         },
 
         /** Is nulls. @param {Any} input @return {Boolean} */
         isNulls: function(input) {
-            return (input === NULLS);
+            return (input === '');
         },
 
         /** Is undefined. @param {Any} input @return {Boolean} */
@@ -229,17 +222,17 @@
 
         /** Is bool. @param {Any} input @return {Boolean} */
         isBool: function(input) {
-            return (input === TRUE || input === FALSE);
+            return (input === true || input === false);
         },
 
         /** Is true. @param {Any} input @return {Boolean} */
         isTrue: function(input) {
-            return input === TRUE;
+            return input === true;
         },
 
         /** Is false. @param {Any} input @return {Boolean} */
         isFalse: function(input) {
-            return input === FALSE;
+            return input === false;
         },
 
         /** Is number. @param {Any} input @return {Boolean} */
@@ -280,23 +273,23 @@
         /** Is iterable.     @param {Any} input @return {Boolean} */
         isIterable: function(input) {
             return $.isArray(input) || $.isObject(input) || $.isList(input) || (input && (
-                (input.length != NULL && !input[NAME_NODE_TYPE]) // dom, nodelist, string etc.
+                (input.length != null && !input[NAME_NODE_TYPE]) // dom, nodelist, string etc.
             ));
         },
 
         /** Is primitive. @param {Any} input @return {Boolean} */
         isPrimitive: function(input) {
-            return $.isVoid(input) || /^(string|number|boolean)$/.test(typeof input);
+            return $.isVoid(input) || re_primitive.test(typeof input);
         },
 
         /** Is window. @param {Any} input @return {Boolean} */
         isWindow: function(input) {
-            return !!(input && input == input[NAME_WINDOW] && input == input[NAME_WINDOW].window);
+            return toBool(input && input == input[NAME_WINDOW] && input == input[NAME_WINDOW][NAME_WINDOW]);
         },
 
         /** Is document. @param {Any} input @return {Boolean} */
         isDocument: function(input) {
-            return !!(input && input[NAME_NODE_TYPE] === NODE_TYPE_DOCUMENT);
+            return toBool(input && input[NAME_NODE_TYPE] === 9);
         }
     });
 
@@ -393,8 +386,8 @@
     function prepareSearchStuff(str, search, index, opt_noCase) {
         if (str && search) {
             // swap arguments
-            if (index === FALSE) {
-                opt_noCase = FALSE, index = 0;
+            if (index === false) {
+                opt_noCase = false, index = 0;
             }
 
             str = toString(str);
@@ -461,9 +454,9 @@
 
             if (lower) str = str.toLowerCase();
 
-            if (all !== FALSE) {
+            if (all !== false) {
                 for (i = 0, str = str.split(' '); i < str.length; i++) {
-                    str[i] = str[i].toCapitalCase(FALSE);
+                    str[i] = str[i].toCapitalCase(false);
                 }
 
                 return str.join(' ');
@@ -513,7 +506,7 @@
                 ret.push(r);
             }
 
-            return ret.length ? ret : NULL;
+            return ret.length ? ret : null;
         },
 
         /**
@@ -595,7 +588,7 @@
 
         /**
          * Trim.
-         * @param  {String|undefined} chars @optional
+         * @param  {String} ?chars
          * @return {String}
          * @override For chars option.
          */
@@ -605,15 +598,15 @@
 
         /**
          * Trim left.
-         * @param  {String|undefined} chars @optional
+         * @param  {String} ?chars
          * @return {String}
          * @override For chars option.
          */
         trimLeft: function(chars) {
-            var str = toString(this), re = prepareTrimRegExp(chars, TRUE);
+            var str = toString(this), re = prepareTrimRegExp(chars, true);
 
             while (re.test(str)) {
-                str = str.replace(re, NULLS);
+                str = str.replace(re, '');
             }
 
             return str;
@@ -621,7 +614,7 @@
 
         /**
          * Trim right.
-         * @param  {String|undefined} chars @optional
+         * @param  {String} ?chars
          * @return {String}
          * @override For chars option.
          */
@@ -629,7 +622,7 @@
             var str = toString(this), re = prepareTrimRegExp(chars);
 
             while (re.test(str)) {
-                str = str.replace(re, NULLS);
+                str = str.replace(re, '');
             }
 
             return str;
@@ -743,7 +736,7 @@
 
     // shortcut
     function _log(fn, args) {
-        window.console[fn].apply(NULL, ['>> so:'].concat(makeArray(args)));
+        window.console[fn].apply(null, ['>> so:'].concat(makeArray(args)));
     }
 
     // so: base functions.
@@ -811,13 +804,13 @@
         fire: function(delay, fn, fnArgs) {
             if ($.isString(delay)) delay = toTimeInt(delay);
             return setTimeout(function() {
-                fn.apply(NULL, fnArgs || []);
+                fn.apply(null, fnArgs || []);
             }, delay || 1);
         },
         firer: function(delay, fn, fnArgs) {
             if ($.isString(delay)) delay = toTimeInt(delay);
             return setInterval(function() {
-                fn.apply(NULL, fnArgs || []);
+                fn.apply(null, fnArgs || []);
             }, delay || 1);
         },
 
@@ -869,12 +862,32 @@
 
         /**
          * Trim.
-         * @param  {String}           input
-         * @param  {String|undefined} chars @optional
+         * @param  {String}  input
+         * @param  {String} ?chars
          * @return {String}
          */
         trim: function(input, chars) {
-            return (input == NULL) ? NULLS : (NULLS + input).trim(chars);
+            return (input != null) ? (''+ input).trim(chars) : '';
+        },
+
+        /**
+         * Trim left.
+         * @param  {String}  input
+         * @param  {String} ?chars
+         * @return {String}
+         */
+        trimLeft: function(input, chars) {
+            return (input != null) ? (''+ input).trimLeft(chars) : '';
+        },
+
+        /**
+         * Trim right.
+         * @param  {String}  input
+         * @param  {String} ?chars
+         * @return {String}
+         */
+        trimRight: function(input, chars) {
+            return (input != null) ? (''+ input).trimRight(chars) : '';
         },
 
         /**
@@ -884,26 +897,6 @@
          */
         trimSpace: function(input) {
             return trimSpace(input);
-        },
-
-        /**
-         * Trim left.
-         * @param  {String}           input
-         * @param  {String|undefined} chars @optional
-         * @return {String}
-         */
-        trimLeft: function(input, chars) {
-            return (input == NULL) ? NULLS : (NULLS + input).trimLeft(chars);
-        },
-
-        /**
-         * Trim right.
-         * @param  {String}           input
-         * @param  {String|undefined} chars @optional
-         * @return {String}
-         */
-        trimRight: function(input, chars) {
-            return (input == NULL) ? NULLS : (NULLS + input).trimRight(chars);
         },
 
         /**
@@ -970,7 +963,7 @@
          * @return {Boolean}
          */
         isSet: function(input, opt_key) {
-            return ((opt_key != NULL) ? $.dig(input, opt_key) : input) != NULL;
+            return ((opt_key != null) ? $.dig(input, opt_key) : input) != null;
         },
 
         /**
@@ -996,7 +989,7 @@
          * @return {Array|Object}
          */
         copy: function(input, opt_keysExclude) {
-            return $.copyTo($.isArray(input) ? [] : {}, input, opt_keysExclude, TRUE);
+            return $.copyTo($.isArray(input) ? [] : {}, input, opt_keysExclude, true);
         },
 
         /**
@@ -1011,7 +1004,7 @@
             var keys = opt_keysExclude || [], key;
             for (key in inputFrom) {
                 if (!keys.has(key)) {
-                    if (opt_overwrite !== FALSE && key in inputTo) {
+                    if (opt_overwrite !== false && key in inputTo) {
                         continue;
                     }
                     inputTo[key] = inputFrom[key];
@@ -1033,7 +1026,7 @@
                     $.extend(target.shift(), source);
                 }
             } else {
-                return extend.apply(NULL, [target, source].concat(makeArray(arguments, 2)));
+                return extend.apply(null, [target, source].concat(makeArray(arguments, 2)));
             }
         },
 
@@ -1072,9 +1065,9 @@
             $.forEach(properties, function(name, property) {
                 properties[name] = {
                     value: property[0],
-                    writable: toBool(property[1] != NULL ? property[1] : TRUE),
-                    enumerable: toBool(property[2] != NULL ? property[2] : TRUE),
-                    configurable: toBool(property[3] != NULL ? property[3] : FALSE),
+                    writable: toBool(property[1] != null ? property[1] : true),
+                    enumerable: toBool(property[2] != null ? property[2] : true),
+                    configurable: toBool(property[3] != null ? property[3] : false),
                 }
             });
 
@@ -1088,7 +1081,7 @@
          * @return {Object}
          */
         options: function(options) {
-            return $.extend.apply(NULL, [options || {}].concat(makeArray(arguments, 1)));
+            return $.extend.apply(null, [options || {}].concat(makeArray(arguments, 1)));
         },
 
         /**
@@ -1177,9 +1170,9 @@
 
         var type = 'DOMContentLoaded';
         document.addEventListener(type, function _() {
-            document.removeEventListener(type, _, FALSE);
+            document.removeEventListener(type, _, false);
             onReadyCallbacksFire();
-        }, FALSE);
+        }, false);
     };
 
     // for later
