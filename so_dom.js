@@ -28,21 +28,21 @@
     var re_comma = /,\s*/;
     var re_trim = /^\s+|\s+$/g;
     var re_tag = /^<[a-z-][^>]*>/i;
-    var trims = $.trimSpace;
     var isBool = $.isBool, isTrue = $.isTrue, isFalse = $.isFalse;
     var isVoid = $.isVoid, isNull = $.isNull, isNulls = $.isNulls, isUndefined = $.isUndefined;
     var isObject = $.isObject, isArray = $.isArray;
     var isNumber = $.isNumber, isNumeric = $.isNumeric, isString = $.isString;
     var isWindow = $.isWindow, isDocument = $.isDocument;
     var getWindow = $.getWindow, getDocument = $.getDocument;
-    var extend = $.extend, extendPrototype = $.extendPrototype;
+    var trimSpace = $.trimSpace;
     var toStyleName = $.util.toCamelCaseFromDashCase;
+    var extend = $.extend, extendPrototype = $.extendPrototype;
     var _re = $.re, _array = $.array, _for = $.for, _forEach = $.forEach;
     var _break = 0; // break tick: for, forEach
 
     // general helpers
     function split(s, re) {
-        return trims(s).split(re);
+        return trimSpace(s).split(re);
     }
     function querySelector(root, selector) {
         return root.querySelector(selector);
@@ -187,7 +187,7 @@
 
         if (!isVoid(selector)) {
             if (isString(selector)) {
-                selector = trims(selector);
+                selector = trimSpace(selector);
                 if (selector) { // prevent empty selector error
                     if (re_tag.test(selector)) {
                         elements = create(selector, root, root); // 'root' could be document or attribute(s)
@@ -1178,7 +1178,7 @@
     }
 
     function setStyle(el, name, value) {
-        name = toStyleName(name), value = trims(value);
+        name = toStyleName(name), value = trimSpace(value);
         if (value && isNumeric(value) && !re_noneUnitStyles.test(name)) {
             value += 'px';
         }
@@ -1196,7 +1196,7 @@
         while (text.length) {
             // wtf! :)
             (s = text.shift().split(_re('\\s*:\\s*')))
-                && (s[0] = trims(s[0]))
+                && (s[0] = trimSpace(s[0]))
                     && (styles[s[0]] = s[1] || '');
         }
         return styles;
@@ -1624,7 +1624,7 @@
     function toAttributeName(name) {
         return name = name.startsWith('@')
             ? 'data-'+ name.slice(1) /* @foo => data-foo */ : name,
-                trims(name.replace(re_attrNameRemove, '-'));
+                trimSpace(name.replace(re_attrNameRemove, '-'));
     }
 
     function hasAttribute(el, name) {
@@ -1894,7 +1894,7 @@
          */
         replaceClass: function(oldName, newName) {
             return this.for(function(el) {
-                el.className = trims(el.className.replace(toClassRegExp(oldName), ' '+ newName +' '));
+                el.className = trimSpace(el.className.replace(toClassRegExp(oldName), ' '+ newName +' '));
             });
         },
 
@@ -1936,7 +1936,7 @@
         if (el) {
             checkData(el);
             if (isString(key)) {
-                key = trims(key);
+                key = trimSpace(key);
                 if (key[0] == '@') {
                     setAttribute(el, key, value);
                 } else {
@@ -1955,7 +1955,7 @@
         if (el) {
             checkData(el);
             if (isString(key)) {
-                key = trims(key);
+                key = trimSpace(key);
                 if (key.startsWith('@')) {
                     return getAttribute(el, key);
                 }
@@ -2005,7 +2005,7 @@
          * @return {this}
          */
         removeData: function(key) {
-            key = trims(key);
+            key = trimSpace(key);
 
             // data-*
             if (key.startsWith('@')) {
@@ -2035,7 +2035,7 @@
     function readFile(file, callback, multiple) {
         var reader = new FileReader();
         reader.onload = function(e) {
-            fileContent = trims(e.target.result);
+            fileContent = trimSpace(e.target.result);
             // opera doesn't give base64 for 'html' files or maybe other more..
             var encoded = fileContent.indexOf(';base64') > -1;
             fileContent = fileContent.replace(re_data, '');
