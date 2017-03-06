@@ -97,7 +97,7 @@
         if (re = selector.matchAll(re_select)) {
             var rem = [];
             re.forEach(function(re) {
-                var all, sel = re[1], tag = re[2],
+                var all, sel = re[1] || '', tag = re[2],
                     dir = re[3] ? re[3].replace(':', '') : dir = tag; // @first etc..
 
                 if (tag.test(re_firstLast)) {
