@@ -354,7 +354,7 @@
         /**
          * Has.
          * @param  {Any}     search
-         * @param  {Boolean} strict
+         * @param  {Boolean} strict?
          * @return {Boolean}
          */
         has: function(search, strict) {
@@ -413,7 +413,7 @@
         /**
          * Has.
          * @param  {Any}     search
-         * @param  {Boolean} strict
+         * @param  {Boolean} strict?
          * @return {Boolean}
          */
         has: function(search, strict) {
@@ -964,6 +964,17 @@
         },
 
         /**
+         * Has.
+         * @param  {Any}     input
+         * @param  {Any}     search
+         * @param  {Boolean} strict?
+         * @return {Boolean}
+         */
+        has: function(input, search, strict) {
+            return has(input, search, strict);
+        },
+
+        /**
          * Is set.
          * @param  {Any}    input
          * @param  {String} key?
@@ -983,10 +994,6 @@
                 || ($.isArray(input) && !Object.keys(input).length)
                 || ($.isNumber(input.length) && !input.length)
                 || ($.isObject(input) && !Object.keys(input).length);
-        },
-
-        mix: function() {
-            throw '@todo Remove method $.mix()!';
         },
 
         /**
@@ -1136,21 +1143,6 @@
             }
 
             return values;
-        },
-
-        /**
-         * Has.
-         * @param  {Any}     input
-         * @param  {Any}     search
-         * @param  {Boolean} strict
-         * @return {Boolean}
-         */
-        has: function(input, search, strict) {
-            return has(input, search, strict);
-        },
-
-        toString: function(name, opt_object) {
-            throw '@todo Remove method $.toString()!';
         }
     });
 
