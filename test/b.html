@@ -89,7 +89,7 @@
 <!-- <style>#div1{ max-width: 300px; max-height: 500px; overflow-y: auto; } #div2{ width: 1500px!important; height: 1500px!important }</style> -->
 <script>
 so.onReady(function($) {
-    $.dom("#wrap").on("click", log)
+    $.dom("#wrap").on("click", (e) => log(e))
     // var uri = '/.dev/so/test/ajax.php', a
     // var onDone = function onDone() { log('done', arguments) },
     //     onSuccess = function onSuccess() { log('success') },
