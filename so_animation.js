@@ -7,10 +7,6 @@
  */
 ;(function(window, $) { 'use strict';
 
-    // minify candies
-    var NULL = null, NULLS = '';
-    var TRUE = true, FALSE = false;
-
     var re_root = /(?:html|body)/;
     var re_digit = /\d+/;
     var re_scroll = /scroll(?:Top|Left)/;
@@ -46,15 +42,15 @@
 
         // swap
         if ($.isFunction(easing)) {
-            callback = easing, easing = NULL;
+            callback = easing, easing = null;
         }
 
         _this.easing = (easing && $.ext && $.ext.easing && $.ext.easing[easing]) || fn_easing;
         _this.callback = callback;
 
-        _this.running = FALSE;
-        _this.stopped = FALSE;
-        _this.ended = FALSE;
+        _this.running = false;
+        _this.stopped = false;
+        _this.ended = false;
         _this.startTime = 0;
         _this.elapsedTime = 0;
 
@@ -66,7 +62,7 @@
 
             // assign animation tasks
             $.forEach(properties, function(name, value) {
-                var root, scroll, startValue, endValue, style, unit = NULLS;
+                var root, scroll, startValue, endValue, style, unit = '';
                 name = toStyleName(name);
                 root = re_root.test(_this.target.tag());
                 scroll = re_scroll.test(name);
@@ -80,7 +76,7 @@
                     endValue = toFloat(value);
 
                     if ($.dom.isUnitStyle(name)) {
-                        unit = style.replace(re_digit, NULLS);
+                        unit = style.replace(re_digit, '');
                     }
                 } else {
                     startValue = _this.target.scroll()[name.slice(6).toLowerCase()];
@@ -113,7 +109,7 @@
             var _this = this;
 
             _this.stop(); // stop if running
-            _this.running = TRUE;
+            _this.running = true;
             _this.startTime = now();
 
             !function run() {
@@ -166,12 +162,12 @@
             var _this = this;
 
             if (_this.running) {
-                _this.running = FALSE;
-                _this.stopped = TRUE;
+                _this.running = false;
+                _this.stopped = true;
             }
 
             // set as null (for isAnimated() etc.)
-            _this.target.me && (_this.target.me.$animation = NULL);
+            _this.target.me && (_this.target.me.$animation = null);
 
             return _this;
         },
@@ -194,7 +190,7 @@
                 });
             }
 
-            _this.ended = TRUE;
+            _this.ended = true;
 
             if ($.isFunction(_this.callback)) {
                 _this.callback(_this);
