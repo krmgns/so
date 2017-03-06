@@ -1052,7 +1052,13 @@
          * @return {Function}
          */
         extendPrototype: function(target, prototype) {
-            return $.extend(target[NAME_PROTOTYPE], prototype);
+            if ($.isArray(target)) {
+                while (target.length) {
+                    $.extendPrototype(target.shift(), source);
+                }
+            } else {
+                return extend(target[NAME_PROTOTYPE], prototype);
+            }
         },
 
         /**
