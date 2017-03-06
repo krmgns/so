@@ -7,10 +7,6 @@
  */
 ;(function(window, $) { 'use strict';
 
-    // minify candies
-    var NULL = null, NULLS = '';
-    var TRUE = true, FALSE = false;
-
     var re_query = /\?&+(.*)/;
     var re_post = /P(U|OS)T/i;
     var re_json = /^(\{.*\}|\[.*\]|".*"|\d+(\.\d+)?|true|false|null)$/;
@@ -18,11 +14,11 @@
     var re_dataTypes = /\/(json|xml|html|plain)(?:[; ])?/i;
     var fn_encode = encodeURIComponent;
     var optionsDefault = {
-        method: 'GET', uri: NULLS, uriParams: NULL, data: NULL, dataType: 'json',
-        async: TRUE, noCache: TRUE, autoSend: TRUE, headers: {},
-        onStart: NULL, onStop: NULL, /* @todo: queue */ onProgress: NULL, onHeaders: NULL,
-        onDone: NULL, onSuccess: NULL, onFailure: NULL,
-        onAbort: NULL, onTimeout: NULL, onBeforeSend: NULL, onAfterSend: NULL,
+        method: 'GET', uri: '', uriParams: null, data: null, dataType: 'json',
+        async: true, noCache: true, autoSend: true, headers: {},
+        onStart: null, onStop: null, /* @todo: queue */ onProgress: null, onHeaders: null,
+        onDone: null, onSuccess: null, onFailure: null,
+        onAbort: null, onTimeout: null, onBeforeSend: null, onAfterSend: null,
         ons: {} // all other on.. stuff
     };
     var STATE_OPENED = 1, STATE_HEADERS_RECEIVED = 2, STATE_LOADING = 3, STATE_DONE = 4;
@@ -41,7 +37,7 @@
             }
 
             if (!$.isString(input)) {
-                return NULL;
+                return null;
             }
 
             return new DOMParser.parseFromString(input, inputType || 'text/xml');
@@ -124,8 +120,8 @@
     function Stream(client) {
         this.client = client;
         this.headers = {};
-        this.data = NULL;
-        this.dataType = NULL;
+        this.data = null;
+        this.dataType = null;
     }
 
     /**
@@ -145,9 +141,9 @@
      */
     function Response(client) {
         this.super(client);
-        this.status = NULL;
-        this.statusCode = NULL;
-        this.statusText = NULL;
+        this.status = null;
+        this.statusCode = null;
+        this.statusText = null;
     }
 
     // extend request & response
@@ -156,7 +152,7 @@
 
     // shortcut helpers
     function removeReadyStateChange(client) {
-        client.api.onreadystatechange = NULL;
+        client.api.onreadystatechange = null;
     }
 
     function onReadyStateChange(client) {
@@ -176,7 +172,7 @@
             case STATE_HEADERS_RECEIVED: client.fire('headers');  break;
             case STATE_LOADING:          client.fire('progress'); break;
             case STATE_DONE:
-                client.done = TRUE;
+                client.done = true;
 
                 var status = 'HTTP/1.1 %s %s'.format(client.api.status, client.api.statusText),
                     headers = $.http.parseHeaders(client.api.getAllResponseHeaders()),
@@ -274,9 +270,9 @@
         }
 
         this.state = 0;
-        this.sent = FALSE;
-        this.done = FALSE;
-        this.aborted = FALSE;
+        this.sent = false;
+        this.done = false;
+        this.aborted = false;
 
         this.api.client = this;
 
@@ -303,7 +299,7 @@
                 this.api.send($.http.serialize(this.request.data));
                 this.fire('afterSend');
 
-                this.sent = TRUE;
+                this.sent = true;
 
                 if (options.timeout) {
                     $.fire(options.timeout, function(){
@@ -350,7 +346,7 @@
         cancel: function() {
             this.api.abort();
             this.call('abort');
-            this.aborted = TRUE;
+            this.aborted = true;
         },
 
         /**
