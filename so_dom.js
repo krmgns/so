@@ -1932,15 +1932,41 @@
 
     // dom: data
     extendPrototype(Dom, {
+        /**
+         * Data.
+         * @param  {String|Object}  key
+         * @param  {Any}           ?value
+         * @return {Any}
+         */
         data: function(key, value) {
-            return isUndefined(value) ? this.getData(key) : this.setData(key, value);
+            return isObject(key) ? this.setData(key) :
+                isUndefined(value) ? this.getData(key) : this.setData(key, value);
         },
+
+        /**
+         * Set data.
+         * @param {String|Object} key
+         * @param {Any}           value
+         */
         setData: function(key, value) {
             return this.for(function(el) { setData(el, key, value); });
         },
+
+        /**
+         * Get data.
+         * @param  {String} key
+         * @param  {Any}    valueDefault
+         * @return {Any}
+         */
         getData: function(key, valueDefault) {
             return this[0] && getData(this[0], key, valueDefault);
         },
+
+        /**
+         * Remove data.
+         * @param  {String} key
+         * @return {this}
+         */
         removeData: function(key) {
             key = trims(key);
 
