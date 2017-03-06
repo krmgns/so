@@ -1512,10 +1512,30 @@
 
     // dom: offset, scroll, box
     extendPrototype(Dom, {
-        offset: function(relative) {return getOffset(this[0], relative);},
-        scroll: function() {return getScroll(this[0]);},
+        /**
+         * Offset.
+         * @param  {Boolean} ?relative
+         * @return {Object}
+         */
+        offset: function(relative) {
+            return getOffset(this[0], relative);
+        },
+
+        /**
+         * Scroll.
+         * @return {Object}
+         */
+        scroll: function() {
+            return getScroll(this[0]);
+        },
+
+        /**
+         * Box.
+         * @return {Object}
+         */
         box: function() {
             var el = this[0], ret = {};
+
             if (el) {
                 var style = getStyle(el);
                 var borderXSize = sumStyleValue(null, style, BORDER_LEFT_WIDTH, BORDER_RIGHT_WIDTH);
@@ -1524,16 +1544,21 @@
                 var marginYSize = sumStyleValue(null, style, MARGIN_TOP, MARGIN_BOTTOM);
                 var dim = getDimensionsBy(el), parentDim = getDimensions(el[PARENT_ELEMENT]);
                 var offset = getOffset(el), scroll = getScroll(el);
+
                 ret = dim;
+                // add width, height
                 ret.outerWidthMargined = dim.width + marginXSize;
                 ret.outerHeightMargined = dim.height + marginYSize;
+                // add offset
                 ret.offset = offset;
                 ret.offset.right = ret.offset.x = parentDim.width - borderXSize - (offset.left + dim.outerWidth);
                 ret.offset.bottom = ret.offset.y = parentDim.height - borderYSize - (offset.top + dim.outerHeight);
+                // add scroll
                 ret.scroll = scroll;
                 ret.scroll.x = scroll.left;
                 ret.scroll.y = scroll.top;
             }
+
             return ret;
         }
     });
@@ -1541,31 +1566,44 @@
     var re_attrStateName = /^(?:(?:check|select|disabl)ed|readonly)$/i;
     var re_attrNameRemove = /[^\w:.-]/g;
 
-    function toAttributeName(name) {  //return name
-        return name = name.startsWith('@') ? 'data-'+ name.slice(1) /* @foo => data-foo */ : name,
-            name.replace(re_attrNameRemove, '-').trimSpace();
+    // attribute helpers
+    function toAttributeName(name) {
+        return name = name.startsWith('@')
+            ? 'data-'+ name.slice(1) /* @foo => data-foo */ : name,
+                name.replace(re_attrNameRemove, '-').trimSpace();
     }
+
     function hasAttribute(el, name) {
         return !!(el && el.hasAttribute && el.hasAttribute(toAttributeName(name)));
     }
+
     function setAttribute(el, name, value) {
         if (isNodeElement(el)) {
             name = toAttributeName(name);
             if (isNull(value)) {
                 el.removeAttribute(name);
             } else if (re_attrStateName.test(name)) {
-                isUndefined(value) || value ? el.setAttribute(name, name) : el.removeAttribute(name);
+                isUndefined(value) || value ?
+                    el.setAttribute(name, name) : el.removeAttribute(name);
             } else {
                 el.setAttribute(name, value);
             }
         }
     }
+
     function getAttribute(el, name, valueDefault) {
-        return name = toAttributeName(name), hasAttribute(el, name) ? el.getAttribute(name) : valueDefault;
+        return name = toAttributeName(name),
+            hasAttribute(el, name) ? el.getAttribute(name) : valueDefault;
     }
 
     // dom: attributes
     extendPrototype(Dom, {
+        /**
+         * Attribute.
+         * @param  {String} name
+         * @param  {String} ?value
+         * @return {Any}
+         */
         attribute: function(name, value) {
             var ret;
             if (isNull(value)) {
@@ -1577,6 +1615,11 @@
             }
             return ret;
         },
+
+        /**
+         * Attributes.
+         * @return {Object}
+         */
         attributes: function() {
             var el = this[0], ret = {};
             if (el) {
@@ -1587,17 +1630,43 @@
             }
             return ret;
         },
+
+        /**
+         * Has attribute.
+         * @param  {String} name
+         * @return {Boolean}
+         */
         hasAttribute: function(name) {
             return hasAttribute(this[0], name);
         },
+
+        /**
+         * Set attribute.
+         * @param  {String} name
+         * @param  {String} ?value
+         * @return {this}
+         */
         setAttribute: function(name, value) {
             return this.for(function(el) {
                 setAttribute(el, name, value);
             });
         },
+
+        /**
+         * Get attribute.
+         * @param  {String} name
+         * @param  {String} valueDefault
+         * @return {String|undefined}
+         */
         getAttribute: function(name, valueDefault) {
             return getAttribute(this[0], name, valueDefault);
         },
+
+        /**
+         * Remve attribute.
+         * @param  {String} name
+         * @return {this}
+         */
         removeAttribute: function(name) {
             return this.for(function(el) {
                 var names = [];
@@ -1618,6 +1687,11 @@
 
     // dom: values
     extendPrototype(Dom, {
+        /**
+         * Value.
+         * @param  {String} value
+         * @return {Any}
+         */
         value: function(value) {
             var ret;
             if (isNull(value)) {
@@ -1629,6 +1703,11 @@
             }
             return ret;
         },
+
+        /**
+         * Set value.
+         * @param {String} ?value
+         */
         setValue: function(value) {
             value += ''; // @important
             return this.for(function(el) {
@@ -1643,6 +1722,12 @@
                 }
             });
         },
+
+        /**
+         * Get value.
+         * @param  {String} ?valueDefault
+         * @return {String|undefined}
+         */
         getValue: function(valueDefault) {
             var el = this[0], ret = valueDefault, option;
             if (el) {
@@ -1659,23 +1744,41 @@
 
     // dom: id
     extendPrototype(Dom, {
+        /**
+         * Id.
+         * @param  {String} ?id
+         * @return {this|String}
+         */
         id: function(id) {
             return !isUndefined(id) ? this.setId(id) : this.getId();
         },
+
+        /**
+         * Set id.
+         * @param {String} id
+         */
         setId: function(id) {
             return setAttribute(this[0], 'id', id);
         },
+
+        /**
+         * Get id.
+         * @return {String|undefined}
+         */
         getId: function() {
             return getAttribute(this[0], 'id');
         }
     });
 
+    // class helpers
     function toClassRegExp(name) {
         return _re('(^| )'+ name +'( |$)', null, '1m');
     }
+
     function hasClass(el, name) {
         return el && el.className && toClassRegExp(name).test(el.className);
     }
+
     function addClass(el, name) {
         split(name, re_space).forEach(function(name) {
             if (!hasClass(el, name)) {
@@ -1683,6 +1786,7 @@
             }
         });
     }
+
     function removeClass(el, name) {
         split(name, re_space).forEach(function(name) {
             el.className = el.className.replace(toClassRegExp(name), '');
@@ -1691,8 +1795,16 @@
 
     // dom: class
     extendPrototype(Dom, {
+        /**
+         * Class.
+         * @param  {String}      ?name
+         * @param  {String|null} ?option
+         * @return {Boolean|this}
+         */
         class: function(name, option) {
-            if (!name) return this.getClass();
+            if (!name) {
+                return this.hasClass();
+            }
 
             if (isUndefined(option)) { // add: ('foo')
                 this.addClass(name);
@@ -1703,36 +1815,80 @@
             } else { // replace: ('foo', 'bar')
                 this.replaceClass(name, (''+ option));
             }
+
             return this
         },
+
+        /**
+         * Has class.
+         * @param  {String} name
+         * @return {Boolean}
+         */
         hasClass: function(name) {
             return !!hasClass(this[0], name);
         },
+
+        /**
+         * Add class.
+         * @param  {String} name
+         * @return {this}
+         */
         addClass: function(name) {
             return this.for(function(el) { addClass(el, name); });
         },
+
+        /**
+         * Remove class.
+         * @param  {String} name
+         * @return {this}
+         */
         removeClass: function(name) {
             return (name == '*') ? this.setClass('')
                 : this.for(function(el) { removeClass(el, name); });
         },
+
+        /**
+         * Replace class.
+         * @param  {String} oldName
+         * @param  {String} newName
+         * @return {this}
+         */
         replaceClass: function(oldName, newName) {
             return this.for(function(el) {
                 el.className = el.className.replace(toClassRegExp(oldName), ' '+ newName +' ');
             });
         },
+
+        /**
+         * Toggle.
+         * @param  {String} name
+         * @return {this}
+         */
         toggleClass: function(name) {
             return this.for(function(el) {
                 hasClass(el, name) ? removeClass(el, name) : addClass(el, name);
             });
         },
+
+        /**
+         * Set class.
+         * @param  {String} name
+         * @return {this}
+         */
         setClass: function(name) {
             return this.for(function(el) { el.className = name; });
         },
+
+        /**
+         * Get class.
+         * @return {String}
+         */
         getClass: function() {
             return getAttribute(this[0], 'class');
         }
     });
 
+    // data helper
     function checkData(el) {
         el.$data = el.$data || $.list();
     }
