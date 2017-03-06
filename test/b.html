@@ -89,7 +89,24 @@
 <!-- <style>#div1{ max-width: 300px; max-height: 500px; overflow-y: auto; } #div2{ width: 1500px!important; height: 1500px!important }</style> -->
 <script>
 so.onReady(function($) {
-    $.dom("#wrap").on("click", (e) => log(e))
+    var el = $.dom("#wrap > div")
+    $.dom.define("fillText", function(text) {
+        return this.for(function(el) {
+            $.dom.find(el).setText(text)
+        })
+    })
+    el.fillText(Math.random())
+
+
+    // el.on("foo", (e) => { log("foo ", e) })
+    // el.on("click", (e) => { log("click 1", e) })
+    // el.on("click", (e) => { log("click 2", e) })
+    // el.on("click", function f(e) { log("click off", e)
+    //     el.fire("foo")
+    //     // el.off("click**")
+    //     // el.off("click", f)
+    // })
+
     // var uri = '/.dev/so/test/ajax.php', a
     // var onDone = function onDone() { log('done', arguments) },
     //     onSuccess = function onSuccess() { log('success') },
