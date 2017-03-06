@@ -7,10 +7,6 @@
  */
 ;(function(window, $) { 'use strict';
 
-    // minify candies
-    var NULL = null, NULLS = '';
-    var TRUE = true, FALSE = false;
-
     var re_types = {
         UIEvent: 'resize|scroll|select|(un)?load|DOMActivate',
         MouseEvent: '(dbl)?click|mouse(up|down|enter|leave|in|out|over|move|wheel)|show|contextmenu|DOMMouseScroll',
@@ -34,12 +30,12 @@
     var re_commaSplit = /,\s*/;
     var fn_defineProperty = Object.defineProperty;
     var optionsDefault = {
-        bubbles: TRUE, cancelable: TRUE, scoped: FALSE, composed: FALSE, // all
-        view: window, detail: NULL, // ui, mouse, custom
-        relatedNode: NULL, prevValue: NULLS, newValue: NULLS, attrName: NULLS, attrChange: 0, // mutation
-        screenX: 0, screenY: 0, clientX: 0, clientY: 0, ctrlKey: FALSE, altKey: FALSE, shiftKey: FALSE,
-            metaKey: FALSE, button: 1, relatedTarget: NULL, // mouse
-        useCapture: FALSE, once: FALSE, passive: FALSE, data: {}
+        bubbles: true, cancelable: true, scoped: false, composed: false, // all
+        view: window, detail: null, // ui, mouse, custom
+        relatedNode: null, prevValue: '', newValue: '', attrName: '', attrChange: 0, // mutation
+        screenX: 0, screenY: 0, clientX: 0, clientY: 0, ctrlKey: false, altKey: false, shiftKey: false,
+            metaKey: false, button: 1, relatedTarget: null, // mouse
+        useCapture: false, once: false, passive: false, data: {}
     };
 
     /**
@@ -133,33 +129,33 @@
             $.extend(e, {
                 event: event,
                 eventTarget: event.eventTarget,
-                stopped: FALSE,
-                stoppedAll: FALSE,
-                stoppedDefault: FALSE,
-                stoppedBubble: FALSE,
-                stoppedBubbleAll: FALSE,
+                stopped: false,
+                stoppedAll: false,
+                stoppedDefault: false,
+                stoppedBubble: false,
+                stoppedBubbleAll: false,
                 stop: function() {
                     e.stopDefault();
                     e.stopBubble();
-                    e.stopped = TRUE;
+                    e.stopped = true;
                 },
                 stopAll: function() {
                     e.stopDefault();
                     e.stopBubble();
                     e.stopBubbleAll();
-                    e.stoppedAll = TRUE;
+                    e.stoppedAll = true;
                 },
                 stopDefault: function() {
                     e.preventDefault();
-                    e.stoppedDefault = TRUE;
+                    e.stoppedDefault = true;
                 },
                 stopBubble: function() {
                     e.stopPropagation();
-                    e.stoppedBubble = TRUE;
+                    e.stoppedBubble = true;
                 },
                 stopBubbleAll: function() {
                     e.stopImmediatePropagation();
-                    e.stoppedBubbleAll = TRUE;
+                    e.stoppedBubbleAll = true;
                 }
             });
 
@@ -173,7 +169,7 @@
             return new Event(type, fn, options);
         }
         function initCustomEvent(type, fn, options) {
-            return new Event(type, fn, $.extend({}, options, {custom: TRUE}));
+            return new Event(type, fn, $.extend({}, options, {custom: true}));
         }
         function initEventTarget(target) {
             return new EventTarget(target);
@@ -220,7 +216,7 @@
             event = createEvent(_this.options.eventClass, _this.type, _this.options);
             _this.event = event.event;
             _this.eventClass = event.eventClass;
-            _this.eventTarget = NULL;
+            _this.eventTarget = null;
 
              options = $.pickAll(_this.options, 'target', 'useCapture');
             _this.target = options.target;
@@ -235,7 +231,7 @@
 
             _this.i = -1; // no bind yet
             _this.fired = 0;
-            _this.cancalled = FALSE;
+            _this.cancalled = false;
             _this.custom = event.eventClass == 'CustomEvent' || !re_typesStandard.test(type);
         }
 
@@ -415,7 +411,7 @@
                     // think memory!
                     events.forEach(function(key, list) {
                         if (list && !list.size) {
-                            events.replaceAt(key, NULL);
+                            events.replaceAt(key, null);
                         }
                     });
                 }
@@ -473,7 +469,7 @@
             });
         }
         function once(target, type, fn, options) {
-            var args = prepareArgs(fn, options, target, TRUE);
+            var args = prepareArgs(fn, options, target, true);
 
             type.split(re_commaSplit).forEach(function(type) {
                 initEvent(type, function(e) {
