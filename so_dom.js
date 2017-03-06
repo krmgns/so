@@ -2171,21 +2171,44 @@
 
     // dom: form element states
     extendPrototype(Dom, {
+        /**
+         * Checked.
+         * @param  {Boolean} ?option
+         * @return {Boolean|this}
+         */
         checked: function(option) {
-            var _this = this; return isVoid(option) ?
-                _this[0].checked : (setAttribute(_this[0], 'checked', option), _this);
+            var _this = this; return isVoid(option) ? !!(_this[0] && _this[0].checked)
+                : (setAttribute(_this[0], 'checked', option), _this);
         },
+
+        /**
+         * Selected.
+         * @param  {Boolean} ?option
+         * @return {Boolean|this}
+         */
         selected: function(option) {
-            var _this = this; return isVoid(option) ?
-                _this[0].selected : (setAttribute(_this[0], 'selected', option), _this);
+            var _this = this; return isVoid(option) ? !!(_this[0] && _this[0].selected)
+                : (setAttribute(_this[0], 'selected', option), _this);
         },
+
+        /**
+         * Disabled.
+         * @param  {Boolean} ?option
+         * @return {Boolean|this}
+         */
         disabled: function(option) {
-            var _this = this; return isVoid(option) ?
-                _this[0].disabled : (setAttribute(_this[0], 'disabled', option), _this);
+            var _this = this; return isVoid(option) ? !!(_this[0] && _this[0].disabled)
+                : (setAttribute(_this[0], 'disabled', option), _this);
         },
+
+        /**
+         * Readonly.
+         * @param  {Boolean} ?option
+         * @return {Boolean|this}
+         */
         readonly: function(option) {
-            var _this = this; return isVoid(option) ?
-                _this[0].readOnly : (setAttribute(_this[0], 'readOnly', option), _this);
+            var _this = this; return isVoid(option) ? !!(_this[0] && _this[0].readOnly)
+                : (setAttribute(_this[0], 'readOnly', option), _this);
         }
     });
 
