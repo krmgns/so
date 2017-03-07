@@ -1,0 +1,163 @@
+<!doctype html>
+<html><head></head><body class="body">
+
+<!-- // give backs for mdn.. -->
+
+<div id="first"></div>
+
+<script>
+;(function() {
+    // helpers
+    var regExp = function(name) {
+        return new RegExp('(^| )'+ name +'( |$)');
+    };
+    var forEach = function(list, fn, scope) {
+        for (var i = 0; i < list.length; i++) {
+            fn.call(scope, list[i]);
+        }
+    };
+
+    // class list object with basic methods
+    function ClassList(element) {
+        this.element = element;
+    }
+    ClassList.prototype = {
+        add: function() {
+            forEach(arguments, function(name) {
+                if (!this.contains(name)) {
+                    this.element.className += ' '+ name;
+                }
+            }, this);
+        },
+        remove: function() {
+            forEach(arguments, function(name) {
+                this.element.className =
+                    this.element.className.replace(regExp(name), '');
+            }, this);
+        },
+        toggle: function(name) {
+            return this.contains(name)
+                ? (this.remove(name), false) : (this.add(name), true);
+        },
+        contains: function(name) {
+            return regExp(name).test(this.element.className);
+        },
+        // bonus..
+        replace: function(oldName, newName) {
+            this.remove(oldName), this.add(newName);
+        }
+    };
+
+    // IE8/9, Safari
+    if (!('classList' in Element.prototype)) {
+        Object.defineProperty(Element.prototype, 'classList', {
+            get: function() {
+                return new ClassList(this);
+            }
+        });
+    }
+
+    // replace() support for others
+    if (window.DOMTokenList && DOMTokenList.prototype.replace == null) {
+        DOMTokenList.prototype.replace = ClassList.prototype.replace;
+    }
+})();
+
+// Overwrites native 'lastElementChild' prototype.
+// Adds Document & DocumentFragment support for IE9 & Safari.
+// Returns array instead of HTMLCollection.
+;(function(constructor) {
+    if (constructor &&
+        constructor.prototype &&
+        constructor.prototype.lastElementChild == null) {
+        Object.defineProperty(constructor.prototype, 'lastElementChild', {
+            get: function() {
+                var node, nodes = this.childNodes, i = nodes.length - 1;
+                while (node = nodes[i--]) {
+                    if (node.nodeType === 1) {
+                        return node;
+                    }
+                }
+                return null;
+            }
+        });
+    }
+})(window.Node || window.Element);
+
+// Overwrites native 'firstElementChild' prototype.
+// Adds Document & DocumentFragment support for IE9 & Safari.
+// Returns array instead of HTMLCollection.
+;(function(constructor) {
+    if (constructor &&
+        constructor.prototype &&
+        constructor.prototype.firstElementChild == null) {
+        Object.defineProperty(constructor.prototype, 'firstElementChild', {
+            get: function() {
+                var node, nodes = this.childNodes, i = 0;
+                while (node = nodes[i++]) {
+                    if (node.nodeType === 1) {
+                        return node;
+                    }
+                }
+                return null;
+            }
+        });
+    }
+})(window.Node || window.Element);
+
+// Overwrites native 'children' prototype.
+// Adds Document & DocumentFragment support for IE9 & Safari.
+// Returns array instead of HTMLCollection.
+;(function(constructor) {
+    if (constructor &&
+        constructor.prototype &&
+        constructor.prototype.children == null) {
+        Object.defineProperty(constructor.prototype, 'children', {
+            get: function() {
+                var i = 0, node, nodes = this.childNodes, children = [];
+                while (node = nodes[i++]) {
+                    if (node.nodeType === 1) {
+                        children.push(node);
+                    }
+                }
+                return children;
+            }
+        });
+    }
+})(window.Node || window.Element);
+
+;(function(constructor) {
+    if (constructor &&
+        constructor.prototype &&
+        constructor.prototype.childElementCount == null) {
+        Object.defineProperty(constructor.prototype, 'childElementCount', {
+            get: function() {
+                var i = 0, count = 0, node, nodes = this.childNodes;
+                while (node = nodes[i++]) {
+                    if (node.nodeType === 1) {
+                        count++;
+                    }
+                }
+                return count;
+            }
+        });
+    }
+})(window.Node || window.Element);
+
+;(function(prototype) {
+    prototype.hasAttributes = prototype.hasAttributes || function() {
+        return (this.attributes.length > 0);
+    }
+})(Element.prototype);
+
+;(function(prototype) {
+    prototype.hasAttribute = prototype.hasAttribute || function(name) {
+        return !!(this.attributes[name] &&
+                  this.attributes[name].specified);
+    }
+})(Element.prototype);
+</script>
+
+<div id="last"></div>
+
+</body></html>

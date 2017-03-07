@@ -1,0 +1,277 @@
+<!doctype html><html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=9" />
+<style>body{margin:0; padding:0; height: !1000px}</style>
+<!-- <script src="so-all.php"></script> -->
+<script src="../so.js"></script>
+<script src="../so_list.js"></script>
+<script src="../so_class.js"></script>
+<script src="../so_util.js"></script>
+<script src="../so_browser.js"></script>
+<script src="../so_event.js"></script>
+<script src="../so_http.js"></script>
+<script src="../ext/so.ext.easing.js"></script>
+<script src="../so_animation.js"></script>
+<script src="../so_dom.js"></script>
+</head>
+<body class="body">
+
+<div id="wrap">
+    <p>wrap p</p>
+    <div id="wrap-1" class="wrap">wrap 1</div>
+    <div id="wrap-2" class="wrap">wrap 2</div>
+    <div id="wrap-3" class="wrap">wrap 3</div>
+    <div id="wrap-4" class="wrap">wrap 4</div>
+    <div id="wrap-5" class="wrap">wrap 5</div>
+    <div id="wrap-6" class="wrap">wrap 6</div>
+    <div id="wrap-7" class="wrap">wrap 7</div>
+    <div id="wrap-8" class="wrap">wrap 8 <i>...</i></div>
+</div>
+
+<form id="form" attr="attr-foo" acceptcharset="utf-8" src="?foo=1" class="cls1 cls2">
+    <input so:v="1" id="form_i" name="form_i" value="123">
+    <select id="form_s" name="form_s">
+        <option>-none-</option>
+        <option value="1" disabled>1</option>
+        <option value="2">2</option>
+    </select>
+    <input type="file" name="file" multiple>
+    <input type="radio" name="radio" values="ok" checked>
+    <input type="checkbox" name="checkbox[0][1]" values="1-0" checked>
+    <input type="checkbox" name="checkbox[1][1]" values="1-1" checked>
+    <textarea name=""></textarea>
+    <input type="submit" name="submit">
+</form>
+<input type="checkbox" checked="checked" id="checkbox">
+<hr>
+<button>button</button>
+<hr>
+<a id="a1" href="#" onclick="alert(1); return !1">a 1</a>
+<a id="a2" href="#">a 2</a>
+<a href="#" id="animate">animate</a>
+
+<div id="div-out" style="padding:">
+    <!-- <div id="div" style="width: 200px; color:red; margin:10px; padding:10px; border:1px solid; min-height:10px; transform: scale(0.5); display:none; position:relative"> -->
+    <div id="div" style="width: ; margin:10px; padding:20px; border:1px solid; display:none ">
+    <!-- <div id="div" style="border:1px solid; transform:scale(0.5); display:none"> -->
+        <p id="p">p</p>
+        <p id="p1">p1</p>
+        <p id="p2">p2</p>
+        <p id="p3">p3</p>
+        <hr>
+        <br>
+        <div id="div-in1">div-in1</div>
+        <div id="div-in2">div-in2</div>
+    </div>
+</div>
+<!-- <style>#div-out, #div {color:red; position:inherit; display:none}</style> -->
+
+<!-- <style>.div {display:none; visibility: hidden;}</style>
+
+<div id="div-parent-root" class="div" style="display:none!important">
+    <div id="div-parent-3" class="div" style="visibility:hidden!important">
+        <div id="div-parent-2" class="div">
+            <div id="div-parent-1" class="div foo">
+                <div id="div-target"  class="div foo bar" style="display:none!important">whad dhaa..</div>
+            </div>
+        </div>
+    </div>
+</div> -->
+<!-- <div id="div0" style="position:relative; border:1px solid; top:5px; left:1px; display:">
+    <div id="div1" style="position:relative; width:300px; height:1300px; border:1px solid red; top:5px; left:2px; display:;">
+        <div id="div2" style="position:absolute; width:50px; height:50px; border:1px solid blue; background:blue; top:10px; padding:; margin:; "></div>
+        <div id="div3" style="position:absolute; width:50px; height:50px; border:1px solid blue; background:blue; top:63px; padding:; margin:; "></div>
+    </div>
+</div>
+<style>#div2,#div3{left:10%;}</style> -->
+<!-- <style>#div1{ width: 1000px!important; height: 1000px!important; max-width: 300px; max-height: 500px; overflow-y: auto; } #div2{ width: 1500px!important; height: 1500px!important }</style> -->
+<!-- <style>#div1{ max-width: 300px; max-height: 500px; overflow-y: auto; } #div2{ width: 1500px!important; height: 1500px!important }</style> -->
+<script>
+so.onReady(function($) {
+    // $.dom.loadStyle("/mock/a.css", log)
+    // $.dom.loadScript("/mock/a.js", log)
+
+    // var els = $.dom("#wrap > div")
+    // $.dom.define("changeText", function(text) {
+    //     return this.for(function(el) {
+    //         $.dom.find(el).setText(text)
+    //     })
+    // })
+    // els.changeText(Math.random())
+
+    // el.on("foo", (e) => { log("foo ", e) })
+    // el.on("click", (e) => { log("click 1", e) })
+    // el.on("click", (e) => { log("click 2", e) })
+    // el.on("click", function f(e) { log("click off", e)
+    //     el.fire("foo")
+    //     // el.off("click**")
+    //     // el.off("click", f)
+    // })
+
+    // var uri = '/.dev/so/test/ajax.php', a
+    // var onDone = function onDone() { log('done', arguments) },
+    //     onSuccess = function onSuccess() { log('success') },
+    //     onFailure = function onFailure() { log('failure') }
+
+    // a = $.http.get(uri, onDone, onSuccess, onFailure);
+    // a = $.http.get(uri, {200:onSuccess, 404:onFailure});
+    // a = $.http.get(uri, {uriParams:{a:1/* ,b:[1,2,3],c:{1:1,2:2,3:3} */}}, onDone, onSuccess, onFailure);
+    // a = $.http.get(uri, {dataType:'html', onDone:onDone, onSuccess:onSuccess, onFailure:onFailure});
+    // a = $.http.post(uri, onDone);
+    // a = $.http.post(uri, {data:{id:123}, dataType:'html'}, onDone);
+    // a = $.http.request('/foo', onDone);
+    // a = $.http.request('/foo @html', onDone);
+    // a = $.http.request('post /foo', onDone);
+    // a = $.http.request('post /foo @html', onDone);
+    // a = $.http.request('/foo', {method:'post', data:{id:123}, dataType:'html'}, onDone);
+    // a = $.http.get(uri, {autoSend:false})
+    // a.on('done', function() {
+    //     log('done!')
+    // }).end(function() {
+    //     log("end")
+    // }).send()
+    // log("a:",a)
+
+    // a = $.http.get(uri, {200:log}).on('data', function(data) {
+    //     log("data::",data)
+    // });
+
+    // var a = new Client(uri, {
+    //     data: {a:1},
+    //     method: 'POST',
+    //     // onDone: function(request, response, client) {
+    //     //     log(request, response, client)
+    //     // }
+    //     headers: {'X-foo': 'foo'}
+    // })
+    // .send().end(function(request, response, client) {
+    //     log(request, response, client)
+    // })
+
+    // var url = '/.dev/so/test/ajax.php';
+    // $.http.get(url, function(request, response, client, api) {
+    //     log(request, response, client)
+    //     log(response.headers['content-type'])
+    // });
+
+    // var request = new XMLHttpRequest();
+    // request.open('HEAD', url, true);
+    // request.onreadystatechange = function(e) {
+    //     // if (request.readyState != 4) return;
+    //     // log(request)
+    // };
+    // request.send(null);
+});
+</script>
+
+<script>
+so.onReady(function($) {
+    // var els, el = document.body
+    // el.once('click', () => log(0)).fire()
+    // el.once('click', () => log(1))
+
+    // var a, b, c,
+    //     list = 'list'
+    //     // list = [1,2,'last']
+    //     list = {a:.1,b:2,c:'last'}
+
+    // list = $.list(list)
+
+    // log(list.filter(function(v,k,i) {return log(v), $.isInt(v)}))
+    // log(list.filter(function(v,k,i) {return $.isFloat(v)}))
+    // log(list.append(10))
+    // log(list)
+    // log(list.data)
+    // log(list.toString())
+
+    // log($.pick(list, 0))
+    // log(list.pickAll([0,1,2,3]))
+    // log(list.pickAll(["a","b","c"]))
+
+    // log($.list([1,2,33]).selectAll([], function(v,k) { return v>2 }))
+
+    // log($.list([1,2,33]).select(function(v,k) { return v>2 }))
+    // log($.list({a:1,b:2,c:3}).select(function(v,k) { return v>2 }))
+
+    // a = {"a":undefined,"b":Infinity,"c":3, d:"ddd"}
+    // // b = $.object.has(a, "dddd")
+    // b = $.object.filter(a)
+    // // b = $.object.filter(a, (k,v) => {
+    // //     return $.isIterable(v);
+    // // })
+    // log(a, b)
+
+
+    // a = ["a","2","b"]
+    // log($.array.find(a, (v) => { log(this) }))
+    // log($.array.findIndex(a, (v) => { return v > 111 }))
+
+    // a = $.extend({a:1}, {a:11, b:22})
+    // a = $.extend({}, {a:1}, {a:11, b:22})
+
+    // a = $.extend('@dom', {id: 11})
+    // a = $.extend({'dom': 11})
+
+    // a = $.extend('@dom', function dom(id) {
+    //     this.id = id
+    // })
+    // $.extend('@dom.getId', function() {
+    //     return this.id
+    // })
+
+    // a = new $.dom(+new Date)
+    // log(a)
+    // log("getId():", a.getId())
+
+    // var names = ['Alice', 'Bob', 'Tiff', 'Bruce', 'Alice', 'Bob'];
+
+    // names = names.select(function(name) {
+    //     return name.contains('Alice')
+    // })
+    // log(names)
+
+    // names = names.uniq()
+    // log(names)
+})
+</script>
+
+<script>
+so.onReady(function($) {
+    // function FooBase(id, name) {
+    //     this.id = id;
+    //     this.name = name;
+    // }
+    // FooBase.prototype.x = function() {return "xx"}
+
+    // function Foo(id, name) {
+    //     this.super(id, name);
+    // }
+    // Foo.prototype.x = function() {return "x"}
+
+    // $.class(Foo).extends(FooBase)
+
+    // var foo = new Foo(123, 'the foo!')
+    // log(foo)
+    // log(foo.id)
+    // log(foo.x())
+
+    // var Foo = $.class.create('Foo', {
+    //     id: null,
+    //     name: 'the foo!',
+    //     init: function(id) {
+    //         this.id = id;
+    //     }
+    // })
+    // var foo = new Foo(123)
+    // log(foo)
+    // log(foo.id)
+    // log(foo.name)
+    // if default props in {} prototype, goes to foo.__proto__.__proto__
+    // log(foo.__proto__.__proto__)
+});
+</script>
+
+<!-- <iframe id="iframe" src="iframe.html"></iframe> -->
+
+</body></html>

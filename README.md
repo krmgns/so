@@ -1,10 +1,17 @@
-Actually I know that, there is a buch of JavaScript libraries, even more powerfull. But sometimes doing the things myself is making me happy. That's it...
+Add some description.. @todo
 
-See: http://qeremy.com/sojs
+**Documents**
 
-**Browser Support**
-- IE7+ (not tested on 6 never ever... is it still alive?)
-- Chrome 1+
-- Safari 3+
-- Firefox 2+
-- Opera
+http://qeremy.com/sojs
+
+**Browser Support (Desktop)**
+
+| Firefox | Chrome | Opera | Safari | IE  |
+| ------- | ------ | ----- | ------ | --- |
+| 4       | 5      | 11.6  | 5      | 9   |
+
+**Browser Support (Mobile)**
+
+| Firefox | Chrome | Opera | Safari | IE  | Android |
+| ------- | ------ | ----- | ------ | --- | ------- |
+| 4       | ✓      | 11.5  | ✓      | ✓   | ✓       |

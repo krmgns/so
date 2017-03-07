@@ -1,7 +1,0 @@
-// add user defined methods to elements
-- $.dom.defineMethod(function(element){ ... })
-
-// etc
-- add so.query.js
-- use so.query() in so-all.js
-- remove qwery from so-all-native.js

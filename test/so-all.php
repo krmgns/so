@@ -5,8 +5,9 @@ $files = array(
     'so.ext',
     'so.array',
     'so.object',
-    'so.event',
+    'so.browser',
     'so.animate',
+    'so.event',
     'so.dom',
     'so.ajax',
 );

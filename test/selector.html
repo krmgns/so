@@ -1,0 +1,39 @@
+<!doctype html><html>
+<head>
+<script src="../so.js"></script>
+<script src="../so_list.js"></script>
+<script src="../so_util.js"></script>
+<script src="../so_dom.js"></script>
+</head>
+<body class="body">
+
+<div id="foo">
+    <p>s p</p>
+    <div id="1">1</div>
+    <div id="2">2</div>
+    <div id="3">3</div>
+    <div id="4">4</div>
+    <div id="5">5</div>
+    <div id="6">6</div>
+    <div id="7">7</div>
+    <div id="8">8<i>...</i></div>
+</div>
+
+<script>
+so.onReady(function($) {
+    [
+        '#foo > @first', '#foo > @last',
+        '#foo > @div:first', '#foo > @div:last',
+        '#foo > @div(first)', '#foo > @div(last)', '#foo > @div(:first)', '#foo > @div(:last)',
+        '#foo > @div:odd', '#foo > @div:even',
+        '#foo > @div(odd)', '#foo > @div(even)', '#foo > @div(:odd)', '#foo > @div(:even)',
+        '#foo > @div:3', '#foo > @div:3n', '#foo > @div(3)', '#foo > @div(3n)',
+        '#foo > @p',
+        '#foo > @div',
+    ].forEach(function(selector) {
+        log(selector, $.dom(selector))
+    })
+})
+</script>
+
+</body></html>
