@@ -1,5 +1,3 @@
-Add some description.. @todo
-
 **Documents**
 
 http://qeremy.com/sojs
