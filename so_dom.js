@@ -1225,7 +1225,7 @@
          * @return {String}
          */
         style: function(name, value, valueDefault, raw) {
-            return !$.isVoid(value) ? this.setStyle(name, value)
+            return $.isObject(name) || !$.isVoid(value) ? this.setStyle(name, value)
                 : this.getStyle(name, value, valueDefault, raw);
         },
 
