@@ -2517,9 +2517,9 @@
     // add static methods to dom
     $.dom.extend({
         find: function(selector, root, i) {
-            return $.$(selector, root, i, true);
+            return $.$(selector, root, i);
         },
-        findAll: function(selector, init) {
+        findAll: function(selector, root, i) {
             return $.$$(selector, root, i);
         },
         define: function(name, value) {
