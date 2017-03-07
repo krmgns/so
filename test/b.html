@@ -4,7 +4,7 @@
 <meta http-equiv="x-ua-compatible" content="ie=9" />
 <style>body{margin:0; padding:0; height: !1000px}</style>
 <!-- <script src="so-all.php"></script> -->
-<script src="../so.js"></script>
+<!-- <script src="../so.js"></script>
 <script src="../so_list.js"></script>
 <script src="../so_class.js"></script>
 <script src="../so_util.js"></script>
@@ -13,7 +13,8 @@
 <script src="../so_http.js"></script>
 <script src="../ext/so.ext.easing.js"></script>
 <script src="../so_animation.js"></script>
-<script src="../so_dom.js"></script>
+<script src="../so_dom.js"></script> -->
+<script src="../so-all.js"></script>
 </head>
 <body class="body">
 
@@ -92,22 +93,23 @@ so.onReady(function($) {
     // $.dom.loadStyle("/mock/a.css", log)
     // $.dom.loadScript("/mock/a.js", log)
 
-    // var els = $.dom("#wrap > div")
+    var $a = $.dom("#wrap")
     // $.dom.define("changeText", function(text) {
     //     return this.for(function(el) {
     //         $.dom.find(el).setText(text)
     //     })
     // })
-    // els.changeText(Math.random())
+    // $a.changeText(Math.random())
 
-    // el.on("foo", (e) => { log("foo ", e) })
-    // el.on("click", (e) => { log("click 1", e) })
-    // el.on("click", (e) => { log("click 2", e) })
-    // el.on("click", function f(e) { log("click off", e)
-    //     el.fire("foo")
-    //     // el.off("click**")
-    //     // el.off("click", f)
-    // })
+    $a.on("foo", (e) => { log("foo ", e) })
+    $a.on("click", (e) => { log("click 1", e) })
+    $a.on("click", (e) => { log("click 2", e) })
+    $a.on("click", function f(e) { log("click off", e)
+        $a.fire("foo")
+        // $a.off("click**")
+        // $a.off("click", f)
+    })
+    $.fire("3s", () => $a.fire("foo").off("foo"))
 
     // var uri = '/.dev/so/test/ajax.php', a
     // var onDone = function onDone() { log('done', arguments) },
