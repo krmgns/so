@@ -432,7 +432,7 @@
                     });
                 }
             } else {
-                $.logWarn('No `%s` events found to fire.'.format(event.type));
+                $.logWarn('No `%s` events found to remove.'.format(event.type));
             }
         },
 
