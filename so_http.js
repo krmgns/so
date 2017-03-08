@@ -327,9 +327,10 @@
                 }
             }
 
-            if($.isFunction(fn)) {
+            if ($.isFunction(fn)) {
                 var args = [this.request, this.response, this];
-                if (fnArgs) {
+                // prepend
+                if (!$.isUndefined(fnArgs)) {
                     args = [fnArgs].concat(args);
                 }
                 fn.apply(this, args);
