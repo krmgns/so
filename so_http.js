@@ -12,7 +12,6 @@
     var re_json = /^(\{.*\}|\[.*\]|".*"|\d+(\.\d+)?|true|false|null)$/;
     var re_request = /^([a-z]+)?\s*(.*?)\s*(?:@(json|xml|html|text))?$/i;
     var re_dataType = /\/(json|xml|html|plain)(?:[; ])?/i;
-    var fn_encode = encodeURIComponent;
     var optionsDefault = {
         method: 'GET', uri: '', uriParams: null, data: null, dataType: null,
         async: true, noCache: true, autoSend: true, headers: {},
@@ -90,22 +89,22 @@
                 data = data.data;
             }
 
-            var ret = [];
+            var ret = [], encode = encodeURIComponent;;
 
             $.forEach(data, function(key, value) { // only two-dimensionals
-                key = fn_encode(key);
+                key = encode(key);
                 if ($.isArray(value)) {
                     if (value.length) {
                         while (value.length) {
-                            ret.push('%s[]=%s'.format(key, fn_encode(value.shift())));
+                            ret.push('%s[]=%s'.format(key, encode(value.shift())));
                         }
                     } else ret.push('%s[]='.format(key));
                 } else if ($.isObject(value)) {
                     $.forEach(value, function(_key, _value) {
-                        ret.push('%s[%s]=%s'.format(key, _key, fn_encode(_value)));
+                        ret.push('%s[%s]=%s'.format(key, _key, encode(_value)));
                     });
                 } else {
-                    ret.push('%s=%s'.format(key, fn_encode(value)));
+                    ret.push('%s=%s'.format(key, encode(value)));
                 }
             });
 
