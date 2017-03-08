@@ -1489,7 +1489,7 @@
         if (isNodeElement(el)) {
             ret.top = el.scrollTop, ret.left = el.scrollLeft;
         } else if (isRoot(el) || isRootElement(el)) {
-            var win = $.win(el);
+            var win = $.getWindow(el);
             ret.top = win.pageYOffset, ret.left = win.pageXOffset;
         }
 
