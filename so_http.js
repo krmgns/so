@@ -150,6 +150,10 @@
     $.class(Response).extends(Stream);
 
     // shortcut helpers
+    function addUriParams(uri, uriParams) {
+        return (uri += (!uri.has('?') ? '?' : '&') + $.http.serialize(uriParams));
+    }
+
     function removeReadyStateChange(client) {
         client.api.onreadystatechange = null;
     }
@@ -240,15 +244,16 @@
         }
 
         if (options.uriParams) {
-            options.uri = options.uri.append(!options.uri.has('?') ? '?' : '&',
-                $.http.serialize(options.uriParams));
+            options.uri = addUriParams(options.uri, options.uriParams);
+        } else if (options.data && options.method == 'GET') {
+            options.uri = addUriParams(options.uri, options.data);
         }
-        if (!options.noCache) {
-            options.uri = options.uri.append(!options.uri.has('?') ? '?' : '&', '_=', $.now());
+
+        if (options.noCache) {
+            options.uri = addUriParams(options.uri, {'_': $.now()});
         }
         options.uri = options.uri.replace(re_query, '?$&');
 
-        var _this = this;
         this.options = options;
         this.request = new Request(this);
         this.response = new Response(this);
@@ -261,6 +266,7 @@
         this.request.headers = $.extend({}, options.headers, {'X-Requested-With': 'XMLHttpRequest'});
 
         if (options.async) {
+            var _this = this;
             this.api.onreadystatechange = function() {
                 onReadyStateChange(_this);
             };
@@ -285,25 +291,31 @@
          * @return {this}
          */
         send: function() {
-            var _this = this, options = this.options;
-
             if (!this.sent && !this.aborted) {
+                var _this = this, data;
+
                 $.forEach(this.request.headers, function(key, value) {
                     _this.api.setRequestHeader(key, value);
                 });
 
                 this.fire('beforeSend');
-                this.api.send($.http.serialize(this.request.data));
+
+                // check data
+                if (re_post.test(this.request.method)) {
+                    data = $.http.serialize(this.request.data);
+                }
+                this.api.send(data);
+
                 this.fire('afterSend');
 
-                this.sent = true;
-
-                if (options.timeout) {
-                    $.fire(options.timeout, function(){
+                if (this.options.timeout) {
+                    $.fire(this.options.timeout, function(){
                         _this.cancel();
                         _this.fire('timeout');
                     });
                 }
+
+                this.sent = true;
             }
 
             return this;
@@ -404,7 +416,7 @@
         }
 
         var re, _options = options = options || {};
-        uri = uri.trim();
+        uri = uri.trimSpace();
         if (uri.has(' ')) {
             // <method> <uri> @<data type>, eg: '/foo', '/foo @json', 'GET /foo', 'GET /foo @json'
             re = re_request.exec(uri);
