@@ -198,18 +198,15 @@
                 }
                 client.response.dataType = dataType;
 
-                // on('data', ...)
-                client.fire('data', client.response.data);
-
                 // specials, eg: 200: function(){...}
                 client.fire(client.response.statusCode);
 
                 // success or failure?
                 client.fire((client.response.statusCode > 99 && client.response.statusCode < 400)
-                    ? 'success' : 'failure');
+                    ? 'success' : 'failure', client.response.data);
 
                 // end!
-                client.fire('done');
+                client.fire('done', client.response.data);
 
                 // release trigger button
                 if (client.options.trigger) {
