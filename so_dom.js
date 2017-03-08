@@ -2532,7 +2532,7 @@
         create: function(content, attributes) {
             return create(content, null, attributes);
         },
-        loadStyle: function(src, onload, attributes) {
+        loadCss: function(src, onload, attributes) {
             var s = document.createElement('link');
             s.href = src, s.onload = onload, s.rel = 'stylesheet';
             document.head.appendChild(s);
@@ -2549,9 +2549,6 @@
         },
         isNodeElement: function(el) {
             return isNodeElement(el);
-        },
-        isUnitStyle: function(value) {
-            return !re_noneUnitStyles.test(value);
         }
     });
 

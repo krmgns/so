@@ -10,6 +10,7 @@
     var re_root = /(?:html|body)/;
     var re_digit = /\d+/;
     var re_scroll = /scroll(?:Top|Left)/;
+    var re_noneUnitStyles = /((fill)?opacity|z(oom|index)|(fontw|lineh)eight|column(count|s))/i;
     var opt_fps = 1000 / 60;
     var opt_speeds = {fast: 50, slow: 650, default: 350};
     // thanks: http://easings.net/ (easeOutQuad)
@@ -71,7 +72,7 @@
                     startValue = $.float(style);
                     endValue = $.float(value);
 
-                    if ($.dom.isUnitStyle(name)) {
+                    if (!re_noneUnitStyles.test(name)) {
                         unit = style.replace(re_digit, '');
                     }
                 } else {
