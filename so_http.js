@@ -27,7 +27,7 @@
         /**
          * Parse XML.
          * @param  {Any}    input
-         * @param  {String} inputType
+         * @param  {String} inputType?
          * @return {Document}
          */
         parseXml: function(input, inputType) {
@@ -390,12 +390,12 @@
 
     /**
      * Invoke.
-     * @param  {String}             uri
-     * @param  {Object|Function}    options
-     * @param  {Function|undefined} onDone
-     * @param  {Function|undefined} onSuccess
-     * @param  {Function|undefined} onFailure
-     * @param  {String}             method @internal
+     * @param  {String}          uri
+     * @param  {Object|Function} options
+     * @param  {Function}        onDone?
+     * @param  {Function}        onSuccess?
+     * @param  {Function}        onFailure?
+     * @param  {String}          method?
      * @return {Client}
      */
     function invoke(uri, options, onDone, onSuccess, onFailure, method) {
