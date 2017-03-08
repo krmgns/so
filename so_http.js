@@ -11,10 +11,10 @@
     var re_post = /P(U|OS)T/i;
     var re_json = /^(\{.*\}|\[.*\]|".*"|\d+(\.\d+)?|true|false|null)$/;
     var re_request = /^([a-z]+)?\s*(.*?)\s*(?:@(json|xml|html|text))?$/i;
-    var re_dataTypes = /\/(json|xml|html|plain)(?:[; ])?/i;
+    var re_dataType = /\/(json|xml|html|plain)(?:[; ])?/i;
     var fn_encode = encodeURIComponent;
     var optionsDefault = {
-        method: 'GET', uri: '', uriParams: null, data: null, dataType: 'json',
+        method: 'GET', uri: '', uriParams: null, data: null, dataType: null,
         async: true, noCache: true, autoSend: true, headers: {},
         onStart: null, onStop: null, /* @todo: queue */ onProgress: null, onHeaders: null,
         onDone: null, onSuccess: null, onFailure: null,
@@ -178,7 +178,7 @@
                     headers = $.http.parseHeaders(client.api.getAllResponseHeaders()),
                     data = client.api.responseText,
                     dataType = client.options.dataType
-                        || (re_dataTypes.exec(headers['content-type']) || [,])[1];
+                        || (re_dataType.exec(headers['content-type']) || [,])[1];
 
                 client.response.status = headers[0] = status;
                 client.response.statusCode = client.api.status;
