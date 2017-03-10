@@ -1,4 +1,4 @@
-So.js: A multipurpose JavaScript library (DOM, HTTP, Events, Animations and extensions built with So). 
+So.js is a multipurpose JavaScript library (DOM, HTTP, Events, Animations and extensions built with So).
 
 **Browser Support (Desktop)**
 
@@ -11,3 +11,5 @@ So.js: A multipurpose JavaScript library (DOM, HTTP, Events, Animations and exte
 | Firefox | Chrome | Opera | Safari | IE  | Android |
 | ------- | ------ | ----- | ------ | --- | ------- |
 | 4       | ✓      | 11.5  | ✓      | ✓   | ✓       |
+
+See documentation [here](https://github.com/k-gun/so/wiki)
