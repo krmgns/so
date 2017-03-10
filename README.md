@@ -35,7 +35,8 @@ so.onReady(function($) {
 
 ### Animation Example
 
-// set each <p> font size animating to '15px', wich has no 'foo' class
+```js
+// set each '<p>' font size animating to '15px', wich has no 'foo' class
 so.onReady(function($) {
     $.dom("p:not(.foo)").animate({"font-size": 15});
     // or
