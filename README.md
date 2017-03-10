@@ -34,7 +34,6 @@ so.onReady(function($) {
 ```
 
 ### Animation Example
-
 ```js
 // set each '<p>' font size animating to '15px', wich has no 'foo' class
 so.onReady(function($) {
