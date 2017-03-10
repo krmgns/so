@@ -12,4 +12,7 @@ So.js is a multipurpose JavaScript library that contains DOM, HTTP, Event, Anima
 | ------- | ------ | ----- | ------ | --- | ------- |
 | 4       | ✓      | 11.5  | ✓      | ✓   | ✓       |
 
-See documentation [here](https://github.com/k-gun/so/wiki)
+<br>
+<br>
+
+See documentation [here](https://github.com/k-gun/so/wiki).
