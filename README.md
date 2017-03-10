@@ -9,7 +9,7 @@ so.onReady(function($) {
     $.dom("p").not(".foo").style("font-size", 15);
     // or
     $.dom("p").filter(function(el) {
-        retur !$.dom(el).hasClass('.foo');
+        return !$.dom(el).hasClass('.foo');
     }).style("font-size", 15);
 });
 ```
@@ -42,7 +42,7 @@ so.onReady(function($) {
     $.dom("p").not(".foo").animate({"font-size": 15});
     // or
     $.dom("p").filter(function(el) {
-        retur !$.dom(el).hasClass('.foo');
+        return !$.dom(el).hasClass('.foo');
     }).animate({"font-size": 15});
 });
 ```
