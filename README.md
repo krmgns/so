@@ -1,6 +1,4 @@
-**Documents**
-
-http://qeremy.com/sojs
+So.js: A multipurpose JavaScript library (DOM, HTTP, Events, Animations and extensions built with So). 
 
 **Browser Support (Desktop)**
 
