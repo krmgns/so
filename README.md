@@ -1,7 +1,7 @@
 So.js is a multipurpose JavaScript library that contains DOM, HTTP, Event, Animation objects and extensions built with So.
 
 **DOM Example**
-```js
+```javascript
 // set each '<p>' font size animating to '15px', wich has no 'foo' class
 so.onReady(function($) {
     $.dom("p:not(.foo)").animate({"font-size": 15});
