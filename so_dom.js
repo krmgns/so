@@ -2532,7 +2532,7 @@
         create: function(content, attributes) {
             return create(content, null, attributes);
         },
-        loadCss: function(src, onload, attributes) {
+        loadStyle: function(src, onload, attributes) {
             var s = document.createElement('link');
             s.href = src, s.onload = onload, s.rel = 'stylesheet';
             document.head.appendChild(s);
