@@ -172,7 +172,7 @@
      * @param {Boolean}       one?
      */
     function Dom(selector, root, i, one) {
-        var elements, size = 0;
+        var els, size = 0;
 
         if ($.isNumber(root)) {
             i = root, root = undefined;
@@ -183,28 +183,28 @@
                 selector = $.trimSpace(selector);
                 if (selector) { // prevent empty selector error
                     if (re_tag.test(selector)) {
-                        elements = create(selector, root, root); // 'root' could be document or attribute(s)
+                        els = create(selector, root, root); // 'root' could be document or attribute(s)
                     } else {
-                        elements = select(selector, root, one);
+                        els = select(selector, root, one);
                         if ($.isNumber(i)) {
-                            elements = [elements[i]];
+                            els = [els[i]];
                         }
                     }
                 }
             } else if ($.isWindow(selector) || $.isDocument(selector)) {
-                elements = [selector];
+                els = [selector];
             } else if (isNode(selector)) {
                 if (root && root != selector[NAME_PARENT_NODE]) {
                     // pass (check root reliability)
                 } else {
-                    elements = [selector];
+                    els = [selector];
                 }
             } else {
-                elements = selector;
+                els = selector;
             }
 
-            _for(elements, function(element) {
-                if (element) this[size++] = element;
+            _for(els, function(el) {
+                if (el) this[size++] = el;
             }, this);
         }
 
@@ -486,8 +486,10 @@
             if (el.$data) clone.$data = el.$data;
 
             if (el.$events) {
-                el.$events.forAll(function(event) {
-                    event.copy().bindTo(clone);
+                _for(el.$events, function(events) {
+                    _for(events, function(event) {
+                        event.copy().bindTo(clone);
+                    });
                 });
             }
 
@@ -532,8 +534,8 @@
          * @return {Dom}
          */
         clone: function(deep) {
-            var clones = []; return this.for(function(element, i) {
-                clones[i] = cloneElement(element, deep);
+            var clones = []; return this.for(function(el, i) {
+                clones[i] = cloneElement(el, deep);
             }), initDom(clones);
         },
 
@@ -542,8 +544,8 @@
          * @return {this}
          */
         empty: function() {
-            return this.for(function(element) {
-                cleanElement(element);
+            return this.for(function(el) {
+                cleanElement(el);
             });
         },
 
@@ -552,10 +554,10 @@
          * @return {this}
          */
         remove: function() {
-            return this.for(function(element) {
-                cleanElement(element);
-                if (element[NAME_PARENT_NODE]) {
-                    element[NAME_PARENT_NODE].removeChild(element);
+            return this.for(function(el) {
+                cleanElement(el);
+                if (el[NAME_PARENT_NODE]) {
+                    el[NAME_PARENT_NODE].removeChild(el);
                 }
             });
         },
