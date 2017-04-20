@@ -27,7 +27,7 @@
     var re_space = /\s+/g;
     var re_comma = /,\s*/;
     var re_trim = /^\s+|\s+$/g;
-    var re_tag = /^<[a-z-][^>]*>/i;
+    var re_tag = /^<([a-z-]+)[^>]*>/i;
     var toStyleName = $.util.toCamelCaseFromDashCase;
     var extend = $.extend, extendPrototype = $.extendPrototype;
     var _re = $.re, _array = $.array, _for = $.for, _forEach = $.forEach;
@@ -182,8 +182,9 @@
             if ($.isString(selector)) {
                 selector = $.trimSpace(selector);
                 if (selector) { // prevent empty selector error
-                    if (re_tag.test(selector)) {
-                        els = create(selector, root, root); // 'root' could be document or attribute(s)
+                    var re = selector.match(re_tag);
+                    if (re) {
+                        els = create(selector, root, root, re[1]); // 'root' could be document or attribute(s)
                     } else {
                         els = select(selector, root, one);
                         if ($.isNumber(i)) {
@@ -440,7 +441,7 @@
     });
 
     // create helpers
-    function create(content, doc, attributes) {
+    function create(content, doc, attributes, tag) {
         if (isDom(content)) {
             return content.toArray();
         }
@@ -448,15 +449,27 @@
             return [content];
         }
 
+        var tmp, tmpTag, frg;
+        tmpTag = 'so-tmp';
+
+        // fix table stuff
+        if (tag) {
+            switch (tag.toLowerCase()) {
+                case 'tr': tmpTag = 'tbody'; break;
+                case 'th': case 'td': tmpTag = 'tr'; break;
+                case 'thead': case 'tbody': case 'tfoot': tmpTag = 'table'; break;
+            }
+        }
+
         doc = doc && $.isDocument(doc) ? doc : document;
-        var tmp = createElement(doc, 'so-tmp', {innerHTML: content});
-        var fragment = doc.createDocumentFragment();
+        tmp = createElement(doc, tmpTag, {innerHTML: content});
+        frg = doc.createDocumentFragment();
         while (tmp[NAME_FIRST_CHILD]) {
-            fragment.appendChild(tmp[NAME_FIRST_CHILD]);
+            frg.appendChild(tmp[NAME_FIRST_CHILD]);
         }
 
         if (attributes && $.isObject(attributes)) {
-            _for(fragment[NAME_CHILD_NODES], function(node) {
+            _for(frg[NAME_CHILD_NODES], function(node) {
                 if (isNodeElement(node)) {
                     _forEach(attributes, function(name, value) {
                         node.setAttribute(name, value);
@@ -465,7 +478,7 @@
             });
         }
 
-        return _array(fragment[NAME_CHILD_NODES]);
+        return _array(frg[NAME_CHILD_NODES]);
     }
 
     function createElement(doc, tag, properties) {
