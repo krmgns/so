@@ -853,10 +853,11 @@
 
         /**
          * Get html.
+         * @param  {Boolean} outer
          * @return {String}
          */
-        getHtml: function() {
-            return __(this, NAME_INNER_HTML);
+        getHtml: function(outer) {
+            return !outer ? __(this, NAME_INNER_HTML) : __(this, 'outerHTML');
         }
     });
 
