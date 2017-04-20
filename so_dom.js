@@ -2410,7 +2410,7 @@
             fadeOut: function(speed, callback) {
                 // remove element after fading out
                 if ($.isTrue(callback) || callback == 'remove') {
-                    callback = function(el) { $.dom(el).remove(); };
+                    callback = function(animation) { $.dom(animation.target).remove(); };
                 }
                 return this.fade(0, speed, callback);
             },
