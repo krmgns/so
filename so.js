@@ -20,7 +20,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.0.0';
+    window.so.VERSION = '5.3.4';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
     window.so.DOMLevel = window[NAME_DOCUMENT].adoptNode ? 3 : 2;
@@ -529,10 +529,10 @@
 
         /**
          * Prepen.
-         * @param  {String} input
+         * @param  {String} ...arguments
          * @return {String}
          */
-        prepend: function(input) {
+        prepend: function() {
             var str = toString(this); return $.for(arguments, function(value) {
                 str = value + str;
             }), str;
@@ -720,8 +720,8 @@
     /**
      * Array.
      * @param  {Any} input
-     * @param  {Int} begin
-     * @param  {Int} end
+     * @param  {Int} begin?
+     * @param  {Int} end?
      * @return {Array}
      */
     function makeArray(input, begin, end) {
@@ -805,17 +805,23 @@
          * Fire & fire(r)ecursive.
          * @param  {Int}      delay (ms)
          * @param  {Function} fn
-         * @param  {Array}    fnArgs
+         * @param  {Array}    fnArgs?
          * @return {void}
          */
         fire: function(delay, fn, fnArgs) {
-            if ($.isString(delay)) delay = toTimeInt(delay);
+            if ($.isString(delay)) {
+                delay = toTimeInt(delay);
+            }
+
             return setTimeout(function() {
                 fn.apply(null, fnArgs || []);
             }, delay || 1);
         },
         firer: function(delay, fn, fnArgs) {
-            if ($.isString(delay)) delay = toTimeInt(delay);
+            if ($.isString(delay)) {
+                delay = toTimeInt(delay);
+            }
+
             return setInterval(function() {
                 fn.apply(null, fnArgs || []);
             }, delay || 1);
