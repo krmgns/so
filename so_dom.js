@@ -2194,12 +2194,12 @@
             };
 
             if (!callback) {
-                return _ret(this.serializeArray(null, false));
+                return _ret(this.serializeArray());
             }
 
             this.serializeArray(function(data) {
                 callback(_ret(data));
-            }, false);
+            });
         }
     });
 
