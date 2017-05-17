@@ -20,7 +20,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.3.5';
+    window.so.VERSION = '5.3.6';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
     window.so.DOMLevel = window[NAME_DOCUMENT].adoptNode ? 3 : 2;
@@ -271,14 +271,9 @@
             return input && (input.constructor == Object);
         },
 
-        /** Is list. @param {Any} input @return {Boolean} */
-        isList: function(input) {
-            return input && (input.constructor && input.constructor.name == 'List');
-        },
-
         /** Is iterable.     @param {Any} input @return {Boolean} */
         isIterable: function(input) {
-            return $.isArray(input) || $.isObject(input) || $.isList(input) || (input && (
+            return $.isArray(input) || $.isObject(input) || (input && (
                 (input.length != null && !input[NAME_NODE_TYPE]) // dom, nodelist, string etc.
             ));
         },
@@ -942,7 +937,6 @@
             else if ($.isUndefined(input))   type = 'undefined';
             else if ($.isWindow(input))      type = NAME_WINDOW;
             else if ($.isDocument(input))    type = NAME_DOCUMENT;
-            else if ($.isList(input))        type = 'list';
             else type = fn_toString.call(input).slice(8, -1).toLowerCase();
 
             return type;

@@ -1,7 +1,7 @@
 /**
  * @package so
  * @object  so.http
- * @depends so, so.class
+ * @depends so, so.list, so.class
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */

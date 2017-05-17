@@ -476,6 +476,15 @@
      */
     $.list = function(data, options) {
         return new List(data, options);
-    }
+    };
+
+    /**
+     * Is list.
+     * @param  {Any} input
+     * @return {Boolean}
+     */
+    $.isList = function(input) {
+        return input && (input instanceof List);
+    };
 
 })(so);
