@@ -76,7 +76,7 @@
 
     function toTimeInt(input) {
         var tmp = input.split(re_time),
-            time = toInt(tmp[1]), timeDir = tmp[2], ret = +input;
+            time = toInt(tmp[1]), timeDir = tmp[2];
 
         switch (timeDir) {
             case 's': case 'sec': input = time * 1000; break;
