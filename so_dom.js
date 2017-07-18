@@ -445,7 +445,7 @@
         if (isDom(content)) {
             return content.toArray();
         }
-        if (isNodeElement()) {
+        if (isNode(content)) {
             return [content];
         }
 
