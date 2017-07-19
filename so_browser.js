@@ -86,9 +86,9 @@
                 enableHighAccuracy: true
             }, options);
 
-            navigator.geolocation.getCurrentPosition(function(position, onError, options){
+            navigator.geolocation.getCurrentPosition(function(position) {
                 onDone(position, position.coords.latitude, position.coords.longitude);
-            });
+            }, onError, options);
         };
 
         // beacon (navigator.sendBeacon() not supported by all browsers)
