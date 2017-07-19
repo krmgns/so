@@ -12,16 +12,16 @@
     var fns_os = ['isMac', 'isWindows', 'isLinux', 'isUnix'];
     var fns_ua = ['isChrome', 'isSafari', 'isFirefox', 'isOpera', 'isWebkitOpera', 'isIE', 'isTrident'];
     var navigator = window.navigator;
+    var ua = navigator.userAgent.toLowerCase();
+    var uap = navigator.platform.toLowerCase();
     var isTouchDevice = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
-    var isMobileDevice = /android|ip(hone|od|ad)|opera *mini|webos|blackberry|mobile|windows *phone/;
+    var isMobileDevice = /android|ip(hone|od|ad)|opera *mini|webos|blackberry|mobile|windows *phone/.test(ua);
 
     $.browser = (function() {
-        var ua = navigator.userAgent.toLowerCase();
-        var uap = navigator.platform.toLowerCase();
         var re, name, test, browser = {};
 
         browser.isTouchDevice = function() { return isTouchDevice; };
-        browser.isMobileDevice = function() { return isMobileDevice.test(ua); };
+        browser.isMobileDevice = function() { return isMobileDevice; };
 
         // set 'is' functions for os
         fns_os.forEach(function(fn) {
