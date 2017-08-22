@@ -1820,30 +1820,30 @@
          * @return {String}
          */
         getId: function() {
-            return getAttribute(this[0], 'id', '');
+            return getAttribute(this[0], 'id');
         }
     });
 
     // class helpers
     function toClassRegExp(name) {
-        return _re('(^| )'+ name +'( |$)', null, '1m');
+        return _re('(^|\\s+)'+ name +'(\\s+|$)', null, '1m');
     }
 
     function hasClass(el, name) {
-        return el && el.className && toClassRegExp(name).test(el.className);
+        return !!(el && el.className && toClassRegExp(name).test(el.className));
     }
 
     function addClass(el, name) {
         split(name, re_space).forEach(function(name) {
             if (!hasClass(el, name)) {
-                el.className += ' '+ name;
+                el.className = $.trimSpace(el.className +' '+ name);
             }
         });
     }
 
     function removeClass(el, name) {
         split(name, re_space).forEach(function(name) {
-            el.className = el.className.replace(toClassRegExp(name), '');
+            el.className = $.trimSpace(el.className.replace(toClassRegExp(name), ' '));
         });
     }
 
@@ -1867,7 +1867,7 @@
          * @return {Boolean}
          */
         hasClass: function(name) {
-            return !!hasClass(this[0], name);
+            return hasClass(this[0], name);
         },
 
         /**
