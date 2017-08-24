@@ -1,7 +1,7 @@
 /**
  * @name: so.ext.cookie
  * @deps: so
- * @vers: 1.0.0
+ * @vers: 1.1.0
  * @cred: https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie
  */
 
@@ -75,14 +75,14 @@ $.ext.cookie = {
         expires: 0, path: "/", domain: null, secure: false
     },
     set: function(name, value, options) {
-        options = $.mix({}, this.options, options);
+        options = $.extend({}, this.options, options);
         docCookies.setItem(name, value, this.expiryTimes[options.expires],
             options.path, options.domain, options.secure);
     },
     get: function(name) {
-        if (document.cookie.length > 0) {
+        if (document.cookie.length) {
             var s = document.cookie.split("; "), p, m, i,
-                r = new RegExp("^"+ $.trim(name) +"=([^;]*)");
+                r = new RegExp("^"+ $.trimSpace(name) +"=([^;]*)");
             for (i = 0; p = s[i]; i++) {
                 m = p.match(r);
                 if (m && m[1]) {
@@ -93,7 +93,7 @@ $.ext.cookie = {
         return null;
     },
     remove: function(name, options) {
-        options = $.mix({}, this.options, options);
+        options = $.extend({}, this.options, options);
         docCookies.removeItem(name, options.path, options.domain);
     },
     check: function(name) {
