@@ -534,19 +534,19 @@
     // add event to so
     $.event = {
         on: on,
-        once: once,
         off: off,
         fire: fire,
+        once: once,
         create: createEvent,
         Event: initEvent,
         CustomEvent: initCustomEvent,
         EventTarget: initEventTarget,
-        keyCode: {
-            BACKSPACE:  8, TAB:      9, ENTER:      13, ESC:       27,  LEFT:     37,
-            UP:        38, RIGHT:   39, DOWN:       40, DELETE:    46,  HOME:     36,
-            END:       35, PAGEUP:  33, PAGEDOWN:   34, INSERT:    45,  CAPSLOCK: 20,
-            ARROWLEFT: 37, ARROWUP: 38, ARROWRIGHT: 39, ARROWDOWN: 40,
-            SHIFT:     16, CONTROL: 17, ALT:        18, ALTGRAPH:  225
+        key: {
+            BACKSPACE:  8,  TAB:       9, ENTER:       13, ESC:        27,  LEFT:      37,
+            UP:         38, RIGHT:    39, DOWN:        40, DELETE:     46,  HOME:      36,
+            END:        35, PAGE_UP:  33, PAGE_DOWN:   34, INSERT:     45,  CAPS_LOCK: 20,
+            ARROW_LEFT: 37, ARROW_UP: 38, ARROW_RIGHT: 39, ARROW_DOWN: 40,
+            SHIFT:      16, CONTROL:  17, ALT:         18, ALT_GR:     225
         }
     };
 
