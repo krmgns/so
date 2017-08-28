@@ -2595,11 +2595,11 @@
         return ret;
     }
 
-    // add domx as shortcut to so
-    $.$x = function(selector, root) {
+    // add xdom as shortcut to so
+    $.$x = function(selector, root) { // one
         return initXDom(selector, root, true);
     };
-    $.$$x = function(selector, root) {
+    $.$$x = function(selector, root) { // all
         return initXDom(selector, root);
     };
 
