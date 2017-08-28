@@ -23,19 +23,20 @@
     var NAME_WIDTH = 'width', NAME_INNER_WIDTH = 'innerWidth', NAME_OUTER_WIDTH = 'outerWidth';
     var NAME_HEIGHT = 'height', NAME_INNER_HEIGHT = 'innerHeight', NAME_OUTER_HEIGHT = 'outerHeight';
     var NAME_INNER_HTML = 'innerHTML', NAME_TEXT_CONTENT = 'textContent';
+    var NAME_CLASS = 'className', NAME_STYLE = 'style';
 
     var re_space = /\s+/g;
     var re_comma = /,\s*/;
     var re_trim = /^\s+|\s+$/g;
     var re_tag = /^<([a-z-]+)[^>]*>/i;
     var toStyleName = $.util.toCamelCaseFromDashCase;
-    var extend = $.extend, extendPrototype = $.extendPrototype;
+    var trims = $.trimSpace, extend = $.extend, extendPrototype = $.extendPrototype;
     var _re = $.re, _array = $.array, _for = $.for, _forEach = $.forEach;
     var _break = 0; // break tick: for, forEach
 
     // general helpers
     function split(s, re) {
-        return $.trimSpace(s).split(re);
+        return trims(s).split(re);
     }
     function querySelector(root, selector) {
         return root.querySelector(selector);
@@ -64,8 +65,8 @@
     function toKeyValueObject(key, value) {
         var ret = key || {}; if ($.isString(ret)) ret = {}, ret[key] = value; return ret;
     }
-    function initDom(selector, root, i, one) {
-        return isDom(selector) ? selector : new Dom(selector, root, i, one);
+    function initDom(selector, root, one) {
+        return isDom(selector) ? selector : new Dom(selector, root, one);
     }
 
     var re_attr = /\[.+\]/;
@@ -168,28 +169,20 @@
      * Dom.
      * @param {String|Object} selector
      * @param {Object}        root?
-     * @param {Int}           i?
      * @param {Boolean}       one?
      */
-    function Dom(selector, root, i, one) {
+    function Dom(selector, root, one) {
         var els, size = 0;
 
-        if ($.isNumber(root)) {
-            i = root, root = undefined;
-        }
-
-        if (!$.isVoid(selector)) {
+        if (selector != null) {
             if ($.isString(selector)) {
-                selector = $.trimSpace(selector);
+                selector = trims(selector);
                 if (selector) { // prevent empty selector error
                     var re = selector.match(re_tag);
                     if (re) {
                         els = create(selector, root, root, re[1]); // 'root' could be document or attribute(s)
                     } else {
                         els = select(selector, root, one);
-                        if ($.isNumber(i)) {
-                            els = [els[i]];
-                        }
                     }
                 }
             } else if ($.isWindow(selector) || $.isDocument(selector)) {
@@ -212,7 +205,7 @@
         // define all read-only
         Object.defineProperties(this, {
                 'size': {value: size},
-            'selector': {value: selector},
+            'selector': {value: selector, writable: true},
                 'root': {value: root},
                   'me': {get: function() { return this[0]; }}
         });
@@ -223,21 +216,19 @@
         /**
          * Find.
          * @param  {String|Object} selector
-         * @param  {Int)           ?i
          * @return {Dom}
          */
-        find: function(selector, i) {
-            return this[0] ? initDom(selector, this[0], i, true) : this;
+        find: function(selector) {
+            return this[0] ? initDom(selector, this[0], true) : this;
         },
 
         /**
          * Find all.
          * @param  {String|Object} selector
-         * @param  {Int)           ?i
          * @return {Dom}
          */
-        findAll: function(selector, i) {
-            return this[0] ? initDom(selector, this[0], i) : this;
+        findAll: function(selector) {
+            return this[0] ? initDom(selector, this[0]) : this;
         },
 
         /**
@@ -261,10 +252,11 @@
          * @return {Array}
          */
         toArray: function() {
-            var ret = [], i = 0;
+            var i = 0, ret = [];
             while (i < this.size) {
                 ret.push(this[i++]);
-            } return ret;
+            }
+            return ret;
         },
 
         /**
@@ -582,8 +574,8 @@
          * @return {this}
          */
         removeFrom: function(selector) {
-            return this.for(function(el) {
-                initDom(selector).find(el).remove();
+            var root = initDom(selector); return this.for(function(el) {
+                root.find(el).remove();
             });
         },
 
@@ -829,7 +821,7 @@
          * @return {String|this}
          */
         text: function(input) {
-            return $.isUndefined(input) ? this.getText() : this.setText($.trimSpace(input));
+            return $.isUndefined(input) ? this.getText() : this.setText(trims(input));
         },
 
         /**
@@ -854,7 +846,7 @@
          * @return {String|Any}
          */
         html: function(input) {
-            return $.isUndefined(input) ? this.getHtml() : this.setHtml($.trimSpace(input));
+            return $.isUndefined(input) ? this.getHtml() : this.setHtml(trims(input));
         },
 
         /**
@@ -943,30 +935,6 @@
             return initDom(this.filter(function(el, i) {
                 return !(i & 1);
             }));
-        },
-
-        /**
-         * Path.
-         * @param  {Boolean} join?
-         * @return {Array|String}
-         */
-        path: function(join) {
-            var el = this[0], path, paths = [];
-            if (el) {
-                path = el.nodeName.toLowerCase();
-                if (el.id) path += '#'+ el.id;
-                if (el.className) path += '.'+ el.className.split(re_space).join('.');
-                paths.push(path);
-
-                this.parents().for(function(node) {
-                    path = node.nodeName.toLowerCase();
-                    if (node.id) path += '#'+ node.id;
-                    if (node.className) path += '.'+ node.className.split(re_space).join('.');
-                    paths.push(path);
-                })
-
-                return paths = paths.reverse(), join ? paths.join(' > ') : paths;
-            }
         },
 
         /**
@@ -1090,22 +1058,10 @@
 
         /**
          * Has parent.
-         * @param  {String} selector?
          * @return {Boolean}
          */
-        hasParent: function(selector) {
-            var el = this[0], ret;
-
-            if (!selector) {
-                ret = el && el[NAME_PARENT_NODE];
-            } else {
-                selector = initDom(selector)[0];
-                this.parents().forEach(function(_el) {
-                    if (el && el == _el) ret = true; return _break;
-                });
-            }
-
-            return !!ret;
+        hasParent: function() {
+            return !!this.parent().size;
         },
 
         /**
@@ -1130,16 +1086,88 @@
          * @return {Dom}
          */
         window: function(content) {
-            return initDom(this[0] && (content ? this[0].contentWindow : $.getWindow(this[0])));
+            var el = this[0];
+            return initDom(el && (content ? el.contentWindow : $.getWindow(el)));
         },
 
         /**
-         * document.
+         * Document.
          * @param  {Boolean} content?
          * @return {Dom}
          */
         document: function(content) {
-            return initDom(this[0] && (content ? this[0].contentDocument : $.getDocument(this[0])));
+            var el = this[0];
+            return initDom(el && (content ? el.contentDocument : $.getDocument(el)));
+        }
+    });
+
+    // path helpers
+    function getPath(el) {
+        var s = getTag(el), path = [];
+        if (el.id) {
+            s += '#'+ el.id; // id is enough
+        } else if (el[NAME_CLASS]) {
+            s += '.'+ el[NAME_CLASS].split(re_space).join('.');
+        }
+        path.push(s);
+
+        if (el[NAME_PARENT_NODE]) {
+            return path.concat(getPath(el[NAME_PARENT_NODE]));
+        }
+
+        return path;
+    }
+
+    function getXPath(el) {
+        var tag = getTag(el);
+        if (tag == 'html') {
+            return ['html'];
+        }
+        if (tag == 'body') {
+            return ['html', 'body'];
+        }
+
+        var i = 0, ii = 0, node, nodes = el[NAME_PARENT_NODE][NAME_CHILDREN], path = [];
+        while (node = nodes[i++]) {
+            if (node == el) {
+                return path.concat(getXPath(el[NAME_PARENT_NODE]), tag +'['+ (ii + 1) +']');
+            }
+            if (node.tagName == el.tagName) {
+                ii++;
+            }
+        }
+
+        return path;
+    }
+
+    // dom: paths
+    extendPrototype(Dom, {
+        /**
+         * Path.
+         * @param  {Boolean} string?
+         * @return {Array|String}
+         */
+        path: function(string) {
+            var el = this[0], ret = [];
+            if (!isNodeElement(el)) {
+                return null;
+            }
+
+            return ret = getPath(el).reverse(), string ? ret.slice(1).join(' > ') : ret;
+        },
+
+        /**
+         * Xpath.
+         * @param  {Boolean} string?
+         * @return {Array|String}
+         */
+        xpath: function(string) {
+            var el = this[0], ret = [];
+            if (!isNodeElement(el)) {
+                return null;
+            }
+
+            return ret = getXPath(el), string ? '/'+ ret.join('/') : ret;
         }
     });
 
@@ -1188,11 +1216,11 @@
     }
 
     function setStyle(el, name, value) {
-        name = toStyleName(name), value = $.trimSpace(value);
+        name = toStyleName(name), value = trims(value);
         if (value && $.isNumeric(value) && !re_noneUnitStyles.test(name)) {
             value += 'px';
         }
-        el.style[name] = value;
+        el[NAME_STYLE][name] = value;
     }
 
     function getStyle(el, name, value) {
@@ -1206,7 +1234,7 @@
         while (text.length) {
             // wtf! :)
             (s = text.shift().split(_re('\\s*:\\s*')))
-                && (s[0] = $.trimSpace(s[0]))
+                && (s[0] = trims(s[0]))
                     && (styles[s[0]] = s[1] || '');
         }
         return styles;
@@ -1253,7 +1281,7 @@
          */
         hasStyle: function(name) {
             var el = this[0];
-            return !!(el && el.style && el.style.cssText.indexOf(name) > -1);
+            return !!(el && el[NAME_STYLE] && el[NAME_STYLE].cssText.indexOf(name) > -1);
         },
 
         /**
@@ -1289,7 +1317,7 @@
                 convert = $.isVoid(valueDefault) || $.isTrue(valueDefault);
                 valueDefault = !$.isBool(valueDefault) ? valueDefault : '';
                 if (raw) {
-                    return el.style[toStyleName(name)] || valueDefault;
+                    return el[NAME_STYLE][toStyleName(name)] || valueDefault;
                 }
 
                 value = getStyle(el, name);
@@ -1372,15 +1400,16 @@
     function getHiddenElementProperties(el, properties) {
         var ret = [];
         var sid = $.sid(), className = ' '+ sid;
-        var styleText = el.style.cssText;
+        var styleText = el[NAME_STYLE].cssText;
         var parent = el[NAME_PARENT_ELEMENT], parents = [], parentStyle;
 
         while (parent) { // doesn't give if parents are hidden
             if (isHidden(parent)) {
                 parentStyle = getStyle(parent);
-                parents.push({el: parent, styleText: parent.style.cssText});
-                parent.className += className;
-                parent.style.display = '', parent.style.visibility = ''; // for `!important` annots
+                parents.push({el: parent, styleText: parent[NAME_STYLE].cssText});
+                parent[NAME_CLASS] += className;
+                parent[NAME_STYLE].display = '';
+                parent[NAME_STYLE].visibility = ''; // for `!important` annots
             }
             parent = parent[NAME_PARENT_ELEMENT];
         }
@@ -1391,8 +1420,9 @@
         });
         doc.body.appendChild(css);
 
-        el.className += className;
-        el.style.display = '', el.style.visibility = ''; // for `!important` annots
+        el[NAME_CLASS] += className;
+        el[NAME_STYLE].display = '';
+        el[NAME_STYLE].visibility = ''; // for `!important` annots
 
         // finally, grap it!
         properties.forEach(function(name) {
@@ -1405,11 +1435,16 @@
 
         // restore all
         doc.body.removeChild(css);
-        el.className = el.className.replace(className, '');
-        if (styleText) el.style.cssText = styleText;
+        el[NAME_CLASS] = el[NAME_CLASS].replace(className, '');
+        if (styleText) {
+            el[NAME_STYLE].cssText = styleText;
+        }
+
         while (parent = parents.shift()) {
-            parent.el.className = parent.el.className.replace(className, '');
-            if (parent.styleText) parent.el.style.cssText = parent.styleText;
+            parent.el[NAME_CLASS] = parent.el[NAME_CLASS].replace(className, '');
+            if (parent.styleText) {
+                parent.el[NAME_STYLE].cssText = parent.styleText;
+            }
         }
 
         return ret;
@@ -1634,7 +1669,7 @@
     function toAttributeName(name) {
         return name = name.startsWith('@')
             ? 'data-'+ name.slice(1) /* @foo => data-foo */ : name,
-                $.trimSpace(name.replace(re_attrNameRemove, '-'));
+                trims(name.replace(re_attrNameRemove, '-'));
     }
 
     function hasAttribute(el, name) {
@@ -1830,20 +1865,20 @@
     }
 
     function hasClass(el, name) {
-        return !!(el && el.className && toClassRegExp(name).test(el.className));
+        return !!(el && el[NAME_CLASS] && toClassRegExp(name).test(el[NAME_CLASS]));
     }
 
     function addClass(el, name) {
         split(name, re_space).forEach(function(name) {
             if (!hasClass(el, name)) {
-                el.className = $.trimSpace(el.className +' '+ name);
+                el[NAME_CLASS] = trims(el[NAME_CLASS] +' '+ name);
             }
         });
     }
 
     function removeClass(el, name) {
         split(name, re_space).forEach(function(name) {
-            el.className = $.trimSpace(el.className.replace(toClassRegExp(name), ' '));
+            el[NAME_CLASS] = trims(el[NAME_CLASS].replace(toClassRegExp(name), ' '));
         });
     }
 
@@ -1897,7 +1932,7 @@
          */
         replaceClass: function(oldName, newName) {
             return this.for(function(el) {
-                el.className = $.trimSpace(el.className.replace(toClassRegExp(oldName), ' '+ newName +' '));
+                el[NAME_CLASS] = trims(el[NAME_CLASS].replace(toClassRegExp(oldName), ' '+ newName +' '));
             });
         },
 
@@ -1918,7 +1953,7 @@
          * @return {this}
          */
         setClass: function(name) {
-            return this.for(function(el) { el.className = name; });
+            return this.for(function(el) { el[NAME_CLASS] = name; });
         },
 
         /**
@@ -1939,7 +1974,7 @@
         if (el) {
             checkData(el);
             if ($.isString(key)) {
-                key = $.trimSpace(key);
+                key = trims(key);
                 if (key[0] == '@') {
                     setAttribute(el, key, value);
                 } else {
@@ -1958,7 +1993,7 @@
         if (el) {
             checkData(el);
             if ($.isString(key)) {
-                key = $.trimSpace(key);
+                key = trims(key);
                 if (key.startsWith('@')) {
                     return getAttribute(el, key);
                 }
@@ -2008,7 +2043,7 @@
          * @return {this}
          */
         removeData: function(key) {
-            key = $.trimSpace(key);
+            key = trims(key);
 
             // data-*
             if (key.startsWith('@')) {
@@ -2038,7 +2073,7 @@
     function readFile(file, callback, multiple) {
         var reader = new FileReader();
         reader.onload = function(e) {
-            fileContent = $.trimSpace(e.target.result);
+            fileContent = trims(e.target.result);
             // opera doesn't give base64 for 'html' files or maybe other more..
             var encoded = fileContent.indexOf(';base64') > -1;
             fileContent = fileContent.replace(re_data, '');
@@ -2425,7 +2460,7 @@
             show: function(speed, easing, callback) {
                 return this.for(function(el) {
                     if (isHidden(el)) {
-                        el.style.display = getDefaultStyle(el.tagName, 'display'); // to default
+                        el[NAME_STYLE].display = getDefaultStyle(el.tagName, 'display'); // to default
                         animation.animate(el, {opacity: 1}, (speed || 0), easing, callback);
                     }
                 });
@@ -2442,7 +2477,7 @@
                 return this.for(function(el) {
                     if (!isHidden(el)) {
                         animation.animate(el, {opacity: 0}, (speed || 0), easing, function() {
-                            el.style.display = 'none'; // to real display
+                            el[NAME_STYLE].display = 'none'; // to real display
                             callback && callback.call(this);
                         });
                     }
@@ -2460,11 +2495,11 @@
                 speed = speed || 0;
                 return this.for(function(el) {
                     if (isHidden(el)) {
-                        el.style.display = getDefaultStyle(el.tagName, 'display'); // to default
+                        el[NAME_STYLE].display = getDefaultStyle(el.tagName, 'display'); // to default
                         animation.animate(el, {opacity: 1}, speed, easing, callback);
                     } else {
                         animation.animate(el, {opacity: 0}, speed, easing, function() {
-                            el.style.display = 'none'; // to real display
+                            el[NAME_STYLE].display = 'none'; // to real display
                             callback && callback.call(this);
                         });
                     }
@@ -2516,26 +2551,25 @@
      * So Dom.
      * @param  {String} selector
      * @param  {Object} root?
-     * @param  {Int}    i?
      * @return {Dom}
      */
-    $.dom = function(selector, root, i) {
-        return initDom(selector, root, i);
+    $.dom = function(selector, root) {
+        return initDom(selector, root);
     };
 
     // add dom as shortcut to so
-    $.$ = function(selector, root, i) { // one
-        return initDom(selector, root, i, true);
+    $.$ = function(selector, root) { // one
+        return initDom(selector, root, true);
     };
-    $.$$ = function(selector, root, i) { // all
-        return initDom(selector, root, i);
+    $.$$ = function(selector, root) { // all
+        return initDom(selector, root);
     };
 
     // xpath helper
     function initXDom(selector, root, one) {
         var doc = root || document;
         var docEl = doc && doc.documentElement;
-        var nodes = [], node, iter;
+        var nodes = [], node, iter, ret;
         if (!docEl) {
             throw ('XPath is not supported by root object!');
         }
@@ -2556,7 +2590,9 @@
             }
         }
 
-        return initDom(nodes);
+        ret = initDom(nodes);
+        ret.selector = selector;
+        return ret;
     }
 
     // add domx as shortcut to so
@@ -2569,11 +2605,11 @@
 
     // add static methods to dom
     $.dom.extend({
-        find: function(selector, root, i) {
-            return $.$(selector, root, i);
+        find: function(selector, root) {
+            return $.$(selector, root);
         },
-        findAll: function(selector, root, i) {
-            return $.$$(selector, root, i);
+        findAll: function(selector, root) {
+            return $.$$(selector, root);
         },
         xfind: function(selector, root) {
             return $.$x(selector, root);
