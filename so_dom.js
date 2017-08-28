@@ -2531,6 +2531,42 @@
         return initDom(selector, root, i);
     };
 
+    // xpath helper
+    function initXDom(selector, root, one) {
+        var doc = root || document;
+        var docEl = doc && doc.documentElement;
+        var nodes = [], node, iter;
+        if (!docEl) {
+            throw ('XPath is not supported by root object!');
+        }
+
+        if (doc.evaluate) {
+            iter = doc.evaluate(selector, docEl, null, XPathResult.ANY_TYPE, null);
+            if (one) {
+                nodes = iter.iterateNext();
+            } else {
+                while (node = iter.iterateNext()) {
+                    nodes.push(node);
+                }
+            }
+        } else if (docEl.selectNodes) { // ie
+            nodes = docEl.selectNodes(selector);
+            if (one) {
+                nodes = nodes[0];
+            }
+        }
+
+        return initDom(nodes);
+    }
+
+    // add domx as shortcut to so
+    $.$x = function(selector, root) {
+        return initXDom(selector, root, true);
+    };
+    $.$$x = function(selector, root) {
+        return initXDom(selector, root);
+    };
+
     // add static methods to dom
     $.dom.extend({
         find: function(selector, root, i) {
@@ -2538,6 +2574,12 @@
         },
         findAll: function(selector, root, i) {
             return $.$$(selector, root, i);
+        },
+        xfind: function(selector, root) {
+            return $.$x(selector, root);
+        },
+        xfindAll: function(selector, root) {
+            return $.$$x(selector, root);
         },
         define: function(name, value) {
             var names = Object.keys(Dom.prototype);
