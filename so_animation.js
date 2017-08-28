@@ -52,9 +52,9 @@
 
         this.tasks = [];
 
-        if (this.target.size) {
+        if (this.target._size) {
             // for stop tool
-            this.target[0].$animation = this;
+            this.target.setProperty('$animation', this);
 
             // assign animation tasks
             var _this = this;
@@ -128,9 +128,9 @@
          * @return {this}
          */
         start: function() {
-            var scroll, value;
+            var target = this.target, scroll, value;
 
-            if (this.target.size) {
+            if (target._size) {
                 this.elapsedTime = $.now() - this.startTime;
 
                 var _this = this;
@@ -138,10 +138,10 @@
                     value = fn_easing(_this.elapsedTime, 0.00, task.diff, _this.speed);
                     value = task.reverse ? task.startValue - value : task.startValue + value;
                     if (!task.scroll) {
-                        _this.target.setStyle(task.name, value.toFixed(9) /* use 'toFixed' to get a good percent */
+                        target.setStyle(task.name, value.toFixed(9) /* use 'toFixed' to get a good percent */
                             + task.unit);
                     } else {
-                        _this.target.setProperty(task.name, value.toFixed(0));
+                        target.setProperty(task.name, value.toFixed(0));
                     }
                 });
             }
@@ -154,13 +154,15 @@
          * @return {this}
          */
         stop: function() {
+            var target = this.target;
+
             if (this.running) {
                 this.running = false;
                 this.stopped = true;
             }
 
             // set as null (for isAnimated() etc.)
-            this.target[0] && (this.target[0].$animation = null);
+            target.setProperty('$animation', null);
 
             return this;
         },
@@ -172,7 +174,7 @@
         end: function() {
             var target = this.target;
 
-            if (target.size) {
+            if (target._size) {
                 this.tasks.forEach(function(task) {
                     if (!task.scroll) {
                         target.setStyle(task.name, task.endValue + task.unit);
@@ -199,10 +201,10 @@
 
     // add animation to so
     $.animation = {
+        Animation: initAnimation,
         animate: function(target, properties, speed, easing, callback) {
             return initAnimation(target, properties, speed, easing, callback).run();
-        },
-        Animation: initAnimation
+        }
     };
 
 })(window, so);

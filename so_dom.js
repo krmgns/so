@@ -204,15 +204,22 @@
 
         // define all read-only
         Object.defineProperties(this, {
-                'size': {value: size},
-            'selector': {value: selector, writable: true},
-                'root': {value: root},
-                  'me': {get: function() { return this[0]; }}
+                '_size': {value: size},
+                '_root': {value: root},
+            '_selector': {value: selector, writable: true}
         });
     }
 
     // dom: base
     extendPrototype(Dom, {
+        /**
+         * Size.
+         * @return {Int}
+         */
+        size : function() {
+            return this._size;
+        },
+
         /**
          * Find.
          * @param  {String|Object} selector
@@ -232,31 +239,17 @@
         },
 
         /**
-         * All.
-         * @return {Array}
-         */
-        all: function() {
-            return this.toArray();
-        },
-
-        /**
-         * Copy.
-         * @return {Dom}
-         */
-        copy: function() {
-            return initDom(this.toArray());
-        },
-
-        /**
          * To array.
          * @return {Array}
          */
         toArray: function() {
-            var i = 0, ret = [];
-            while (i < this.size) {
-                ret.push(this[i++]);
+            var i = 0, array = [];
+
+            while (i < this._size) {
+                array.push(this[i++]);
             }
-            return ret;
+
+            return array;
         },
 
         /**
@@ -287,12 +280,12 @@
 
         /**
          * Has.
-         * @param  {Object} search
+         * @param  {Object} searchEl
          * @return {Boolean}
          */
-        has: function(search) {
+        has: function(searchEl) {
             var ret; return this.for(function(el) {
-                if (search == el) ret = true; return _break;
+                if (el == searchEl) ret = true; return _break;
             }), !!ret;
         },
 
@@ -301,7 +294,15 @@
          * @return {Boolean}
          */
         isEmpty: function() {
-            return !this.size;
+            return !this._size;
+        },
+
+        /**
+         * Copy.
+         * @return {Dom}
+         */
+        copy: function() {
+            return initDom(this.toArray());
         },
 
         /**
@@ -394,7 +395,7 @@
          * @return {Dom}
          */
         last: function() {
-            return this.item(this.size);
+            return this.item(this._size);
         },
 
         /**
@@ -429,6 +430,14 @@
             var ret = []; return this.for(function(el) {
                 ret.push(getTag(el))
             }), ret;
+        },
+
+        /**
+         * All (alias of toArray()).
+         * @return {Array}
+         */
+        all: function() {
+            return this.toArray();
         }
     });
 
@@ -646,7 +655,7 @@
         },
 
         /**
-         * Insert. Alias of append().
+         * Insert (alias of append()).
          * @inheritDoc
          */
         insert: function(content, attributes, cloning) {
@@ -654,7 +663,7 @@
         },
 
         /**
-         * Insert to. Alias of appendTo().
+         * Insert to (alias of appendTo()).
          * @inheritDoc
          */
         insertTo: function(selector, cloning) {
@@ -1053,7 +1062,7 @@
          * @return {Boolean}
          */
         contains: function(selector) {
-            return !!(this[0] && initDom(selector, this[0]).size);
+            return !!(this[0] && initDom(selector, this[0])._size);
         },
 
         /**
@@ -1061,7 +1070,15 @@
          * @return {Boolean}
          */
         hasParent: function() {
-            return !!this.parent().size;
+            return !!this.parent()._size;
+        },
+
+        /**
+         * Has parents.
+         * @return {Boolean}
+         */
+        hasParents: function() {
+            return !!this.parent().parent()._size;
         },
 
         /**
@@ -1069,11 +1086,11 @@
          * @return {Boolean}
          */
         hasChild: function() {
-            return this.children().size > 0;
+            return this.children()._size > 0;
         },
 
         /**
-         * Has children. Alias of hasChild().
+         * Has children (alias of hasChild()).
          * @inheritDoc
          */
         hasChildren: function() {
@@ -2591,7 +2608,7 @@
         }
 
         ret = initDom(nodes);
-        ret.selector = selector;
+        ret._selector = selector;
         return ret;
     }
 

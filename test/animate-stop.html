@@ -11,10 +11,11 @@
 so.onReady(function($) {
     var p = $.dom(".p");
     p.on("mouseover", function(){
-        p.animate("stop").animate({width: 500}, null);
+        p.animate("stop").animate({width: 500}, null, function(anim) {
+            log(anim)
+        });
     }).on("mouseout", function(){
-        p.animate("stop").animate({width: 200}, null, function(el, anim){
-            log(el)
+        p.animate("stop").animate({width: 200}, null, function(anim){
             log(anim)
             log(this)
         });
