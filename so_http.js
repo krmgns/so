@@ -381,7 +381,7 @@
                     _this.fire(fn);
                     clearInterval(i);
                 }
-            }, 1);
+            }, 10);
 
             return this;
         },
