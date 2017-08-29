@@ -12,7 +12,7 @@
     var re_http = /^https?/;
     var re_post = /^P(?:U|OS)T$/i;
     var re_json = /^(?:\{.*\}|\[.*\]|".*"|-?\d+(?:\.\d+)?|true|false|null)$/;
-    var re_request = /^([A-Z]+)?\s*(.*?)\s*(?:@(json|xml|html|text))?$/;
+    var re_request = /^([A-Z]+)?\s*(.*?)\s*(?:@(json|xml|html|plain))?$/;
     var re_dataType = /\/(json|xml|html|plain)(?:[; ])?/i;
     var optionsDefault = {
         method: 'GET', uri: '', uriParams: null, data: null, dataType: null,
