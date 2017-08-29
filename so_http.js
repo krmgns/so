@@ -8,16 +8,19 @@
 ;(function(window, $) { 'use strict';
 
     var re_query = /\?&+(.*)/;
-    var re_post = /P(U|OS)T/i;
-    var re_json = /^(\{.*\}|\[.*\]|".*"|\d+(\.\d+)?|true|false|null)$/;
-    var re_request = /^([a-z]+)?\s*(.*?)\s*(?:@(json|xml|html|text))?$/i;
+    var re_space = /%20/g;
+    var re_http = /^https?/;
+    var re_post = /PUT|POST/i;
+    var re_json = /^(\{.*\}|\[.*\]|".*"|-?\d+(\.\d+)?|true|false|null)$/;
+    var re_request = /^([A-Z]+)?\s*(.*?)\s*(?:@(json|xml|html|text))?$/;
     var re_dataType = /\/(json|xml|html|plain)(?:[; ])?/i;
     var optionsDefault = {
         method: 'GET', uri: '', uriParams: null, data: null, dataType: null,
-        async: true, noCache: true, autoSend: true, headers: {},
-        onStart: null, onStop: null, /* @todo: queue */ onProgress: null, onHeaders: null,
-        onDone: null, onSuccess: null, onFailure: null,
-        onAbort: null, onTimeout: null, onBeforeSend: null, onAfterSend: null,
+        async: true, noCache: true, autoSend: true, headers: {'X-Requested-With': 'XMLHttpRequest'},
+        // onStart: null, onStop: null, /* @todo: queue */
+        // onHeaders: null, onProgress: null,
+        // onDone: null, onSuccess: null, onFailure: null,
+        // onAbort: null, onTimeout: null, onBeforeSend: null, onAfterSend: null,
         ons: {} // all other on.. stuff
     };
     var STATE_OPENED = 1, STATE_HEADERS_RECEIVED = 2, STATE_LOADING = 3, STATE_DONE = 4;
@@ -108,7 +111,7 @@
                 }
             });
 
-            return ret.join('&').replace(/%20/g, '+');
+            return ret.join('&').replace(re_space, '+');
         }
     };
 
@@ -154,13 +157,9 @@
         return (uri += (!uri.has('?') ? '?' : '&') + $.http.serialize(uriParams));
     }
 
-    function removeReadyStateChange(client) {
-        client.api.onreadystatechange = null;
-    }
-
     function onReadyStateChange(client) {
         if (client.aborted) {
-            return removeReadyStateChange(client);
+            return offReadyStateChange(client);
         }
 
         // hold trigger button
@@ -180,8 +179,7 @@
                 var status = 'HTTP/1.1 %s %s'.format(client.api.status, client.api.statusText),
                     headers = $.http.parseHeaders(client.api.getAllResponseHeaders()),
                     data = client.api.responseText,
-                    dataType = client.options.dataType
-                        || (re_dataType.exec(headers['content-type']) || [,])[1];
+                    dataType = client.options.dataType || (re_dataType.exec(headers['content-type']) || [,])[1];
 
                 client.response.status = headers[0] = status;
                 client.response.statusCode = client.api.status;
@@ -213,11 +211,15 @@
                     client.options.trigger.disabled = false;
                 }
 
-                removeReadyStateChange(client);
+                offReadyStateChange(client);
                 break;
             default:
                 throw ('Unknown HTTP error!');
         }
+    }
+
+    function offReadyStateChange(client) {
+        client.api.onreadystatechange = null;
     }
 
     /**
@@ -231,9 +233,14 @@
         }
 
         options = $.extend({}, optionsDefault, options);
-        options.uri = uri;
         options.method = (options.method || optionsDefault.method).toUpperCase();
+        options.uri = uri;
         options.headers = $.extend({}, optionsDefault.headers, options.headers);
+
+        // check cross domain
+        if (re_http.test(uri)) {
+            delete options.headers['X-Requested-With'];
+        }
 
         // handle post streams
         if (re_post.test(options.method)) {
@@ -249,21 +256,24 @@
         if (options.noCache) {
             options.uri = addUriParams(options.uri, {'_': $.now()});
         }
-        options.uri = options.uri.replace(re_query, '?$&');
+        options.uri = options.uri.replace(re_query, '?$1');
 
+        var _this = this;
         this.options = options;
         this.request = new Request(this);
         this.response = new Response(this);
 
         this.api = new XMLHttpRequest(); // what an ugly name..
         this.api.open(this.request.method, this.request.uri, !!options.async);
+        this.api.onerror = function(e) {
+            _this.fire('error');
+        };
 
         this.request.data = options.data;
         this.request.dataType = options.dataType;
-        this.request.headers = $.extend({}, options.headers, {'X-Requested-With': 'XMLHttpRequest'});
+        this.request.headers = options.headers;
 
         if (options.async) {
-            var _this = this;
             this.api.onreadystatechange = function() {
                 onReadyStateChange(_this);
             };
@@ -291,16 +301,17 @@
             if (!this.sent && !this.aborted) {
                 var _this = this, data;
 
-                $.forEach(this.request.headers, function(key, value) {
-                    _this.api.setRequestHeader(key, value);
-                });
-
                 this.fire('beforeSend');
+
+                $.forEach(this.request.headers, function(name, value) {
+                    _this.api.setRequestHeader(name, value);
+                });
 
                 // check data
                 if (re_post.test(this.request.method)) {
                     data = $.http.serialize(this.request.data);
                 }
+
                 this.api.send(data);
 
                 this.fire('afterSend');
@@ -352,7 +363,7 @@
          */
         cancel: function() {
             this.api.abort();
-            this.call('abort');
+            this.fire('abort');
             this.aborted = true;
         },
 
@@ -398,28 +409,42 @@
     }
 
     /**
-     * Invoke.
+     * Init.
      * @param  {String}          uri
-     * @param  {Object|Function} options
+     * @param  {Object|Function} options?
      * @param  {Function}        onDone?
      * @param  {Function}        onSuccess?
      * @param  {Function}        onFailure?
      * @param  {String}          method?
      * @return {Client}
      */
-    function invoke(uri, options, onDone, onSuccess, onFailure, method) {
+    function init(uri, options, onDone, onSuccess, onFailure, method) {
         if (!$.isString(uri)) {
             throw ('URI must be string!');
         }
 
-        var re, _options = options = options || {};
+        var args, re, _options;
+
+        // swap arguments
+        if ($.isFunction(options)) {
+            args = arguments;
+            onDone = onSuccess = onFailure = options = null;
+            onDone = args[1], onSuccess = args[2], onFailure = args[3];
+        }
+        _options = options = options || {};
+
         uri = uri.trimSpace();
         if (uri.has(' ')) {
             // <method> <uri> @<data type>, eg: '/foo', '/foo @json', 'GET /foo', 'GET /foo @json'
             re = re_request.exec(uri);
-            re && (options.method = re[1], options.uri = re[2], options.dataType = re[3]);
+            if (re) {
+                options.method = re[1];
+                options.uri = uri = re[2];
+                options.dataType = re[3];
+            }
         } else {
-            options.uri = uri, options.method = method;
+            options.method = method;
+            options.uri = uri;
         }
 
         if ($.isFunction(_options)) {
@@ -427,8 +452,7 @@
             options = $.extend(options, {onDone: _options, onSuccess: onDone, onFailure: onSuccess});
         } else if ($.isObject(_options)) {
             // eg: '/foo', {...}
-            options = $.extend(options,
-                $.extend({onDone: onDone, onSuccess: onSuccess, onFailure: onSuccess}, _options));
+            options = $.extend(options, $.extend({onDone: onDone, onSuccess: onSuccess, onFailure: onFailure}, _options));
         }
 
         return initClient(uri, options);
@@ -440,13 +464,13 @@
         Request: initRequest,
         Response: initResponse,
         get: function(uri, options, onDone, onSuccess, onFailure) {
-            return invoke(uri, options, onDone, onSuccess, onFailure, 'get');
+            return init(uri, options, onDone, onSuccess, onFailure, 'get');
         },
         post: function(uri, options, onDone, onSuccess, onFailure) {
-            return invoke(uri, options, onDone, onSuccess, onFailure, 'post');
+            return init(uri, options, onDone, onSuccess, onFailure, 'post');
         },
         request: function(uri, options, onDone, onSuccess, onFailure) {
-            return invoke(uri, options, onDone, onSuccess, onFailure);
+            return init(uri, options, onDone, onSuccess, onFailure);
         }
     });
 
