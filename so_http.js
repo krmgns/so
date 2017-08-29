@@ -10,8 +10,8 @@
     var re_query = /\?&+(.*)/;
     var re_space = /%20/g;
     var re_http = /^https?/;
-    var re_post = /PUT|POST/i;
-    var re_json = /^(\{.*\}|\[.*\]|".*"|-?\d+(\.\d+)?|true|false|null)$/;
+    var re_post = /^P(?:U|OS)T$/i;
+    var re_json = /^(?:\{.*\}|\[.*\]|".*"|-?\d+(?:\.\d+)?|true|false|null)$/;
     var re_request = /^([A-Z]+)?\s*(.*?)\s*(?:@(json|xml|html|text))?$/;
     var re_dataType = /\/(json|xml|html|plain)(?:[; ])?/i;
     var optionsDefault = {
@@ -54,7 +54,7 @@
             input = $.trim(input);
 
             if (!re_json.test(input)) {
-                return input;
+                return $.logWarn('No valid JSON given.'), null;
             }
 
             return $.json(input);
@@ -188,23 +188,22 @@
 
                 // parse wars..
                 if (dataType == 'json') {
-                    client.response.data = $.http.parseJson(data);
+                    data = $.http.parseJson(data);
                 } else if (dataType == 'xml') {
-                    client.response.data = $.http.parseXml(data);
-                } else {
-                    client.response.data = data;
+                    data = $.http.parseXml(data);
                 }
+                client.response.data = data;
                 client.response.dataType = dataType;
 
                 // specials, eg: 200: function(){...}
                 client.fire(client.response.statusCode);
 
                 // success or failure?
-                client.fire((client.response.statusCode > 99 && client.response.statusCode < 400)
-                    ? 'success' : 'failure', client.response.data);
+                client.fire((client.response.statusCode > 99 && client.response.statusCode < 400
+                    ? 'success' : 'failure'), data);
 
                 // end!
-                client.fire('done', client.response.data);
+                client.fire('done', data);
 
                 // release trigger button
                 if (client.options.trigger) {
@@ -348,7 +347,7 @@
             }
 
             if ($.isFunction(fn)) {
-                var args = [this.request, this.response, this];
+                var args = [this];
                 // prepend
                 if (!$.isUndefined(fnArgs)) {
                     args = [fnArgs].concat(args);
