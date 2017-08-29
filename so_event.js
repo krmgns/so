@@ -155,7 +155,31 @@
                 stopBubbleAll: function() {
                     e.stopImmediatePropagation();
                     e.stoppedBubbleAll = true;
-                }
+                },
+                isKey: function(keyCode) { return keyCode == e.keyCode; },
+                isBackspaceKey: function() { return e.isKey(8); },
+                isTabKey: function() { return e.isKey(9); },
+                isEnterKey: function() { return e.isKey(13); },
+                isEscKey: function() { return e.isKey(27); },
+                isLeftKey: function() { return e.isKey(37); },
+                isUpKey: function() { return e.isKey(38); },
+                isRightKey: function() { return e.isKey(39); },
+                isDownKey: function() { return e.isKey(40); },
+                isDeleteKey: function() { return e.isKey(46); },
+                isHomeKey: function() { return e.isKey(36); },
+                isEndKey: function() { return e.isKey(35); },
+                isPageUpKey: function() { return e.isKey(33); },
+                isPageDownKey: function() { return e.isKey(34); },
+                isInsertKey: function() { return e.isKey(45); },
+                isCapsLockKey: function() { return e.isKey(20); },
+                isArrowLeftKey: function() { return e.isKey(37); },
+                isArrowUpKey: function() { return e.isKey(38); },
+                isArrowRightKey: function() { return e.isKey(39); },
+                isArrowDownKey: function() { return e.isKey(40); },
+                isShiftKey: function() { return e.isKey(16); },
+                isControlKey: function() { return e.isKey(17); },
+                isAltKey: function() { return e.isKey(18); },
+                isAltGrKey: function() { return e.isKey(225); }
             });
 
             return fn.call(event.target, e);
