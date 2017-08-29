@@ -32,7 +32,7 @@
      * @param {Function|undefined} callback
      */
     function Animation(target, properties, speed, easing, callback) {
-        this.target = $.dom(target);
+        this.$target = $.dom(target);
         this.properties = properties;
         this.speed = $.isNumber(speed) ? speed : opt_speeds[speed] || opt_speeds.default;
 
@@ -52,22 +52,22 @@
 
         this.tasks = [];
 
-        if (this.target._size) {
+        if (this.$target._size) {
             // for stop tool
-            this.target.setProperty('$animation', this);
+            this.$target.setProperty('$animation', this);
 
             // assign animation tasks
             var _this = this;
             $.forEach(properties, function(name, value) {
                 var root, scroll, startValue, endValue, style, unit = '';
                 name = toStyleName(name);
-                root = re_root.test(_this.target.tag());
+                root = re_root.test(_this.$target.tag());
                 scroll = re_scroll.test(name);
 
                 if (!scroll) {
                     style = $.isString(value)
-                        ? _this.target.getCssStyle(name) // get original style to catch unit sign
-                        : _this.target.getComputedStyle(name);
+                        ? _this.$target.getCssStyle(name) // get original style to catch unit sign
+                        : _this.$target.getComputedStyle(name);
 
                     startValue = $.float(style);
                     endValue = $.float(value);
@@ -76,7 +76,7 @@
                         unit = style.replace(re_digit, '');
                     }
                 } else {
-                    startValue = _this.target.scroll()[name.slice(6).toLowerCase()];
+                    startValue = _this.$target.scroll()[name.slice(6).toLowerCase()];
                     endValue = value;
                 }
 
@@ -128,7 +128,7 @@
          * @return {this}
          */
         start: function() {
-            var target = this.target, scroll, value;
+            var target = this.$target, scroll, value;
 
             if (target._size) {
                 this.elapsedTime = $.now() - this.startTime;
@@ -154,7 +154,7 @@
          * @return {this}
          */
         stop: function() {
-            var target = this.target;
+            var target = this.$target;
 
             if (this.running) {
                 this.running = false;
@@ -172,7 +172,7 @@
          * @return {this}
          */
         end: function() {
-            var target = this.target;
+            var target = this.$target;
 
             if (target._size) {
                 this.tasks.forEach(function(task) {
