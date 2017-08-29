@@ -1864,7 +1864,7 @@
          * @param {String} id
          */
         setId: function(id) {
-            return setAttribute(this[0], 'id', id);
+            return setAttribute(this[0], 'id', id), this;
         },
 
         /**
