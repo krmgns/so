@@ -125,6 +125,15 @@
         },
 
         /**
+         * Append (alias of append()).
+         * @param  {Any} value
+         * @return {this}
+         */
+        add: function(value) {
+            return this.append(value);
+        },
+
+        /**
          * Remove.
          * @param  {Any} value
          * @return {this}
