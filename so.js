@@ -20,7 +20,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.9.0';
+    window.so.VERSION = '5.9.1';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
     window.so.DOMLevel = window[NAME_DOCUMENT].adoptNode ? 3 : 2;
@@ -45,7 +45,6 @@
 
     var _reCache = {};
     var re_dot = /^[-+]?\./;
-    var re_dotZero = /^0\./;
     var re_time = /(\d+)(\w+)/;
     var re_numeric = /^[-+]?(?:\.?\d+|\d+\.\d+)$/;
     var re_trimSpace = /^\s+|\s+$/g;
@@ -779,7 +778,7 @@
 
         /**
          * Sid (string id).
-         * @param  {String} prefix
+         * @param  {String} prefix?
          * @return {String}
          */
         sid: function(prefix) {
@@ -788,13 +787,18 @@
 
         /**
          * Rid (random id).
-         * @param  {String}   prefix
-         * @param  {Int|Bool} radix?
+         * @param  {String}   prefix?
+         * @param  {Int|Bool} base?
          * @return {String}
          */
-        rid: function(prefix, radix) {
-            return (prefix != null ? prefix : '__so_rid_')
-                + Math.random().toString(radix == true ? 16 : radix || 10).replace(re_dotZero, '');
+        rid: function(prefix, base) {
+            base = (base >= 2 && base <= 36) ? base : 10;
+            // @credit https://stackoverflow.com/a/24810220/362780
+            var rid = new Array(base).join().replace(/(.|$)/g, function() {
+                return ((Math.random() * base) | 0).toString(base)
+                    // [Math.random() < .5 ? 'toString' : 'toUpperCase']();
+            });
+            return (prefix != null ? prefix : '__so_rid_') + rid;
         },
 
         /**

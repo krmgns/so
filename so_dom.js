@@ -172,7 +172,7 @@
      * @param {Boolean}       one?
      */
     function Dom(selector, root, one) {
-        var els, size = 0, re, id, aid;
+        var els, size = 0, re, sid, id;
 
         if (selector != null) {
             if ($.isString(selector)) {
@@ -184,10 +184,10 @@
                         els = create(selector, root, root, re[1]);
                     } else if (selector[0] == '>' && isNodeElement(root)) {
                         // buggy :scope selector
-                        id = $.rid('__scope_selector_');
-                        aid = 'so:selector';
-                        selector = '[%s="%s"] %s'.format(aid, id, selector);
-                        setAttribute(root, aid, id);
+                        sid = 'so:id';
+                        id = getAttribute(root, sid) || $.rid('');
+                        selector = '[%s="%s"] %s'.format(sid, id, selector);
+                        setAttribute(root, sid, id);
                         els = select(selector, null, one);
                     } else {
                         els = select(selector, root, one);
@@ -503,7 +503,7 @@
 
     function cloneElement(el, deep) {
         var clone = el.cloneNode();
-        clone.setAttribute && clone.setAttribute('so:id', $.sid('clone-'));
+        clone.setAttribute && clone.setAttribute('so:clone', $.sid(''));
         // clone.cloneOf = el; // @debug
         if (!$.isFalse(deep)) {
             if (el.$data) clone.$data = el.$data;
