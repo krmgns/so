@@ -144,7 +144,7 @@
         if (selector.has(re_attr)) {
             // prevent DOMException 'input[foo=1]' is not a valid selector.
             selector = selector.replace(re_attrFix, function(_, $1, $2) {
-                $1 = $1.replace(re_attrEscape, '\\$&');
+                $1 = $1.replace(re_attrEscape, '\\$1');
                 $2 = $2.replace(re_attrQuotes, '');
                 return '[%s="%s"]'.format($1, $2);
             });
@@ -172,15 +172,23 @@
      * @param {Boolean}       one?
      */
     function Dom(selector, root, one) {
-        var els, size = 0;
+        var els, size = 0, re, id, aid;
 
         if (selector != null) {
             if ($.isString(selector)) {
                 selector = trims(selector);
                 if (selector) { // prevent empty selector error
-                    var re = selector.match(re_tag);
+                    re = selector.match(re_tag);
                     if (re) {
-                        els = create(selector, root, root, re[1]); // 'root' could be document or attribute(s)
+                        // root could be document or attribute(s)
+                        els = create(selector, root, root, re[1]);
+                    } else if (selector[0] == '>' && isNodeElement(root)) {
+                        // buggy :scope selector
+                        id = $.rid('__scope_selector_');
+                        aid = 'so:selector';
+                        selector = '[%s="%s"] %s'.format(aid, id, selector);
+                        setAttribute(root, aid, id);
+                        els = select(selector, null, one);
                     } else {
                         els = select(selector, root, one);
                     }

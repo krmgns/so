@@ -20,7 +20,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.8.1';
+    window.so.VERSION = '5.9.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
     window.so.DOMLevel = window[NAME_DOCUMENT].adoptNode ? 3 : 2;
@@ -45,6 +45,7 @@
 
     var _reCache = {};
     var re_dot = /^[-+]?\./;
+    var re_dotZero = /^0\./;
     var re_time = /(\d+)(\w+)/;
     var re_numeric = /^[-+]?(?:\.?\d+|\d+\.\d+)$/;
     var re_trimSpace = /^\s+|\s+$/g;
@@ -53,22 +54,22 @@
 
     // faster trim for space only
     function trimSpace(input) {
-        return (input != null) ? (''+ input).replace(re_trimSpace, '') : '';
+        return input != null ? (''+ input).replace(re_trimSpace, '') : '';
     }
 
     // shortcut convert helpers
     function toValue(input, valueDefault) {
-        return (input != null) ? input : valueDefault;
+        return input != null ? input : valueDefault;
     }
     function toInt(input, base) {
-        return input = input.replace(re_dot, '0.'),
-            ((base == null) ? parseInt(input) : parseInt(input, base)) || 0;
+        return input = trimSpace(input).replace(re_dot, '0.'),
+            (base == null ? parseInt(input) : parseInt(input, base)) || 0;
     }
     function toFloat(input) {
         return parseFloat(input) || 0;
     }
     function toString(input) {
-        return ((input != null) && input.toString) ? input.toString() : (''+ input);
+        return (input != null && input.toString) ? input.toString() : (''+ input);
     }
     function toBool(input) {
         return !!input;
@@ -777,12 +778,23 @@
         },
 
         /**
-         * Sid.
+         * Sid (string id).
          * @param  {String} prefix
          * @return {String}
          */
         sid: function(prefix) {
-            return (prefix || '__so_sid_') + $.id();
+            return (prefix != null ? prefix : '__so_sid_') + $.id();
+        },
+
+        /**
+         * Rid (random id).
+         * @param  {String}   prefix
+         * @param  {Int|Bool} radix?
+         * @return {String}
+         */
+        rid: function(prefix, radix) {
+            return (prefix != null ? prefix : '__so_rid_')
+                + Math.random().toString(radix == true ? 16 : radix || 10).replace(re_dotZero, '');
         },
 
         /**
@@ -875,7 +887,7 @@
          * @return {String}
          */
         trim: function(input, chars) {
-            return (input != null) ? (''+ input).trim(chars) : '';
+            return input != null ? (''+ input).trim(chars) : '';
         },
 
         /**
@@ -885,7 +897,7 @@
          * @return {String}
          */
         trimLeft: function(input, chars) {
-            return (input != null) ? (''+ input).trimLeft(chars) : '';
+            return input != null ? (''+ input).trimLeft(chars) : '';
         },
 
         /**
@@ -895,7 +907,7 @@
          * @return {String}
          */
         trimRight: function(input, chars) {
-            return (input != null) ? (''+ input).trimRight(chars) : '';
+            return input != null ? (''+ input).trimRight(chars) : '';
         },
 
         /**
