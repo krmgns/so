@@ -324,11 +324,17 @@
 
         /**
          * Filter.
-         * @param  {Function} fn
+         * @param  {Function|String} fn (test function or selector string)
          * @return {Dom}
          */
         filter: function(fn) {
-            return initDom(this.toArray().filter(fn));
+            if ($.isFunction(fn)) {
+                return initDom(this.toArray().filter(fn));
+            } else if ($.isString(fn)) {
+                return initDom(this.toArray().filter(function(el) {
+                    return matchesSelector.call(el, fn);
+                }));
+            }
         },
 
         /**
@@ -1232,10 +1238,10 @@
 
     function getDefaultStyle(tag, name) {
         if (!defaultStyles[tag]) {
-            var doc = document, el = createElement(doc, tag);
-            doc.body.appendChild(el);
+            var el = createElement(document, tag);
+            document.body.appendChild(el);
             defaultStyles[tag] = getComputedStyle(el)[toStyleName(name)];
-            doc.body.removeChild(el);
+            document.body.removeChild(el);
         }
         return defaultStyles[tag];
     }
@@ -2642,12 +2648,15 @@
         xfindAll: function(selector, root) {
             return $.$$x(selector, root);
         },
+        // (name, value) or ({name: value})
         define: function(name, value) {
             var names = Object.keys(Dom.prototype);
-            if (names.indexOf(name) > -1) {
-                throw ('Cannot overwrite on `Dom.'+ name +'`!');
-            }
-            return extendPrototype(Dom, toKeyValueObject(name, value));
+            _forEach(toKeyValueObject(name, value), function(name, value) {
+                if (names.has(name)) {
+                    throw ('Cannot overwrite on Dom.'+ name +'!');
+                }
+                Dom.prototype[name] = value;
+            });
         },
         create: function(content, attributes) {
             return create(content, null, attributes);
@@ -2656,13 +2665,11 @@
             var s = document.createElement('link');
             s.href = src, s.onload = onload, s.rel = 'stylesheet';
             document.head.appendChild(s);
-            return this;
         },
         loadScript: function(src, onload, attributes) {
             var s = document.createElement('script');
             s.src = src, s.onload = onload;
             document.head.appendChild(s);
-            return this;
         },
         isNode: function(el) {
             return isNode(el);
