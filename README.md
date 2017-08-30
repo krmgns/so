@@ -17,8 +17,9 @@ so.onReady(function($) {
 ### HTTP (Ajax) Example
 ```js
 so.onReady(function($) {
-    $.http.get("/url", function(data, /* request, response, client */) {
+    $.http.get("/url", function(data, /* client */) {
         console.log(data);
+        /* console.log(client, client.request, client.response); */
     });
 });
 ```
