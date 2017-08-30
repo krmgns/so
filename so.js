@@ -20,7 +20,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.8.0';
+    window.so.VERSION = '5.8.1';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
     window.so.DOMLevel = window[NAME_DOCUMENT].adoptNode ? 3 : 2;
@@ -956,11 +956,14 @@
         /**
          * Json encode / decode.
          * @param  {Any}     input
-         * @param  {Boolean} to @default=parse
+         * @param  {Boolean} encode @default=false (parse)
+         * @param  {Object}  options?
          * @return {String}
          */
-        json: function(input, to) {
-            return to ? JSON.stringify(input) : JSON.parse(input);
+        json: function(input, encode, options) {
+            return (options = options || {}),
+                encode ? JSON.stringify(input, options.replacer, options.space)
+                       : JSON.parse(input, options.reviver);
         },
 
         /**
