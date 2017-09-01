@@ -20,7 +20,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.12.1';
+    window.so.VERSION = '5.12.2';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -473,14 +473,19 @@
          * @throws
          */
         format: function() {
-            var str = toString(this), args = arguments, match = str.match(/(%s)/g) || [], i = 0;
+            var str = toString(this),
+                arg, args = arguments,
+                match = str.match(/(%s)/g) || [], i = 0;
 
             if (args.length < match.length) {
                 $.logWarn('No enough arguments!');
             }
 
             while (match.shift()) {
-                str = str.replace(/(%s)/, args[i++]);
+                arg = args[i++];
+                if (arg != null) {
+                    str = str.replace(/(%s)/, arg);
+                }
             }
 
             return str;
