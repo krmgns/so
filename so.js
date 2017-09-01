@@ -20,10 +20,9 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.11.0';
+    window.so.VERSION = '5.12.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
-    window.so.DOMLevel = window[NAME_DOCUMENT].adoptNode ? 3 : 2;
 
     // safe bind for ie9 (yes, still ie..)
     function consoleBind(fn, args) {

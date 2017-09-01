@@ -2328,15 +2328,15 @@
             },
 
             /**
-             * Once.
+             * One.
              * @param  {String}   type
              * @param  {Function} fn
              * @param  {Object}   options?
              * @return {this}
              */
-            once: function(type, fn, options) {
+            one: function(type, fn, options) {
                 return this.for(function(el) {
-                    event.once(el, type, fn, options);
+                    event.one(el, type, fn, options);
                 });
             },
 

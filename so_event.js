@@ -5,7 +5,7 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function(window, $) { 'use strict';
+;(function(window, document, $) { 'use strict';
 
     var re_types = {
         UIEvent: 'resize|scroll|select|(un)?load|DOMActivate',
@@ -28,6 +28,7 @@
     var re_typesFix = /^(UI|Mouse|Mutation|HTML)Event$/i;
     var re_typesStandard = $.re('('+ Object.values(re_types).join('|') +')', 'i');
     var re_comma = /,\s*/;
+    var domLevel = document.adoptNode ? 3 : 2;
     var optionsDefault = {
         bubbles: true, cancelable: true, scoped: false, composed: false, // all
         view: window, detail: null, // ui, mouse, custom
@@ -36,18 +37,22 @@
             metaKey: false, button: 1, relatedTarget: null, // mouse
         useCapture: false, once: false, passive: false, data: {}
     };
+    var trims = $.trimSpace, extend = $.extend;
 
     /**
-     * Create event.
+     * Create.
      * @param  {String} eventClass
      * @param  {String} eventType
      * @param  {Object} options
      * @return {Object}
      */
-    function createEvent(eventClass, eventType, options) {
-        if (!eventType) throw ('Type required.');
+    function create(eventClass, eventType, options) {
+        eventType = trims(eventType);
+        if (!eventType) {
+            throw ('Type required.');
+        }
 
-        options = $.extend({}, optionsDefault, options);
+        options = extend({}, optionsDefault, options);
 
         var event, eventClassOrig;
         if (!eventClass) { // autodetect
@@ -55,7 +60,7 @@
                 re = $.re('^('+ re +')$', 'i');
                 if (re.test(eventType)) {
                     eventClass = eventClassOrig = _eventClass;
-                    return 0;
+                    return 0; // break
                 }
             });
         }
@@ -67,7 +72,7 @@
 
         if (!event) {
             // add 's' if needed
-            if ($.DOMLevel < 3 && re_typesFix.test(eventClass)) {
+            if (domLevel < 3 && re_typesFix.test(eventClass)) {
                 eventClass += 's';
             }
 
@@ -110,7 +115,7 @@
         if (!fn) return;
 
         return function(e) {
-            if (event.once) { // once?
+            if (event.once) { // remove after call if once
                 event.unbind();
             }
 
@@ -125,7 +130,7 @@
             }
 
             // sugars..
-            $.extend(e, {
+            extend(e, {
                 event: event,
                 eventTarget: event.eventTarget,
                 stopped: false,
@@ -156,6 +161,7 @@
                     e.stopImmediatePropagation();
                     e.stoppedBubbleAll = true;
                 },
+                // key functions
                 isKey: function(keyCode) { return keyCode == e.keyCode; },
                 isBackspaceKey: function() { return e.isKey(8); },
                 isTabKey: function() { return e.isKey(9); },
@@ -179,7 +185,7 @@
                 isShiftKey: function() { return e.isKey(16); },
                 isControlKey: function() { return e.isKey(17); },
                 isAltKey: function() { return e.isKey(18); },
-                isAltGrKey: function() { return e.isKey(225); }
+                isAltGraphKey: function() { return e.isKey(225); }
             });
 
             return fn.call(event.target, e);
@@ -191,7 +197,7 @@
         return new Event(type, fn, options);
     }
     function initCustomEvent(type, fn, options) {
-        return new Event(type, fn, $.extend({}, options, {custom: true}));
+        return new Event(type, fn, extend({}, options, {custom: true}));
     }
     function initEventTarget(target) {
         return new EventTarget(target);
@@ -216,38 +222,36 @@
      * @param {Object}   options?
      */
     function Event(type, fn, options) {
-        if (!type) throw ('Type required.');
-
-        // ..('click', {fn: function(){...}})
-        if ($.isObject(fn)) {
+        type = trims(type);
+        options = options || {};
+        if ($.isObject(fn)) { // ..('click', {fn: function(){...}})
             options = fn, fn = options.fn;
         }
 
+        options = extend({}, optionsDefault, options);
 
         this.type = type.toLowerCase();
-        this.options = $.extend({}, optionsDefault, options);
-        this.data = this.options.data;
+        this.options = options;
+        this.data = options.data;
 
-        this.custom = $.pick(this.options, 'custom');
+        this.custom = options.custom;
         if (this.custom) {
             this.options.eventClass = 'CustomEvent';
         }
 
-        var event = createEvent(this.options.eventClass, this.type, this.options);
+        var event = create(this.options.eventClass, this.type, options);
         this.event = event.event;
         this.eventClass = event.eventClass;
         this.eventTarget = null;
 
-         options = $.pickAll(this.options, 'target', 'useCapture');
         this.target = options.target;
-        this.useCapture = !!options.useCapture;
+        this.useCapture = options.useCapture;
 
         this.fn = extendFn(this, fn);
-        this.fnOrig = fn;
+        this.fno = fn; // original fn
 
-        options = $.pickAll(this.options, 'once', 'passive');
-        this.once = !!options.once;
-        this.passive = !!options.passive;
+        this.once = options.once;
+        this.passive = options.passive;
 
         this.i = -1; // no bind yet
         this.fired = 0;
@@ -262,9 +266,9 @@
          */
         copy: function() {
             var event = this;
-            var eventCopy = initEvent(event.type, event.fnOrig, event.options);
+            var eventCopy = initEvent(event.type, event.fno, event.options);
 
-            return $.extend(eventCopy, event);
+            return extend(eventCopy, event);
         },
 
         /**
@@ -298,9 +302,9 @@
             event.target = event.options.target = target;
 
             // add fn after target set
-            var fn = this.fnOrig.bind(target);
+            var fn = this.fno.bind(target);
             event.fn = extendFn(event, fn);
-            event.fnOrig = fn;
+            event.fno = fn;
 
             initEventTarget(target).addEvent(event);
 
@@ -351,14 +355,8 @@
         },
 
         /**
-         * Is fired.
-         * @return {Boolean}
+         * Off (alias of unbind(), for chaining, eg: el.on(...).fire().off())
          */
-        isFired: function() {
-            return !!this.fired;
-        },
-
-        // for chaining, eg: el.on(...).fire().off()
         off: function(type) {
             return this.unbind(type);
         }
@@ -423,11 +421,11 @@
                         });
                     });
                 } else if (target.$events[event.type]) {
-                    var fnOrig = event.fnOrig;
-                    if (fnOrig) { // all matched fn's, eg: .off('click', fn)
+                    var fno = event.fno;
+                    if (fno) { // all matched fn's, eg: .off('click', fn)
                         $.for(target.$events, function(events) {
                             $.for(events, function(event, i) {
-                                if (event && event.fnOrig == fnOrig) {
+                                if (event && event.fno == fno) {
                                     remove.push(event);
                                 }
                             });
@@ -456,7 +454,7 @@
                     });
                 }
             } else {
-                $.logWarn('No `%s` events found to remove.'.format(event.type));
+                $.logWarn('No `'+ event.type +'` events found to remove.');
             }
         },
 
@@ -481,22 +479,22 @@
                     event.fn(event.event);
                 });
             } else {
-                $.logWarn('No `%s` type events found to fire.'.format(event.type));
+                $.logWarn('No `'+ event.type +'` type events found to fire.');
             }
         }
     });
 
-    // on, once, off, fire helper
-    function prepareArgs(fn, options, target, once) {
+    // on, one, off, fire helper
+    function prepareArgs(fn, options, target) {
+        options = options || {};
         if ($.isObject(fn)) {
             options = fn, fn = options.fn;
         }
-
-        return {fn: fn, options: $.options(options, {target: target, once: !!once})};
+        return {fn: fn, options: extend(options, {target: target})};
     }
 
     /**
-     * On, once, off, fire.
+     * On, one, off, fire.
      * @param  {Object}   target
      * @param  {String}   type
      * @param  {Function} fn
@@ -504,43 +502,39 @@
      * @return {Event}
      */
     function on(target, type, fn, options) {
-        var args = prepareArgs(fn, options, target);
-        var event, eventTarget;
-        type.split(re_comma).forEach(function(type) {
+        var args = prepareArgs(fn, options, target), event, eventTarget;
+        trims(type).split(re_comma).forEach(function(type) {
             event = initEvent(type, args.fn, args.options);
             eventTarget = initEventTarget(target);
             eventTarget.addEvent(event);
         });
     }
-    function once(target, type, fn, options) {
-        var args = prepareArgs(fn, options, target, true);
-        var event, eventTarget;
-        type.split(re_comma).forEach(function(type) {
+    function one(target, type, fn, options) {
+        var args = prepareArgs(fn, $.options(options, {once: true}), target), event, eventTarget;
+        trims(type).split(re_comma).forEach(function(type) {
             event = initEvent(type, args.fn, args.options);
             eventTarget = initEventTarget(target);
             eventTarget.addEvent(event);
         });
     }
     function off(target, type, fn, options) {
-        var args = prepareArgs(fn, options, target);
-        var event, eventTarget;
-        type.split(re_comma).forEach(function(type) {
+        var args = prepareArgs(fn, options, target), event, eventTarget;
+        trims(type).split(re_comma).forEach(function(type) {
             event = initEvent(type, args.fn, args.options);
             eventTarget = initEventTarget(target);
             eventTarget.removeEvent(event);
         });
     }
     function fire(target, type, fn, options) {
-        var args = prepareArgs(fn, options, target);
-        var event;
-        type.split(re_comma).forEach(function(type) {
+        var args = prepareArgs(fn, options, target), event;
+        trims(type).split(re_comma).forEach(function(type) {
             event = initEvent(type, args.fn, args.options);
             event.fire(type, args.options.data);
         });
     }
 
     // shortcuts for Window & Node (Document, Element, ..) objects
-    var objects = [Node], prototype = 'prototype', names = ['on', 'once', 'off', 'fire'];
+    var objects = [Node], prototype = 'prototype', names = ['on', 'one', 'off', 'fire'];
     if (window.Window) {
         objects.push(window.Window);
     } else if (window.__proto__) { // fails on safari/5.1 (maybe others too)
@@ -558,10 +552,10 @@
     // add event to so
     $.event = {
         on: on,
+        one: one,
         off: off,
         fire: fire,
-        once: once,
-        create: createEvent,
+        create: create,
         Event: initEvent,
         CustomEvent: initCustomEvent,
         EventTarget: initEventTarget,
@@ -570,8 +564,8 @@
             UP:         38, RIGHT:    39, DOWN:        40, DELETE:     46,  HOME:      36,
             END:        35, PAGE_UP:  33, PAGE_DOWN:   34, INSERT:     45,  CAPS_LOCK: 20,
             ARROW_LEFT: 37, ARROW_UP: 38, ARROW_RIGHT: 39, ARROW_DOWN: 40,
-            SHIFT:      16, CONTROL:  17, ALT:         18, ALT_GR:     225
+            SHIFT:      16, CONTROL:  17, ALT:         18, ALT_GRAPH:  225
         }
     };
 
-})(window, so);
+})(window, document, so);
