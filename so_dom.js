@@ -28,7 +28,7 @@
     var re_space = /\s+/g;
     var re_comma = /,\s*/;
     var re_trim = /^\s+|\s+$/g;
-    var re_tag = /^<([a-z-]+)[^>]*>/i;
+    var re_tag = /^<([\w-]+)[^>]*>/i;
     var toStyleName = $.util.toCamelCaseFromDashCase;
     var trims = $.trimSpace, extend = $.extend, extendPrototype = $.extendPrototype;
     var _re = $.re, _array = $.array, _for = $.for, _forEach = $.forEach;
@@ -69,13 +69,12 @@
         return isDom(selector) ? selector : new Dom(selector, root, one);
     }
 
+    var re_child = /(?:first|last|nth)/;
+    var re_childFix = /([\w-]+|):(first|last|nth([^-].+))/g;
     var re_attr = /\[.+\]/;
     var re_attrFix = /\[(.+)=(.+)\]/g;
-    var re_attrEscape = /([.:])/g;
-    var re_attrQuotes = /(^['"]|['"]$)/g;
-    var re_attrState = /(((check|select|disabl)ed|readonly)!?)/gi;
-    var re_firstLast = /^((?:fir|la)st)$/;
-    var re_select = /([.#>\s\w-]*)?@([\w-]+)(?:\(?:?((?:fir|la)st|odd|even|\d+n?)\)?)?(?:,\s*)?/gi;
+    var re_attrEsc = /([.:])/g;
+    var re_attrQuote = /(^['"]|['"]$)/g;
 
     /**
      * Select.
@@ -93,75 +92,23 @@
 
         selector = selector.replace(re_space, ' ');
 
-        var re, ret = [];
-        // check so directives
-        if (re = selector.matchAll(re_select)) {
-            var rem = [];
-            re.forEach(function(re) {
-                var all, sel = re[1] || '', tag = re[2],
-                    dir = re[3] ? re[3].replace(':', '') : dir = tag; // @first etc..
-
-                if (tag.test(re_firstLast)) {
-                    dir = tag, tag = '*';
-                }
-                all = _array(querySelectorAll(root, sel +' '+ tag));
-
-                if (dir == 'first') all = all[0];
-                else if (dir == 'last')  all = all[all.length - 1];
-                else if ($.isNumeric(dir)) all = all[dir - 1];
-                else if (dir == 'odd' || dir == 'even') {
-                    // odd / even
-                    var odd = [], even = [];
-                    all.forEach(function(node, i) {
-                        (i & 1) ? odd.push(node) : even.push(node);
-                    });
-                    (dir == 'odd') ? (all = odd) : (all = even);
-                } else if (dir = dir.toInt()) {
-                    // @div(3n) etc..
-                    all = all.filter(function(node, i) {
-                        return !((i + 1) % dir);
-                    });
-                }
-
-                ret = ret.concat(all), rem.push(re[0]);
+        if (selector.has(re_child)) {
+            selector = selector.replace(re_childFix, function(_, $1, $2, $3) {
+                return $1 +':'+ ($3 ? 'nth-child'+ $3 : $2 +'-child');
             });
-
-            // for find()'s
-            if (one) ret = [ret[0]];
-
-            // remove processed selectors
-            if (rem.length) {
-                rem.forEach(function(re) { selector = selector.replace(re, ''); });
-            }
-        }
-
-        // could be empty after processe above
-        if (selector == '') {
-            return ret;
         }
 
         // grammar: https://www.w3.org/TR/css3-selectors/#grammar
         if (selector.has(re_attr)) {
             // prevent DOMException 'input[foo=1]' is not a valid selector.
             selector = selector.replace(re_attrFix, function(_, $1, $2) {
-                $1 = $1.replace(re_attrEscape, '\\$1');
-                $2 = $2.replace(re_attrQuotes, '');
+                $1 = $1.replace(re_attrEsc, '\\$1');
+                $2 = $2.replace(re_attrQuote, '');
                 return '[%s="%s"]'.format($1, $2);
             });
         }
 
-        var search, replace, not = '!';
-        // shortcut for input:not([checked]) as input:checked!
-        if (re = selector.match(re_attrState)) {
-            search = _re(re[0], 'g'), replace = re[0].replace(not, '');
-            if (re[0].has(not)) {
-                selector = selector.replace(search, 'not([%s])'.format(replace));
-            } else {
-                selector = selector.replace(search, replace);
-            }
-        }
-
-        return _array(ret, one ? querySelector(root, selector) // speed issues..
+        return _array(one ? querySelector(root, selector) // speed issues..
             : querySelectorAll(root, selector));
     }
 
@@ -605,11 +552,11 @@
         /**
          * Append.
          * @param  {String|Object|Dom} content
-         * @param  {Object}            attributes?
          * @param  {Boolean}           cloning?
+         * @param  {Object}            attributes?
          * @return {this}
          */
-        append: function(content, attributes, cloning) {
+        append: function(content, cloning, attributes) {
             return this.for(function(el) {
                 createFor(el, content, attributes).forEach(function(node) {
                     el.appendChild(cloneIf(cloning, node));
@@ -638,11 +585,11 @@
         /**
          * Prepend.
          * @param  {String|Object|Dom} content
-         * @param  {Object}            attributes?
          * @param  {Boolean}           cloning?
+         * @param  {Object}            attributes?
          * @return {this}
          */
-        prepend: function(content, attributes, cloning) {
+        prepend: function(content, cloning, attributes) {
             return this.for(function(el) {
                 createFor(el, content, attributes).forEach(function(node) {
                     el.insertBefore(cloneIf(cloning, node), el[NAME_FIRST_CHILD]);
@@ -672,8 +619,8 @@
          * Insert (alias of append()).
          * @inheritDoc
          */
-        insert: function(content, attributes, cloning) {
-            return this.append(content, attributes, cloning);
+        insert: function(content, cloning, attributes) {
+            return this.append(content, cloning, attributes);
         },
 
         /**
@@ -1693,14 +1640,14 @@
         }
     });
 
-    var re_attrStateName = /^(?:(?:check|select|disabl)ed|readonly)$/i;
-    var re_attrNameRemove = /[^\w:.-]/g;
+    var re_attrState = /^(?:(?:check|select|disabl)ed|readonly)$/;
+    var re_attrNameFix = /[^\w:.-]+/g;
 
     // attribute helpers
     function toAttributeName(name) {
         return name = name.startsWith('@')
             ? 'data-'+ name.slice(1) /* @foo => data-foo */ : name,
-                trims(name.replace(re_attrNameRemove, '-'));
+                trims(name.replace(re_attrNameFix, '-'));
     }
 
     function hasAttribute(el, name) {
@@ -1712,7 +1659,7 @@
             name = toAttributeName(name);
             if ($.isNull(value)) {
                 el.removeAttribute(name);
-            } else if (re_attrStateName.test(name)) {
+            } else if (re_attrState.test(name)) {
                 $.isUndefined(value) || value ?
                     el.setAttribute(name, name) : el.removeAttribute(name);
             } else {
@@ -1749,7 +1696,7 @@
             var el = this[0], ret = {};
             if (el) {
                 _for(el.attributes, function(attribute) {
-                    ret[attribute.name] = re_attrStateName.test(attribute.name)
+                    ret[attribute.name] = re_attrState.test(attribute.name)
                         ? attribute.name :  attribute.value;
                 });
             }
