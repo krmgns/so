@@ -7,6 +7,8 @@
  */
 ;(function(window, document, $) { 'use strict';
 
+    var objectValues = Object.values;
+    var objectDefineProperty = Object.defineProperty;
     var re_types = {
         UIEvent: 'resize|scroll|select|(un)?load|DOMActivate',
         MouseEvent: '(dbl)?click|mouse(up|down|enter|leave|in|out|over|move|wheel)|show|contextmenu|DOMMouseScroll',
@@ -26,7 +28,7 @@
         DeviceMotionEvent: 'devicemotion', DeviceOrientationEvent: 'deviceorientation'
     };
     var re_typesFix = /^(UI|Mouse|Mutation|HTML)Event$/i;
-    var re_typesStandard = $.re('('+ Object.values(re_types).join('|') +')', 'i');
+    var re_typesStandard = $.re('('+ objectValues(re_types).join('|') +')', 'i');
     var re_comma = /,\s*/;
     var domLevel = document.adoptNode ? 3 : 2;
     var optionsDefault = {
@@ -123,10 +125,10 @@
             event.fired++;
 
             if (!e.data) {
-                e.data = event.data;
+                e = objectDefineProperty(e, 'data', {value: event.data});
             }
             if (!e.target) {
-                e = Object.defineProperty(e, 'target', {value: event.target});
+                e = objectDefineProperty(e, 'target', {value: event.target});
             }
 
             // sugars..
@@ -449,7 +451,7 @@
                         if ($.isEmpty(events)) {
                             target.$events[type] = null;
                         } else {
-                            target.$events[type] = Object.values(target.$events[type]);
+                            target.$events[type] = objectValues(target.$events[type]);
                         }
                     });
                 }
