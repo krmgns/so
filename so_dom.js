@@ -480,7 +480,7 @@
     }
 
     function cleanElement(el) {
-        el.$data = el.$events = null;
+        el.$data = el.$events = el.$animation = null;
         var child;
         while (child = el[NAME_FIRST_CHILD]) {
             if (isNodeElement(child)) {
@@ -539,14 +539,18 @@
         },
 
         /**
-         * Remove from.
+         * Remove all.
          * @param  {String} selector
          * @return {this}
          */
-        removeFrom: function(selector) {
-            var root = initDom(selector); return this.for(function(el) {
-                root.find(el).remove();
-            });
+        removeAll: function(selector) {
+            var parent = this[0];
+            if (parent) {
+                this.findAll(selector).for(function(el) {
+                    parent.removeChild(cleanElement(el));
+                });
+            }
+            return this;
         },
 
         /**
