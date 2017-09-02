@@ -544,10 +544,13 @@
          * @return {this}
          */
         removeAll: function(selector) {
-            var parent = this[0];
+            var parent = this[0], _parent;
             if (parent) {
                 this.findAll(selector).for(function(el) {
-                    parent.removeChild(cleanElement(el));
+                    _parent = el[NAME_PARENT_NODE];
+                    if (_parent && _parent == parent) {
+                        parent.removeChild(cleanElement(el));
+                    }
                 });
             }
             return this;
