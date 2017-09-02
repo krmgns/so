@@ -9,7 +9,7 @@
 
     var re_query = /\?&+(.*)/;
     var re_space = /%20/g;
-    var re_http = /^https?/;
+    var re_httpHost = /^https?:\/\/([^:]+)/;
     var re_post = /^P(?:U|OS)T$/i;
     var re_json = /^(?:\{.*\}|\[.*\]|".*"|-?\d+(?:\.\d+)?|true|false|null)$/;
     var re_request = /^([A-Z]+)?\s*(.*?)\s*(?:@(json|xml|html|plain))?$/;
@@ -24,6 +24,7 @@
         ons: {} // all other on.. stuff
     };
     var STATE_OPENED = 1, STATE_HEADERS_RECEIVED = 2, STATE_LOADING = 3, STATE_DONE = 4;
+    var trims = $.trimSpace;
 
     // export base methods
     $.http = {
@@ -51,7 +52,7 @@
          * @return {Any}
          */
         parseJson: function(input) {
-            input = $.trim(input);
+            input = trims(input);
 
             if (!re_json.test(input)) {
                 return $.logWarn('No valid JSON given.'), null;
@@ -69,9 +70,9 @@
             var ret = {};
 
             if ($.isString(headers)) {
-                headers.trim().split('\r\n').forEach(function(header) {
+                trims(headers).split('\r\n').forEach(function(header) {
                     header = header.split(':', 2),
-                        ret[$.trim(header[0]).toLowerCase()] = $.trim(header[1]);
+                        ret[trims(header[0]).toLowerCase()] = trims(header[1]);
                 });
             }
 
@@ -227,6 +228,7 @@
      * @param {Object} options
      */
     function Client(uri, options) {
+        uri = trims(uri);
         if (!uri) {
             throw ('URI required!');
         }
@@ -236,8 +238,9 @@
         options.uri = uri;
         options.headers = $.extend({}, optionsDefault.headers, options.headers);
 
-        // check cross domain
-        if (re_http.test(uri)) {
+        // cross domain?
+        var match = uri.match(re_httpHost);
+        if (match && match[1] != window.location.host) {
             delete options.headers['X-Requested-With'];
         }
 
@@ -432,7 +435,7 @@
         }
         _options = options = options || {};
 
-        uri = uri.trimSpace();
+        uri = trims(uri);
         if (uri.has(' ')) {
             // <method> <uri> @<data type>, eg: '/foo', '/foo @json', 'GET /foo', 'GET /foo @json'
             re = re_request.exec(uri);
