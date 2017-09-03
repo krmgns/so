@@ -20,7 +20,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.14.0';
+    window.so.VERSION = '5.15.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -50,24 +50,28 @@
     var re_primitive = /^(string|number|boolean)$/;
     var RegExp = window.RegExp;
 
+    // null/undefined checker
+    function isVoid(input) {
+        return input == null;
+    }
+
     // faster trim for space only
     function trimSpace(input) {
-        return input != null ? (''+ input).replace(re_trimSpace, '') : '';
+        return !isVoid(input) ? (''+ input).replace(re_trimSpace, '') : '';
     }
 
     // shortcut convert helpers
     function toValue(input, valueDefault) {
-        return input != null ? input : valueDefault;
+        return isVoid(input) ? valueDefault : input;
     }
     function toInt(input, base) {
-        return input = trimSpace(input).replace(re_dot, '0.'),
-            (base == null ? parseInt(input) : parseInt(input, base)) || 0;
+        return parseInt(trimSpace(input).replace(re_dot, '0.'), base || 10) || 0;
     }
     function toFloat(input) {
         return parseFloat(input) || 0;
     }
     function toString(input) {
-        return (input != null && input.toString) ? input.toString() : (''+ input);
+        return (''+ input);
     }
     function toBool(input) {
         return !!input;
@@ -146,7 +150,7 @@
     function loop(input, fn, _this, useKey, useLength) {
         var _this = _this || input, length = input && input.length, i = 0, key, value;
 
-        if (length != null && useLength != false) {
+        if (!isVoid(length) && useLength) {
             for (; i < length; i++) {
                 value = input[i];
                 if (0 === fn.apply(_this, !useKey ?
@@ -192,7 +196,7 @@
     extend($, {
         /** Is void. @param {Any} input @return {Boolean} */
         isVoid: function(input) {
-            return (input == null);
+            return isVoid(input);
         },
 
         /** Is null. @param {Any} input @return {Boolean} */
@@ -203,6 +207,11 @@
         /** Is nulls. @param {Any} input @return {Boolean} */
         isNulls: function(input) {
             return (input === '');
+        },
+
+        /** Is defined. @param {Any} input @return {Boolean} */
+        isDefined: function(input) {
+            return (input !== undefined);
         },
 
         /** Is undefined. @param {Any} input @return {Boolean} */
@@ -273,13 +282,13 @@
         /** Is iterable.     @param {Any} input @return {Boolean} */
         isIterable: function(input) {
             return $.isArray(input) || $.isObject(input) || (input && (
-                (input.length != null && !input[NAME_NODE_TYPE]) // dom, nodelist, string etc.
+                (!isVoid(input.length) && !input[NAME_NODE_TYPE]) // dom, nodelist, string etc.
             ));
         },
 
         /** Is primitive. @param {Any} input @return {Boolean} */
         isPrimitive: function(input) {
-            return $.isVoid(input) || re_primitive.test(typeof input);
+            return isVoid(input) || re_primitive.test(typeof input);
         },
 
         /** Is window. @param {Any} input @return {Boolean} */
@@ -483,7 +492,7 @@
 
             while (match.shift()) {
                 arg = args[i++];
-                if (arg != null) {
+                if (!isVoid(arg)) {
                     str = str.replace(/(%s)/, arg);
                 }
             }
@@ -731,7 +740,7 @@
         }
 
         if (!input || inputType == 'string' || inputType == 'window'
-            || input[NAME_NODE_TYPE] || $.isVoid(input.length)) {
+            || input[NAME_NODE_TYPE] || isVoid(input.length)) {
             ret = [input];
         } else {
             ret = fn_slice.call(input, begin, end);
@@ -786,7 +795,7 @@
          * @return {String}
          */
         sid: function(prefix) {
-            return (prefix != null ? prefix : '__so_sid_') + $.id();
+            return toValue(prefix,  '__so_sid_') + $.id();
         },
 
         /**
@@ -802,7 +811,7 @@
                 return ((Math.random() * base) | 0).toString(base)
                     // [Math.random() < .5 ? 'toString' : 'toUpperCase']();
             });
-            return (prefix != null ? prefix : '__so_rid_') + rid;
+            return toValue(prefix, '__so_rid_') + rid;
         },
 
         /**
@@ -845,7 +854,7 @@
         /**
          * Get window.
          * @param  {Any} node
-         * @return {Window|undefined}
+         * @return {Window?}
          */
         getWindow: function(input) {
             var ret;
@@ -868,7 +877,7 @@
         /**
          * Get document.
          * @param  {Any} input
-         * @return {Document|undefined}
+         * @return {Document?}
          */
         getDocument: function(input) {
             var ret;
@@ -895,7 +904,7 @@
          * @return {String}
          */
         trim: function(input, chars) {
-            return input != null ? (''+ input).trim(chars) : '';
+            return !isVoid(input) ? toString(input).trim(chars) : '';
         },
 
         /**
@@ -905,7 +914,7 @@
          * @return {String}
          */
         trimLeft: function(input, chars) {
-            return input != null ? (''+ input).trimLeft(chars) : '';
+            return !isVoid(input) ? toString(input).trimLeft(chars) : '';
         },
 
         /**
@@ -915,7 +924,7 @@
          * @return {String}
          */
         trimRight: function(input, chars) {
-            return input != null ? (''+ input).trimRight(chars) : '';
+            return !isVoid(input) ? toString(input).trimRight(chars) : '';
         },
 
         /**
@@ -935,12 +944,13 @@
          */
         dig: function(input, key) {
             if ($.isArray(input) || $.isObject(input)) {
-                var keys = toString(key).split('.'), key = keys.shift();
+                var keys = trimSpace(key).split('.'), key = keys.shift();
 
                 if (!keys.length) {
                     return input[key];
                 }
 
+                // recursion
                 return $.dig(input[key], keys.join('.'));
             }
         },
@@ -967,11 +977,11 @@
          * @param  {Any} input
          * @return {Any}
          */
-        int: function(input, base) { return toInt(input, base); },
-        float: function(input) { return toFloat(input); },
+        int:    function(input, base) { return toInt(input, base); },
+        float:  function(input) { return toFloat(input); },
         string: function(input) { return toString(input); },
-        bool: function(input) { return toBool(input); },
-        value: function(input, valueDefault) { return toValue(input, valueDefault); },
+        bool:   function(input) { return toBool(input); },
+        value:  function(input, valueDefault) { return toValue(input, valueDefault); },
 
         /**
          * Json encode / decode.
@@ -1004,7 +1014,7 @@
          * @return {Boolean}
          */
         isSet: function(input, key) {
-            return ((key != null) ? $.dig(input, key) : input) != null;
+            return !isVoid(isVoid(key) ? input : $.dig(input, key));
         },
 
         /**
@@ -1014,7 +1024,6 @@
          */
         isEmpty: function(input) {
             return !input // '', null, undefined, false, 0, -0, NaN
-                || ($.isArray(input) && !Object.keys(input).length)
                 || ($.isNumber(input.length) && !input.length)
                 || ($.isObject(input) && !Object.keys(input).length);
         },
@@ -1026,7 +1035,7 @@
          * @return {Array|Object}
          */
         copy: function(input, keysExclude) {
-            return $.copyTo($.isArray(input) ? [] : {}, input, keysExclude, true);
+            return $.copyTo($.isArray(input) ? [] : {}, input, keysExclude);
         },
 
         /**
@@ -1109,9 +1118,9 @@
             $.forEach(properties, function(name, property) {
                 properties[name] = {
                     value: property[0],
-                    writable: toBool(property[1] != null ? property[1] : true),
-                    enumerable: toBool(property[2] != null ? property[2] : true),
-                    configurable: toBool(property[3] != null ? property[3] : false),
+                    writable: toBool(!isVoid(property[1]) ? property[1] : true),
+                    enumerable: toBool(!isVoid(property[2]) ? property[2] : true),
+                    configurable: toBool(!isVoid(property[3]) ? property[3] : true)
                 }
             });
 
@@ -1133,7 +1142,7 @@
          * @param  {Array|Object} input
          * @param  {String}       key
          * @param  {Any}          valueDefault?
-         * @return {Any|undefined}
+         * @return {Any?}
          * @throws
          */
         pick: function(input, key, valueDefault) {
@@ -1185,8 +1194,8 @@
 
     /**
      * Oh baby..
-     * @param  {Function}           callback
-     * @param  {Document|undefined} document
+     * @param  {Function}  callback
+     * @param  {Document?} document
      * @return {none}
      */
     $.onReady = function(callback, document) {

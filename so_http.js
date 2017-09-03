@@ -352,7 +352,7 @@
             if ($.isFunction(fn)) {
                 var args = [this];
                 // prepend
-                if (!$.isUndefined(fnArgs)) {
+                if ($.isDefined(fnArgs)) {
                     args = [fnArgs].concat(args);
                 }
                 fn.apply(this, args);
