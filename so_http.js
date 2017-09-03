@@ -9,7 +9,7 @@
 
     var re_query = /\?&+(.*)/;
     var re_space = /%20/g;
-    var re_httpHost = /^https?:\/\/([^:]+)/;
+    var re_httpHost = /^https?:\/\/([^:/]+)/;
     var re_post = /^P(?:U|OS)T$/i;
     var re_json = /^(?:\{.*\}|\[.*\]|".*"|-?\d+(?:\.\d+)?|true|false|null)$/;
     var re_request = /^([A-Z]+)?\s*(.*?)\s*(?:@(json|xml|html|plain))?$/;
