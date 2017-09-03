@@ -416,17 +416,17 @@
         if (!$.isObject(options)) throw ('Options must be an object!');
 
         uri = trims(uri);
-        if (method) { // for get/post shortcut methods
-            options.method = method;
-            options.uri = uri;
-        } else if (uri.has(' ')) {
+        if (uri.has(' ')) {
             // <method> <uri> @<data type>, eg: '/foo', '/foo @json', 'GET /foo', 'GET /foo @json'
             var re = re_request.exec(uri);
             if (re) {
-                options.method = re[1];
+                options.method = re[1] || method;
                 options.uri = uri = re[2];
                 options.dataType = re[3];
             }
+        } else if (method) { // for get/post shortcut methods
+            options.method = method;
+            options.uri = uri;
         }
 
         return initClient(uri, $.extend(options, {
