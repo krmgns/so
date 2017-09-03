@@ -429,13 +429,11 @@
             }
         }
 
-        options = $.extend(options, {
+        return initClient(uri, $.extend(options, {
             onDone: options.onDone || onDone,
             onSuccess: options.onSuccess || onSuccess,
             onFailure: options.onFailure || onFailure
-        });
-
-        return initClient(uri, options);
+        }));
     }
 
     // export more methods
