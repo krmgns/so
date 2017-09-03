@@ -375,17 +375,7 @@
          * @return {this}
          */
         end: function(fn) {
-            var _this = this, i;
-
-            // actually just calls onDone
-            i = setInterval(function() {
-                if (_this.done) {
-                    _this.fire(fn);
-                    clearInterval(i);
-                }
-            }, 10);
-
-            return this;
+            return this.on('done', fn);
         },
 
         /**
@@ -413,7 +403,7 @@
     /**
      * Init.
      * @param  {String}          uri
-     * @param  {Object|Function} options?
+     * @param  {Object|Function} options
      * @param  {Function}        onDone?
      * @param  {Function}        onSuccess?
      * @param  {Function}        onFailure?
@@ -421,41 +411,29 @@
      * @return {Client}
      */
     function init(uri, options, onDone, onSuccess, onFailure, method) {
-        if (!$.isString(uri)) {
-            throw ('URI must be string!');
-        }
-
-        var args, re, _options;
-
-        // swap arguments
-        if ($.isFunction(options)) {
-            args = arguments;
-            onDone = onSuccess = onFailure = options = null;
-            onDone = args[1], onSuccess = args[2], onFailure = args[3];
-        }
-        _options = options = options || {};
+        options = options || {};
+        if (!$.isString(uri)) throw ('URI must be a string!');
+        if (!$.isObject(options)) throw ('Options must be an object!');
 
         uri = trims(uri);
-        if (uri.has(' ')) {
+        if (method) { // for get/post shortcut methods
+            options.method = method;
+            options.uri = uri;
+        } else if (uri.has(' ')) {
             // <method> <uri> @<data type>, eg: '/foo', '/foo @json', 'GET /foo', 'GET /foo @json'
-            re = re_request.exec(uri);
+            var re = re_request.exec(uri);
             if (re) {
                 options.method = re[1];
                 options.uri = uri = re[2];
                 options.dataType = re[3];
             }
-        } else {
-            options.method = method;
-            options.uri = uri;
         }
 
-        if ($.isFunction(_options)) {
-            // eg: '/foo', function() {...}
-            options = $.extend(options, {onDone: _options, onSuccess: onDone, onFailure: onSuccess});
-        } else if ($.isObject(_options)) {
-            // eg: '/foo', {...}
-            options = $.extend(options, $.extend({onDone: onDone, onSuccess: onSuccess, onFailure: onFailure}, _options));
-        }
+        options = $.extend(options, {
+            onDone: options.onDone || onDone,
+            onSuccess: options.onSuccess || onSuccess,
+            onFailure: options.onFailure || onFailure
+        });
 
         return initClient(uri, options);
     }
