@@ -7,6 +7,7 @@
  */
 ;(function(window, document, $) { 'use strict';
 
+    var id = 0;
     var objectValues = Object.values;
     var objectDefineProperty = Object.defineProperty;
     var re_types = {
@@ -40,6 +41,11 @@
         useCapture: false, once: false, passive: false, data: {}
     };
     var trims = $.trimSpace, extend = $.extend;
+    var KEY_BACKSPACE =  8,  KEY_TAB =       9, KEY_ENTER =       13, KEY_ESC =        27,  KEY_LEFT =      37,
+        KEY_UP =         38, KEY_RIGHT =    39, KEY_DOWN =        40, KEY_DELETE =     46,  KEY_HOME =      36,
+        KEY_END =        35, KEY_PAGE_UP =  33, KEY_PAGE_DOWN =   34, KEY_INSERT =     45,  KEY_CAPS_LOCK = 20,
+        KEY_ARROW_LEFT = 37, KEY_ARROW_UP = 38, KEY_ARROW_RIGHT = 39, KEY_ARROW_DOWN = 40,
+        KEY_SHIFT =      16, KEY_CONTROL =  17, KEY_ALT =         18, KEY_ALT_GRAPH =  225;
 
     /**
      * Create.
@@ -124,12 +130,8 @@
             event.event = e; // overwrite on initial
             event.fired++;
 
-            if (!e.data) {
-                e = objectDefineProperty(e, 'data', {value: event.data});
-            }
-            if (!e.target) {
-                e = objectDefineProperty(e, 'target', {value: event.target});
-            }
+            if (!e.data) e = objectDefineProperty(e, 'data', {value: event.data});
+            if (!e.target) e = objectDefineProperty(e, 'target', {value: event.target});
 
             // sugars..
             extend(e, {
@@ -162,33 +164,39 @@
                 stopBubbleAll: function() {
                     e.stopImmediatePropagation();
                     e.stoppedBubbleAll = true;
-                },
-                // key functions
-                isKey: function(keyCode) { return keyCode == e.keyCode; },
-                isBackspaceKey: function() { return e.isKey(8); },
-                isTabKey: function() { return e.isKey(9); },
-                isEnterKey: function() { return e.isKey(13); },
-                isEscKey: function() { return e.isKey(27); },
-                isLeftKey: function() { return e.isKey(37); },
-                isUpKey: function() { return e.isKey(38); },
-                isRightKey: function() { return e.isKey(39); },
-                isDownKey: function() { return e.isKey(40); },
-                isDeleteKey: function() { return e.isKey(46); },
-                isHomeKey: function() { return e.isKey(36); },
-                isEndKey: function() { return e.isKey(35); },
-                isPageUpKey: function() { return e.isKey(33); },
-                isPageDownKey: function() { return e.isKey(34); },
-                isInsertKey: function() { return e.isKey(45); },
-                isCapsLockKey: function() { return e.isKey(20); },
-                isArrowLeftKey: function() { return e.isKey(37); },
-                isArrowUpKey: function() { return e.isKey(38); },
-                isArrowRightKey: function() { return e.isKey(39); },
-                isArrowDownKey: function() { return e.isKey(40); },
-                isShiftKey: function() { return e.isKey(16); },
-                isControlKey: function() { return e.isKey(17); },
-                isAltKey: function() { return e.isKey(18); },
-                isAltGraphKey: function() { return e.isKey(225); }
+                }
             });
+
+            if ($.isDefined(e.keyCode)) {
+                var eKeyCode = e.keyCode;
+                // key sugars..
+                extend(e, {
+                    isKey: function(keyCode) { return eKeyCode == keyCode; },
+                    isBackspaceKey: function() { return eKeyCode == KEY_BACKSPACE; },
+                    isTabKey: function() { return eKeyCode == KEY_TAB; },
+                    isEnterKey: function() { return eKeyCode == KEY_ENTER; },
+                    isEscKey: function() { return eKeyCode == KEY_ESC; },
+                    isLeftKey: function() { return eKeyCode == KEY_LEFT; },
+                    isUpKey: function() { return eKeyCode == KEY_UP; },
+                    isRightKey: function() { return eKeyCode == KEY_RIGHT; },
+                    isDownKey: function() { return eKeyCode == KEY_DOWN; },
+                    isDeleteKey: function() { return eKeyCode == KEY_DELETE; },
+                    isHomeKey: function() { return eKeyCode == KEY_HOME; },
+                    isEndKey: function() { return eKeyCode == KEY_END; },
+                    isPageUpKey: function() { return eKeyCode == KEY_PAGE_UP; },
+                    isPageDownKey: function() { return eKeyCode == KEY_PAGE_DOWN; },
+                    isInsertKey: function() { return eKeyCode == KEY_INSERT; },
+                    isCapsLockKey: function() { return eKeyCode == KEY_CAPS_LOCK; },
+                    isArrowLeftKey: function() { return eKeyCode == KEY_ARROW_LEFT; },
+                    isArrowUpKey: function() { return eKeyCode == KEY_ARROW_UP; },
+                    isArrowRightKey: function() { return eKeyCode == KEY_ARROW_RIGHT; },
+                    isArrowDownKey: function() { return eKeyCode == KEY_ARROW_DOWN; },
+                    isShiftKey: function() { return eKeyCode == KEY_SHIFT; },
+                    isControlKey: function() { return eKeyCode == KEY_CONTROL; },
+                    isAltKey: function() { return eKeyCode == KEY_ALT; },
+                    isAltGraphKey: function() { return eKeyCode == KEY_ALT_GRAPH; }
+                });
+            }
 
             return fn.call(event.target, e);
         };
@@ -211,7 +219,7 @@
             target.$events = {};
         }
         if (eventType && !target.$events[eventType]) {
-            target.$events[eventType] = [];
+            target.$events[eventType] = {};
         }
 
         return target;
@@ -255,7 +263,7 @@
         this.once = options.once;
         this.passive = options.passive;
 
-        this.i = -1; // no bind yet
+        this.id = ++id;
         this.fired = 0;
         this.cancalled = false;
         this.custom = event.eventClass == 'CustomEvent' || !re_typesStandard.test(type);
@@ -380,10 +388,12 @@
          */
         addEvent: function(event) {
             var target = checkTarget(this.target, event.type);
+            var targetEvents = target.$events;
 
+            event.id = (event.id || ++id);
             event.target = target;
             event.eventTarget = this;
-            event.i = target.$events[event.type].push(event) - 1;
+            targetEvents[event.type][event.id] = event;
 
             target.addEventListener(event.type, event.fn, event.useCapture);
         },
@@ -395,64 +405,60 @@
          */
         removeEvent: function(event) {
             var target = checkTarget(this.target);
-            var remove;
+            var targetEvents;
+            var remove = [];
 
             if (target.$events) {
-                remove = [];
                 if (event.type == '*') { // all
                     $.for(target.$events, function(events) {
-                        $.for(events, function(event, i) {
+                        $.for(events, function(event) {
                             remove.push(event);
                         });
                     });
                 } else if (event.type == '**') { // all fired
                     $.for(target.$events, function(events) {
-                        $.for(events, function(event, i) {
+                        $.for(events, function(event) {
                             if (event && event.fired) {
                                 remove.push(event);
                             }
                         });
                     });
-                } else if (event.type.has('**')) { // all fired 'x' types, eg: .off('click**')
-                    var type = event.type.slice(0, -2);
+                } else if (event.type.startsWith('**')) { // all fired 'x' types, eg: .off('**click')
+                    var type = event.type.slice(2);
                     $.for(target.$events, function(events) {
-                        $.for(events, function(event, i) {
+                        $.for(events, function(event) {
                             if (event && event.fired && event.type == type) {
                                 remove.push(event);
                             }
                         });
                     });
                 } else if (target.$events[event.type]) {
-                    var fno = event.fno;
-                    if (fno) { // all matched fn's, eg: .off('click', fn)
-                        $.for(target.$events, function(events) {
-                            $.for(events, function(event, i) {
-                                if (event && event.fno == fno) {
-                                    remove.push(event);
-                                }
-                            });
+                    var fno = event.fno, events = target.$events[event.type];
+                    if (fno) { // all matched type's & fn's, eg: .off('click', fn)
+                        $.for(events, function(event) {
+                            if (event && event.fno == fno) {
+                                remove.push(event);
+                            }
                         });
                     } else { // all matched type's, eg: .off('click')
-                        $.for(target.$events[event.type], function(event, i) {
+                        $.for(events, function(event) {
                             remove.push(event);
                         });
                     }
                 }
 
-
                 if (remove.length) {
+                    targetEvents = target.$events;
                     $.for(remove, function(event) {
-                        delete target.$events[event.type][event.i];
-                        target.removeEventListener(event.type, event.fn, event.useCapture);
+                        if (event && event.id in targetEvents[event.type]) {
+                            delete targetEvents[event.type][event.id];
+                            target.removeEventListener(event.type, event.fn, event.useCapture);
+                        }
                     });
 
                     // think memory!
-                    $.forEach(target.$events, function(type, events) {
-                        if ($.isEmpty(events)) {
-                            target.$events[type] = null;
-                        } else {
-                            target.$events[type] = objectValues(target.$events[type]);
-                        }
+                    $.forEach(targetEvents, function(type, events) {
+                        targetEvents[type] = !$.isEmpty(events) ? events : null;
                     });
                 }
             } else {
@@ -562,11 +568,12 @@
         CustomEvent: initCustomEvent,
         EventTarget: initEventTarget,
         key: {
-            BACKSPACE:  8,  TAB:       9, ENTER:       13, ESC:        27,  LEFT:      37,
-            UP:         38, RIGHT:    39, DOWN:        40, DELETE:     46,  HOME:      36,
-            END:        35, PAGE_UP:  33, PAGE_DOWN:   34, INSERT:     45,  CAPS_LOCK: 20,
-            ARROW_LEFT: 37, ARROW_UP: 38, ARROW_RIGHT: 39, ARROW_DOWN: 40,
-            SHIFT:      16, CONTROL:  17, ALT:         18, ALT_GRAPH:  225
+            BACKSPACE: KEY_BACKSPACE, TAB:         KEY_TAB,         ENTER:      KEY_ENTER,      ESC:        KEY_ESC,
+            LEFT:      KEY_LEFT,      UP:          KEY_UP,          RIGHT:      KEY_RIGHT,      DOWN:       KEY_DOWN,
+            DELETE:    KEY_DELETE,    HOME:        KEY_HOME,        END:        KEY_END,        PAGE_UP:    KEY_END,
+            PAGE_DOWN: KEY_PAGE_DOWN, INSERT:      KEY_INSERT,      CAPS_LOCK:  KEY_CAPS_LOCK,  ARROW_LEFT: KEY_ARROW_LEFT,
+            ARROW_UP:  KEY_ARROW_UP,  ARROW_RIGHT: KEY_ARROW_RIGHT, ARROW_DOWN: KEY_ARROW_DOWN, SHIFT:      KEY_SHIFT,
+            CONTROL:   KEY_CONTROL,   ALT:         KEY_ALT,         ALT_GRAPH:  KEY_ALT_GRAPH
         }
     };
 

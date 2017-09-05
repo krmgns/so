@@ -20,7 +20,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.16.1';
+    window.so.VERSION = '5.16.2';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -1029,7 +1029,8 @@
         isEmpty: function(input) {
             return !input // '', null, undefined, false, 0, -0, NaN
                 || ($.isNumber(input.length) && !input.length)
-                || ($.isObject(input) && !Object.keys(input).length);
+                || ($.isObject(input) && !Object.keys(input).length)
+                || ($.isArray(input) && !Object.values(input).length);
         },
 
         /**
