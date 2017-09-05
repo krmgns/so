@@ -240,7 +240,7 @@
 
         options = extend({}, optionsDefault, options);
 
-        this.type = type.toLowerCase();
+        this.type = type;
         this.options = options;
         this.data = options.data;
 
