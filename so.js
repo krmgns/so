@@ -20,7 +20,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.16.0';
+    window.so.VERSION = '5.16.1';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -445,13 +445,17 @@
          * @param  {Int} base
          * @return {Int|null}
          */
-        toInt: function(base) { return toInt(this, base); },
+        toInt: function(base) {
+            return toInt(this, base);
+        },
 
         /**
          * To float.
          * @return {Float|null}
          */
-        toFloat: function() { return toFloat(this); },
+        toFloat: function() {
+            return toFloat(this);
+        },
 
         /**
          * To capital case.

@@ -1168,7 +1168,7 @@
     var re_color = /color/i;
     var re_unit = /(?:px|em|%)/i; // short & quick
     var re_unitOther = /(?:ex|in|[cm]m|p[tc]|v[hw]?min)/i;
-    var re_noneUnitStyles = /(?:(?:fill)?opacity|z(?:oom|index)|(?:fontw|lineh)eight|column(?:count|s))/i;
+    var re_noneUnitStyles = /(?:(?:fill-?)?opacity|z(?:oom|index)|(?:font-?w|line-?h)eight|column(?:-?count|s))/i;
     var defaultStyles = {};
     var matchesSelector = document.documentElement.matches || function(selector) {
         var i = 0, all = querySelectorAll(this.ownerDocument, selector);
@@ -1209,16 +1209,16 @@
     }
 
     function setStyle(el, name, value) {
-        name = toStyleName(name), value = trims(value);
+        name = toStyleName(name), value = (''+ value);
         if (value && isNumeric(value) && !re_noneUnitStyles.test(name)) {
             value += 'px';
         }
         el[NAME_STYLE][name] = value;
     }
 
-    function getStyle(el, name, value) {
-        var style = getComputedStyle(el);
-        return name ? (name = toStyleName(name), style[name] || value || '') : style;
+    function getStyle(el, name) {
+        var styles = getComputedStyle(el);
+        return name ? styles[toStyleName(name)] || '' : styles;
     }
 
     function parseStyleText(text) {
@@ -1262,7 +1262,7 @@
          * @return {String}
          */
         style: function(name, value, raw) {
-            return isObject(name) || (isString(name) && name.has(':')) ? this.setStyle(name)
+            return isObject(name) || (isString(name) && (!isNulls(value) || name.has(':'))) ? this.setStyle(name)
                 : isNull(value) || isNulls(value) ? this.removeStyle(name)
                 : this.getStyle(name, value, raw);
         },
@@ -1312,8 +1312,9 @@
                 value = getStyle(el, name);
                 if (value !== '') {
                     value = isFalse(convert)  ? value : (
-                        re_rgb.test(value) ? $.util.toHexFromRgb(value) // convert rgb to hex
-                            : re_unit.test(value) || re_unitOther.test(value) // convert px etc. to float
+                        re_rgb.test(value) ? $.util.toHexFromRgb(value) // make rgb - hex
+                            : re_unit.test(value) || re_unitOther.test(value) // make px etc. - float
+                                // || re_noneUnitStyles.test(name) // make opacity etc. - float @cancel use String.toFloat()
                             ? value.toFloat() : value
                     );
                 } else {
@@ -1335,7 +1336,7 @@
             if (!names) {
                 styles = toStyleObject(getStyle(el));
             } else {
-                el = initDom(this[0]);
+                el = initDom(el);
                 split(names, re_comma).forEach(function(name) {
                     styles[name] = el.getStyle(name, convert, raw);
                 });
