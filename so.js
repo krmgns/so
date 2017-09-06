@@ -20,7 +20,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.16.3';
+    window.so.VERSION = '5.16.4';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -857,48 +857,36 @@
 
         /**
          * Get window.
-         * @param  {Any} node
+         * @param  {Any} object
          * @return {Window?}
          */
-        getWindow: function(input) {
-            var ret;
-
-            if (!input) {
-                ret = window;
-            } else {
-                if ($.isWindow(input)) {
-                    ret = input;
-                } else if ($.isDocument(input)) {
-                    ret = input[NAME_DEFAULT_VIEW]; // document window
-                } else if (input[NAME_NODE_TYPE] === 1 || input[NAME_NODE_TYPE] === 9 || input[NAME_NODE_TYPE] === 11) {
-                    ret = input[NAME_OWNER_DOCUMENT][NAME_DEFAULT_VIEW]; // node document window
-                }
+        getWindow: function(object) {
+            if (!object) {
+                return window;
+            } if (object[NAME_OWNER_DOCUMENT]) {
+                return object[NAME_OWNER_DOCUMENT][NAME_DEFAULT_VIEW];
+            } if ($.isWindow(object)) {
+                return object;
+            } if ($.isDocument(object)) {
+                return object[NAME_DEFAULT_VIEW];
             }
-
-            return ret;
         },
 
         /**
          * Get document.
-         * @param  {Any} input
+         * @param  {Any} object
          * @return {Document?}
          */
-        getDocument: function(input) {
-            var ret;
-
-            if (!input) {
-                ret = window[NAME_DOCUMENT];
-            } else {
-                if ($.isDocument(input)) {
-                    ret = input;
-                } else if (input[NAME_DOCUMENT]) { // window
-                    ret = input[NAME_DOCUMENT];
-                } else if (input[NAME_OWNER_DOCUMENT]) { // document or node
-                    ret = input[NAME_OWNER_DOCUMENT];
-                }
+        getDocument: function(object) {
+            if (!object) {
+                return window[NAME_DOCUMENT];
+            } if (object[NAME_OWNER_DOCUMENT]) {
+                return object[NAME_OWNER_DOCUMENT]; // node
+            } if ($.isDocument(object)) {
+                return object;
+            } if ($.isWindow(object)) {
+                return object[NAME_DOCUMENT];
             }
-
-            return ret;
         },
 
         /**
