@@ -830,11 +830,11 @@
 
         /**
          * Html.
-         * @param  {String} input?
+         * @param  {String|Boolean} input?
          * @return {String|Any}
          */
         html: function(input) {
-            return isDefined(input) ? this.setHtml(input) : this.getHtml();
+            return isUndefined(input) || isTrue(input) ? this.getHtml(input) : this.setHtml(input);
         },
 
         /**
