@@ -20,7 +20,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.16.6';
+    window.so.VERSION = '5.17.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -51,9 +51,9 @@
     }
 
     // faster trim for space only
-    function trimSpace(input, side) {
+    function trim(input, side) {
         return !isVoid(input) ? (''+ input).replace(
-            !side ? re_trim : side == 1 ? re_trimLeft : re_trimRight, '') : '';
+            (!side) ? re_trim : (side == 1) ? re_trimLeft : re_trimRight, '') : '';
     }
 
     // shortcut convert helpers
@@ -61,7 +61,7 @@
         return isVoid(input) ? valueDefault : input;
     }
     function toInt(input, base) {
-        return parseInt(trimSpace(input).replace(re_dot, '0.'), base || 10) || 0;
+        return parseInt(trim(input).replace(re_dot, '0.'), base || 10) || 0;
     }
     function toFloat(input) {
         return parseFloat(input) || 0;
@@ -610,7 +610,7 @@
          */
         trim: function(chars) {
             if (!chars) {
-                return trimSpace(this);
+                return trim(this);
             }
             return this.trimLeft(chars).trimRight(chars);
         },
@@ -623,7 +623,7 @@
          */
         trimLeft: function(chars) {
             if (!chars) {
-                return trimSpace(this, 1);
+                return trim(this, 1);
             }
 
             var str = toString(this), re = prepareTrimRegExp(chars, true);
@@ -641,7 +641,7 @@
          */
         trimRight: function(chars) {
             if (!chars) {
-                return trimSpace(this, 2);
+                return trim(this, 2);
             }
 
             var str = toString(this), re = prepareTrimRegExp(chars);
@@ -649,14 +649,6 @@
                 str = str.replace(re, '');
             }
             return str;
-        },
-
-        /**
-         * Trim space.
-         * @return {String}
-         */
-        trimSpace: function() {
-            return trimSpace(this);
         },
 
         /**
@@ -924,15 +916,6 @@
         },
 
         /**
-         * Trim space.
-         * @param  {String} input
-         * @return {String}
-         */
-        trimSpace: function(input) {
-            return trimSpace(input);
-        },
-
-        /**
          * Dig.
          * @param  {Object} input
          * @param  {String} key
@@ -940,7 +923,7 @@
          */
         dig: function(input, key) {
             if ($.isArray(input) || $.isObject(input)) {
-                var keys = trimSpace(key).split('.'), key = keys.shift();
+                var keys = trim(key).split('.'), key = keys.shift();
 
                 if (!keys.length) {
                     return input[key];

@@ -24,7 +24,7 @@
         ons: {} // all other on.. stuff
     };
     var STATE_OPENED = 1, STATE_HEADERS_RECEIVED = 2, STATE_LOADING = 3, STATE_DONE = 4;
-    var trims = $.trimSpace;
+    var trim = $.trim, extend = $.extend, extendPrototype = $.extendPrototype;
 
     // export base methods
     $.http = {
@@ -52,7 +52,7 @@
          * @return {Any}
          */
         parseJson: function(input) {
-            input = trims(input);
+            input = trim(input);
 
             if (!re_json.test(input)) {
                 return $.logWarn('No valid JSON given.'), null;
@@ -70,9 +70,9 @@
             var ret = {};
 
             if ($.isString(headers)) {
-                trims(headers).split('\r\n').forEach(function(header) {
+                trim(headers).split('\r\n').forEach(function(header) {
                     header = header.split(':', 2),
-                        ret[trims(header[0]).toLowerCase()] = trims(header[1]);
+                        ret[trim(header[0]).toLowerCase()] = trim(header[1]);
                 });
             }
 
@@ -228,15 +228,15 @@
      * @param {Object} options
      */
     function Client(uri, options) {
-        uri = trims(uri);
+        uri = trim(uri);
         if (!uri) {
             throw ('URI required!');
         }
 
-        options = $.extend({}, optionsDefault, options);
+        options = extend({}, optionsDefault, options);
         options.method = (options.method || optionsDefault.method).toUpperCase();
         options.uri = uri;
-        options.headers = $.extend({}, optionsDefault.headers, options.headers);
+        options.headers = extend({}, optionsDefault.headers, options.headers);
 
         // cross domain?
         var match = uri.match(re_httpHost);
@@ -294,7 +294,7 @@
         }
     }
 
-    $.extendPrototype(Client, {
+    extendPrototype(Client, {
         /**
          * Send.
          * @return {this}
@@ -415,7 +415,7 @@
         if (!$.isString(uri)) throw ('URI must be a string!');
         if (!$.isObject(options)) throw ('Options must be an object!');
 
-        uri = trims(uri);
+        uri = trim(uri);
         if (uri.has(' ')) {
             // <method> <uri> @<data type>, eg: '/foo', '/foo @json', 'GET /foo', 'GET /foo @json'
             var re = re_request.exec(uri);
@@ -429,7 +429,7 @@
             options.uri = uri;
         }
 
-        return initClient(uri, $.extend(options, {
+        return initClient(uri, extend(options, {
             onDone: options.onDone || onDone,
             onSuccess: options.onSuccess || onSuccess,
             onFailure: options.onFailure || onFailure
@@ -437,7 +437,7 @@
     }
 
     // export more methods
-    $.extend($.http, {
+    extend($.http, {
         Client: initClient,
         Request: initRequest,
         Response: initResponse,

@@ -40,7 +40,7 @@
             metaKey: false, button: 1, relatedTarget: null, // mouse
         useCapture: false, once: false, passive: false, data: {}
     };
-    var trims = $.trimSpace, extend = $.extend;
+    var trim = $.trim, extend = $.extend;
     var KEY_BACKSPACE =  8,  KEY_TAB =       9, KEY_ENTER =       13, KEY_ESC =        27,  KEY_LEFT =      37,
         KEY_UP =         38, KEY_RIGHT =    39, KEY_DOWN =        40, KEY_DELETE =     46,  KEY_HOME =      36,
         KEY_END =        35, KEY_PAGE_UP =  33, KEY_PAGE_DOWN =   34, KEY_INSERT =     45,  KEY_CAPS_LOCK = 20,
@@ -55,7 +55,7 @@
      * @return {Object}
      */
     function create(eventClass, eventType, options) {
-        eventType = trims(eventType);
+        eventType = trim(eventType);
         if (!eventType) {
             throw ('Type required.');
         }
@@ -232,7 +232,7 @@
      * @param {Object}   options?
      */
     function Event(type, fn, options) {
-        type = trims(type);
+        type = trim(type);
         options = options || {};
         if ($.isObject(fn)) { // ..('click', {fn: function(){...}})
             options = fn, fn = options.fn;
@@ -511,7 +511,7 @@
      */
     function on(target, type, fn, options) {
         var args = prepareArgs(fn, options, target), event, eventTarget;
-        trims(type).split(re_comma).forEach(function(type) {
+        trim(type).split(re_comma).forEach(function(type) {
             event = initEvent(type, args.fn, args.options);
             eventTarget = initEventTarget(target);
             eventTarget.addEvent(event);
@@ -519,7 +519,7 @@
     }
     function one(target, type, fn, options) {
         var args = prepareArgs(fn, $.options(options, {once: true}), target), event, eventTarget;
-        trims(type).split(re_comma).forEach(function(type) {
+        trim(type).split(re_comma).forEach(function(type) {
             event = initEvent(type, args.fn, args.options);
             eventTarget = initEventTarget(target);
             eventTarget.addEvent(event);
@@ -527,7 +527,7 @@
     }
     function off(target, type, fn, options) {
         var args = prepareArgs(fn, options, target), event, eventTarget;
-        trims(type).split(re_comma).forEach(function(type) {
+        trim(type).split(re_comma).forEach(function(type) {
             event = initEvent(type, args.fn, args.options);
             eventTarget = initEventTarget(target);
             eventTarget.removeEvent(event);
@@ -535,7 +535,7 @@
     }
     function fire(target, type, fn, options) {
         var args = prepareArgs(fn, options, target), event;
-        trims(type).split(re_comma).forEach(function(type) {
+        trim(type).split(re_comma).forEach(function(type) {
             event = initEvent(type, args.fn, args.options);
             event.fire(type, args.options.data);
         });

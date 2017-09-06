@@ -82,7 +82,7 @@ $.ext.cookie = {
     get: function(name) {
         if (document.cookie.length) {
             var s = document.cookie.split("; "), p, m, i,
-                r = new RegExp("^"+ $.trimSpace(name) +"=([^;]*)");
+                r = new RegExp("^"+ $.trim(name) +"=([^;]*)");
             for (i = 0; p = s[i]; i++) {
                 m = p.match(r);
                 if (m && m[1]) {

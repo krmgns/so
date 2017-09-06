@@ -32,7 +32,7 @@
     var toStyleName = $.util.toCamelCaseFromDashCase;
     var _re = $.re, _array = $.array, _for = $.for, _forEach = $.forEach;
     var _break = 0; // break tick: for, forEach
-    var trims = $.trimSpace, extend = $.extend, extendPrototype = $.extendPrototype;
+    var trim = $.trim, extend = $.extend, extendPrototype = $.extendPrototype;
     var isVoid = $.isVoid, isNull = $.isNull, isNulls = $.isNulls, isDefined = $.isDefined,
         isUndefined = $.isUndefined, isString = $.isString, isNumeric = $.isNumeric,
         isNumber = $.isNumber, isArray = $.isArray, isObject = $.isObject, isFunction = $.isFunction,
@@ -40,7 +40,7 @@
 
     // general helpers
     function split(s, re) {
-        return trims(s).split(re);
+        return trim(s).split(re);
     }
     function querySelector(root, selector) {
         return root.querySelector(selector);
@@ -132,7 +132,7 @@
 
         if (selector != null) {
             if (isString(selector)) {
-                selector = trims(selector);
+                selector = trim(selector);
                 if (selector) { // prevent empty selector error
                     re = selector.match(re_tag);
                     if (re) {
@@ -1232,7 +1232,7 @@
         while (text.length) {
             // wtf! :)
             (s = text.shift().split(_re('\\s*:\\s*')))
-                && (s[0] = trims(s[0]))
+                && (s[0] = trim(s[0]))
                     && (styles[s[0]] = s[1] || '');
         }
         return styles;
@@ -1681,7 +1681,7 @@
     function toAttributeName(name) {
         return name = name.startsWith('@')
             ? 'data-'+ name.slice(1) /* @foo => data-foo */ : name,
-                trims(name.replace(re_attrNameFix, '-'));
+                trim(name.replace(re_attrNameFix, '-'));
     }
 
     function hasAttribute(el, name) {
@@ -1882,14 +1882,14 @@
     function addClass(el, name) {
         split(name, re_space).forEach(function(name) {
             if (!hasClass(el, name)) {
-                el[NAME_CLASS] = trims(el[NAME_CLASS] +' '+ name);
+                el[NAME_CLASS] = trim(el[NAME_CLASS] +' '+ name);
             }
         });
     }
 
     function removeClass(el, name) {
         split(name, re_space).forEach(function(name) {
-            el[NAME_CLASS] = trims(el[NAME_CLASS].replace(toClassRegExp(name), ' '));
+            el[NAME_CLASS] = trim(el[NAME_CLASS].replace(toClassRegExp(name), ' '));
         });
     }
 
@@ -1943,7 +1943,7 @@
          */
         replaceClass: function(oldName, newName) {
             return this.for(function(el) {
-                el[NAME_CLASS] = trims(el[NAME_CLASS].replace(toClassRegExp(oldName), ' '+ newName +' '));
+                el[NAME_CLASS] = trim(el[NAME_CLASS].replace(toClassRegExp(oldName), ' '+ newName +' '));
             });
         },
 
@@ -1985,7 +1985,7 @@
         if (el) {
             checkData(el);
             if (isString(key)) {
-                key = trims(key);
+                key = trim(key);
                 if (key[0] == '@') {
                     setAttribute(el, key, value);
                 } else {
@@ -2004,7 +2004,7 @@
         if (el) {
             checkData(el);
             if (isString(key)) {
-                key = trims(key);
+                key = trim(key);
                 if (key.startsWith('@')) {
                     return getAttribute(el, key);
                 }
@@ -2054,7 +2054,7 @@
          * @return {this}
          */
         removeData: function(key) {
-            key = trims(key);
+            key = trim(key);
 
             // data-*
             if (key.startsWith('@')) {
@@ -2084,7 +2084,7 @@
     function readFile(file, callback, multiple) {
         var reader = new FileReader();
         reader.onload = function(e) {
-            fileContent = trims(e.target.result);
+            fileContent = trim(e.target.result);
             // opera doesn't give base64 for 'html' files or maybe other more..
             var encoded = fileContent.indexOf(';base64') > -1;
             fileContent = fileContent.replace(re_data, '');
