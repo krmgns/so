@@ -20,7 +20,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.16.5';
+    window.so.VERSION = '5.16.6';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -39,7 +39,9 @@
     var re_dot = /^[-+]?\./;
     var re_time = /(\d+)(\w+)/;
     var re_numeric = /^[-+]?(?:\.?\d+|\d+\.\d+)$/;
-    var re_trimSpace = /^\s+|\s+$/g;
+    var re_trim = /^\s+|\s+$/g;
+    var re_trimLeft = /^\s+/g;
+    var re_trimRight = /\s+$/g;
     var re_primitive = /^(string|number|boolean)$/;
     var RegExp = window.RegExp;
 
@@ -49,8 +51,9 @@
     }
 
     // faster trim for space only
-    function trimSpace(input) {
-        return !isVoid(input) ? (''+ input).replace(re_trimSpace, '') : '';
+    function trimSpace(input, side) {
+        return !isVoid(input) ? (''+ input).replace(
+            !side ? re_trim : side == 1 ? re_trimLeft : re_trimRight, '') : '';
     }
 
     // shortcut convert helpers
@@ -395,7 +398,8 @@
 
             str = toString(str);
             if (noCase) {
-                str = s.toLowerCase(), search = search.toLowerCase();
+                str = s.toLowerCase();
+                search = search.toLowerCase();
             }
 
             return {s: str, ss: search, i: index};
@@ -605,6 +609,9 @@
          * @override For chars option.
          */
         trim: function(chars) {
+            if (!chars) {
+                return trimSpace(this);
+            }
             return this.trimLeft(chars).trimRight(chars);
         },
 
@@ -615,12 +622,14 @@
          * @override For chars option.
          */
         trimLeft: function(chars) {
-            var str = toString(this), re = prepareTrimRegExp(chars, true);
+            if (!chars) {
+                return trimSpace(this, 1);
+            }
 
+            var str = toString(this), re = prepareTrimRegExp(chars, true);
             while (re.test(str)) {
                 str = str.replace(re, '');
             }
-
             return str;
         },
 
@@ -631,12 +640,14 @@
          * @override For chars option.
          */
         trimRight: function(chars) {
-            var str = toString(this), re = prepareTrimRegExp(chars);
+            if (!chars) {
+                return trimSpace(this, 2);
+            }
 
+            var str = toString(this), re = prepareTrimRegExp(chars);
             while (re.test(str)) {
                 str = str.replace(re, '');
             }
-
             return str;
         },
 
