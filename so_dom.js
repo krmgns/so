@@ -1718,7 +1718,8 @@
          */
         attribute: function(name, value) {
             return isNull(value) ? this.removeAttribute(name)
-                : isDefined(value) ? this.setAttribute(name, value) : this.getAttribute(name);
+                : isObject(name) || isDefined(value) ? this.setAttribute(name, value)
+                : this.getAttribute(name);
         },
 
         /**
@@ -1752,8 +1753,11 @@
          * @return {this}
          */
         setAttribute: function(name, value) {
+            var attributes = toKeyValueObject(name, value);
             return this.for(function(el) {
-                setAttribute(el, name, value);
+                for (name in attributes) {
+                    setAttribute(el, name, attributes[name]);
+                }
             });
         },
 
@@ -2640,8 +2644,8 @@
                 Dom.prototype[name] = value;
             });
         },
-        create: function(content, attributes) {
-            return create(content, null, attributes);
+        create: function(content, doc, attributes) {
+            return create(content, doc, attributes);
         },
         loadStyle: function(src, onload, attributes) {
             var s = document.createElement('link');
