@@ -76,9 +76,9 @@
     var re_child = /(?:first|last|nth)/;
     var re_childFix = /([\w-]+|):(first|last|nth([^-].+))/g;
     var re_attr = /\[.+\]/;
-    var re_attrFix = /\[(.+)=(.+)\]/g;
-    var re_attrEsc = /([.:])/g;
-    var re_attrQuote = /(^['"]|['"]$)/g;
+    var re_attrFix = /\[(.+)\]/g;
+    var re_attrFixEsc = /([.:])/g;
+    var re_attrFixQuote = /(^['"]|['"]$)/g;
 
     /**
      * Select.
@@ -104,11 +104,16 @@
 
         // grammar: https://www.w3.org/TR/css3-selectors/#grammar
         if (selector.has(re_attr)) {
-            // prevent DOMException 'input[foo=1]' is not a valid selector.
-            selector = selector.replace(re_attrFix, function(_, $1, $2) {
-                $1 = $1.replace(re_attrEsc, '\\$1');
-                $2 = $2.replace(re_attrQuote, '');
-                return '[%s="%s"]'.format($1, $2);
+            // prevent DOMException [foo=1] is not a valid selector.
+            selector = selector.replace(re_attrFix, function(_, $1) {
+                var s = '=', name, value;
+                $1 = $1.split(s);
+                name = $1[0].replace(re_attrFixEsc, '\\$1');
+                if ($1.length > 1) {
+                    value = $1.slice(1).join(s).replace(re_attrFixQuote, '');
+                    return '['+ name +'="'+ value +'"]';
+                }
+                return '['+ name +']';
             });
         }
 

@@ -20,26 +20,19 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.16.4';
+    window.so.VERSION = '5.16.5';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
     // safe bind for ie9 (yes, still ie..)
     function consoleBind(fn, args) {
-        Function[NAME_PROTOTYPE].bind.call(window.console[fn], window.console)
+        return Function[NAME_PROTOTYPE].bind.call(window.console[fn], window.console)
             .apply(window.console, args);
     }
 
     // shortcut for 'console.log'
     window.log = function() {
-        var args = arguments, i = 0;
-        while (i < args.length) {
-            if (typeof args[i] == 'string') {
-                args[i] = '"'+ args[i] +'"'; // show strings in quotes
-            }
-            i++;
-        }
-        consoleBind('log', args);
+        consoleBind('log', arguments);
     };
 
     var _reCache = {};
