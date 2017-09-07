@@ -1810,7 +1810,7 @@
          * @param {String} value?
          */
         setValue: function(value) {
-            value += ''; // @important
+            value = isNull(value) ? '' : (value += ''); // @important
 
             return this.for(function(el) {
                 if (el.options) { // <select>
