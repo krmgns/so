@@ -465,7 +465,7 @@
 
     function cloneElement(el, deep) {
         var clone = el.cloneNode();
-        clone.setAttribute && clone.setAttribute('so:clone', $.sid(''));
+        clone.setAttribute && clone.setAttribute('so:clone', $.id());
         // clone.cloneOf = el; // @debug
         if (!isFalse(deep)) {
             if (el.$data) clone.$data = el.$data;
