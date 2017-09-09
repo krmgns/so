@@ -73,7 +73,7 @@
         return isDom(selector) ? selector : new Dom(selector, root, one);
     }
 
-    var re_child = /(?:first|last|nth)/;
+    var re_child = /(?:first|last|nth)[^-]/;
     var re_childFix = /([\w-]+|):(first|last|nth([^-].+))/g;
     var re_attr = /\[.+\]/;
     var re_attrFix = /\[(.+)\]/g;
