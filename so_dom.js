@@ -33,10 +33,11 @@
     var _re = $.re, _array = $.array, _for = $.for, _forEach = $.forEach;
     var _break = 0; // break tick: for, forEach
     var trim = $.trim, extend = $.extend, extendPrototype = $.extendPrototype;
+    var getWindow = $.getWindow, getDocument = $.getDocument;
     var isVoid = $.isVoid, isNull = $.isNull, isNulls = $.isNulls, isDefined = $.isDefined,
         isUndefined = $.isUndefined, isString = $.isString, isNumeric = $.isNumeric,
         isNumber = $.isNumber, isArray = $.isArray, isObject = $.isObject, isFunction = $.isFunction,
-        isBool = $.isBool, isTrue = $.isTrue, isFalse = $.isFalse, isWindow = $.isWindow, isDocument = $.isDocument
+        isBool = $.isBool, isTrue = $.isTrue, isFalse = $.isFalse, isWindow = $.isWindow, isDocument = $.isDocument;
 
     // general helpers
     function split(s, re) {
@@ -73,6 +74,7 @@
         return isDom(selector) ? selector : new Dom(selector, root, one);
     }
 
+    var re_id = /^#([^ ]+)$/;
     var re_child = /(?:first|last|nth)(?!-)/;
     var re_childFix = /([\w-]+|):(first|last|nth([^-].+))/g;
     var re_attr = /\[.+\]/;
@@ -133,9 +135,12 @@
         if (selector != null) {
             if (isString(selector)) {
                 selector = trim(selector);
-                if (selector) { // prevent empty selector error
-                    re = selector.match(re_tag);
-                    if (re) {
+                // prevent empty selector error
+                if (selector) {
+                    // id check (speed)
+                    if (re = selector.match(re_id)) {
+                        els = [(root = document).getElementById(re[1])];
+                    } else if (re = selector.match(re_tag)) {
                         // root could be document or attribute(s)
                         els = create(selector, root, root, re[1]);
                     } else if (selector[0] == '>' && isNodeElement(root)) {
@@ -433,7 +438,7 @@
             }
         }
 
-        doc = doc && isDocument(doc) ? doc : document;
+        doc = isDocument(doc) ? doc : document;
         tmp = createElement(doc, tmpTag, {innerHTML: content});
         frg = doc.createDocumentFragment();
         while (tmp[NAME_FIRST_CHILD]) {
@@ -501,7 +506,7 @@
     }
 
     function createFor(el, content, attributes) {
-        return create(content, $.getDocument(el), attributes);
+        return create(content, getDocument(el), attributes);
     }
 
     function cloneIf(cloning, node) {
@@ -1085,7 +1090,7 @@
          */
         window: function(content) {
             var el = this[0];
-            return initDom(el && (content ? el.contentWindow : $.getWindow(el)));
+            return initDom(el && (content ? el.contentWindow : getWindow(el)));
         },
 
         /**
@@ -1095,7 +1100,7 @@
          */
         document: function(content) {
             var el = this[0];
-            return initDom(el && (content ? el.contentDocument : $.getDocument(el)));
+            return initDom(el && (content ? el.contentDocument : getDocument(el)));
         }
     });
 
@@ -1200,7 +1205,7 @@
     }
 
     function getComputedStyle(el) {
-        return $.getWindow(el).getComputedStyle(el);
+        return getWindow(el).getComputedStyle(el);
     }
 
     function getDefaultStyle(tag, name) {
@@ -1426,7 +1431,7 @@
             parent = parent[NAME_PARENT_ELEMENT];
         }
 
-        var doc = $.getDocument(el);
+        var doc = getDocument(el);
         var css = createElement(doc, 'style', {
             textContent: '.'+ sid +'{display:block!important;visibility:hidden!important}'
         });
@@ -1474,7 +1479,7 @@
                 ret.width = el.offsetWidth, ret.height = el.offsetHeight;
             }
         } else if (isRoot(el)) {
-            var win = $.getWindow(el);
+            var win = getWindow(el);
             width = win.innerWidth, height = win.innerHeight;
         }
 
@@ -1529,7 +1534,7 @@
         var ret = {top: 0, left: 0};
 
         if (isNodeElement(el)) {
-            var body = $.getDocument(el).body;
+            var body = getDocument(el).body;
             if (isHidden(el) || isHiddenParent(el)) {
                 var properties = getHiddenElementProperties(el, ['offsetTop', 'offsetLeft']);
                 ret.top = properties[0], ret.left = properties[1];
@@ -1553,7 +1558,7 @@
         if (isNodeElement(el)) {
             ret.top = el.scrollTop, ret.left = el.scrollLeft;
         } else if (isRoot(el) || isRootElement(el)) {
-            var win = $.getWindow(el);
+            var win = getWindow(el);
             ret.top = win.pageYOffset, ret.left = win.pageXOffset;
         }
 
@@ -2574,14 +2579,6 @@
         return initDom(selector, root);
     };
 
-    // add dom as shortcut to so
-    $.$ = function(selector, root) { // one
-        return initDom(selector, root, true);
-    };
-    $.$$ = function(selector, root) { // all
-        return initDom(selector, root);
-    };
-
     // xpath helper
     function initXDom(selector, root, one) {
         var doc = root || document;
@@ -2612,36 +2609,28 @@
         return ret;
     }
 
-    // add xdom as shortcut to so
-    $.$x = function(selector, root) { // one
-        return initXDom(selector, root, true);
-    };
-    $.$$x = function(selector, root) { // all
-        return initXDom(selector, root);
-    };
-
     // add static methods to dom
     $.dom.extend({
         find: function(selector, root) {
-            return $.$(selector, root);
+            return initDom(selector, root, true);
         },
         findAll: function(selector, root) {
-            return $.$$(selector, root);
+            return initDom(selector, root);
         },
         xfind: function(selector, root) {
-            return $.$x(selector, root);
+            return initXDom(selector, root, true);
         },
         xfindAll: function(selector, root) {
-            return $.$$x(selector, root);
+            return initXDom(selector, root);
         },
         // (name, value) or ({name: value})
         define: function(name, value) {
-            var names = Object.keys(Dom.prototype);
+            var prototype = 'prototype', names = Object.keys(Dom[prototype]);
             _forEach(toKeyValueObject(name, value), function(name, value) {
                 if (names.has(name)) {
                     throw ('Cannot overwrite on Dom.'+ name +'!');
                 }
-                Dom.prototype[name] = value;
+                Dom[prototype][name] = value;
             });
         },
         create: function(content, doc, attributes) {
@@ -2668,10 +2657,10 @@
     // add find, findAll to Node
     extendPrototype(Node, {
         find: function(selector) {
-            return $.$(selector, this).get();
+            return initDom(selector, this, true).get();
         },
         findAll: function(selector, init) {
-            return $.$$(selector, this).getAll();
+            return initDom(selector, this).getAll();
         }
     });
 

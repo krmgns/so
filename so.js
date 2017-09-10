@@ -20,7 +20,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.17.6';
+    window.so.VERSION = '5.18.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -299,35 +299,16 @@
     });
 
     /**
-     * Object keys, values, copy.
+     * Object keys & values.
      * @param  {Object} object
-     * @param  @internal ret
      * @return {Array}
      */
-    Object.keys = Object.keys || function(object, ret) {
-        return ret = [], $.forEach(object, function(key) { ret.push(key); }), ret;
+    Object.keys = Object.keys || function(object) {
+        var ret = []; $.forEach(object, function(key) { ret.push(key) }); return ret;
     };
-    Object.values = Object.values || function(object, ret) {
-        return ret = [], $.forEach(object, function(_, value) { ret.push(value); }), ret;
+    Object.values = Object.values || function(object) {
+        var ret = []; $.forEach(object, function(_, value) { ret.push(value) }); return ret;
     };
-    // Object[NAME_PROTOTYPE].copy = function() {
-    //     var _this = this, ret = {}, i;
-    //     for (i in _this) {
-    //         if (_this.hasOwnProperty(i)) {
-    //             ret[i] = _this[i];
-    //         }
-    //     }
-    //     return ret;
-    // };
-    // Object[NAME_PROTOTYPE].append = function(source) {
-    //     var _this = this, i;
-    //     for (i in source) {
-    //         if (source.hasOwnProperty(i)) {
-    //             _this[i] = source[i];
-    //         }
-    //     }
-    //     return _this;
-    // };
 
     // shortcut
     function has(input, search, strict) {
