@@ -20,7 +20,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.18.0';
+    window.so.VERSION = '5.18.1';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -786,7 +786,7 @@
          * @return {String}
          */
         rid: function(prefix, base) {
-            base = (base >= 2 && base <= 36) ? base : 10;
+            base = (base >= 10 && base <= 36) ? base : 10;
             // @credit https://stackoverflow.com/a/24810220/362780
             var rid = new Array(base).join().replace(/(.|$)/g, function() {
                 return ((Math.random() * base) | 0).toString(base)
