@@ -20,7 +20,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.20.1';
+    window.so.VERSION = '5.21.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -339,16 +339,6 @@
          */
         has: function(search, strict) {
             return has(this, search, strict);
-        },
-
-        /**
-         * Get.
-         * @param  {Int} key
-         * @param  {Any} valueDefault
-         * @return {Any}
-         */
-        get: function(key, valueDefault) {
-            return (key in this) ? this[key] : valueDefault;
         },
 
         /**
@@ -706,7 +696,7 @@
     var fn_toString = {}.toString;
 
     /**
-     * Array.
+     * Make array.
      * @param  {Any} input
      * @param  {Int} begin?
      * @param  {Int} end?
@@ -780,18 +770,19 @@
 
         /**
          * Rid (random id).
-         * @param  {String}   prefix?
-         * @param  {Int|Bool} base?
+         * @param  {String} prefix?
+         * @param  {Int}    base?
          * @return {String}
          */
         rid: function(prefix, base) {
-            base = (base >= 10 && base <= 36) ? base : 10;
-            // @credit https://stackoverflow.com/a/24810220/362780
-            var ret = new Array(base).join().replace(/(.|$)/g, function() {
-                return ((Math.random() * base) | 0).toString(base)
+            base = (base >= 2 && base <= 36) ? base : 10;
+
+            for (var i = 0, ret = []; i < base; i++) {
+                ret[i] = ((Math.random() * base) | 0).toString(base)
                     // [Math.random() < .5 ? 'toString' : 'toUpperCase']();
-            });
-            return toValue(prefix, '__so_rid_') + ret;
+            }
+
+            return toValue(prefix, '__so_rid_') + ret.join('');
         },
 
         /**
