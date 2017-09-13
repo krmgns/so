@@ -480,7 +480,7 @@
             if (el.$events) {
                 _for(el.$events, function(events) {
                     _for(events, function(event) {
-                        event.copy().bindTo(clone);
+                        event.bindTo(clone);
                     });
                 });
             }

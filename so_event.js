@@ -308,11 +308,12 @@
          * @return {Event}
          */
         bindTo: function(target) {
-            var event = this.copy();
+            var event = this.copy(), fn;
             event.target = event.options.target = target;
 
             // add fn after target set
-            var fn = this.fno.bind(target);
+            // fn = this.fno.bind(target);
+            fn = event.fno;
             event.fn = extendFn(event, fn);
             event.fno = fn;
 
