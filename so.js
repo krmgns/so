@@ -20,7 +20,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.19.0';
+    window.so.VERSION = '5.20.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -138,8 +138,8 @@
      * @param  {Array|Object} input
      * @param  {Function}     fn
      * @param  {Object}       _this?
-     * @param  {Boolean}      useKey?
-     * @param  {Boolean}      useLength?
+     * @param  {Bool}         useKey?
+     * @param  {Bool}         useLength?
      * @return {Array|Object}
      * @private
      */
@@ -190,109 +190,109 @@
 
     // so: type functions.
     extend($, {
-        /** Is void. @param {Any} input @return {Boolean} */
+        /** Is void. @param {Any} input @return {Bool} */
         isVoid: function(input) {
             return isVoid(input);
         },
 
-        /** Is null. @param {Any} input @return {Boolean} */
+        /** Is null. @param {Any} input @return {Bool} */
         isNull: function(input) {
             return (input === null);
         },
 
-        /** Is nulls. @param {Any} input @return {Boolean} */
+        /** Is nulls. @param {Any} input @return {Bool} */
         isNulls: function(input) {
             return (input === '');
         },
 
-        /** Is defined. @param {Any} input @return {Boolean} */
+        /** Is defined. @param {Any} input @return {Bool} */
         isDefined: function(input) {
             return (input !== undefined);
         },
 
-        /** Is undefined. @param {Any} input @return {Boolean} */
+        /** Is undefined. @param {Any} input @return {Bool} */
         isUndefined: function(input) {
             return (input === undefined);
         },
 
-        /** Is string. @param {Any} input @return {Boolean} */
+        /** Is string. @param {Any} input @return {Bool} */
         isString: function(input) {
             return (typeof input == 'string' || (input && input.constructor == String));
         },
 
-        /** Is int. @param {Any} input @return {Boolean} */
+        /** Is int. @param {Any} input @return {Bool} */
         isInt: function(input) {
             return $.isNumber(input) && input == (input | 0);
         },
 
-        /** Is float. @param {Any} input @return {Boolean} */
+        /** Is float. @param {Any} input @return {Bool} */
         isFloat: function(input) {
             return $.isNumber(input) && input != (input | 0);
         },
 
-        /** Is bool. @param {Any} input @return {Boolean} */
+        /** Is bool. @param {Any} input @return {Bool} */
         isBool: function(input) {
             return (input === true || input === false);
         },
 
-        /** Is true. @param {Any} input @return {Boolean} */
+        /** Is true. @param {Any} input @return {Bool} */
         isTrue: function(input) {
             return input === true;
         },
 
-        /** Is false. @param {Any} input @return {Boolean} */
+        /** Is false. @param {Any} input @return {Bool} */
         isFalse: function(input) {
             return input === false;
         },
 
-        /** Is number. @param {Any} input @return {Boolean} */
+        /** Is number. @param {Any} input @return {Bool} */
         isNumber: function(input) {
             return (typeof input == 'number');
         },
 
-        /** Is numeric. @param {Any} input @return {Boolean} */
+        /** Is numeric. @param {Any} input @return {Bool} */
         isNumeric: function(input) {
             return $.isNumber(input) || re_numeric.test(input);
         },
 
-        /** Is RegExp. @param {Any} input @return {Boolean} */
+        /** Is RegExp. @param {Any} input @return {Bool} */
         isRegExp: function(input) {
             return input && input.constructor == RegExp;
         },
 
-        /** Is function. @param {Any} input @return {Boolean} */
+        /** Is function. @param {Any} input @return {Bool} */
         isFunction: function(input) {
             return (typeof input == 'function');
         },
 
-        /** Is array.@param {Any} input @return {Boolean} */
+        /** Is array.@param {Any} input @return {Bool} */
         isArray: function(input) {
             return Array.isArray(input);
         },
 
-        /** Is object. @param {Any} input @return {Boolean} */
+        /** Is object. @param {Any} input @return {Bool} */
         isObject: function(input) {
             return input && (input.constructor == Object);
         },
 
-        /** Is iterable.     @param {Any} input @return {Boolean} */
+        /** Is iterable.     @param {Any} input @return {Bool} */
         isIterable: function(input) {
             return $.isArray(input) || $.isObject(input) || (input && (
                 (!isVoid(input.length) && !input[NAME_NODE_TYPE]) // dom, nodelist, string etc.
             ));
         },
 
-        /** Is primitive. @param {Any} input @return {Boolean} */
+        /** Is primitive. @param {Any} input @return {Bool} */
         isPrimitive: function(input) {
             return isVoid(input) || re_primitive.test(typeof input);
         },
 
-        /** Is window. @param {Any} input @return {Boolean} */
+        /** Is window. @param {Any} input @return {Bool} */
         isWindow: function(input) {
             return toBool(input && input == input[NAME_WINDOW] && input == input[NAME_WINDOW][NAME_WINDOW]);
         },
 
-        /** Is document. @param {Any} input @return {Boolean} */
+        /** Is document. @param {Any} input @return {Bool} */
         isDocument: function(input) {
             return toBool(input && input[NAME_NODE_TYPE] === 9);
         }
@@ -333,9 +333,9 @@
     extend(Array[NAME_PROTOTYPE], {
         /**
          * Has.
-         * @param  {Any}     search
-         * @param  {Boolean} strict?
-         * @return {Boolean}
+         * @param  {Any}  search
+         * @param  {Bool} strict?
+         * @return {Bool}
          */
         has: function(search, strict) {
             return has(this, search, strict);
@@ -393,9 +393,9 @@
     extend(String[NAME_PROTOTYPE], {
         /**
          * Has.
-         * @param  {Any}     search
-         * @param  {Boolean} strict?
-         * @return {Boolean}
+         * @param  {Any}  search
+         * @param  {Bool} strict?
+         * @return {Bool}
          */
         has: function(search, strict) {
             return has(this, search, strict);
@@ -404,7 +404,7 @@
         /**
          * Test.
          * @param  {RegExp} re
-         * @return {Boolean}
+         * @return {Bool}
          */
         test: function(re) {
             return re.test(this);
@@ -412,7 +412,7 @@
 
         /**
          * Is numeric.
-         * @return {Boolean}
+         * @return {Bool}
          */
         isNumeric: function() {
             return $.isNumeric(this);
@@ -437,8 +437,8 @@
 
         /**
          * To capital case.
-         * @param  {Boolean} all   @default=true
-         * @param  {Boolean} lower @default=false
+         * @param  {Bool} all   @default=true
+         * @param  {Bool} lower @default=false
          * @return {String}
          */
         toCapitalCase: function(all, lower) {
@@ -636,8 +636,8 @@
          * Starts with.
          * @param  {String}  search
          * @param  {Int}     index
-         * @param  {Boolean} noCase?
-         * @return {Boolean}
+         * @param  {Bool}    noCase?
+         * @return {Bool}
          * @override For no-case option.
          */
         startsWith: function(search, index, noCase) {
@@ -649,8 +649,8 @@
          * Ends with.
          * @param  {String}  search
          * @param  {Int}     index
-         * @param  {Boolean} noCase?
-         * @return {Boolean}
+         * @param  {Bool}    noCase?
+         * @return {Bool}
          * @override For no-case option.
          */
         endsWith: function(search, index, noCase) {
@@ -661,8 +661,8 @@
         /**
          * Contains.
          * @param  {String}  search
-         * @param  {Boolean} noCase?
-         * @return {Boolean}
+         * @param  {Bool}    noCase?
+         * @return {Bool}
          */
         contains: function(search, noCase) {
             var src = prepareSearchStuff(this, search, noCase);
@@ -780,8 +780,8 @@
 
         /**
          * Rid (random id).
-         * @param  {String}      prefix?
-         * @param  {Int|Boolean} base?
+         * @param  {String}   prefix?
+         * @param  {Int|Bool} base?
          * @return {String}
          */
         rid: function(prefix, base) {
@@ -944,9 +944,9 @@
 
         /**
          * Json encode / decode.
-         * @param  {Any}     input
-         * @param  {Boolean} encode @default=false (parse)
-         * @param  {Object}  options?
+         * @param  {Any}    input
+         * @param  {Bool}   encode @default=false (parse)
+         * @param  {Object} options?
          * @return {String}
          */
         json: function(input, encode, options) {
@@ -957,10 +957,10 @@
 
         /**
          * Has.
-         * @param  {Any}     input
-         * @param  {Any}     search
-         * @param  {Boolean} strict?
-         * @return {Boolean}
+         * @param  {Any}  input
+         * @param  {Any}  search
+         * @param  {Bool} strict?
+         * @return {Bool}
          */
         has: function(input, search, strict) {
             return has(input, search, strict);
@@ -970,7 +970,7 @@
          * Is set.
          * @param  {Any}    input
          * @param  {String} key?
-         * @return {Boolean}
+         * @return {Bool}
          */
         isSet: function(input, key) {
             return !isVoid(isVoid(key) ? input : $.dig(input, key));
@@ -979,7 +979,7 @@
         /**
          * Is empty.
          * @param  {Any} input
-         * @return {Boolean}
+         * @return {Bool}
          */
         isEmpty: function(input) {
             return !input // '', null, undefined, false, 0, -0, NaN
@@ -1003,7 +1003,7 @@
          * @param  {Array|Object} inputTo
          * @param  {Array|Object} inputFrom
          * @param  {Array}        keysExclude
-         * @param  {Boolean}      overwrite? @default=true
+         * @param  {Bool}         overwrite? @default=true
          * @return {Array|Object}
          */
         copyTo: function(inputTo, inputFrom, keysExclude, overwrite) {

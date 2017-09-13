@@ -197,9 +197,9 @@
 
         /**
          * Has.
-         * @param  {Any}     search
-         * @param  {Boolean} strict
-         * @return {Boolean}
+         * @param  {Any}  search
+         * @param  {Bool} strict
+         * @return {Bool}
          */
         has: function(search, strict) {
             return $.has(this.data, search, strict);
@@ -208,7 +208,7 @@
         /**
          * Has key.
          * @param  {Int|String} key
-         * @return {Boolean}
+         * @return {Bool}
          */
         hasKey: function(key) {
             return (key in this.data);
@@ -470,7 +470,7 @@
 
         /**
          * Is empty.
-         * @return {Boolean}
+         * @return {Bool}
          */
         isEmpty: function() {
             return !this.size;
@@ -490,7 +490,7 @@
     /**
      * Is list.
      * @param  {Any} input
-     * @return {Boolean}
+     * @return {Bool}
      */
     $.isList = function(input) {
         return input && (input instanceof List);

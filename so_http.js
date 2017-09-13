@@ -379,6 +379,32 @@
         },
 
         /**
+         * Ok.
+         * @return {Bool}
+         */
+        ok: function() {
+            return this.response.statusCode === 200;
+        },
+
+        /**
+         * Is success.
+         * @return {Bool}
+         */
+        isSuccess: function() {
+            var code = this.response.statusCode;
+            return code >= 200 && code <= 299;
+        },
+
+        /**
+         * Is failure.
+         * @return {Bool}
+         */
+        isFailure: function() {
+            var code = this.response.statusCode;
+            return code >= 400 && code <= 599;
+        },
+
+        /**
          * On.
          * @param  {String}   name
          * @param  {Function} callback

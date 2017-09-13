@@ -86,7 +86,7 @@
      * Select.
      * @param  {String|Object} selector
      * @param  {Object}        root?
-     * @param  {Boolean}       one?
+     * @param  {Bool}          one?
      * @return {Array}
      */
     function select(selector, root, one) {
@@ -127,10 +127,10 @@
      * Dom.
      * @param {String|Object} selector
      * @param {Object}        root?
-     * @param {Boolean}       one?
+     * @param {Bool}          one?
      */
     function Dom(selector, root, one) {
-        var els, size = 0, re, sid, id;
+        var els, size = 0, re, id, soid;
 
         if (selector != null) {
             if (isString(selector)) {
@@ -145,11 +145,13 @@
                         els = create(selector, root, root, re[1]);
                     } else if (selector[0] == '>' && isNodeElement(root)) {
                         // buggy :scope selector
-                        sid = 'so:id';
-                        id = getAttribute(root, sid) || $.rid('');
-                        selector = '[%s="%s"] %s'.format(sid, id, selector);
-                        setAttribute(root, sid, id);
-                        els = select(selector, null, one);
+                        id = getAttribute(root, (soid = 'so:id')) || $.rid('');
+                        setAttribute(root, soid, id);
+                        // fix '>' only selector
+                        if (selector.length == 1) {
+                            selector += ' *';
+                        }
+                        els = select((selector = '[%s="%s"] %s'.format(soid, id, selector)), null, one);
                     } else {
                         els = select(selector, root, one);
                     }
@@ -250,7 +252,7 @@
         /**
          * Has.
          * @param  {Object} searchEl
-         * @return {Boolean}
+         * @return {Bool}
          */
         has: function(searchEl) {
             var ret; return this.for(function(el) {
@@ -259,11 +261,11 @@
         },
 
         /**
-         * Is empty.
-         * @return {Boolean}
+         * Has size.
+         * @return {Bool}
          */
-        isEmpty: function() {
-            return !this._size;
+        hasSize: function() {
+            return this._size > 0;
         },
 
         /**
@@ -309,7 +311,7 @@
         /**
          * Get.
          * @param  {Int}     i?
-         * @param  {Boolean} init?
+         * @param  {Bool}    init?
          * @return {Object|Dom}
          */
         get: function(i, init) {
@@ -327,7 +329,7 @@
         /**
          * Get all.
          * @param  {Int|Array} i?
-         * @param  {Boolean}   init?
+         * @param  {Bool}      init?
          * @return {Array|Dom}
          */
         getAll: function(i, init) {
@@ -494,7 +496,7 @@
     }
 
     function cleanElement(el) {
-        el.$data = el.$events = el.$animation = null;
+        el.$data = el.$events = null;
         var child;
         while (child = el[NAME_FIRST_CHILD]) {
             if (isNodeElement(child)) {
@@ -520,7 +522,7 @@
     extendPrototype(Dom, {
         /**
          * Colne.
-         * @param  {Boolean} deep?
+         * @param  {Bool} deep?
          * @return {Dom}
          */
         clone: function(deep) {
@@ -573,7 +575,7 @@
         /**
          * Append.
          * @param  {String|Object|Dom} content
-         * @param  {Boolean}           cloning?
+         * @param  {Bool}              cloning?
          * @param  {Object}            attributes?
          * @return {this}
          */
@@ -588,7 +590,7 @@
         /**
          * Append to.
          * @param  {String}  selector
-         * @param  {Boolean} cloning?
+         * @param  {Bool}    cloning?
          * @return {this}
          */
         appendTo: function(selector, cloning) {
@@ -606,7 +608,7 @@
         /**
          * Prepend.
          * @param  {String|Object|Dom} content
-         * @param  {Boolean}           cloning?
+         * @param  {Bool}              cloning?
          * @param  {Object}            attributes?
          * @return {this}
          */
@@ -621,7 +623,7 @@
         /**
          * Prepend to.
          * @param  {String}  selector
-         * @param  {Boolean} cloning?
+         * @param  {Bool}    cloning?
          * @return {this}
          */
         prependTo: function(selector, cloning) {
@@ -655,7 +657,7 @@
         /**
          * Insert before.
          * @param  {String}  selector
-         * @param  {Boolean} cloning?
+         * @param  {Bool}    cloning?
          * @return {this}
          */
         insertBefore: function(selector, cloning) {
@@ -673,7 +675,7 @@
         /**
          * Insert before.
          * @param  {String}  selector
-         * @param  {Boolean} cloning?
+         * @param  {Bool}    cloning?
          * @return {this}
          */
         insertAfter: function(selector, cloning) {
@@ -691,7 +693,7 @@
         /**
          * Replace with.
          * @param  {String}  selector
-         * @param  {Boolean} cloning?
+         * @param  {Bool}    cloning?
          * @return {this}
          */
         replaceWith: function(selector, cloning) {
@@ -733,7 +735,7 @@
 
         /**
          * Unwrap
-         * @param  {Boolean} remove?
+         * @param  {Bool} remove?
          * @return {Dom}
          */
         unwrap: function(remove) {
@@ -773,16 +775,16 @@
          * @return {Any|this}
          */
         property: function(name, value) {
-            return isDefined(value) ? this.setProperty(name, value) : this.getProperty(name);
+            return isUndefined(value) ? this.getProperty(name) : this.setProperty(name, value);
         },
 
         /**
          * Has property
          * @param  {String} name
-         * @return {Boolean}
+         * @return {Bool|null}
          */
         hasProperty: function(name) {
-            return (this[0] && name in this[0]);
+            return this[0] ? (name in this[0]) : null;
         },
 
         /**
@@ -835,7 +837,7 @@
 
         /**
          * Html.
-         * @param  {String|Boolean} input?
+         * @param  {String|Bool} input?
          * @return {String|Any}
          */
         html: function(input) {
@@ -854,12 +856,35 @@
 
         /**
          * Get html.
-         * @param  {Boolean} outer
+         * @param  {Bool} outer
          * @return {String}
          */
         getHtml: function(outer) {
             return outer ? __(this, 'outerHTML') : __(this, NAME_INNER_HTML);
-        }
+        },
+
+        /**
+         * Is empty.
+         * @param  {Bool} trimContent?
+         * @return {Bool}
+         */
+        isEmpty: function(trimContent) {
+            var content;
+            switch (this.tag()) {
+                case 'input':
+                case 'select':
+                case 'textarea':
+                    content = this.value();
+                    break;
+                case '#window':
+                case '#document':
+                    content = '1';
+                    break;
+                default:
+                    content = this.html();
+            }
+            return !(trimContent ? trim(content) : content);
+        },
     });
 
     // array intersect helper
@@ -1045,7 +1070,7 @@
         /**
          * Contains.
          * @param  {String} selector
-         * @return {Boolean}
+         * @return {Bool}
          */
         contains: function(selector) {
             return !!(this[0] && initDom(selector, this[0])._size);
@@ -1053,7 +1078,7 @@
 
         /**
          * Has parent.
-         * @return {Boolean}
+         * @return {Bool}
          */
         hasParent: function() {
             return !!this.parent()._size;
@@ -1061,7 +1086,7 @@
 
         /**
          * Has parents.
-         * @return {Boolean}
+         * @return {Bool}
          */
         hasParents: function() {
             return !!this.parent().parent()._size;
@@ -1069,7 +1094,7 @@
 
         /**
          * Has child.
-         * @return {Boolean}
+         * @return {Bool}
          */
         hasChild: function() {
             return this.children()._size > 0;
@@ -1084,8 +1109,16 @@
         },
 
         /**
+         * Has content (alias of isEmpty()).
+         * @inheritDoc
+         */
+        hasContent: function(trimContent) {
+            return this.isEmpty(trimContent);
+        },
+
+        /**
          * Window.
-         * @param  {Boolean} content?
+         * @param  {Bool} content?
          * @return {Dom}
          */
         window: function(content) {
@@ -1095,7 +1128,7 @@
 
         /**
          * Document.
-         * @param  {Boolean} content?
+         * @param  {Bool} content?
          * @return {Dom}
          */
         document: function(content) {
@@ -1147,7 +1180,7 @@
     extendPrototype(Dom, {
         /**
          * Path.
-         * @param  {Boolean} string?
+         * @param  {Bool} string?
          * @return {Array|String}
          */
         path: function(string) {
@@ -1161,7 +1194,7 @@
 
         /**
          * Xpath.
-         * @param  {Boolean} string?
+         * @param  {Bool} string?
          * @return {Array|String}
          */
         xpath: function(string) {
@@ -1268,7 +1301,7 @@
          * Style.
          * @param  {String}  name
          * @param  {String}  value?
-         * @param  {Boolean} raw?
+         * @param  {Bool}    raw?
          * @return {String}
          */
         style: function(name, value, raw) {
@@ -1280,7 +1313,7 @@
         /**
          * Has style.
          * @param  {String} name
-         * @return {Boolean}
+         * @return {Bool}
          */
         hasStyle: function(name) {
             var el = this[0];
@@ -1309,8 +1342,8 @@
         /**
          * Get style.
          * @param  {String}  name
-         * @param  {Boolean} convert? @default=true
-         * @param  {Boolean} raw?     @default=false
+         * @param  {Bool}    convert? @default=true
+         * @param  {Bool}    raw?     @default=false
          * @return {String?}
          */
         getStyle: function(name, convert, raw) {
@@ -1337,8 +1370,8 @@
         /**
          * Get styles.
          * @param  {String}  name
-         * @param  {Boolean} convert? @default=true
-         * @param  {Boolean} raw?     @default=false
+         * @param  {Bool}    convert? @default=true
+         * @param  {Bool}    raw?     @default=false
          * @return {Object}
          */
         getStyles: function(names, convert, raw) {
@@ -1486,7 +1519,7 @@
         return ret;
     }
 
-    function getDimensionsBy(el, by, margined) {
+    function getDimensionsBy(el, by, margins) {
         var dim = getDimensions(el);
         var ret = extend(dim, {
             innerWidth: dim.width, outerWidth: dim.width,
@@ -1505,7 +1538,7 @@
                 if (by) return ret.innerWidth;
             }
             if ((!by || by == NAME_OUTER_WIDTH) && dim.width) {
-                if (margined) {
+                if (margins) {
                     ret.outerWidth += sumStyleValue(null, style, NAME_MARGIN_LEFT, NAME_MARGIN_RIGHT);
                 }
                 if (by) return ret.outerWidth;
@@ -1520,7 +1553,7 @@
                 if (by) return ret.innerHeight;
             }
             if ((!by || by == NAME_OUTER_HEIGHT) && dim.height) {
-                if (margined) {
+                if (margins) {
                     ret.outerHeight += sumStyleValue(null, style, NAME_MARGIN_TOP, NAME_MARGIN_BOTTOM);
                 }
                 if (by) return ret.outerHeight;
@@ -1593,11 +1626,11 @@
 
         /**
          * Outer width.
-         * @param  {Boolean} margined
+         * @param  {Bool} margins
          * @return {Int}
          */
-        outerWidth: function(margined) {
-            return getDimensionsBy(this[0], NAME_OUTER_WIDTH, margined);
+        outerWidth: function(margins) {
+            return getDimensionsBy(this[0], NAME_OUTER_WIDTH, margins);
         },
 
         /**
@@ -1618,11 +1651,11 @@
 
         /**
          * Outer height.
-         * @param  {Boolean} margined
+         * @param  {Bool} margins
          * @return {Int}
          */
-        outerHeight: function(margined) {
-            return getDimensionsBy(this[0], NAME_OUTER_HEIGHT, margined);
+        outerHeight: function(margins) {
+            return getDimensionsBy(this[0], NAME_OUTER_HEIGHT, margins);
         }
     });
 
@@ -1630,7 +1663,7 @@
     extendPrototype(Dom, {
         /**
          * Offset.
-         * @param  {Boolean} relative?
+         * @param  {Bool} relative?
          * @return {Object}
          */
         offset: function(relative) {
@@ -1693,13 +1726,14 @@
         return !!(el && el.hasAttribute && el.hasAttribute(toAttributeName(name)));
     }
 
-    function setAttribute(el, name, value) {
+    function setAttribute(el, name, value, state /* @internal */) {
         if (isNodeElement(el)) {
             name = toAttributeName(name);
             if (isNull(value)) {
                 el.removeAttribute(name);
-            } else if (re_attrState.test(name)) {
-                value || isUndefined(value) ? el.setAttribute(name, name) : el.removeAttribute(name);
+            } else if (state || re_attrState.test(name)) {
+                value || isUndefined(value) ? (el.setAttribute(name, name), el[name] = !!value)
+                    : (el.removeAttribute(name), el[name] = false);
             } else {
                 el.setAttribute(name, value);
             }
@@ -1745,7 +1779,7 @@
         /**
          * Has attribute.
          * @param  {String} name
-         * @return {Boolean}
+         * @return {Bool}
          */
         hasAttribute: function(name) {
             return hasAttribute(this[0], name);
@@ -1796,6 +1830,16 @@
                     el.removeAttribute(toAttributeName(name));
                 }
             });
+        },
+
+        /**
+         * So (so:attribute's).
+         * @param  {String} value
+         * @return {Any|this}
+         */
+        so: function(name, value) {
+            name = 'so:'+ name;
+            return isUndefined(value) ? this.attribute(name) : this.attribute(name, value);
         }
     });
 
@@ -1908,7 +1952,7 @@
          * Class.
          * @param  {String}      name?
          * @param  {String|null} option?
-         * @return {Boolean|this}
+         * @return {Bool|this}
          */
         class: function(name, option) {
             return isUndefined(option) ? this.addClass(name)
@@ -1919,7 +1963,7 @@
         /**
          * Has class.
          * @param  {String} name
-         * @return {Boolean}
+         * @return {Bool}
          */
         hasClass: function(name) {
             return hasClass(this[0], name);
@@ -2130,7 +2174,7 @@
         /**
          * Serialize.
          * @param  {Function} callback?
-         * @param  {Boolean}  plus?
+         * @param  {Bool}     plus?
          * @return {String}
          */
         serialize: function(callback, plus) {
@@ -2258,46 +2302,58 @@
         }
     });
 
-    // dom: form element states
+    // state helpers
+    function setState(el, name, value) {
+        setAttribute(el, name, value, true);
+    }
+    function getState(el, name) {
+        return !!(el && el[name]);
+    }
+
+    // dom: form elements states
     extendPrototype(Dom, {
         /**
          * Checked.
-         * @param  {Boolean} option?
-         * @return {Boolean|this}
+         * @param  {Bool} option?
+         * @return {Bool|this}
          */
         checked: function(option) {
-            return isVoid(option) ? !!(this[0] && this[0].checked)
-                : (setAttribute(this[0], 'checked', option), this);
+            var _this = this;
+            return isVoid(option) ? getState(_this[0], 'checked')
+                : (setState(_this[0], 'checked', option), _this);
         },
 
         /**
          * Selected.
-         * @param  {Boolean} option?
-         * @return {Boolean|this}
+         * @param  {Bool} option?
+         * @return {Bool|this}
          */
         selected: function(option) {
-            return isVoid(option) ? !!(this[0] && this[0].selected)
-                : (setAttribute(this[0], 'selected', option), this);
+            var _this = this;
+            return isVoid(option) ? getState(_this[0], 'selected')
+                : (setState(_this[0], 'selected', option), _this);
         },
 
         /**
          * Disabled.
-         * @param  {Boolean} option?
-         * @return {Boolean|this}
+         * @param  {Bool} option?
+         * @return {Bool|this}
          */
         disabled: function(option) {
-            return isVoid(option) ? !!(this[0] && this[0].disabled)
-                : (setAttribute(this[0], 'disabled', option), this);
+            var _this = this;
+            return isVoid(option) ? getState(_this[0], 'disabled')
+                : (setState(_this[0], 'disabled', option), _this);
         },
 
         /**
          * Readonly.
-         * @param  {Boolean} option?
-         * @return {Boolean|this}
+         * @param  {Bool} option?
+         * @return {Bool|this}
          */
         readonly: function(option) {
-            return isVoid(option) ? !!(this[0] && this[0].readOnly)
-                : (setAttribute(this[0], 'readOnly', option), this);
+            var _this = this;
+            return isVoid(option) ? getState(_this[0], 'readOnly')
+                : (setState(_this[0], 'readOnly', option), _this);
         }
     });
 
@@ -2305,7 +2361,7 @@
     extendPrototype(Dom, {
         /**
          * Is window.
-         * @return {Boolean}
+         * @return {Bool}
          */
         isWindow: function() {
             return isWindow(this[0]);
@@ -2313,7 +2369,7 @@
 
         /**
          * Is document.
-         * @return {Boolean}
+         * @return {Bool}
          */
         isDocument: function() {
             return isDocument(this[0]);
@@ -2321,7 +2377,7 @@
 
         /**
          * Is node.
-         * @return {Boolean}
+         * @return {Bool}
          */
         isNode: function() {
             return isNode(this[0]);
@@ -2329,7 +2385,7 @@
 
         /**
          * Is node element.
-         * @return {Boolean}
+         * @return {Bool}
          */
         isNodeElement: function() {
             return isNodeElement(this[0]);
@@ -2337,7 +2393,7 @@
 
         /**
          * Is root.
-         * @return {Boolean}
+         * @return {Bool}
          */
         isRoot: function() {
             return isRoot(this[0]);
@@ -2345,7 +2401,7 @@
 
         /**
          * Is root element.
-         * @return {Boolean}
+         * @return {Bool}
          */
         isRootElement: function() {
             return isRootElement(this[0]);
@@ -2611,17 +2667,23 @@
 
     // add static methods to dom
     $.dom.extend({
+        // find by selector
         find: function(selector, root) {
             return initDom(selector, root, true);
         },
         findAll: function(selector, root) {
             return initDom(selector, root);
         },
+        // find by xpath
         xfind: function(selector, root) {
             return initXDom(selector, root, true);
         },
         xfindAll: function(selector, root) {
             return initXDom(selector, root);
+        },
+        // find by so:attribute(s)
+        soFind: function(name, id) {
+            return initDom('[so:%s="%s"]'.format(name, id));
         },
         // (name, value) or ({name: value})
         define: function(name, value) {
