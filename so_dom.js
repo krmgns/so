@@ -1322,7 +1322,7 @@
                 value = getStyle(el, name);
                 if (value !== '') {
                     value = isFalse(convert)  ? value : (
-                        re_rgb.test(value) ? $.util.toHexFromRgb(value) // make rgb - hex
+                        re_rgb.test(value) ? $.util.parseRgbColorToHex(value) // make rgb - hex
                             : re_unit.test(value) || re_unitOther.test(value) // make px etc. - float
                                 // || re_noneUnitStyles.test(name) // make opacity etc. - float @cancel use String.toFloat()
                             ? value.toFloat() : value

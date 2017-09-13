@@ -20,7 +20,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.18.1';
+    window.so.VERSION = '5.19.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -702,7 +702,6 @@
     });
 
     var _id = 0;
-    var fn_eval = window.eval; // direct eval breaks minify tool
     var fn_slice = [].slice;
     var fn_toString = {}.toString;
 
@@ -781,18 +780,18 @@
 
         /**
          * Rid (random id).
-         * @param  {String}   prefix?
-         * @param  {Int|Bool} base?
+         * @param  {String}      prefix?
+         * @param  {Int|Boolean} base?
          * @return {String}
          */
         rid: function(prefix, base) {
             base = (base >= 10 && base <= 36) ? base : 10;
             // @credit https://stackoverflow.com/a/24810220/362780
-            var rid = new Array(base).join().replace(/(.|$)/g, function() {
+            var ret = new Array(base).join().replace(/(.|$)/g, function() {
                 return ((Math.random() * base) | 0).toString(base)
                     // [Math.random() < .5 ? 'toString' : 'toUpperCase']();
             });
-            return toValue(prefix, '__so_rid_') + rid;
+            return toValue(prefix, '__so_rid_') + ret;
         },
 
         /**
