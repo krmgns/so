@@ -1716,10 +1716,13 @@
     var re_attrNameFix = /[^\w:.-]+/g;
 
     // attribute helpers
+    function fixAttributeName(name) {
+        return trim(name).replace(re_attrNameFix, '-');
+    }
+
     function toAttributeName(name) {
-        return name = name.startsWith('@')
-            ? 'data-'+ name.slice(1) /* @foo => data-foo */ : name,
-                trim(name.replace(re_attrNameFix, '-'));
+        return fixAttributeName(name[0] == '@'
+            ? 'data-'+ name.slice(1) /* @foo => data-foo */ : name);
     }
 
     function hasAttribute(el, name) {
@@ -2058,6 +2061,7 @@
             checkData(el);
             if (isString(key)) {
                 key = trim(key);
+                // data-*
                 if (key.startsWith('@')) {
                     return getAttribute(el, key);
                 }
@@ -2683,7 +2687,7 @@
         },
         // find by so:attribute(s)
         soFind: function(name, id) {
-            return initDom('[so:%s="%s"]'.format(name, id));
+            return initDom('[so:%s="%s"]'.format(fixAttributeName(name), id));
         },
         // (name, value) or ({name: value})
         define: function(name, value) {
