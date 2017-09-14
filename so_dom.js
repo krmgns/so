@@ -1869,7 +1869,7 @@
                         }
                     });
                 } else {
-                    el.value = value;
+                    setAttribute(el, 'value', (el.value = value));
                 }
             });
         },
@@ -1883,9 +1883,8 @@
             var el = this[0], ret = valueDefault, option;
 
             if (el) {
-                if (el.options && !isVoid(option = el.options[el.selectedIndex])) {
-                    ret = hasAttribute(option, 'value')
-                        ? (option.disabled || option[NAME_PARENT_ELEMENT].disabled ? '' : option.value) : '';
+                if (el.options && (option = el.options[el.selectedIndex])) { // <selet>
+                    ret = hasAttribute(option, 'value') ? option.value : valueDefault;
                 } else {
                     ret = el.value;
                 }
@@ -2191,16 +2190,12 @@
                     var type = el.options ? 'select' : el.type ? el.type : getTag(el);
                     var name = encode(el.name).replace(/%5([BD])/g, function($0, $1) {
                         return ($1 == 'B') ? '[' : ']';
-                    }), value;
+                    }), value, option;
 
                     switch (type) {
                         case 'select':
-                            _for(el.options, function(option, i) {
-                                // find selected option thas has 'value' attribute
-                                if (option.selected && option.hasAttribute('value')) {
-                                    value = option.value; return _break;
-                                }
-                            });
+                            value = (option = el.options[el.selectedIndex]) && hasAttribute(option, 'value')
+                                ? option.value : undefined;
                             break;
                         case 'radio':
                         case 'checkbox':
