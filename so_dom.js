@@ -1713,7 +1713,7 @@
         }
     });
 
-    var re_attrState = /^(?:(?:check|select|disabl)ed|readonly)$/;
+    var re_attrState = /^(?:(?:check|select|disabl)ed|readonly)$/i;
     var re_attrNameFix = /[^\w:.-]+/g;
 
     // attribute helpers
