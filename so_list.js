@@ -5,7 +5,7 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function($, undefined) { 'use strict';
+;(function($, UNDEFINED) { 'use strict';
 
     /**
      * List.
@@ -280,7 +280,7 @@
          * @return {String|undefined}
          */
         findKey: function(searchValue) {
-            return this.find(searchValue, undefined, 0);
+            return this.find(searchValue, UNDEFINED, 0);
         },
 
         /**
@@ -289,7 +289,7 @@
          * @return {Int|undefined}
          */
         findIndex: function(searchValue) {
-            return this.find(searchValue, undefined, 1);
+            return this.find(searchValue, UNDEFINED, 1);
         },
 
         /**
@@ -496,4 +496,4 @@
         return input && (input instanceof List);
     };
 
-})(so);
+})(window.so);

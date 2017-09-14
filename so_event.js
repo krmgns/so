@@ -5,8 +5,9 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function(window, document, $) { 'use strict';
+;(function(window, $, NULL, TRUE, FALSE) { 'use strict';
 
+    var document = $.document;
     var id = 0;
     var objectValues = Object.values;
     var objectDefineProperty = Object.defineProperty;
@@ -33,12 +34,12 @@
     var re_comma = /,\s*/;
     var domLevel = document.adoptNode ? 3 : 2;
     var optionsDefault = {
-        bubbles: true, cancelable: true, scoped: false, composed: false, // all
-        view: window, detail: null, // ui, mouse, custom
-        relatedNode: null, prevValue: '', newValue: '', attrName: '', attrChange: 0, // mutation
-        screenX: 0, screenY: 0, clientX: 0, clientY: 0, ctrlKey: false, altKey: false, shiftKey: false,
-            metaKey: false, button: 1, relatedTarget: null, // mouse
-        useCapture: false, once: false, passive: false, data: {}
+        bubbles: TRUE, cancelable: TRUE, scoped: FALSE, composed: FALSE, // all
+        view: window, detail: NULL, // ui, mouse, custom
+        relatedNode: NULL, prevValue: '', newValue: '', attrName: '', attrChange: 0, // mutation
+        screenX: 0, screenY: 0, clientX: 0, clientY: 0, ctrlKey: FALSE, altKey: FALSE, shiftKey: FALSE,
+            metaKey: FALSE, button: 1, relatedTarget: NULL, // mouse
+        useCapture: FALSE, once: FALSE, passive: FALSE, data: {}
     };
     var trim = $.trim, extend = $.extend;
     var KEY_BACKSPACE =  8,  KEY_TAB =       9, KEY_ENTER =       13, KEY_ESC =        27,  KEY_LEFT =      37,
@@ -137,33 +138,33 @@
             extend(e, {
                 event: event,
                 eventTarget: event.eventTarget,
-                stopped: false,
-                stoppedAll: false,
-                stoppedDefault: false,
-                stoppedBubble: false,
-                stoppedBubbleAll: false,
+                stopped: FALSE,
+                stoppedAll: FALSE,
+                stoppedDefault: FALSE,
+                stoppedBubble: FALSE,
+                stoppedBubbleAll: FALSE,
                 stop: function() {
                     e.stopDefault();
                     e.stopBubble();
-                    e.stopped = true;
+                    e.stopped = TRUE;
                 },
                 stopAll: function() {
                     e.stopDefault();
                     e.stopBubble();
                     e.stopBubbleAll();
-                    e.stoppedAll = true;
+                    e.stoppedAll = TRUE;
                 },
                 stopDefault: function() {
                     e.preventDefault();
-                    e.stoppedDefault = true;
+                    e.stoppedDefault = TRUE;
                 },
                 stopBubble: function() {
                     e.stopPropagation();
-                    e.stoppedBubble = true;
+                    e.stoppedBubble = TRUE;
                 },
                 stopBubbleAll: function() {
                     e.stopImmediatePropagation();
-                    e.stoppedBubbleAll = true;
+                    e.stoppedBubbleAll = TRUE;
                 }
             });
 
@@ -207,7 +208,7 @@
         return new Event(type, fn, options);
     }
     function initCustomEvent(type, fn, options) {
-        return new Event(type, fn, extend({}, options, {custom: true}));
+        return new Event(type, fn, extend({}, options, {custom: TRUE}));
     }
     function initEventTarget(target) {
         return new EventTarget(target);
@@ -252,7 +253,7 @@
         var event = create(this.options.eventClass, this.type, options);
         this.event = event.event;
         this.eventClass = event.eventClass;
-        this.eventTarget = null;
+        this.eventTarget = NULL;
 
         this.target = options.target;
         this.useCapture = options.useCapture;
@@ -265,7 +266,7 @@
 
         this.id = ++id;
         this.fired = 0;
-        this.cancalled = false;
+        this.cancalled = FALSE;
         this.custom = event.eventClass == 'CustomEvent' || !re_typesStandard.test(type);
     }
 
@@ -459,7 +460,7 @@
 
                     // think memory!
                     $.forEach(targetEvents, function(type, events) {
-                        targetEvents[type] = !$.isEmpty(events) ? events : null;
+                        targetEvents[type] = !$.isEmpty(events) ? events : NULL;
                     });
                 }
             } else {
@@ -519,7 +520,7 @@
         });
     }
     function one(target, type, fn, options) {
-        var args = prepareArgs(fn, $.options(options, {once: true}), target), event, eventTarget;
+        var args = prepareArgs(fn, $.options(options, {once: TRUE}), target), event, eventTarget;
         trim(type).split(re_comma).forEach(function(type) {
             event = initEvent(type, args.fn, args.options);
             eventTarget = initEventTarget(target);
@@ -578,4 +579,4 @@
         }
     };
 
-})(window, document, so);
+})(window, window.so, null, true, false);

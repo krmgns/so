@@ -4,7 +4,7 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function(window, $, undefined) { 'use strict';
+;(function(window, $, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
 
     // simply support check
     if (!''.trim) {
@@ -20,7 +20,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.22.3';
+    window.so.VERSION = '5.22.4';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -47,7 +47,7 @@
 
     // null/undefined checker
     function isVoid(input) {
-        return input == null;
+        return input == NULL;
     }
 
     // faster trim for space only
@@ -98,7 +98,7 @@
         }
 
         if ($.isString(ttl)) {
-            ttl = toTimeInt(ttl, true);
+            ttl = toTimeInt(ttl, TRUE);
         }
         ttl = (ttl > -1) ? ttl : 60 * 60 * 24; // one day
 
@@ -177,14 +177,14 @@
          * @inheritDoc
          */
         for: function(input, fn, _this, useLength) {
-            return loop(input, fn, _this, false, useLength);
+            return loop(input, fn, _this, FALSE, useLength);
         },
         /**
          * For each: (key => value, i)
          * @inheritDoc
          */
         forEach: function(input, fn, _this, useLength) {
-            return loop(input, fn, _this, true, useLength);
+            return loop(input, fn, _this, TRUE, useLength);
         }
     });
 
@@ -197,7 +197,7 @@
 
         /** Is null. @param {Any} input @return {Bool} */
         isNull: function(input) {
-            return (input === null);
+            return (input === NULL);
         },
 
         /** Is nulls. @param {Any} input @return {Bool} */
@@ -207,12 +207,12 @@
 
         /** Is defined. @param {Any} input @return {Bool} */
         isDefined: function(input) {
-            return (input !== undefined);
+            return (input !== UNDEFINED);
         },
 
         /** Is undefined. @param {Any} input @return {Bool} */
         isUndefined: function(input) {
-            return (input === undefined);
+            return (input === UNDEFINED);
         },
 
         /** Is string. @param {Any} input @return {Bool} */
@@ -232,17 +232,17 @@
 
         /** Is bool. @param {Any} input @return {Bool} */
         isBool: function(input) {
-            return (input === true || input === false);
+            return (input === TRUE || input === FALSE);
         },
 
         /** Is true. @param {Any} input @return {Bool} */
         isTrue: function(input) {
-            return input === true;
+            return input === TRUE;
         },
 
         /** Is false. @param {Any} input @return {Bool} */
         isFalse: function(input) {
-            return input === false;
+            return input === FALSE;
         },
 
         /** Is number. @param {Any} input @return {Bool} */
@@ -363,8 +363,8 @@
     function prepareSearchStuff(str, search, index, noCase) {
         if (str && search) {
             // swap arguments
-            if (index === false) {
-                noCase = false, index = 0;
+            if (index === FALSE) {
+                noCase = FALSE, index = 0;
             }
 
             str = toString(str);
@@ -411,7 +411,7 @@
         /**
          * To int.
          * @param  {Int} base
-         * @return {Int|null}
+         * @return {Int?}
          */
         toInt: function(base) {
             return toInt(this, base);
@@ -419,7 +419,7 @@
 
         /**
          * To float.
-         * @return {Float|null}
+         * @return {Float?}
          */
         toFloat: function() {
             return toFloat(this);
@@ -434,13 +434,14 @@
         toCapitalCase: function(all, lower) {
             var str = toString(this), i;
 
-            if (lower) str = str.toLowerCase();
+            if (lower) {
+                str = str.toLowerCase();
+            }
 
-            if (all !== false) {
+            if (all !== FALSE) {
                 for (i = 0, str = str.split(' '); i < str.length; i++) {
-                    str[i] = str[i].toCapitalCase(false);
+                    str[i] = str[i].toCapitalCase(FALSE);
                 }
-
                 return str.join(' ');
             }
 
@@ -475,7 +476,7 @@
         /**
          * Match all.
          * @param  {RegExp} pattern
-         * @return {Array|null}
+         * @return {Array?}
          */
         matchAll: function(pattern) {
             pattern = toString(pattern);
@@ -493,7 +494,7 @@
                 ret.push(r);
             }
 
-            return ret.length ? ret : null;
+            return ret.length ? ret : NULL;
         },
 
         /**
@@ -597,7 +598,7 @@
                 return trim(this, 1);
             }
 
-            var str = toString(this), re = prepareTrimRegExp(chars, true);
+            var str = toString(this), re = prepareTrimRegExp(chars, TRUE);
             while (re.test(str)) {
                 str = str.replace(re, '');
             }
@@ -809,7 +810,7 @@
             }
 
             return setTimeout(function() {
-                fn.apply(null, fnArgs || []);
+                fn.apply(NULL, fnArgs || []);
             }, delay || 1);
         },
         firer: function(delay, fn, fnArgs) {
@@ -818,7 +819,7 @@
             }
 
             return setInterval(function() {
-                fn.apply(null, fnArgs || []);
+                fn.apply(NULL, fnArgs || []);
             }, delay || 1);
         },
 
@@ -1002,7 +1003,7 @@
 
             for (key in inputFrom) {
                 if (!keys.has(key)) {
-                    if (overwrite !== false && key in inputTo) {
+                    if (overwrite !== FALSE && key in inputTo) {
                         continue;
                     }
                     inputTo[key] = inputFrom[key];
@@ -1024,7 +1025,7 @@
                     $.extend(target.shift(), source);
                 }
             } else {
-                return extend.apply(null, [target, source].concat(makeArray(arguments, 2)));
+                return extend.apply(NULL, [target, source].concat(makeArray(arguments, 2)));
             }
         },
 
@@ -1069,9 +1070,9 @@
             $.forEach(properties, function(name, property) {
                 properties[name] = {
                     value: property[0],
-                    writable: toBool(!isVoid(property[1]) ? property[1] : true),
-                    enumerable: toBool(!isVoid(property[2]) ? property[2] : true),
-                    configurable: toBool(!isVoid(property[3]) ? property[3] : true)
+                    writable: toBool(!isVoid(property[1]) ? property[1] : TRUE),
+                    enumerable: toBool(!isVoid(property[2]) ? property[2] : TRUE),
+                    configurable: toBool(!isVoid(property[3]) ? property[3] : TRUE)
                 }
             });
 
@@ -1085,7 +1086,7 @@
          * @return {Object}
          */
         options: function(options) {
-            return $.extend.apply(null, [options || {}].concat(makeArray(arguments, 1)));
+            return $.extend.apply(NULL, [options || {}].concat(makeArray(arguments, 1)));
         },
 
         /**
@@ -1159,12 +1160,12 @@
 
         var type = 'DOMContentLoaded';
         document.addEventListener(type, function _() {
-            document.removeEventListener(type, _, false);
+            document.removeEventListener(type, _, FALSE);
             onReadyCallbacksFire();
-        }, false);
+        }, FALSE);
     };
 
     // for later
     $.ext = {};
 
-})(window, {});
+})(window, {}, null, true, false);

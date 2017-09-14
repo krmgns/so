@@ -4,7 +4,7 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function(window, document, $, undefined) { 'use strict';
+;(function(window, $, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
 
     // minify candies
     var NAME_NODE_TYPE = 'nodeType';
@@ -25,8 +25,9 @@
     var NAME_INNER_HTML = 'innerHTML', NAME_TEXT_CONTENT = 'textContent';
     var NAME_CLASS = 'className', NAME_STYLE = 'style';
 
+    var document = $.document;
     var re_space = /\s+/g;
-    var re_comma = /,\s*/;
+    var re_comma = /\s*,\s*/;
     var re_trim = /^\s+|\s+$/g;
     var re_tag = /^<([\w-]+)[^>]*>/i;
     var toStyleName = $.util.toCamelCaseFromDashCase;
@@ -50,7 +51,7 @@
         return root.querySelectorAll(selector);
     }
     function getTag(el) {
-        return (el && el.nodeName) ? el.nodeName.toLowerCase() : isWindow(el) ? '#window' : null;
+        return (el && el.nodeName) ? el.nodeName.toLowerCase() : isWindow(el) ? '#window' : NULL;
     }
     function isDom(input) {
         return (input instanceof Dom);
@@ -132,7 +133,7 @@
     function Dom(selector, root, one) {
         var els, size = 0, re, id, soid;
 
-        if (selector != null) {
+        if (selector) {
             if (isString(selector)) {
                 selector = trim(selector);
                 // prevent empty selector error
@@ -149,9 +150,9 @@
                         setAttribute(root, soid, id);
                         // fix '>' only selector
                         if (selector.length == 1) {
-                            selector += ' *';
+                            selector = '> *';
                         }
-                        els = select((selector = '[%s="%s"] %s'.format(soid, id, selector)), null, one);
+                        els = select((selector = '[%s="%s"] %s'.format(soid, id, selector)), NULL, one);
                     } else {
                         els = select(selector, root, one);
                     }
@@ -177,7 +178,7 @@
         Object.defineProperties(this, {
                 '_size': {value: size},
                 '_root': {value: root},
-            '_selector': {value: selector, writable: true}
+            '_selector': {value: selector, writable: TRUE}
         });
     }
 
@@ -197,7 +198,7 @@
          * @return {Dom}
          */
         find: function(selector) {
-            return this[0] ? initDom(selector, this[0], true) : this;
+            return this[0] ? initDom(selector, this[0], TRUE) : this;
         },
 
         /**
@@ -253,7 +254,7 @@
          */
         has: function(searchEl) {
             var ret; return this.for(function(el) {
-                if (el == searchEl) { ret = true; return _break; }
+                if (el == searchEl) { ret = TRUE; return _break; }
             }), !!ret;
         },
 
@@ -493,7 +494,7 @@
     }
 
     function cleanElement(el) {
-        el.$data = el.$events = null;
+        el.$data = el.$events = NULL;
         var child;
         while (child = el[NAME_FIRST_CHILD]) {
             if (isNodeElement(child)) {
@@ -778,10 +779,10 @@
         /**
          * Has property
          * @param  {String} name
-         * @return {Bool|null}
+         * @return {Bool?}
          */
         hasProperty: function(name) {
-            return this[0] ? (name in this[0]) : null;
+            return this[0] ? (name in this[0]) : NULL;
         },
 
         /**
@@ -790,7 +791,10 @@
          * @param {Any}    value
          */
         setProperty: function(name, value) {
-            return (this[0] && (this[0][name] = value), this);
+            if (this[0]) {
+                this[0][name] = value;
+            }
+            return this;
         },
 
         /**
@@ -887,7 +891,7 @@
     // array intersect helper
     function intersect(a, b, match) {
         var tmp = (b.length > a.length)
-            ? (tmp = b, b = a, a = tmp) : null; // loop over shorter
+            ? (tmp = b, b = a, a = tmp) : NULL; // loop over shorter
 
         return a.filter(function(search) {
             return !match ? b.indexOf(search) < 0 : b.indexOf(search) > -1;
@@ -1183,7 +1187,7 @@
         path: function(string) {
             var el = this[0], ret = [];
             if (!isNodeElement(el)) {
-                return null;
+                return NULL;
             }
 
             return ret = getPath(el).reverse(), string ? ret.slice(1).join(' > ') : ret;
@@ -1197,7 +1201,7 @@
         xpath: function(string) {
             var el = this[0], ret = [];
             if (!isNodeElement(el)) {
-                return null;
+                return NULL;
             }
 
             return ret = getXPath(el), string ? '/'+ ret.join('/') : ret;
@@ -1214,10 +1218,10 @@
         var i = 0, all = querySelectorAll(this.ownerDocument, selector);
         while (i < all.length) {
             if (all[i++] == this) {
-                return true;
+                return TRUE;
             }
         }
-        return false;
+        return FALSE;
     };
 
     // style helpers
@@ -1344,7 +1348,7 @@
          * @return {String?}
          */
         getStyle: function(name, convert, raw) {
-            var el = this[0], value = null, convert;
+            var el = this[0], value = NULL, convert;
             if (el) {
                 if (raw) {
                     return el[NAME_STYLE][toStyleName(name)] || value;
@@ -1358,7 +1362,7 @@
                             ? value.toFloat() : value
                     );
                 } else {
-                    value = null;
+                    value = NULL;
                 }
             }
             return value;
@@ -1418,7 +1422,7 @@
         removeStyle: function(name) {
             return this.for(function(el) {
                 if (name == '*') {
-                    el.removeAttribute('style');
+                    removeAttribute(el, 'style');
                 } else {
                     split(name, re_comma).forEach(function(name) {
                         setStyle(el, name, '');
@@ -1437,11 +1441,11 @@
         var parent = el && el[NAME_PARENT_ELEMENT];
         while (parent) {
             if (isHidden(parent)) {
-                return true;
+                return TRUE;
             }
             parent = parent[NAME_PARENT_ELEMENT];
         }
-        return false;
+        return FALSE;
     }
 
     function getHiddenElementProperties(el, properties) {
@@ -1526,32 +1530,32 @@
         if (isNodeElement(el)) {
             style = getStyle(el);
             if ((!by || by == NAME_WIDTH) && dim.width) {
-                ret.width -= sumStyleValue(null, style, NAME_PADDING_LEFT, NAME_PADDING_RIGHT)
-                           + sumStyleValue(null, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);
+                ret.width -= sumStyleValue(NULL, style, NAME_PADDING_LEFT, NAME_PADDING_RIGHT)
+                           + sumStyleValue(NULL, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);
                 if (by) return ret.width;
             }
             if ((!by || by == NAME_INNER_WIDTH) && dim.width) {
-                ret.innerWidth -= sumStyleValue(null, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);;
+                ret.innerWidth -= sumStyleValue(NULL, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);;
                 if (by) return ret.innerWidth;
             }
             if ((!by || by == NAME_OUTER_WIDTH) && dim.width) {
                 if (margins) {
-                    ret.outerWidth += sumStyleValue(null, style, NAME_MARGIN_LEFT, NAME_MARGIN_RIGHT);
+                    ret.outerWidth += sumStyleValue(NULL, style, NAME_MARGIN_LEFT, NAME_MARGIN_RIGHT);
                 }
                 if (by) return ret.outerWidth;
             }
             if ((!by || by == NAME_HEIGHT) && dim.height) {
-                ret.height -= sumStyleValue(null, style, NAME_PADDING_TOP, NAME_PADDING_BOTTOM)
-                            + sumStyleValue(null, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
+                ret.height -= sumStyleValue(NULL, style, NAME_PADDING_TOP, NAME_PADDING_BOTTOM)
+                            + sumStyleValue(NULL, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
                 if (by) return ret.height;
             }
             if ((!by || by == NAME_INNER_HEIGHT) && dim.height) {
-                ret.innerHeight -= sumStyleValue(null, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
+                ret.innerHeight -= sumStyleValue(NULL, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
                 if (by) return ret.innerHeight;
             }
             if ((!by || by == NAME_OUTER_HEIGHT) && dim.height) {
                 if (margins) {
-                    ret.outerHeight += sumStyleValue(null, style, NAME_MARGIN_TOP, NAME_MARGIN_BOTTOM);
+                    ret.outerHeight += sumStyleValue(NULL, style, NAME_MARGIN_TOP, NAME_MARGIN_BOTTOM);
                 }
                 if (by) return ret.outerHeight;
             }
@@ -1684,10 +1688,10 @@
 
             if (el) {
                 var style = getStyle(el);
-                var borderXSize = sumStyleValue(null, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);
-                var borderYSize = sumStyleValue(null, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
-                var marginXSize = sumStyleValue(null, style, NAME_MARGIN_LEFT, NAME_MARGIN_RIGHT);
-                var marginYSize = sumStyleValue(null, style, NAME_MARGIN_TOP, NAME_MARGIN_BOTTOM);
+                var borderXSize = sumStyleValue(NULL, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);
+                var borderYSize = sumStyleValue(NULL, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
+                var marginXSize = sumStyleValue(NULL, style, NAME_MARGIN_LEFT, NAME_MARGIN_RIGHT);
+                var marginYSize = sumStyleValue(NULL, style, NAME_MARGIN_TOP, NAME_MARGIN_BOTTOM);
                 var dim = getDimensionsBy(el), parentDim = getDimensions(el[NAME_PARENT_ELEMENT]);
                 var offset = getOffset(el), scroll = getScroll(el);
 
@@ -1730,10 +1734,10 @@
         if (isNodeElement(el)) {
             name = toAttributeName(name);
             if (isNull(value)) {
-                el.removeAttribute(name);
+                removeAttribute(el, name);
             } else if (state || re_attrState.test(name)) {
                 (value || isUndefined(value)) ? (el.setAttribute(name, ''), el[name] = !!value)
-                    : (el.removeAttribute(name), el[name] = false);
+                    : (removeAttribute(el, name), el[name] = FALSE);
             } else {
                 el.setAttribute(name, value);
             }
@@ -1744,6 +1748,12 @@
         if (isNodeElement(el)) {
             name = toAttributeName(name);
             return hasAttribute(el, name) ? el.getAttribute(name) : valueDefault;
+        }
+    }
+
+    function removeAttribute(el, name, to) {
+        if (isNodeElement(el)) {
+            el.removeAttribute(to ? toAttributeName(name) : name);
         }
     }
 
@@ -1823,11 +1833,11 @@
                         names.push(attribute.name);
                     });
                 } else {
-                    names = split(name, re_comma);
+                    names = split(name, re_comma).map(toAttributeName);
                 }
 
                 while (name = names.shift()) {
-                    el.removeAttribute(toAttributeName(name));
+                    removeAttribute(el, name);
                 }
             });
         },
@@ -1865,7 +1875,7 @@
                 if (el.options) { // <select>
                     _for(el.options, function(option) {
                         if (option.value === value) {
-                            option.selected = true;
+                            option.selected = TRUE;
                         }
                     });
                 } else {
@@ -1924,7 +1934,7 @@
 
     // class helpers
     function toClassRegExp(name) {
-        return _re('(^|\\s+)'+ name +'(\\s+|$)', null, '1m');
+        return _re('(^|\\s+)'+ name +'(\\s+|$)', NULL, '1m');
     }
 
     function hasClass(el, name) {
@@ -1949,8 +1959,8 @@
     extendPrototype(Dom, {
         /**
          * Class.
-         * @param  {String}      name?
-         * @param  {String|null} option?
+         * @param  {String} name?
+         * @param  {String} option?
          * @return {Bool|this}
          */
         class: function(name, option) {
@@ -2111,7 +2121,7 @@
 
             // data-*
             if (key.startsWith('@')) {
-                return this.attribute(key, null);
+                return this.attribute(key, NULL);
             }
 
             return this.for(function(el) {
@@ -2181,7 +2191,7 @@
             var el = this[0], ret = '';
             if (getTag(el) == 'form') {
                 var data = [];
-                var done = true;
+                var done = TRUE;
                 _for(el, function(el) {
                     if (!el.name || el.disabled) {
                         return;
@@ -2195,11 +2205,11 @@
                     switch (type) {
                         case 'select':
                             value = (option = el.options[el.selectedIndex]) && hasAttribute(option, 'value')
-                                ? option.value : undefined;
+                                ? option.value : UNDEFINED;
                             break;
                         case 'radio':
                         case 'checkbox':
-                            value = el.checked ? el.value != 'on' ? el.value : 'on' : undefined;
+                            value = el.checked ? el.value != 'on' ? el.value : 'on' : UNDEFINED;
                             break;
                         case 'submit':
                             value = el.value != '' ? el.value : type;
@@ -2209,7 +2219,7 @@
                                 done = !(el.files && el.files.length);
                                 readFiles(el, function(value) {
                                     if (!isArray(value)) { // single, one read
-                                        done = true;
+                                        done = TRUE;
                                         data.push(name +'='+ encode(value));
                                     } else {
                                         done = (value.length == el.files.length);
@@ -2268,12 +2278,12 @@
             };
 
             if (!callback) {
-                return _ret(this.serialize(null, false));
+                return _ret(this.serialize(NULL, FALSE));
             }
 
             this.serialize(function(data) {
                 callback(_ret(data));
-            }, false);
+            }, FALSE);
         },
 
         /**
@@ -2285,7 +2295,7 @@
             var _ret = function(data, ret) {
                 return ret = {}, data.forEach(function(item) {
                     ret[item.name] = item.value;
-                }), $.json(ret, true);
+                }), $.json(ret, TRUE);
             };
 
             if (!callback) {
@@ -2300,7 +2310,7 @@
 
     // state helpers
     function setState(el, name, value) {
-        setAttribute(el, name, value, true);
+        setAttribute(el, name, value, TRUE);
     }
     function getState(el, name) {
         return !!(el && el[name]);
@@ -2641,7 +2651,7 @@
         }
 
         if (doc.evaluate) {
-            iter = doc.evaluate(selector, docEl, null, XPathResult.ANY_TYPE, null);
+            iter = doc.evaluate(selector, docEl, NULL, XPathResult.ANY_TYPE, NULL);
             if (one) {
                 nodes = iter.iterateNext();
             } else {
@@ -2649,7 +2659,7 @@
                     nodes.push(node);
                 }
             }
-        } else if (docEl.selectNodes) { // ie
+        } else if (docEl.selectNodes) { // ie (still..)
             nodes = docEl.selectNodes(selector);
             if (one) {
                 nodes = nodes[0];
@@ -2665,14 +2675,14 @@
     $.dom.extend({
         // find by selector
         find: function(selector, root) {
-            return initDom(selector, root, true);
+            return initDom(selector, root, TRUE);
         },
         findAll: function(selector, root) {
             return initDom(selector, root);
         },
         // find by xpath
         xfind: function(selector, root) {
-            return initXDom(selector, root, true);
+            return initXDom(selector, root, TRUE);
         },
         xfindAll: function(selector, root) {
             return initXDom(selector, root);
@@ -2715,11 +2725,11 @@
     // add find, findAll to Node
     extendPrototype(Node, {
         find: function(selector) {
-            return initDom(selector, this, true).get();
+            return initDom(selector, this, TRUE).get();
         },
         findAll: function(selector, init) {
             return initDom(selector, this).getAll();
         }
     });
 
-})(window, document, so);
+})(window, window.so, null, true, false);

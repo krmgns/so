@@ -7,6 +7,9 @@
  */
 ;(function($) { 'use strict';
 
+    // minify candy
+    var NAME_PROTOTYPE = 'prototype';
+
     // create constructor with original name (minify tools change the original name)
     function createConstructor(name, contents) {
         return new Function('return function '+ name +'(){'+ contents +'}')();
@@ -31,11 +34,11 @@
 
             Class = createConstructor(name, 'if(this.init)this.init.apply(this,arguments)');
             if (prototype) {
-                Class.prototype = Object.create(prototype, {
+                Class[NAME_PROTOTYPE] = Object.create(prototype, {
                     constructor: {value: (function() {
                         Constructor = createConstructor(name);
-                        Constructor.prototype = prototype;
-                        Constructor.prototype.constructor = Constructor;
+                        Constructor[NAME_PROTOTYPE] = prototype;
+                        Constructor[NAME_PROTOTYPE].constructor = Constructor;
                         return Constructor;
                     })()}
                 });
@@ -70,10 +73,10 @@
             var prototype = $.extend({
                 constructor: subClass,
                       super: supClass
-            }, supClass.prototype, subClass.prototype);
+            }, supClass[NAME_PROTOTYPE], subClass[NAME_PROTOTYPE]);
 
             $.forEach(prototype, function(name, value) {
-                subClass.prototype[name] = value;
+                subClass[NAME_PROTOTYPE][name] = value;
             });
 
             return subClass;
@@ -83,4 +86,4 @@
     // add shortcuts for without ()'s.
     $.class.create = $.class().create;
     $.class.extend = $.class().extend;
-})(so);
+})(window.so);

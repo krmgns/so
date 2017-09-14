@@ -130,4 +130,4 @@
         $.util.base64Decode=function(b){if(ab)return e(ab(b));if(b=b[r](/=+$/,""),1==b.length%4)throw"'atob' error!";for(var d,f,g=0,h=0,i="";f=b[ca](h++);~f&&(d=g%4?64*d+f:f,g++%4)?i+=s[fcc](255&d>>(6&-2*g)):0)f=c.indexOf(f);return e(i)}
     })();
 
-})(window, so);
+})(window, window.so);

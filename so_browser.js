@@ -106,4 +106,4 @@
         return browser;
     })();
 
-})(window, so);
+})(window, window.so);

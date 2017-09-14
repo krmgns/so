@@ -5,7 +5,7 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function(window, $) { 'use strict';
+;(function(window, $, NULL, TRUE, FALSE) { 'use strict';
 
     var re_query = /\?&+(.*)/;
     var re_space = /%20/g;
@@ -15,12 +15,12 @@
     var re_request = /^([A-Z]+)?\s*(.*?)\s*(?:@(json|xml|html|plain))?$/;
     var re_dataType = /\/(json|xml|html|plain)(?:[; ])?/i;
     var optionsDefault = {
-        method: 'GET', uri: '', uriParams: null, data: null, dataType: null,
-        async: true, noCache: true, autoSend: true, headers: {'X-Requested-With': 'XMLHttpRequest'},
-        // onStart: null, onStop: null, /* @todo: queue */
-        // onHeaders: null, onProgress: null,
-        // onDone: null, onSuccess: null, onFailure: null,
-        // onAbort: null, onTimeout: null, onBeforeSend: null, onAfterSend: null,
+        method: 'GET', uri: '', uriParams: NULL, data: NULL, dataType: NULL,
+        async: TRUE, noCache: TRUE, autoSend: TRUE, headers: {'X-Requested-With': 'XMLHttpRequest'},
+        // onStart: NULL, onStop: NULL, /* @todo: queue */
+        // onHeaders: NULL, onProgress: NULL,
+        // onDone: NULL, onSuccess: NULL, onFailure: NULL,
+        // onAbort: NULL, onTimeout: NULL, onBeforeSend: NULL, onAfterSend: NULL,
         ons: {} // all other on.. stuff
     };
     var STATE_OPENED = 1, STATE_HEADERS_RECEIVED = 2, STATE_LOADING = 3, STATE_DONE = 4;
@@ -40,7 +40,7 @@
             }
 
             if (!$.isString(input)) {
-                return null;
+                return NULL;
             }
 
             return new DOMParser.parseFromString(input, inputType || 'text/xml');
@@ -55,7 +55,7 @@
             input = trim(input);
 
             if (!re_json.test(input)) {
-                return $.logWarn('No valid JSON given.'), null;
+                return $.logWarn('No valid JSON given.'), NULL;
             }
 
             return $.json(input);
@@ -123,8 +123,8 @@
     function Stream(client) {
         this.client = client;
         this.headers = {};
-        this.data = null;
-        this.dataType = null;
+        this.data = NULL;
+        this.dataType = NULL;
     }
 
     /**
@@ -144,9 +144,9 @@
      */
     function Response(client) {
         this.super(client);
-        this.status = null;
-        this.statusCode = null;
-        this.statusText = null;
+        this.status = NULL;
+        this.statusCode = NULL;
+        this.statusText = NULL;
     }
 
     // extend request & response
@@ -165,7 +165,7 @@
 
         // hold trigger button
         if (client.options.trigger) {
-            client.options.trigger.disabled = true;
+            client.options.trigger.disabled = TRUE;
         }
 
         // handle states
@@ -175,7 +175,7 @@
             case STATE_HEADERS_RECEIVED: client.fire('headers');  break;
             case STATE_LOADING:          client.fire('progress'); break;
             case STATE_DONE:
-                client.done = true;
+                client.done = TRUE;
 
                 var status = 'HTTP/1.1 %s %s'.format(client.api.status, client.api.statusText),
                     headers = $.http.parseHeaders(client.api.getAllResponseHeaders()),
@@ -208,7 +208,7 @@
 
                 // release trigger button
                 if (client.options.trigger) {
-                    client.options.trigger.disabled = false;
+                    client.options.trigger.disabled = FALSE;
                 }
 
                 offReadyStateChange(client);
@@ -219,7 +219,7 @@
     }
 
     function offReadyStateChange(client) {
-        client.api.onreadystatechange = null;
+        client.api.onreadystatechange = NULL;
     }
 
     /**
@@ -282,9 +282,9 @@
         }
 
         this.state = 0;
-        this.sent = false;
-        this.done = false;
-        this.aborted = false;
+        this.sent = FALSE;
+        this.done = FALSE;
+        this.aborted = FALSE;
 
         this.api.client = this;
 
@@ -325,7 +325,7 @@
                     });
                 }
 
-                this.sent = true;
+                this.sent = TRUE;
             }
 
             return this;
@@ -366,7 +366,7 @@
         cancel: function() {
             this.api.abort();
             this.fire('abort');
-            this.aborted = true;
+            this.aborted = TRUE;
         },
 
         /**
@@ -478,4 +478,4 @@
         }
     });
 
-})(window, so);
+})(window, window.so, null, true, false);

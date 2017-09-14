@@ -5,7 +5,7 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function(window, $) { 'use strict';
+;(function($) { 'use strict';
 
     var re_root = /(?:html|body)/;
     var re_digit = /\d+/;
@@ -207,4 +207,4 @@
         }
     };
 
-})(window, so);
+})(window.so);
