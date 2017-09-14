@@ -214,12 +214,9 @@
          * @return {Array}
          */
         toArray: function() {
-            var i = 0, array = [];
-
-            while (i < this._size) {
-                array.push(this[i++]);
+            for (var i = 0, array = []; i < this._size; i++) {
+                array[i] = this[i];
             }
-
             return array;
         },
 
@@ -256,7 +253,7 @@
          */
         has: function(searchEl) {
             var ret; return this.for(function(el) {
-                if (el == searchEl) ret = true; return _break;
+                if (el == searchEl) { ret = true; return _break; }
             }), !!ret;
         },
 
