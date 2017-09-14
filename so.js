@@ -777,12 +777,12 @@
         rid: function(prefix, base) {
             base = (base >= 2 && base <= 36) ? base : 10;
 
-            for (var i = 0, ret = []; i < base; i++) {
-                ret[i] = ((Math.random() * base) | 0).toString(base)
-                    // [Math.random() < .5 ? 'toString' : 'toUpperCase']();
+            for (var i = 0, ret = ''; i < base; i++) {
+                ret += (~~(Math.random() * base)).toString(base)
+                    // [Math.random() < 0.5 ? 'toString' : 'toUpperCase']();
             }
 
-            return toValue(prefix, '__so_rid_') + ret.join('');
+            return toValue(prefix, '__so_rid_') + ret;
         },
 
         /**
