@@ -1735,7 +1735,7 @@
             if (isNull(value)) {
                 el.removeAttribute(name);
             } else if (state || re_attrState.test(name)) {
-                value || isUndefined(value) ? (el.setAttribute(name, name), el[name] = !!value)
+                (value || isUndefined(value)) ? (el.setAttribute(name, ''), el[name] = !!value)
                     : (el.removeAttribute(name), el[name] = false);
             } else {
                 el.setAttribute(name, value);
@@ -2322,9 +2322,9 @@
          * @return {Bool|this}
          */
         checked: function(option) {
-            var _this = this;
-            return isVoid(option) ? getState(_this[0], 'checked')
-                : (setState(_this[0], 'checked', option), _this);
+            return isVoid(option) ? getState(this[0], 'checked') : this.for(function(el) {
+                setState(el, 'checked', option);
+            });
         },
 
         /**
@@ -2333,9 +2333,9 @@
          * @return {Bool|this}
          */
         selected: function(option) {
-            var _this = this;
-            return isVoid(option) ? getState(_this[0], 'selected')
-                : (setState(_this[0], 'selected', option), _this);
+            return isVoid(option) ? getState(this[0], 'selected') : this.for(function(el) {
+                setState(el, 'selected', option);
+            });
         },
 
         /**
@@ -2344,9 +2344,9 @@
          * @return {Bool|this}
          */
         disabled: function(option) {
-            var _this = this;
-            return isVoid(option) ? getState(_this[0], 'disabled')
-                : (setState(_this[0], 'disabled', option), _this);
+            return isVoid(option) ? getState(this[0], 'disabled') : this.for(function(el) {
+                setState(el, 'disabled', option);
+            });
         },
 
         /**
@@ -2355,9 +2355,9 @@
          * @return {Bool|this}
          */
         readonly: function(option) {
-            var _this = this;
-            return isVoid(option) ? getState(_this[0], 'readOnly')
-                : (setState(_this[0], 'readOnly', option), _this);
+            return isVoid(option) ? getState(this[0], 'readOnly') : this.for(function(el) {
+                setState(el, 'readOnly', option);
+            });
         }
     });
 
