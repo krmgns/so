@@ -2691,8 +2691,8 @@
             return initXDom(selector, root);
         },
         // find by so:attribute(s)
-        soFind: function(name, id) {
-            return initDom('[so:%s="%s"]'.format(fixAttributeName(name), id));
+        soFind: function(name, value) {
+            return initDom('[so:%s="%s"]'.format(fixAttributeName(name), value));
         },
         // (name, value) or ({name: value})
         define: function(name, value) {
