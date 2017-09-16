@@ -2045,15 +2045,17 @@
 
     function setData(el, key, value) {
         if (el) {
-            checkData(el);
             if (isString(key)) {
                 key = trim(key);
+                // data-*
                 if (key[0] == '@') {
                     setAttribute(el, key, value);
                 } else {
+                    checkData(el);
                     el.$data.set(key, value);
                 }
             } else {
+                checkData(el);
                 var data = toKeyValueObject(key, value);
                 for (key in data) {
                     el.$data.set(key, data[key]);
@@ -2064,16 +2066,17 @@
 
     function getData(el, key) {
         if (el) {
-            checkData(el);
             if (isString(key)) {
                 key = trim(key);
                 // data-*
-                if (key.startsWith('@')) {
+                if (key[0] == '@') {
                     return getAttribute(el, key);
                 }
+                checkData(el);
                 return (key == '*') ? el.$data.data : el.$data.get(key);
             }
             if (isTrue(key)) {
+                checkData(el);
                 return el.$data; // get list object
             }
         }
@@ -2120,7 +2123,7 @@
             key = trim(key);
 
             // data-*
-            if (key.startsWith('@')) {
+            if (key[0] == '@') {
                 return this.attribute(key, NULL);
             }
 
