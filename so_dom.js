@@ -75,6 +75,7 @@
         return isDom(selector) ? selector : new Dom(selector, root, one);
     }
 
+    var soPrefix = 'so:';
     var re_id = /^#([^ ]+)$/;
     var re_child = /(?:first|last|nth)(?!-)/;
     var re_childFix = /([\w-]+|):(first|last|nth([^-].+))/g;
@@ -82,6 +83,7 @@
     var re_attrFix = /\[(.+)\]/g;
     var re_attrFixEsc = /([.:])/g;
     var re_attrFixQuote = /(^['"]|['"]$)/g;
+    var re_attrSo = /so:([^, ]+)/g;
 
     /**
      * Select.
@@ -98,6 +100,12 @@
         }
 
         selector = selector.replace(re_space, ' ');
+
+        if (selector.has(soPrefix)) {
+            selector = selector.replace(re_attrSo, function(_, $1) {
+                return '['+ soPrefix + $1 +']';
+            });
+        }
 
         if (selector.has(re_child)) {
             selector = selector.replace(re_childFix, function(_, $1, $2, $3) {
@@ -146,7 +154,7 @@
                         els = create(selector, root, root, re[1]);
                     } else if (selector[0] == '>' && isNodeElement(root)) {
                         // buggy :scope selector
-                        id = getAttribute(root, (soid = 'so:id')) || $.rid('');
+                        id = getAttribute(root, (soid = soPrefix +'id')) || $.rid('');
                         setAttribute(root, soid, id);
                         // fix '>' only selector
                         if (selector.length == 1) {
@@ -470,7 +478,7 @@
 
     function cloneElement(el, deep) {
         var clone = el.cloneNode();
-        clone.setAttribute && clone.setAttribute('so:clone', $.id());
+        clone.setAttribute && clone.setAttribute(soPrefix +'clone', $.id());
         // clone.cloneOf = el; // @debug
         if (!isFalse(deep)) {
             if (el.$data) clone.$data = el.$data;
@@ -1848,7 +1856,7 @@
          * @return {Any|this}
          */
         so: function(name, value) {
-            name = 'so:'+ name;
+            name = (soPrefix + name);
             return isUndefined(value) ? this.attribute(name) : this.attribute(name, value);
         }
     });
