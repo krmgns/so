@@ -17,10 +17,12 @@
     var NAME_DEFAULT_VIEW = 'defaultView';
     var NAME_OWNER_DOCUMENT = 'ownerDocument';
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
+    var Array = window.Array, Object = window.Object, JSON = window.JSON;
+    var String = window.String, RegExp = window.RegExp, Function = window.Function;
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.23.0';
+    window.so.VERSION = '5.24.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -43,7 +45,6 @@
     var re_trimLeft = /^\s+/g;
     var re_trimRight = /\s+$/g;
     var re_primitive = /^(string|number|boolean)$/;
-    var RegExp = window.RegExp;
 
     // null/undefined checker
     function isVoid(input) {
@@ -102,13 +103,11 @@
         }
         ttl = (ttl > -1) ? ttl : 60 * 60 * 24; // one day
 
-        var i = pattern + (flags || ''), ret = _reCache[i];
-        if (!ret) {
-            ret = _reCache[i] = new RegExp(pattern, flags);
-        }
+        var i = pattern + (flags || ''),
+            ret = _reCache[i] || new RegExp(pattern, flags);
 
         // simple gc
-        $.fire(ttl, function(){ _reCache = {}; });
+        $.fire(ttl, function(){ delete _reCache[i]; });
 
         return ret;
     }
@@ -265,7 +264,7 @@
             return (typeof input == 'function');
         },
 
-        /** Is array.@param {Any} input @return {Bool} */
+        /** Is array. @param {Any} input @return {Bool} */
         isArray: function(input) {
             return Array.isArray(input);
         },
@@ -275,7 +274,7 @@
             return input && (input.constructor == Object);
         },
 
-        /** Is iterable.     @param {Any} input @return {Bool} */
+        /** Is iterable. @param {Any} input @return {Bool} */
         isIterable: function(input) {
             return $.isArray(input) || $.isObject(input) || (input && (
                 (!isVoid(input.length) && !input[NAME_NODE_TYPE]) // dom, nodelist, string etc.
@@ -364,7 +363,7 @@
         if (str && search) {
             // swap arguments
             if (index === FALSE) {
-                noCase = FALSE, index = 0;
+                noCase = FALSE, index = UNDEFINED;
             }
 
             str = toString(str);
@@ -373,7 +372,7 @@
                 search = search.toLowerCase();
             }
 
-            return {s: str, ss: search, i: index};
+            return {s: str, ss: search, i: index || 0};
         }
     }
 
@@ -411,7 +410,7 @@
         /**
          * To int.
          * @param  {Int} base
-         * @return {Int?}
+         * @return {Int}
          */
         toInt: function(base) {
             return toInt(this, base);
@@ -419,7 +418,7 @@
 
         /**
          * To float.
-         * @return {Float?}
+         * @return {Float}
          */
         toFloat: function() {
             return toFloat(this);
@@ -625,43 +624,43 @@
 
         /**
          * Starts with.
-         * @param  {String}  search
-         * @param  {Int}     index
-         * @param  {Bool}    noCase?
+         * @param  {String} search
+         * @param  {Int}    index?
+         * @param  {Bool}   noCase?
          * @return {Bool}
          * @override For no-case option.
          */
         startsWith: function(search, index, noCase) {
             var src = prepareSearchStuff(this, search, index, noCase);
-            return src.ss === src.s.substr(src.i || 0, src.ss.length);
+            return (src.ss === src.s.substr(src.i, src.ss.length));
         },
 
         /**
          * Ends with.
-         * @param  {String}  search
-         * @param  {Int}     index
-         * @param  {Bool}    noCase?
+         * @param  {String} search
+         * @param  {Int}    index?
+         * @param  {Bool}   noCase?
          * @return {Bool}
          * @override For no-case option.
          */
         endsWith: function(search, index, noCase) {
             var src = prepareSearchStuff(this, search, index, noCase);
-            return src.ss === src.s.substr(0, src.i || src.ss.length);
+            return (src.ss === src.s.substr(0, src.i || src.ss.length));
         },
 
         /**
          * Contains.
-         * @param  {String}  search
-         * @param  {Bool}    noCase?
+         * @param  {String} search
+         * @param  {Bool}   noCase?
          * @return {Bool}
          */
         contains: function(search, noCase) {
             var src = prepareSearchStuff(this, search, noCase);
-            return src.s !== src.s.split(src.ss)[0];
+            return (src.s !== src.s.split(src.ss)[0]);
         },
 
         /**
-         * To RegExp
+         * To reg exp.
          * @param  {String} flags?
          * @return {RegExp}
          */
@@ -789,8 +788,8 @@
         /**
          * Re.
          * @param  {String} pattern
-         * @param  {String} flags
-         * @param  {Int}    ttl
+         * @param  {String} flags?
+         * @param  {Int}    ttl?
          * @return {RegExp}
          */
         re: function(pattern, flags, ttl) {
@@ -798,10 +797,10 @@
         },
 
         /**
-         * Fire & fire(r)ecursive.
-         * @param  {Int}      delay (ms)
-         * @param  {Function} fn
-         * @param  {Array}    fnArgs?
+         * Fire & firer(recursive).
+         * @param  {Int|String} delay (ms)
+         * @param  {Function}   fn
+         * @param  {Array}      fnArgs?
          * @return {void}
          */
         fire: function(delay, fn, fnArgs) {
@@ -889,8 +888,8 @@
 
         /**
          * Dig.
-         * @param  {Object} input
-         * @param  {String} key
+         * @param  {Array|Object} input
+         * @param  {Int|String}   key
          * @return {Any}
          */
         dig: function(input, key) {
@@ -1015,9 +1014,9 @@
 
         /**
          * Extend.
-         * @param  {Any}     target
-         * @param  {Any}     source
-         * @return {Any}
+         * @param  {Object} target
+         * @param  {Object} source
+         * @return {Object}
          */
         extend: function(target, source) {
             if ($.isArray(target)) {
@@ -1095,7 +1094,6 @@
          * @param  {String}       key
          * @param  {Any}          valueDefault?
          * @return {Any?}
-         * @throws
          */
         pick: function(input, key, valueDefault) {
             var value = valueDefault;
@@ -1113,7 +1111,7 @@
         },
 
         /**
-         * Pick all
+         * Pick all.
          * @param  {Array|Object} input
          * @param  {Object}       ...arguments
          * @return {Object}

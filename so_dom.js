@@ -28,7 +28,6 @@
     var document = $.document;
     var re_space = /\s+/g;
     var re_comma = /\s*,\s*/;
-    var re_trim = /^\s+|\s+$/g;
     var re_tag = /^<([\w-]+)[^>]*>/i;
     var toStyleName = $.util.toCamelCaseFromDashCase;
     var _re = $.re, _array = $.array, _for = $.for, _forEach = $.forEach;
@@ -83,7 +82,7 @@
     var re_attrFix = /\[(.+)\]/g;
     var re_attrFixEsc = /([.:])/g;
     var re_attrFixQuote = /(^['"]|['"]$)/g;
-    var re_attrSo = /so:([^, ]+)/g;
+    var re_attrSoFix = /(?:[^[])so:([^, ]+)/g;
 
     /**
      * Select.
@@ -102,19 +101,19 @@
         selector = selector.replace(re_space, ' ');
 
         if (selector.has(soPrefix)) {
-            selector = selector.replace(re_attrSo, function(_, $1) {
-                return '['+ soPrefix + $1 +']';
+            selector = selector.replace(re_attrSoFix, function(_, $1) {
+                return '[' + soPrefix + $1 + ']';
             });
         }
 
-        if (selector.has(re_child)) {
+        if (selector.test(re_child)) {
             selector = selector.replace(re_childFix, function(_, $1, $2, $3) {
-                return $1 +':'+ ($3 ? 'nth-child'+ $3 : $2 +'-child');
+                return $1 + ':' + ($3 ? 'nth-child' + $3 : $2 + '-child');
             });
         }
 
         // grammar: https://www.w3.org/TR/css3-selectors/#grammar
-        if (selector.has(re_attr)) {
+        if (selector.test(re_attr)) {
             // prevent DOMException [foo=1] is not a valid selector.
             selector = selector.replace(re_attrFix, function(_, $1) {
                 var s = '=', name, value;
@@ -122,9 +121,9 @@
                 name = $1[0].replace(re_attrFixEsc, '\\$1');
                 if ($1.length > 1) {
                     value = $1.slice(1).join(s).replace(re_attrFixQuote, '');
-                    return '['+ name +'="'+ value +'"]';
+                    return '[' + name + '="' + value + '"]';
                 }
-                return '['+ name +']';
+                return '[' + name + ']';
             });
         }
 
@@ -150,12 +149,12 @@
                     if (re = selector.match(re_id)) {
                         els = [(root = document).getElementById(re[1])];
                     } else if (re = selector.match(re_tag)) {
-                        // root could be document or attribute(s)
+                        // root could be document or attributes
                         els = create(selector, root, root, re[1]);
                     } else if (selector[0] == '>' && isNodeElement(root)) {
                         // buggy :scope selector
-                        id = getAttribute(root, (soid = soPrefix +'id')) || $.rid('');
-                        setAttribute(root, soid, id);
+                        id = getAttr(root, (soid = soPrefix + 'id')) || $.rid('');
+                        setAttr(root, soid, id, FALSE);
                         // fix '>' only selector
                         if (selector.length == 1) {
                             selector = '> *';
@@ -417,7 +416,6 @@
 
         /**
          * All (alias of toArray()).
-         * @return {Array}
          */
         all: function() {
             return this.toArray();
@@ -425,7 +423,7 @@
     });
 
     // create helpers
-    function create(content, doc, attributes, tag) {
+    function create(content, doc, attrs, tag) {
         if (isDom(content)) {
             return content.toArray();
         }
@@ -453,11 +451,11 @@
             frg.appendChild(tmp[NAME_FIRST_CHILD]);
         }
 
-        if (attributes && isObject(attributes)) {
+        if (attrs && isObject(attrs)) {
             _for(frg[NAME_CHILD_NODES], function(node) {
                 if (isNodeElement(node)) {
-                    _forEach(attributes, function(name, value) {
-                        node.setAttribute(name, value);
+                    _forEach(attrs, function(name, value) {
+                        setAttr(node, name, value);
                     });
                 }
             });
@@ -478,8 +476,8 @@
 
     function cloneElement(el, deep) {
         var clone = el.cloneNode();
-        clone.setAttribute && clone.setAttribute(soPrefix +'clone', $.id());
         // clone.cloneOf = el; // @debug
+        setAttr(clone, soPrefix + 'clone', $.id(), FALSE);
         if (!isFalse(deep)) {
             if (el.$data) clone.$data = el.$data;
 
@@ -513,8 +511,8 @@
         return el;
     }
 
-    function createFor(el, content, attributes) {
-        return create(content, getDocument(el), attributes);
+    function createFor(el, content, attrs) {
+        return create(content, getDocument(el), attrs);
     }
 
     function cloneIf(cloning, node) {
@@ -582,12 +580,12 @@
          * Append.
          * @param  {String|Object|Dom} content
          * @param  {Bool}              cloning?
-         * @param  {Object}            attributes?
+         * @param  {Object}            attrs?
          * @return {this}
          */
-        append: function(content, cloning, attributes) {
+        append: function(content, cloning, attrs) {
             return this.for(function(el) {
-                createFor(el, content, attributes).forEach(function(node) {
+                createFor(el, content, attrs).forEach(function(node) {
                     el.appendChild(cloneIf(cloning, node));
                 });
             });
@@ -615,12 +613,12 @@
          * Prepend.
          * @param  {String|Object|Dom} content
          * @param  {Bool}              cloning?
-         * @param  {Object}            attributes?
+         * @param  {Object}            attrs?
          * @return {this}
          */
-        prepend: function(content, cloning, attributes) {
+        prepend: function(content, cloning, attrs) {
             return this.for(function(el) {
-                createFor(el, content, attributes).forEach(function(node) {
+                createFor(el, content, attrs).forEach(function(node) {
                     el.insertBefore(cloneIf(cloning, node), el[NAME_FIRST_CHILD]);
                 });
             });
@@ -646,15 +644,13 @@
 
         /**
          * Insert (alias of append()).
-         * @inheritDoc
          */
-        insert: function(content, cloning, attributes) {
-            return this.append(content, cloning, attributes);
+        insert: function(content, cloning, attrs) {
+            return this.append(content, cloning, attrs);
         },
 
         /**
          * Insert to (alias of appendTo()).
-         * @inheritDoc
          */
         insertTo: function(selector, cloning) {
             return this.appendTo(selector, cloning);
@@ -717,15 +713,15 @@
         /**
          * Wrap.
          * @param  {String|Object|Dom} content
-         * @param  {Object}            attributes?
+         * @param  {Object}            attrs?
          * @return {Dom}
          */
-        wrap: function(content, attributes) {
+        wrap: function(content, attrs) {
             var me = this[0], parent = me && me[NAME_PARENT_NODE],
                 wrapper, replace, clone, clones = [];
 
             if (parent) {
-                wrapper = createFor(me, content, attributes)[0];
+                wrapper = createFor(me, content, attrs)[0];
                 replace = createFor(parent, '<so-tmp>', {style: 'display:none'})[0];
                 parent.insertBefore(replace, me);
                 this.for(function(el) {
@@ -781,28 +777,31 @@
          * @return {Any|this}
          */
         property: function(name, value) {
-            return isUndefined(value) ? this.getProperty(name) : this.setProperty(name, value);
+            return isDefined(value) ? this.setProperty(name, value) : this.getProperty(name);
         },
 
         /**
-         * Has property
+         * Has property.
          * @param  {String} name
-         * @return {Bool?}
+         * @return {Bool}
          */
         hasProperty: function(name) {
-            return this[0] ? (name in this[0]) : NULL;
+            return !!(this[0] && (name in this[0]));
         },
 
         /**
          * Set property.
-         * @param {String} name
-         * @param {Any}    value
+         * @param  {String} name
+         * @param  {Any}    value
+         * @return {this}
          */
         setProperty: function(name, value) {
-            if (this[0]) {
-                this[0][name] = value;
-            }
-            return this;
+            var properties = toKeyValueObject(name, value);
+            return this.for(function(el) {
+                for (name in properties) {
+                    el[name] = properties[name];
+                }
+            });
         },
 
         /**
@@ -828,7 +827,8 @@
 
         /**
          * Set text.
-         * @param {String} input
+         * @param  {String} input
+         * @return {this}
          */
         setText: function(input) {
             return this.for(function(el) {
@@ -855,7 +855,8 @@
 
         /**
          * Set html
-         * @param {String} input
+         * @param  {String} input
+         * @return {this}
          */
         setHtml: function(input) {
             return this.for(function(el) {
@@ -1111,7 +1112,6 @@
 
         /**
          * Has children (alias of hasChild()).
-         * @inheritDoc
          */
         hasChildren: function() {
             return this.hasChild();
@@ -1119,7 +1119,6 @@
 
         /**
          * Has content (alias of isEmpty()).
-         * @inheritDoc
          */
         hasContent: function(trimContent) {
             return this.isEmpty(trimContent);
@@ -1150,9 +1149,9 @@
     function getPath(el) {
         var s = getTag(el), path = [];
         if (el.id) {
-            s += '#'+ el.id; // id is enough
+            s += '#' + el.id; // id is enough
         } else if (el[NAME_CLASS]) {
-            s += '.'+ el[NAME_CLASS].split(re_space).join('.');
+            s += '.' + el[NAME_CLASS].split(re_space).join('.');
         }
         path.push(s);
 
@@ -1175,7 +1174,7 @@
         var i = 0, ii = 0, node, nodes = el[NAME_PARENT_NODE][NAME_CHILDREN], path = [];
         while (node = nodes[i++]) {
             if (node == el) {
-                return path.concat(getXPath(el[NAME_PARENT_NODE]), tag +'['+ (ii + 1) +']');
+                return path.concat(getXPath(el[NAME_PARENT_NODE]), tag + '[' + (ii + 1) + ']');
             }
             if (node.tagName == el.tagName) {
                 ii++;
@@ -1428,15 +1427,12 @@
          * @return {this}
          */
         removeStyle: function(name) {
-            return this.for(function(el) {
-                if (name == '*') {
-                    removeAttribute(el, 'style');
-                } else {
-                    split(name, re_comma).forEach(function(name) {
+            return (name == '*') ? this.attr('style', '') : (name = split(name, re_comma)),
+                this.for(function(el) {
+                    name.forEach(function(name) {
                         setStyle(el, name, '');
                     });
-                }
-            });
+                });
         }
     });
 
@@ -1724,140 +1720,180 @@
     var re_attrState = /^(?:(?:check|select|disabl)ed|readonly)$/i;
     var re_attrNameFix = /[^\w:.-]+/g;
 
-    // attribute helpers
-    function fixAttributeName(name) {
-        return trim(name).replace(re_attrNameFix, '-');
+    // attr helpers
+    function hasAttr(el, name) {
+        return !!(el && el.hasAttribute && el.hasAttribute(name));
     }
 
-    function toAttributeName(name) {
-        return fixAttributeName(name[0] == '@'
-            ? 'data-'+ name.slice(1) /* @foo => data-foo */ : name);
-    }
-
-    function hasAttribute(el, name) {
-        return !!(el && el.hasAttribute && el.hasAttribute(toAttributeName(name)));
-    }
-
-    function setAttribute(el, name, value, state /* @internal */) {
+    function setAttr(el, name, value, state /* @internal */) {
         if (isNodeElement(el)) {
-            name = toAttributeName(name);
             if (isNull(value)) {
-                removeAttribute(el, name);
-            } else if (state || re_attrState.test(name)) {
-                (value || isUndefined(value)) ? (el.setAttribute(name, ''), el[name] = !!value)
-                    : (removeAttribute(el, name), el[name] = FALSE);
+                removeAttr(el, name);
+            } else if (state !== FALSE /* speed */ && (state || re_attrState.test(name))) {
+                (value || isUndefined(value)) ? (el.setAttribute(name, name), el[name] = !!value)
+                    : (removeAttr(el, name), el[name] = FALSE);
             } else {
                 el.setAttribute(name, value);
             }
         }
     }
 
-    function getAttribute(el, name, valueDefault) {
-        if (isNodeElement(el)) {
-            name = toAttributeName(name);
-            return hasAttribute(el, name) ? el.getAttribute(name) : valueDefault;
-        }
+    function getAttr(el, name) {
+        return hasAttr(el, name) ? el.getAttribute(name) : UNDEFINED;
     }
 
-    function removeAttribute(el, name, to) {
-        if (isNodeElement(el)) {
-            el.removeAttribute(to ? toAttributeName(name) : name);
+    function getAttrs(el, namesOnly) {
+        var ret = _array(el.attributes);
+        if (namesOnly) {
+            ret = ret.map(function(attr) {
+                return attr.name;
+            });
         }
+        return ret;
+    }
+
+    function removeAttr(el, name) {
+        if (isNodeElement(el)) el.removeAttribute(name);
+    }
+
+    function toDataAttrName(name) {
+        return 'data-' + trim(name);
     }
 
     // dom: attributes
     extendPrototype(Dom, {
         /**
-         * Attribute.
+         * Attr.
          * @param  {String} name
-         * @param  {String} value?
+         * @param  {Any}    value?
          * @return {Any}
          */
-        attribute: function(name, value) {
-            return isNull(value) ? this.removeAttribute(name)
-                : isObject(name) || isDefined(value) ? this.setAttribute(name, value)
-                : this.getAttribute(name);
+        attr: function(name, value) {
+            return isNull(value) ? this.removeAttr(name)
+                : isObject(name) || isDefined(value) ? this.setAttr(name, value)
+                    : this.getAttr(name);
         },
 
         /**
-         * Attributes.
+         * Attrs.
          * @return {Object}
          */
-        attributes: function() {
+        attrs: function() {
             var el = this[0], ret = {};
             if (el) {
-                _for(el.attributes, function(attribute) {
-                    ret[attribute.name] = re_attrState.test(attribute.name)
-                        ? attribute.name :  attribute.value;
+                getAttrs(el).forEach(function(attr) {
+                    ret[attr.name] = re_attrState.test(attr.name) ? attr.name : attr.value;
                 });
             }
             return ret;
         },
 
         /**
-         * Has attribute.
+         * Has attr.
          * @param  {String} name
          * @return {Bool}
          */
-        hasAttribute: function(name) {
-            return hasAttribute(this[0], name);
+        hasAttr: function(name) {
+            return hasAttr(this[0], name);
         },
 
         /**
-         * Set attribute.
+         * Set attr.
          * @param  {String} name
          * @param  {String} value?
          * @return {this}
          */
-        setAttribute: function(name, value) {
-            var attributes = toKeyValueObject(name, value);
+        setAttr: function(name, value) {
+            var attrs = toKeyValueObject(name, value);
             return this.for(function(el) {
-                for (name in attributes) {
-                    setAttribute(el, name, attributes[name]);
+                for (name in attrs) {
+                    setAttr(el, name, attrs[name]);
                 }
             });
         },
 
         /**
-         * Get attribute.
+         * Get attr.
          * @param  {String} name
-         * @param  {String} valueDefault
          * @return {String?}
          */
-        getAttribute: function(name, valueDefault) {
-            return getAttribute(this[0], name, valueDefault);
+        getAttr: function(name) {
+            return getAttr(this[0], name);
         },
 
         /**
-         * Remve attribute.
+         * Remve attr.
          * @param  {String} name
          * @return {this}
          */
-        removeAttribute: function(name) {
+        removeAttr: function(name) {
+            name = split(name, re_comma);
             return this.for(function(el) {
-                var names = [];
-                if (name == '*') {
-                    _for(el.attributes, function(attribute) {
-                        names.push(attribute.name);
-                    });
-                } else {
-                    names = split(name, re_comma).map(toAttributeName);
-                }
-
-                while (name = names.shift()) {
-                    removeAttribute(el, name);
-                }
+                ((name != '*') ? name : getAttrs(el, TRUE)).forEach(function(name) {
+                    removeAttr(el, name)
+                });
             });
         },
 
         /**
-         * So (so:attribute's).
-         * @param  {String} value
-         * @return {Any|this}
+         * Attribute (alias of attr()).
          */
-        so: function(name, value) {
-            name = (soPrefix + name);
-            return isUndefined(value) ? this.attribute(name) : this.attribute(name, value);
+        attribute: function(name, value) {
+            return this.attr(name, value);
+        },
+
+        /**
+         * Attributes (alias of attrs()).
+         */
+        attributes: function() {
+            return this.attrs();
+        },
+
+        /**
+         * Data attr (alias of attr()).
+         */
+        dataAttr: function(name, value) {
+            if (isString(name)) {
+                name = toDataAttrName(name);
+            } else if (isObject(name)) {
+                var name_ = {};
+                _forEach(name, function(key, value) {
+                    name_[toDataAttrName(key)] = value;
+                });
+                name = name_;
+            }
+            return this.attr(name, value);
+        },
+
+        /**
+         * Remove data attr.
+         * @param  {String} name
+         * @return {this}
+         */
+        removeDataAttr: function(name) {
+            name = split(name, re_comma);
+            return this.for(function(el) {
+                if (name == '*') {
+                    name = getAttrs(el, TRUE).filter(function(name) {
+                        return name.startsWith('data-');
+                    });
+                } else {
+                    name = name.map(function(name) {
+                        return toDataAttrName(name);
+                    });
+                }
+                name.forEach(function(name) { removeAttr(el, name); });
+            });
+        },
+
+        /**
+         * So attr (so:* attributes).
+         * @param  {String} value
+         * @return {String?|this}
+         */
+        soAttr: function(name, value) {
+            return (name = soPrefix + name),
+                isDefined(value) ? this.attr(name, value) : this.attr(name);
         }
     });
 
@@ -1874,7 +1910,8 @@
 
         /**
          * Set value.
-         * @param {String} value?
+         * @param  {String} value?
+         * @return {this}
          */
         setValue: function(value) {
             value = isNull(value) ? '' : (value += ''); // @important
@@ -1887,28 +1924,21 @@
                         }
                     });
                 } else {
-                    setAttribute(el, 'value', (el.value = value));
+                    setAttr(el, 'value', (el.value = value), FALSE);
                 }
             });
         },
 
         /**
          * Get value.
-         * @param  {String} valueDefault?
          * @return {String?}
          */
-        getValue: function(valueDefault) {
-            var el = this[0], ret = valueDefault, option;
-
+        getValue: function() {
+            var el = this[0];
             if (el) {
-                if (el.options && (option = el.options[el.selectedIndex])) { // <selet>
-                    ret = hasAttribute(option, 'value') ? option.value : valueDefault;
-                } else {
-                    ret = el.value;
-                }
+                return el.options ? getAttr(el.options[el.selectedIndex], 'value') // <select>
+                    : el.value;
             }
-
-            return ret;
         }
     });
 
@@ -1925,10 +1955,11 @@
 
         /**
          * Set id.
-         * @param {String} id
+         * @param  {String} id
+         * @return {this}
          */
         setId: function(id) {
-            return setAttribute(this[0], 'id', id), this;
+            return setAttr(this[0], 'id', id, FALSE), this;
         },
 
         /**
@@ -1936,7 +1967,7 @@
          * @return {String}
          */
         getId: function() {
-            return getAttribute(this[0], 'id');
+            return getAttr(this[0], 'id');
         }
     });
 
@@ -1967,14 +1998,14 @@
     extendPrototype(Dom, {
         /**
          * Class.
-         * @param  {String} name?
-         * @param  {String} option?
+         * @param  {String}      name?
+         * @param  {String|Bool} option?
          * @return {Bool|this}
          */
         class: function(name, option) {
             return isUndefined(option) ? this.addClass(name)
                 : isNull(option) || isNulls(option) ? this.removeClass(name)
-                : isTrue(option) ? this.setClass(name) : this.replaceClass(name, (''+ option));
+                : isTrue(option) ? this.setClass(name) : this.replaceClass(name, option);
         },
 
         /**
@@ -1992,7 +2023,9 @@
          * @return {this}
          */
         addClass: function(name) {
-            return this.for(function(el) { addClass(el, name); });
+            return this.for(function(el) {
+                addClass(el, name);
+            });
         },
 
         /**
@@ -2001,8 +2034,9 @@
          * @return {this}
          */
         removeClass: function(name) {
-            return (name == '*') ? this.setClass('')
-                : this.for(function(el) { removeClass(el, name); });
+            return (name == '*') ? this.attr('class', '') : this.for(function(el) {
+                removeClass(el, name);
+            });
         },
 
         /**
@@ -2034,7 +2068,9 @@
          * @return {this}
          */
         setClass: function(name) {
-            return this.for(function(el) { el[NAME_CLASS] = name; });
+            return this.for(function(el) {
+                el[NAME_CLASS] = name;
+            });
         },
 
         /**
@@ -2042,7 +2078,7 @@
          * @return {String}
          */
         getClass: function() {
-            return getAttribute(this[0], 'class');
+            return getAttr(this[0], 'class');
         }
     });
 
@@ -2053,17 +2089,11 @@
 
     function setData(el, key, value) {
         if (el) {
+            checkData(el);
             if (isString(key)) {
                 key = trim(key);
-                // data-*
-                if (key[0] == '@') {
-                    setAttribute(el, key, value);
-                } else {
-                    checkData(el);
-                    el.$data.set(key, value);
-                }
+                el.$data.set(key, value);
             } else {
-                checkData(el);
                 var data = toKeyValueObject(key, value);
                 for (key in data) {
                     el.$data.set(key, data[key]);
@@ -2074,17 +2104,12 @@
 
     function getData(el, key) {
         if (el) {
+            checkData(el);
             if (isString(key)) {
                 key = trim(key);
-                // data-*
-                if (key[0] == '@') {
-                    return getAttribute(el, key);
-                }
-                checkData(el);
                 return (key == '*') ? el.$data.data : el.$data.get(key);
             }
             if (isTrue(key)) {
-                checkData(el);
                 return el.$data; // get list object
             }
         }
@@ -2104,22 +2129,34 @@
         },
 
         /**
+         * Has data.
+         * @param  {String} key?
+         * @return {Bool}
+         */
+        hasData: function(key) {
+            var el = this[0];
+            return (el && isDefined(key ? getData(el, key) : getData(el, '*')));
+        },
+
+        /**
          * Set data.
-         * @param {String|Object} key
-         * @param {Any}           value
+         * @param  {String|Object} key
+         * @param  {Any}           value
+         * @return {this}
          */
         setData: function(key, value) {
-            return this.for(function(el) { setData(el, key, value); });
+            return this.for(function(el) {
+                setData(el, key, value);
+            });
         },
 
         /**
          * Get data.
          * @param  {String} key
-         * @param  {Any}    valueDefault?
          * @return {Any}
          */
-        getData: function(key, valueDefault) {
-            return this[0] && getData(this[0], key, valueDefault);
+        getData: function(key) {
+            return (this[0] && getData(this[0], key));
         },
 
         /**
@@ -2128,19 +2165,16 @@
          * @return {this}
          */
         removeData: function(key) {
-            key = trim(key);
-
-            // data-*
-            if (key[0] == '@') {
-                return this.attribute(key, NULL);
-            }
-
+            key = split(key, re_comma);
             return this.for(function(el) {
                 checkData(el);
-                (key == '*') ? el.$data.empty() :
-                    split(key, re_comma).forEach(function(key) {
+                if (key == '*') {
+                    el.$data.empty();
+                } else {
+                    key.forEach(function(key) {
                         el.$data.removeAt(key);
                     });
+                }
             });
         }
     });
@@ -2211,19 +2245,18 @@
                     var type = el.options ? 'select' : el.type ? el.type : getTag(el);
                     var name = encode(el.name).replace(/%5([BD])/g, function($0, $1) {
                         return ($1 == 'B') ? '[' : ']';
-                    }), value, option;
+                    }), value;
 
                     switch (type) {
                         case 'select':
-                            value = (option = el.options[el.selectedIndex]) && hasAttribute(option, 'value')
-                                ? option.value : UNDEFINED;
+                            value = getAttr(el.options[el.selectedIndex], 'value');
                             break;
                         case 'radio':
                         case 'checkbox':
-                            value = el.checked ? el.value != 'on' ? el.value : 'on' : UNDEFINED;
+                            value = el.checked ? (el.value != 'on') ? el.value : 'on' : UNDEFINED;
                             break;
                         case 'submit':
-                            value = el.value != '' ? el.value : type;
+                            value = (el.value != '') ? el.value : type;
                             break;
                         case 'file':
                             if (callback) {
@@ -2321,7 +2354,7 @@
 
     // state helpers
     function setState(el, name, value) {
-        setAttribute(el, name, value, TRUE);
+        setAttr(el, name, value, TRUE);
     }
     function getState(el, name) {
         return !!(el && el[name]);
@@ -2602,6 +2635,18 @@
             },
 
             /**
+             * Display.
+             * @param  {Bool} option
+             * @return {this|Bool}
+             */
+            display: function(option) {
+                return isDefined(option) ? this.for(function(el) {
+                    el[NAME_STYLE].display = !option ? 'none'
+                        : getDefaultStyle(el.tagName, 'display'); // to default
+                }) : this;
+            },
+
+            /**
              * Blip.
              * @param  {Int}        times?
              * @param  {Int|String} speed?
@@ -2698,9 +2743,9 @@
         xfindAll: function(selector, root) {
             return initXDom(selector, root);
         },
-        // find by so:attribute(s)
-        soFind: function(name, value) {
-            return initDom('[so:%s="%s"]'.format(fixAttributeName(name), value));
+        // find by so:* attributes
+        soAttrFind: function(name, value) {
+            return initDom('[%s%s="%s"]'.format(soPrefix, name, value));
         },
         // (name, value) or ({name: value})
         define: function(name, value) {
@@ -2712,15 +2757,15 @@
                 Dom[prototype][name] = value;
             });
         },
-        create: function(content, doc, attributes) {
-            return create(content, doc, attributes);
+        create: function(content, doc, attrs) {
+            return create(content, doc, attrs);
         },
-        loadStyle: function(src, onload, attributes) {
+        loadStyle: function(src, onload, attrs) {
             var s = document.createElement('link');
             s.href = src, s.onload = onload, s.rel = 'stylesheet';
             document.head.appendChild(s);
         },
-        loadScript: function(src, onload, attributes) {
+        loadScript: function(src, onload, attrs) {
             var s = document.createElement('script');
             s.src = src, s.onload = onload;
             document.head.appendChild(s);
