@@ -1894,6 +1894,15 @@
         soAttr: function(name, value) {
             return (name = soPrefix + name),
                 isDefined(value) ? this.attr(name, value) : this.attr(name);
+        },
+
+        /**
+         * So attr remove.
+         * @param  {String} name
+         * @return {this}
+         */
+        soAttrRemove: function(name) {
+            return this.attr(name, null);
         }
     });
 
