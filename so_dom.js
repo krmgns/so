@@ -82,7 +82,7 @@
     var re_attrFix = /\[(.+)\]/g;
     var re_attrFixEsc = /([.:])/g;
     var re_attrFixQuote = /(^['"]|['"]$)/g;
-    var re_attrSoFix = /(?:[^[])so:([^, ]+)/g;
+    var re_attrSoFix = /so:([^, ]+)/g;
 
     /**
      * Select.
@@ -100,24 +100,24 @@
 
         selector = selector.replace(re_space, ' ');
 
-        if (selector.has(soPrefix)) {
+        if (~selector.search(soPrefix)) {
             selector = selector.replace(re_attrSoFix, function(_, $1) {
                 return '[' + soPrefix + $1 + ']';
             });
         }
 
-        if (selector.test(re_child)) {
+        if (re_child.test(selector)) {
             selector = selector.replace(re_childFix, function(_, $1, $2, $3) {
                 return $1 + ':' + ($3 ? 'nth-child' + $3 : $2 + '-child');
             });
         }
 
         // grammar: https://www.w3.org/TR/css3-selectors/#grammar
-        if (selector.test(re_attr)) {
+        if (re_attr.test(selector)) {
             // prevent DOMException [foo=1] is not a valid selector.
             selector = selector.replace(re_attrFix, function(_, $1) {
                 var s = '=', name, value;
-                $1 = $1.split(s);
+                $1 = $1.trim('[]').split(s);
                 name = $1[0].replace(re_attrFixEsc, '\\$1');
                 if ($1.length > 1) {
                     value = $1.slice(1).join(s).replace(re_attrFixQuote, '');
