@@ -1902,7 +1902,7 @@
          * @return {this}
          */
         soAttrRemove: function(name) {
-            return this.attr(name, null);
+            return this.attr(soPrefix + name, null);
         }
     });
 
