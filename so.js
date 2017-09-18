@@ -22,7 +22,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.25.1';
+    window.so.VERSION = '5.26.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -338,6 +338,22 @@
          */
         has: function(search, strict) {
             return has(this, search, strict);
+        },
+
+        /**
+         * First.
+         * @return {Any}
+         */
+        first: function() {
+            return this[0];
+        },
+
+        /**
+         * Last.
+         * @return {Any}
+         */
+        last: function() {
+            return this[this.length - 1];
         },
 
         /**
