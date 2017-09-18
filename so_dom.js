@@ -237,6 +237,20 @@
         },
 
         /**
+         * To html (alias of getHtml()).
+         */
+        toHtml: function(outer) {
+            return this.getHtml(outer);
+        },
+
+        /**
+         * To text (alias of getText()).
+         */
+        toText: function() {
+            return this.getText();
+        },
+
+        /**
          * For.
          * @param  {Function} fn
          * @return {this}
