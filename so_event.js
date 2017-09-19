@@ -462,6 +462,8 @@
                     $.forEach(targetEvents, function(type, events) {
                         targetEvents[type] = !$.isEmpty(events) ? events : NULL;
                     });
+                } else if ($.isFunction(target['on'+ event.type])) { // natives
+                    target['on'+ event.type] = null;
                 }
             } else {
                 $.logWarn('No `'+ event.type +'` events found to remove.');
@@ -488,6 +490,8 @@
                     }
                     event.fn(event.event);
                 });
+            } else if ($.isFunction(target[event.type])) { // natives
+                target.dispatchEvent(event.event);
             } else {
                 $.logWarn('No `'+ event.type +'` type events found to fire.');
             }
