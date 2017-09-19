@@ -31,7 +31,7 @@
     };
     var re_typesFix = /^(UI|Mouse|Mutation|HTML)Event$/i;
     var re_typesStandard = $.re('('+ objectValues(re_types).join('|') +')', 'i');
-    var re_comma = /,\s*/;
+    var re_comma = /\s*,\s*/;
     var domLevel = document.adoptNode ? 3 : 2;
     var optionsDefault = {
         bubbles: TRUE, cancelable: TRUE, scoped: FALSE, composed: FALSE, // all
