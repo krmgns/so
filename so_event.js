@@ -491,7 +491,7 @@
                     event.fn(event.event);
                 });
             } else if ($.isFunction(target[event.type])) { // natives
-                target.dispatchEvent(event.event);
+                target[event.type](event.event);
             } else {
                 $.logWarn('No `'+ event.type +'` type events found to fire.');
             }
