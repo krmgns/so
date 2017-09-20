@@ -529,8 +529,10 @@
         return create(content, getDocument(el), attrs);
     }
 
-    function cloneIf(cloning, node) {
-        if (!isFalse(cloning)) { // inserts only once without `clone`
+    function cloneIf(cloning, node) { // inserts only once without `clone`
+        if (cloning === FALSE) {
+            // pass
+        } else if (cloning === TRUE || !hasAttr(node, soPrefix + 'clone')) {
             node = cloneElement(node);
         }
         return node;
