@@ -22,8 +22,13 @@
     var NAME_BORDER_LEFT_WIDTH = 'borderLeftWidth', NAME_BORDER_RIGHT_WIDTH = 'borderRightWidth';
     var NAME_WIDTH = 'width', NAME_INNER_WIDTH = 'innerWidth', NAME_OUTER_WIDTH = 'outerWidth';
     var NAME_HEIGHT = 'height', NAME_INNER_HEIGHT = 'innerHeight', NAME_OUTER_HEIGHT = 'outerHeight';
+    var NAME_OFFSET_WIDTH = 'offsetWidth', NAME_OFFSET_HEIGHT = 'offsetHeight';
+    var NAME_OFFSET_TOP = 'offsetTop', NAME_OFFSET_LEFT = 'offsetLeft';
+    var NAME_SCROLL_TOP = 'scrollTop', NAME_SCROLL_LEFT = 'scrollLeft';
     var NAME_INNER_HTML = 'innerHTML', NAME_TEXT_CONTENT = 'textContent';
-    var NAME_CLASS = 'className', NAME_STYLE = 'style';
+    var NAME_STYLE = 'style', NAME_CLASS_NAME = 'className', NAME_TAG_NAME = 'tagName';
+    var NAME_DISPLAY = 'display', NAME_VISIBILITY = 'visibility', NAME_CSS_TEXT = 'cssText';
+    var NAME_OWNER_DOCUMENT = 'ownerDocument', NAME_DOCUMENT_ELEMENT = 'documentElement';
 
     var document = $.document;
     var re_space = /\s+/g;
@@ -172,6 +177,10 @@
                 } else {
                     els = [selector];
                 }
+            } else if (isArray(selector)) {
+                els = [], selector.forEach(function(el) {
+                    isDom(el) ? els = els.concat(el.all()) : els.push(el);
+                });
             } else {
                 els = selector;
             }
@@ -222,8 +231,8 @@
          * @return {Array}
          */
         toArray: function() {
-            for (var i = 0, array = []; i < this._size; i++) {
-                array[i] = this[i];
+            for (var i = 0, array = [], el; el = this[i]; i++) {
+                array[i] = el;
             }
             return array;
         },
@@ -233,7 +242,7 @@
          * @return {List}
          */
         toList: function() {
-            return $.list(this.toArray());
+            return $.list(this.all());
         },
 
         /**
@@ -253,30 +262,31 @@
         /**
          * For.
          * @param  {Function} fn
-         * @return {this}
+         * @return {Dom}
          */
         for: function(fn) {
-            return _for(this.toArray(), fn, this);
+            return _for(this.all(), fn, this);
         },
 
         /**
          * For each.
          * @param  {Function} fn
-         * @return {this}
+         * @return {Dom}
          */
         forEach: function(fn) {
-            return _forEach(this.toArray(), fn, this);
+            return _forEach(this.all(), fn, this);
         },
 
         /**
          * Has.
-         * @param  {Object} searchEl
+         * @param  {Element} el
          * @return {Bool}
          */
-        has: function(searchEl) {
-            var ret; return this.for(function(el) {
-                if (el == searchEl) { ret = TRUE; return _break; }
-            }), !!ret;
+        has: function(el) {
+            for (var i = 0, _el; _el = this[i]; i++) {
+                if (_el == el) return TRUE;
+            }
+            return FALSE;
         },
 
         /**
@@ -292,7 +302,7 @@
          * @return {Dom}
          */
         copy: function() {
-            return initDom(this.toArray());
+            return initDom(this.all());
         },
 
         /**
@@ -301,20 +311,22 @@
          * @return {Dom}
          */
         map: function(fn) {
-            return initDom(this.toArray().map(fn));
+            return initDom(this.all().map(fn));
         },
 
         /**
          * Filter.
-         * @param  {Function|String} fn (test function or selector string)
+         * @param  {Function|String} fn
          * @return {Dom}
          */
         filter: function(fn) {
+            var all = this.all(), alls;
             if (isFunction(fn)) {
-                return initDom(this.toArray().filter(fn));
+                return initDom(all.filter(fn));
             } else if (isString(fn)) {
-                return initDom(this.toArray().filter(function(el) {
-                    return matchesSelector.call(el, fn);
+                alls = initDom(fn);
+                return initDom(all.filter(function(el) {
+                    return alls.has(el);
                 }));
             }
         },
@@ -324,41 +336,30 @@
          * @return {Dom}
          */
         reverse: function() {
-            return initDom(this.toArray().reverse());
+            return initDom(this.all().reverse());
         },
 
         /**
          * Get.
-         * @param  {Int}     i?
-         * @param  {Bool}    init?
-         * @return {Object|Dom}
+         * @param  {Int} i?
+         * @return {Object}
          */
-        get: function(i, init) {
-            var el;
-
-            if (isVoid(i)) {
-                el = this[0];
-            } else if (isNumber(i)) {
-                el = this[i - 1];
-            }
-
-            return init ? initDom(el) : el;
+        get: function(i) {
+            return this[(i || 1) - 1]; // 1 = first, not 0
         },
 
         /**
          * Get all.
-         * @param  {Int|Array} i?
-         * @param  {Bool}      init?
-         * @return {Array|Dom}
+         * @param  {Int} ...arguments
+         * @return {Array}
          */
-        getAll: function(i, init) {
-            var el, els = [];
+        getAll: function() {
+            var el, els = [], _this = this, args = arguments;
 
-            if (isVoid(i)) {
-                els = this.toArray();
+            if (!args.length) {
+                els = _this.all();
             } else {
-                var _this = this;
-                (isNumber(i) ? [i] : i).forEach(function(i) {
+                _for(args, function(i) {
                     el = _this.get(i);
                     if (el && !els.has(el)) {
                         els.push(el);
@@ -366,7 +367,7 @@
                 });
             }
 
-            return init ? initDom(els) : els;
+            return els;
         },
 
         /**
@@ -376,6 +377,14 @@
          */
         item: function(i) {
             return initDom(this[i - 1]);
+        },
+
+        /**
+         * Items.
+         * @return {Dom}
+         */
+        items: function() {
+            return initDom(this.getAll.apply(this, arguments));
         },
 
         /**
@@ -438,12 +447,8 @@
 
     // create helpers
     function create(content, doc, attrs, tag) {
-        if (isDom(content)) {
-            return content.toArray();
-        }
-        if (isNode(content)) {
-            return [content];
-        }
+        if (isDom(content)) return content.all();
+        if (isNode(content)) return [content];
 
         var tmp, tmpTag, frg;
         tmpTag = 'so-tmp';
@@ -553,7 +558,7 @@
 
         /**
          * Empty.
-         * @return {this}
+         * @return {Dom}
          */
         empty: function() {
             return this.for(function(el) {
@@ -563,7 +568,7 @@
 
         /**
          * Remove
-         * @return {this}
+         * @return {Dom}
          */
         remove: function() {
             return this.for(function(el) {
@@ -577,7 +582,7 @@
         /**
          * Remove all.
          * @param  {String} selector
-         * @return {this}
+         * @return {Dom}
          */
         removeAll: function(selector) {
             var parent = this[0], _parent;
@@ -597,7 +602,7 @@
          * @param  {String|Object|Dom} content
          * @param  {Bool}              cloning?
          * @param  {Object}            attrs?
-         * @return {this}
+         * @return {Dom}
          */
         append: function(content, cloning, attrs) {
             return this.for(function(el) {
@@ -611,7 +616,7 @@
          * Append to.
          * @param  {String}  selector
          * @param  {Bool}    cloning?
-         * @return {this}
+         * @return {Dom}
          */
         appendTo: function(selector, cloning) {
             if (!isDom(selector)) {
@@ -630,7 +635,7 @@
          * @param  {String|Object|Dom} content
          * @param  {Bool}              cloning?
          * @param  {Object}            attrs?
-         * @return {this}
+         * @return {Dom}
          */
         prepend: function(content, cloning, attrs) {
             return this.for(function(el) {
@@ -644,7 +649,7 @@
          * Prepend to.
          * @param  {String}  selector
          * @param  {Bool}    cloning?
-         * @return {this}
+         * @return {Dom}
          */
         prependTo: function(selector, cloning) {
             if (!isDom(selector)) {
@@ -676,7 +681,7 @@
          * Insert before.
          * @param  {String}  selector
          * @param  {Bool}    cloning?
-         * @return {this}
+         * @return {Dom}
          */
         insertBefore: function(selector, cloning) {
             if (!isDom(selector)) {
@@ -694,7 +699,7 @@
          * Insert before.
          * @param  {String}  selector
          * @param  {Bool}    cloning?
-         * @return {this}
+         * @return {Dom}
          */
         insertAfter: function(selector, cloning) {
             if (!isDom(selector)) {
@@ -712,7 +717,7 @@
          * Replace with.
          * @param  {String}  selector
          * @param  {Bool}    cloning?
-         * @return {this}
+         * @return {Dom}
          */
         replaceWith: function(selector, cloning) {
             if (!isDom(selector)) {
@@ -790,7 +795,7 @@
          * Property.
          * @param  {String} name
          * @param  {Any}    value?
-         * @return {Any|this}
+         * @return {Any|Dom}
          */
         property: function(name, value) {
             return isDefined(value) ? this.setProperty(name, value) : this.getProperty(name);
@@ -809,7 +814,7 @@
          * Set property.
          * @param  {String} name
          * @param  {Any}    value
-         * @return {this}
+         * @return {Dom}
          */
         setProperty: function(name, value) {
             var properties = toKeyValueObject(name, value);
@@ -835,7 +840,7 @@
         /**
          * Text.
          * @param  {String} input?
-         * @return {String|this}
+         * @return {String|Dom}
          */
         text: function(input) {
             return isDefined(input) ? this.setText(input) : this.getText();
@@ -844,7 +849,7 @@
         /**
          * Set text.
          * @param  {String} input
-         * @return {this}
+         * @return {Dom}
          */
         setText: function(input) {
             return this.for(function(el) {
@@ -872,7 +877,7 @@
         /**
          * Set html
          * @param  {String} input
-         * @return {this}
+         * @return {Dom}
          */
         setHtml: function(input) {
             return this.for(function(el) {
@@ -1027,7 +1032,7 @@
                     return _el != el;
                 });
                 if (selector && ret.length) {
-                    ret = intersect(ret, this.parent().find(selector).toArray());
+                    ret = intersect(ret, this.parent().findAll(selector).all());
                 }
             }
             return initDom(ret);
@@ -1060,7 +1065,7 @@
             if (el) {
                 ret = walk(el, NAME_PREVIOUS_ELEMENT_SIBLING).reverse();
                 if (selector && ret.length) {
-                    ret = intersect(ret, this.parent().find(selector).toArray());
+                    ret = intersect(ret, this.parent().findAll(selector).all());
                 }
             }
 
@@ -1086,7 +1091,7 @@
             if (el) {
                 ret = walk(el, NAME_NEXT_ELEMENT_SIBLING);
                 if (selector && ret.length) {
-                    ret = intersect(ret, this.parent().find(selector).toArray());
+                    ret = intersect(ret, this.parent().findAll(selector).all());
                 }
             }
 
@@ -1094,8 +1099,17 @@
         },
 
         /**
+         * Matches.
+         * @param  {String|Element|Any} selector
+         * @return {Bool}
+         */
+        matches: function(selector) {
+            return !!(this[0] && initDom(selector).has(this[0]));
+        },
+
+        /**
          * Contains.
-         * @param  {String} selector
+         * @param  {String|Element} selector
          * @return {Bool}
          */
         contains: function(selector) {
@@ -1127,10 +1141,11 @@
         },
 
         /**
-         * Has children (alias of hasChild()).
+         * Has children.
+         * @return {Bool}
          */
         hasChildren: function() {
-            return this.hasChild();
+            return this.children()._size > 1;
         },
 
         /**
@@ -1166,13 +1181,13 @@
         var s = getTag(el), path = [];
         if (el.id) {
             s += '#' + el.id; // id is enough
-        } else if (el[NAME_CLASS]) {
-            s += '.' + el[NAME_CLASS].split(re_space).join('.');
+        } else if (el[NAME_CLASS_NAME]) {
+            s += '.' + el[NAME_CLASS_NAME].split(re_space).join('.');
         }
         path.push(s);
 
         if (el[NAME_PARENT_NODE]) {
-            return path.concat(getPath(el[NAME_PARENT_NODE]));
+            path = path.concat(getPath(el[NAME_PARENT_NODE]));
         }
 
         return path;
@@ -1192,7 +1207,7 @@
             if (node == el) {
                 return path.concat(getXPath(el[NAME_PARENT_NODE]), tag + '[' + (ii + 1) + ']');
             }
-            if (node.tagName == el.tagName) {
+            if (node[NAME_TAG_NAME] == el[NAME_TAG_NAME]) {
                 ii++;
             }
         }
@@ -1236,9 +1251,8 @@
     var re_unit = /(?:px|em|%)/i; // short & quick
     var re_unitOther = /(?:ex|in|[cm]m|p[tc]|v[hw]?min)/i;
     var re_noneUnitStyles = /(?:(?:fill-?)?opacity|z(?:oom|index)|(?:font-?w|line-?h)eight|column(?:-?count|s))/i;
-    var defaultStyles = {};
-    var matchesSelector = document.documentElement.matches || function(selector) {
-        var i = 0, all = querySelectorAll(this.ownerDocument, selector);
+    var matchesSelector = document[NAME_DOCUMENT_ELEMENT].matches || function(selector) {
+        var i = 0, all = querySelectorAll(this[NAME_OWNER_DOCUMENT], selector);
         while (i < all.length) {
             if (all[i++] == this) {
                 return TRUE;
@@ -1246,15 +1260,16 @@
         }
         return FALSE;
     };
+    var _defaultStylesCache = {};
 
     // style helpers
     function getCssStyle(el) {
-        var sheets = el.ownerDocument.styleSheets, rules, ret = [];
+        var sheets = el[NAME_OWNER_DOCUMENT].styleSheets, rules, ret = [];
         _for(sheets, function(sheet) {
             rules = sheet.rules || sheet.cssRules;
             _for(rules, function(rule) {
                 if (matchesSelector.call(el, rule.selectorText)) {
-                    ret.push(rule.style); // loop over all until last
+                    ret.push(rule[NAME_STYLE]); // loop over all until last
                 }
             });
         });
@@ -1265,14 +1280,15 @@
         return getWindow(el).getComputedStyle(el);
     }
 
-    function getDefaultStyle(tag, name) {
-        if (!defaultStyles[tag]) {
-            var el = createElement(document, tag);
-            document.body.appendChild(el);
-            defaultStyles[tag] = getComputedStyle(el)[toStyleName(name)];
-            document.body.removeChild(el);
+    function getDefaultStyle(el, name) {
+        var doc = getDocument(el), body = doc.body, tag = el[NAME_TAG_NAME];
+        if (!_defaultStylesCache[tag]) {
+            el = createElement(doc, tag);
+            body.appendChild(el);
+            _defaultStylesCache[tag] = getComputedStyle(el)[toStyleName(name)];
+            body.removeChild(el);
         }
-        return defaultStyles[tag];
+        return _defaultStylesCache[tag];
     }
 
     function setStyle(el, name, value) {
@@ -1341,14 +1357,14 @@
          */
         hasStyle: function(name) {
             var el = this[0];
-            return !!(el && el[NAME_STYLE] && el[NAME_STYLE].cssText.indexOf(name) > -1);
+            return !!(el && el[NAME_STYLE] && el[NAME_STYLE][NAME_CSS_TEXT].indexOf(name) > -1);
         },
 
         /**
          * Set style.
          * @param  {String|Object} name
          * @param  {String}        value?
-         * @return {this}
+         * @return {Dom}
          */
         setStyle: function(name, value) {
             var styles = name;
@@ -1440,7 +1456,7 @@
         /**
          * Remove style.
          * @param  {String} name
-         * @return {this}
+         * @return {Dom}
          */
         removeStyle: function(name) {
             return (name == '*') ? this.attr('style', '') : (name = split(name, re_comma)),
@@ -1452,15 +1468,15 @@
         }
     });
 
-    // hidden, dimension, offset, scroll helpers
-    function isHidden(el) {
-        return el && !(el.offsetWidth || el.offsetHeight);
+    // dimension, offset, scroll etc. helpers
+    function isVisible(el) {
+        return !!(el && (el[NAME_OFFSET_WIDTH] || el[NAME_OFFSET_HEIGHT]));
     }
 
-    function isHiddenParent(el) {
+    function isVisibleParent(el) {
         var parent = el && el[NAME_PARENT_ELEMENT];
         while (parent) {
-            if (isHidden(parent)) {
+            if (isVisible(parent)) {
                 return TRUE;
             }
             parent = parent[NAME_PARENT_ELEMENT];
@@ -1468,37 +1484,38 @@
         return FALSE;
     }
 
-    function getHiddenElementProperties(el, properties) {
+    function getInvisibleElementProperties(el, properties) {
         var ret = [];
+        var doc, css;
         var sid = $.sid(), className = ' '+ sid;
-        var styleText = el[NAME_STYLE].cssText;
+        var styleText = el[NAME_STYLE][NAME_CSS_TEXT];
         var parent = el[NAME_PARENT_ELEMENT], parents = [], parentStyle;
 
-        while (parent) { // doesn't give if parents are hidden
-            if (isHidden(parent)) {
+        while (parent) { // doesn't give if parents are invisible
+            if (!isVisible(parent)) {
                 parentStyle = getStyle(parent);
-                parents.push({el: parent, styleText: parent[NAME_STYLE].cssText});
-                parent[NAME_CLASS] += className;
-                parent[NAME_STYLE].display = '';
-                parent[NAME_STYLE].visibility = ''; // for `!important` annots
+                parents.push({el: parent, styleText: parent[NAME_STYLE][NAME_CSS_TEXT]});
+                parent[NAME_CLASS_NAME] += className;
+                parent[NAME_STYLE][NAME_DISPLAY] = '';
+                parent[NAME_STYLE][NAME_VISIBILITY] = ''; // for !important annots
             }
             parent = parent[NAME_PARENT_ELEMENT];
         }
 
-        var doc = getDocument(el);
-        var css = createElement(doc, 'style', {
+        doc = getDocument(el);
+        css = createElement(doc, 'style', {
             textContent: '.'+ sid +'{display:block!important;visibility:hidden!important}'
         });
         doc.body.appendChild(css);
 
-        el[NAME_CLASS] += className;
-        el[NAME_STYLE].display = '';
-        el[NAME_STYLE].visibility = ''; // for `!important` annots
+        el[NAME_CLASS_NAME] += className;
+        el[NAME_STYLE][NAME_DISPLAY] = '';
+        el[NAME_STYLE][NAME_VISIBILITY] = ''; // for !important annots
 
         // finally, grap it!
         properties.forEach(function(name) {
             var value = el[name];
-            if (value.call) { // el.getBoundingClientRect() etc.
+            if (value.call) { // getBoundingClientRect() etc.
                 value = value.call(el);
             }
             ret.push(value);
@@ -1506,15 +1523,15 @@
 
         // restore all
         doc.body.removeChild(css);
-        el[NAME_CLASS] = el[NAME_CLASS].replace(className, '');
+        el[NAME_CLASS_NAME] = el[NAME_CLASS_NAME].replace(className, '');
         if (styleText) {
-            el[NAME_STYLE].cssText = styleText;
+            el[NAME_STYLE][NAME_CSS_TEXT] = styleText;
         }
 
         while (parent = parents.shift()) {
-            parent.el[NAME_CLASS] = parent.el[NAME_CLASS].replace(className, '');
+            parent.el[NAME_CLASS_NAME] = parent.el[NAME_CLASS_NAME].replace(className, '');
             if (parent.styleText) {
-                parent.el[NAME_STYLE].cssText = parent.styleText;
+                parent.el[NAME_STYLE][NAME_CSS_TEXT] = parent.styleText;
             }
         }
 
@@ -1526,15 +1543,15 @@
         var ret = {width: 0, height: 0};
 
         if (isNodeElement(el)) {
-            if (isHidden(el) || isHiddenParent(el)) {
-                var properties = getHiddenElementProperties(el, ['offsetWidth', 'offsetHeight']);
+            if (!isVisible(el) || !isVisibleParent(el)) {
+                var properties = getInvisibleElementProperties(el, [NAME_OFFSET_WIDTH, NAME_OFFSET_HEIGHT]);
                 ret.width = properties[0], ret.height = properties[1];
             } else {
-                ret.width = el.offsetWidth, ret.height = el.offsetHeight;
+                ret.width = el[NAME_OFFSET_WIDTH], ret.height = el[NAME_OFFSET_HEIGHT];
             }
         } else if (isRoot(el)) {
             var win = getWindow(el);
-            width = win.innerWidth, height = win.innerHeight;
+            width = win[NAME_INNER_WIDTH], height = win[NAME_INNER_HEIGHT];
         }
 
         return ret;
@@ -1589,14 +1606,14 @@
 
         if (isNodeElement(el)) {
             var body = getDocument(el).body;
-            if (isHidden(el) || isHiddenParent(el)) {
-                var properties = getHiddenElementProperties(el, ['offsetTop', 'offsetLeft']);
+            if (!isVisible(el) || !isVisibleParent(el)) {
+                var properties = getInvisibleElementProperties(el, [NAME_OFFSET_TOP, NAME_OFFSET_LEFT]);
                 ret.top = properties[0], ret.left = properties[1];
             } else {
-                ret.top = el.offsetTop, ret.left = el.offsetLeft;
+                ret.top = el[NAME_OFFSET_TOP], ret.left = el[NAME_OFFSET_LEFT];
             }
 
-            ret.top += body.scrollTop, ret.left += body.scrollLeft;
+            ret.top += body[NAME_SCROLL_TOP], ret.left += body[NAME_SCROLL_LEFT];
             if (relative) {
                 var parentOffset = getOffset(el[NAME_PARENT_ELEMENT], relative);
                 ret.top += parentOffset.top, ret.left += parentOffset.left;
@@ -1610,7 +1627,7 @@
         var ret = {top: 0, left: 0};
 
         if (isNodeElement(el)) {
-            ret.top = el.scrollTop, ret.left = el.scrollLeft;
+            ret.top = el[NAME_SCROLL_TOP], ret.left = el[NAME_SCROLL_LEFT];
         } else if (isRoot(el) || isRootElement(el)) {
             var win = getWindow(el);
             ret.top = win.pageYOffset, ret.left = win.pageXOffset;
@@ -1680,7 +1697,7 @@
         }
     });
 
-    // dom: offset, scroll, box
+    // dom: offset, scroll, box, isVisible
     extendPrototype(Dom, {
         /**
          * Offset.
@@ -1730,6 +1747,14 @@
             }
 
             return ret;
+        },
+
+        /**
+         * Is visible.
+         * @return {Bool}
+         */
+        isVisible: function() {
+            return isVisible(this[0]);
         }
     });
 
@@ -1817,7 +1842,7 @@
          * Set attr.
          * @param  {String} name
          * @param  {String} value?
-         * @return {this}
+         * @return {Dom}
          */
         setAttr: function(name, value) {
             var attrs = toKeyValueObject(name, value);
@@ -1840,7 +1865,7 @@
         /**
          * Remve attr.
          * @param  {String} name
-         * @return {this}
+         * @return {Dom}
          */
         removeAttr: function(name) {
             name = split(name, re_comma);
@@ -1884,7 +1909,7 @@
         /**
          * Remove data attr.
          * @param  {String} name
-         * @return {this}
+         * @return {Dom}
          */
         removeDataAttr: function(name) {
             name = split(name, re_comma);
@@ -1905,7 +1930,7 @@
         /**
          * So attr (so:* attributes).
          * @param  {String} value
-         * @return {String?|this}
+         * @return {String?|Dom}
          */
         soAttr: function(name, value) {
             return (name = soPrefix + name),
@@ -1915,7 +1940,7 @@
         /**
          * So attr remove.
          * @param  {String} name
-         * @return {this}
+         * @return {Dom}
          */
         soAttrRemove: function(name) {
             return this.attr(soPrefix + name, null);
@@ -1927,7 +1952,7 @@
         /**
          * Value.
          * @param  {String} value?
-         * @return {String|this}
+         * @return {String|Dom}
          */
         value: function(value) {
             return isDefined(value) ? this.setValue(value) : this.getValue();
@@ -1936,7 +1961,7 @@
         /**
          * Set value.
          * @param  {String} value?
-         * @return {this}
+         * @return {Dom}
          */
         setValue: function(value) {
             value = isNull(value) ? '' : (value += ''); // @important
@@ -1972,7 +1997,7 @@
         /**
          * Id.
          * @param  {String} id?
-         * @return {String|this}
+         * @return {String|Dom}
          */
         id: function(id) {
             return isDefined(id) ? this.setId(id) : this.getId();
@@ -1981,7 +2006,7 @@
         /**
          * Set id.
          * @param  {String} id
-         * @return {this}
+         * @return {Dom}
          */
         setId: function(id) {
             return setAttr(this[0], 'id', id, FALSE), this;
@@ -2002,20 +2027,20 @@
     }
 
     function hasClass(el, name) {
-        return !!(el && el[NAME_CLASS] && toClassRegExp(name).test(el[NAME_CLASS]));
+        return !!(el && el[NAME_CLASS_NAME] && toClassRegExp(name).test(el[NAME_CLASS_NAME]));
     }
 
     function addClass(el, name) {
         split(name, re_space).forEach(function(name) {
             if (!hasClass(el, name)) {
-                el[NAME_CLASS] = trim(el[NAME_CLASS] +' '+ name);
+                el[NAME_CLASS_NAME] = trim(el[NAME_CLASS_NAME] +' '+ name);
             }
         });
     }
 
     function removeClass(el, name) {
         split(name, re_space).forEach(function(name) {
-            el[NAME_CLASS] = trim(el[NAME_CLASS].replace(toClassRegExp(name), ' '));
+            el[NAME_CLASS_NAME] = trim(el[NAME_CLASS_NAME].replace(toClassRegExp(name), ' '));
         });
     }
 
@@ -2025,7 +2050,7 @@
          * Class.
          * @param  {String}      name?
          * @param  {String|Bool} option?
-         * @return {Bool|this}
+         * @return {Bool|Dom}
          */
         class: function(name, option) {
             return isUndefined(option) ? this.addClass(name)
@@ -2045,7 +2070,7 @@
         /**
          * Add class.
          * @param  {String} name
-         * @return {this}
+         * @return {Dom}
          */
         addClass: function(name) {
             return this.for(function(el) {
@@ -2056,7 +2081,7 @@
         /**
          * Remove class.
          * @param  {String} name
-         * @return {this}
+         * @return {Dom}
          */
         removeClass: function(name) {
             return (name == '*') ? this.attr('class', '') : this.for(function(el) {
@@ -2068,18 +2093,18 @@
          * Replace class.
          * @param  {String} oldName
          * @param  {String} newName
-         * @return {this}
+         * @return {Dom}
          */
         replaceClass: function(oldName, newName) {
             return this.for(function(el) {
-                el[NAME_CLASS] = trim(el[NAME_CLASS].replace(toClassRegExp(oldName), ' '+ newName +' '));
+                el[NAME_CLASS_NAME] = trim(el[NAME_CLASS_NAME].replace(toClassRegExp(oldName), ' '+ newName +' '));
             });
         },
 
         /**
          * Toggle.
          * @param  {String} name
-         * @return {this}
+         * @return {Dom}
          */
         toggleClass: function(name) {
             return this.for(function(el) {
@@ -2090,11 +2115,11 @@
         /**
          * Set class.
          * @param  {String} name
-         * @return {this}
+         * @return {Dom}
          */
         setClass: function(name) {
             return this.for(function(el) {
-                el[NAME_CLASS] = name;
+                el[NAME_CLASS_NAME] = name;
             });
         },
 
@@ -2167,7 +2192,7 @@
          * Set data.
          * @param  {String|Object} key
          * @param  {Any}           value
-         * @return {this}
+         * @return {Dom}
          */
         setData: function(key, value) {
             return this.for(function(el) {
@@ -2187,7 +2212,7 @@
         /**
          * Remove data.
          * @param  {String} key
-         * @return {this}
+         * @return {Dom}
          */
         removeData: function(key) {
             key = split(key, re_comma);
@@ -2390,7 +2415,7 @@
         /**
          * Checked.
          * @param  {Bool} option?
-         * @return {Bool|this}
+         * @return {Bool|Dom}
          */
         checked: function(option) {
             return isVoid(option) ? getState(this[0], 'checked') : this.for(function(el) {
@@ -2401,7 +2426,7 @@
         /**
          * Selected.
          * @param  {Bool} option?
-         * @return {Bool|this}
+         * @return {Bool|Dom}
          */
         selected: function(option) {
             return isVoid(option) ? getState(this[0], 'selected') : this.for(function(el) {
@@ -2412,7 +2437,7 @@
         /**
          * Disabled.
          * @param  {Bool} option?
-         * @return {Bool|this}
+         * @return {Bool|Dom}
          */
         disabled: function(option) {
             return isVoid(option) ? getState(this[0], 'disabled') : this.for(function(el) {
@@ -2423,7 +2448,7 @@
         /**
          * Readonly.
          * @param  {Bool} option?
-         * @return {Bool|this}
+         * @return {Bool|Dom}
          */
         readonly: function(option) {
             return isVoid(option) ? getState(this[0], 'readOnly') : this.for(function(el) {
@@ -2492,7 +2517,7 @@
              * @param  {String}   type
              * @param  {Function} fn
              * @param  {Object}   options?
-             * @return {this}
+             * @return {Dom}
              */
             on: function(type, fn, options) {
                 return this.for(function(el) {
@@ -2505,7 +2530,7 @@
              * @param  {String}   type
              * @param  {Function} fn
              * @param  {Object}   options?
-             * @return {this}
+             * @return {Dom}
              */
             one: function(type, fn, options) {
                 return this.for(function(el) {
@@ -2518,7 +2543,7 @@
              * @param  {String}   type
              * @param  {Function} fn
              * @param  {Object}   options?
-             * @return {this}
+             * @return {Dom}
              */
             off: function(type, fn, options) {
                 return this.for(function(el) {
@@ -2531,7 +2556,7 @@
              * @param  {String}   type
              * @param  {Function} fn
              * @param  {Object}   options?
-             * @return {this}
+             * @return {Dom}
              */
             fire: function(type, fn, options) {
                 return this.for(function(el) {
@@ -2542,16 +2567,16 @@
     }
 
     // dom: animations
-    var animation = $.animation;
-    if (animation) {
+    var animate = $.animation && $.animation.animate;
+    if (animate) {
         extendPrototype(Dom, {
             /**
              * Animate.
-             * @param  {Object}     properties
-             * @param  {Int|String} speed?
-             * @param  {String}     easing?
-             * @param  {Function}   callback?
-             * @return {this}
+             * @param  {Object|String} properties
+             * @param  {Int|String}    speed?
+             * @param  {String}        easing?
+             * @param  {Function}      callback?
+             * @return {Dom}
              */
             animate: function(properties, speed, easing, callback) {
                 return (properties == 'stop') // stop previous animation
@@ -2562,7 +2587,7 @@
                         }
                     })
                     : this.for(function(el) {
-                        animation.animate(el, properties, speed, easing, callback);
+                        animate(el, properties, speed, easing, callback);
                     });
             },
 
@@ -2571,7 +2596,7 @@
              * @param  {Float}      to
              * @param  {Int|String} speed?
              * @param  {Function}   callback?
-             * @return {this}
+             * @return {Dom}
              */
             fade: function(to, speed, callback) {
                 return this.animate({opacity: to}, speed, callback);
@@ -2581,7 +2606,7 @@
              * Fade in.
              * @param  {Int|String} speed?
              * @param  {Function}   callback?
-             * @return {this}
+             * @return {Dom}
              */
             fadeIn: function(speed, callback) {
                 return this.fade(1, speed, callback);
@@ -2591,11 +2616,10 @@
              * Fade out.
              * @param  {Int|String} speed?
              * @param  {Function}   callback?
-             * @return {this}
+             * @return {Dom}
              */
             fadeOut: function(speed, callback) {
-                // remove element after fading out
-                if (isTrue(callback) || callback == 'remove') {
+                if (isTrue(callback)) { // remove element after fading out?
                     callback = function(animation) {
                         $.dom(animation.$target).remove();
                     };
@@ -2608,13 +2632,13 @@
              * @param  {Int|String} speed?
              * @param  {String}     easing?
              * @param  {Function}   callback?
-             * @return {this}
+             * @return {Dom}
              */
             show: function(speed, easing, callback) {
                 return this.for(function(el) {
-                    if (isHidden(el)) {
-                        el[NAME_STYLE].display = getDefaultStyle(el.tagName, 'display'); // to default
-                        animation.animate(el, {opacity: 1}, (speed || 0), easing, callback);
+                    if (!isVisible(el)) {
+                        el[NAME_STYLE][NAME_DISPLAY] = getDefaultStyle(el, 'display');
+                        animate(el, {opacity: 1}, (speed || 0), easing, callback);
                     }
                 });
             },
@@ -2624,14 +2648,14 @@
              * @param  {Int|String} speed?
              * @param  {String}     easing?
              * @param  {Function}   callback?
-             * @return {this}
+             * @return {Dom}
              */
             hide: function(speed, easing, callback) {
                 return this.for(function(el) {
-                    if (!isHidden(el)) {
-                        animation.animate(el, {opacity: 0}, (speed || 0), easing, function() {
-                            el[NAME_STYLE].display = 'none'; // to real display
-                            callback && callback.call(this);
+                    if (isVisible(el)) {
+                        animate(el, {opacity: 0}, (speed || 0), easing, function() {
+                            el[NAME_STYLE][NAME_DISPLAY] = 'none';
+                            callback && callback(this);
                         });
                     }
                 });
@@ -2642,18 +2666,18 @@
              * @param  {Int|String} speed?
              * @param  {String}     easing?
              * @param  {Function}   callback?
-             * @return {this}
+             * @return {Dom}
              */
             toggle: function(speed, easing, callback) {
                 speed = speed || 0;
                 return this.for(function(el) {
-                    if (isHidden(el)) {
-                        el[NAME_STYLE].display = getDefaultStyle(el.tagName, 'display'); // to default
-                        animation.animate(el, {opacity: 1}, speed, easing, callback);
+                    if (!isVisible(el)) {
+                        el[NAME_STYLE][NAME_DISPLAY] = getDefaultStyle(el, 'display');
+                        animate(el, {opacity: 1}, speed, easing, callback);
                     } else {
-                        animation.animate(el, {opacity: 0}, speed, easing, function() {
-                            el[NAME_STYLE].display = 'none'; // to real display
-                            callback && callback.call(this);
+                        animate(el, {opacity: 0}, speed, easing, function() {
+                            el[NAME_STYLE][NAME_DISPLAY] = 'none';
+                            callback && callback(this);
                         });
                     }
                 });
@@ -2661,33 +2685,31 @@
 
             /**
              * Display.
-             * @param  {Bool} option
-             * @return {this|Bool}
+             * @return {Dom}
              */
             display: function(option) {
-                return isDefined(option) ? this.for(function(el) {
-                    el[NAME_STYLE].display = !option ? 'none'
-                        : getDefaultStyle(el.tagName, 'display'); // to default
-                }) : this;
+                return this.for(function(el) {
+                    el[NAME_STYLE][NAME_DISPLAY] = option ? getDefaultStyle(el, 'display') : 'none';
+                });
             },
 
             /**
              * Blip.
              * @param  {Int}        times?
              * @param  {Int|String} speed?
-             * @return {this}
+             * @return {Dom}
              */
             blip: function(times, speed) {
-                times = times || 10;
-                speed = speed || 155;
-                var count = times > 0 ? 1 : 0;
+                times = times || Infinity;
+                speed = speed || 255;
                 return this.for(function(el) {
+                    var count = times > 0 ? 1 : 0;
                     !function callback() {
                         if (count && count > times) {
                             return;
                         }
-                        animation.animate(el, {opacity: 0}, speed, function() {
-                            animation.animate(el, {opacity: 1}, speed, callback);
+                        animate(el, {opacity: 0}, speed, function() {
+                            animate(el, {opacity: 1}, speed, callback);
                             count++;
                         });
                     }();
@@ -2701,11 +2723,11 @@
              * @param  {Int|String}  speed?
              * @param  {String}      easing?
              * @param  {Function}    callback?
-             * @return {this}
+             * @return {Dom}
              */
             scrollTo: function(top, left, speed, easing, callback) {
                 return this.for(function(el) {
-                    animation.animate(el, {scrollTop: top || el.scrollTop, scrollLeft: left || el.scrollLeft},
+                    animate(el, {scrollTop: top || el[NAME_SCROLL_TOP], scrollLeft: left || el[NAME_SCROLL_LEFT]},
                         speed, easing, callback);
                 });
             }
@@ -2725,7 +2747,7 @@
     // xpath helper
     function initXDom(selector, root, one) {
         var doc = root || document;
-        var docEl = doc && doc.documentElement;
+        var docEl = doc && doc[NAME_DOCUMENT_ELEMENT];
         var nodes = [], node, iter, ret;
         if (!docEl) {
             throw ('XPath is not supported by root object!');
