@@ -1301,7 +1301,7 @@
 
     function getStyle(el, name) {
         var styles = getComputedStyle(el);
-        return name ? styles[toStyleName(name)] || '' : styles;
+        return name ? (styles[toStyleName(name)] || '') : styles;
     }
 
     function parseStyleText(text) {
@@ -1345,8 +1345,8 @@
          * @return {String}
          */
         style: function(name, value, raw) {
-            return isObject(name) || (isString(name) && (!isNulls(value) || name.has(':'))) ? this.setStyle(name)
-                : isNull(value) || isNulls(value) ? this.removeStyle(name)
+            return isNull(value) || isNulls(value) ? this.removeStyle(name)
+                : isObject(name) || isString(value) || (name && name.has(':')) ? this.setStyle(name, value)
                 : this.getStyle(name, value, raw);
         },
 
@@ -1394,7 +1394,7 @@
                 }
                 value = getStyle(el, name);
                 if (value !== '') {
-                    value = isFalse(convert)  ? value : (
+                    value = isFalse(convert) ? value : (
                         re_rgb.test(value) ? $.util.parseRgbColorToHex(value) // make rgb - hex
                             : re_unit.test(value) || re_unitOther.test(value) // make px etc. - float
                                 // || re_noneUnitStyles.test(name) // make opacity etc. - float @cancel use String.toFloat()
