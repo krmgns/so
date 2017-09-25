@@ -1771,7 +1771,7 @@
             if (isNull(value)) {
                 removeAttr(el, name);
             } else if (state !== FALSE /* speed */ && (state || re_attrState.test(name))) {
-                (value || isUndefined(value)) ? (el.setAttribute(name, name), el[name] = !!value)
+                (value || isUndefined(value)) ? (el.setAttribute(name, ''), el[name] = !!value)
                     : (removeAttr(el, name), el[name] = FALSE);
             } else {
                 el.setAttribute(name, value);
