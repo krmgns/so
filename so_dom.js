@@ -2621,7 +2621,7 @@
             fadeOut: function(speed, callback) {
                 if (isTrue(callback)) { // remove element after fading out?
                     callback = function(animation) {
-                        $.dom(animation.$target).remove();
+                        animation.$target.remove();
                     };
                 }
                 return this.fade(0, speed, callback);
@@ -2652,10 +2652,10 @@
              * @return {Dom}
              */
             hide: function(speed, easing, callback) {
+                speed = speed || 0;
                 if (isFunction(easing)) {
                     callback = easing, easing = NULL;
                 }
-                speed = speed || 0;
                 return this.for(function(el) {
                     if (isVisible(el)) {
                         animate(el, {opacity: 0}, speed, easing, function() {

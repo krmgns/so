@@ -25,11 +25,11 @@
 
     /**
      * Animation.
-     * @param {Element}            target
-     * @param {Object}             properties
-     * @param {Int}                speed
-     * @param {String|undefined}   easing
-     * @param {Function|undefined} callback
+     * @param {Element}  target
+     * @param {Object}   properties
+     * @param {Int}      speed?
+     * @param {String}   easing?
+     * @param {Function} callback?
      */
     function Animation(target, properties, speed, easing, callback) {
         this.$target = $.dom(target);

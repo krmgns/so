@@ -22,7 +22,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.29.0';
+    window.so.VERSION = '5.29.1';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -39,7 +39,7 @@
 
     var _reCache = {};
     var re_dot = /^[-+]?\./;
-    var re_time = /(\d+)(\w+)/;
+    var re_time = /([\d.]+)(\w+)/;
     var re_numeric = /^[-+]?(?:\.?\d+|\d+\.\d+)$/;
     var re_trim = /^\s+|\s+$/g;
     var re_trimLeft = /^\s+/g;
@@ -53,8 +53,8 @@
 
     // faster trim for space only
     function trim(input, side) {
-        return !isVoid(input) ? (''+ input).replace(
-            (!side) ? re_trim : (side == 1) ? re_trimLeft : re_trimRight, '') : '';
+        return !isVoid(input) ? (''+ input)
+            .replace(side ? (side == 1 ? re_trimLeft : re_trimRight) : re_trim, '') : '';
     }
 
     // shortcut convert helpers
@@ -74,17 +74,18 @@
         return !!input;
     }
 
-    function toTimeInt(input) {
-        var tmp = input.split(re_time),
-            time = toInt(tmp[1]), timeDir = tmp[2];
+    function toMilliseconds(time) {
+        var s = time.split(re_time);
+        var time = toFloat(s[1]);
+        var timeDir = s[2];
 
         switch (timeDir) {
-            case 's': case 'sec': input = time * 1000; break;
-            case 'm': case 'min': input = time * 1000 * 60; break;
-            case 'h': case 'hour': input = time * 1000 * 60 * 60; break;
+            case 's': case 'sec': time *= 1000; break;
+            case 'm': case 'min': time *= 1000 * 60; break;
+            case 'h': case 'hour': time *= 1000 * 60 * 60; break;
         }
 
-        return input;
+        return time;
     }
 
     // cacheable regexp stuff
@@ -99,12 +100,12 @@
         }
 
         if ($.isString(ttl)) {
-            ttl = toTimeInt(ttl, TRUE);
+            ttl = toMilliseconds(ttl, TRUE);
         }
-        ttl = (ttl > -1) ? ttl : 60 * 60 * 24; // one day
+        ttl = (ttl > -1) ? ttl : 3600; // one hour
 
-        var i = pattern + (flags || ''),
-            ret = _reCache[i] || new RegExp(pattern, flags);
+        var i = pattern + (flags || '');
+        var ret = _reCache[i] || new RegExp(pattern, flags);
 
         // simple gc
         $.fire(ttl, function(){ delete _reCache[i]; });
@@ -821,7 +822,7 @@
          */
         fire: function(delay, fn, fnArgs) {
             if ($.isString(delay)) {
-                delay = toTimeInt(delay);
+                delay = toMilliseconds(delay);
             }
 
             return setTimeout(function() {
@@ -830,7 +831,7 @@
         },
         firer: function(delay, fn, fnArgs) {
             if ($.isString(delay)) {
-                delay = toTimeInt(delay);
+                delay = toMilliseconds(delay);
             }
 
             return setInterval(function() {
