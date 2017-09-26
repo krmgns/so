@@ -30,6 +30,11 @@
          * @return {Function}
          */
         create: function(name, prototype) {
+            if ($.isObject(name)) {
+                prototype = name;
+                name = $.rid();
+            }
+
             var Class, Constructor;
 
             Class = createConstructor(name, 'if(this.init)this.init.apply(this,arguments)');
