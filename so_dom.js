@@ -2637,10 +2637,8 @@
             show: function(speed, easing, callback) {
                 speed = speed || 0;
                 return this.for(function(el) {
-                    if (!isVisible(el)) {
-                        el[NAME_STYLE][NAME_DISPLAY] = getDefaultStyle(el, 'display');
-                        animate(el, {opacity: 1}, speed, easing, callback);
-                    }
+                    el[NAME_STYLE][NAME_DISPLAY] = getDefaultStyle(el, 'display');
+                    animate(el, {opacity: 1}, speed, easing, callback);
                 });
             },
 
@@ -2652,17 +2650,16 @@
              * @return {Dom}
              */
             hide: function(speed, easing, callback) {
-                speed = speed || 0;
                 if (isFunction(easing)) {
                     callback = easing, easing = NULL;
                 }
+
+                speed = speed || 0;
                 return this.for(function(el) {
-                    if (isVisible(el)) {
-                        animate(el, {opacity: 0}, speed, easing, function() {
-                            el[NAME_STYLE][NAME_DISPLAY] = 'none';
-                            callback && callback(this);
-                        });
-                    }
+                    animate(el, {opacity: 0}, speed, easing, function() {
+                        el[NAME_STYLE][NAME_DISPLAY] = 'none';
+                        callback && callback(this);
+                    });
                 });
             },
 
