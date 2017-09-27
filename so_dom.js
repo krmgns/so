@@ -1064,7 +1064,7 @@
 
             if (el) {
                 ret = walk(el, NAME_PREVIOUS_ELEMENT_SIBLING).reverse();
-                if (selector && ret.length) {
+                if (ret.length && selector) {
                     ret = intersect(ret, this.parent().findAll(selector).all());
                 }
             }
@@ -1090,7 +1090,7 @@
 
             if (el) {
                 ret = walk(el, NAME_NEXT_ELEMENT_SIBLING);
-                if (selector && ret.length) {
+                if (ret.length && selector) {
                     ret = intersect(ret, this.parent().findAll(selector).all());
                 }
             }
