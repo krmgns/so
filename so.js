@@ -22,7 +22,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.29.3';
+    window.so.VERSION = '5.30.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -1148,6 +1148,21 @@
             }
 
             return values;
+        },
+
+        /**
+         * Split.
+         * @param  {String} input
+         * @param  {String} separator
+         * @param  {Int}    limit?
+         * @return {Array}
+         */
+        split: function(input, separator, limit) {
+            input = input.split(separator);
+            if (limit) {
+                input = input.slice(0, limit - 1).concat(input.slice(limit - 1).join(separator));
+            }
+            return input;
         }
     });
 
