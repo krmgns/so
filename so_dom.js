@@ -454,7 +454,7 @@
         tmpTag = 'so-tmp';
 
         // fix table stuff
-        tag = tag || (content.match(re_tag) || [,])[1];
+        tag = tag || ((content && content.match(re_tag)) || [,])[1];
         if (tag) {
             switch (tag.toLowerCase()) {
                 case 'tr': tmpTag = 'tbody'; break;
