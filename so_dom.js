@@ -548,7 +548,7 @@
         },
 
         /**
-         * Remove
+         * Remove.
          * @return {Dom}
          */
         remove: function() {
