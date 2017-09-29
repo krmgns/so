@@ -1786,8 +1786,8 @@
     extendPrototype(Dom, {
         /**
          * Attr.
-         * @param  {String} name
-         * @param  {Any}    value?
+         * @param  {String|Object} name
+         * @param  {Any}           value?
          * @return {Any}
          */
         attr: function(name, value) {
@@ -1872,17 +1872,17 @@
         },
 
         /**
-         * Data attr (alias of attr()).
+         * Data attr (alias of attr() for "data-" attributes).
          */
         dataAttr: function(name, value) {
             if (isString(name)) {
                 name = toDataAttrName(name);
             } else if (isObject(name)) {
-                var name_ = {};
+                var names = {};
                 _forEach(name, function(key, value) {
-                    name_[toDataAttrName(key)] = value;
+                    names[toDataAttrName(key)] = value;
                 });
-                name = name_;
+                name = names;
             }
             return this.attr(name, value);
         },
