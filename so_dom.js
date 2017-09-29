@@ -85,7 +85,7 @@
     var re_childFix = /([\w-]+|):(first|last|nth([^-].+))/g;
     var re_attr = /\[.+\]/;
     var re_attrFix = /([.:])/g;
-    var re_attrMatch = /(\[[^=]+)[.:]/g;
+    var re_attrMatch = /(\[[^=\]]+)[.:]/g;
 
     /**
      * Select.
