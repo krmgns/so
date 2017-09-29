@@ -84,10 +84,8 @@
     var re_child = /(?:first|last|nth)(?!-)/;
     var re_childFix = /([\w-]+|):(first|last|nth([^-].+))/g;
     var re_attr = /\[.+\]/;
-    var re_attrFix = /\[(.+)\]/g;
-    var re_attrFixEsc = /([.:])/g;
-    var re_attrFixQuote = /(^['"]|['"]$)/g;
-    var re_attrSoFix = /so:([^, ]+)/g;
+    var re_attrFix = /([.:])/g;
+    var re_attrMatch = /(\[[^=]+)[.:]/g;
 
     /**
      * Select.
@@ -105,12 +103,6 @@
 
         selector = selector.replace(re_space, ' ');
 
-        if (~selector.search(soPrefix)) {
-            selector = selector.replace(re_attrSoFix, function(_, $1) {
-                return '[' + soPrefix + $1 + ']';
-            });
-        }
-
         if (re_child.test(selector)) {
             selector = selector.replace(re_childFix, function(_, $1, $2, $3) {
                 return $1 + ':' + ($3 ? 'nth-child' + $3 : $2 + '-child');
@@ -119,16 +111,8 @@
 
         // grammar: https://www.w3.org/TR/css3-selectors/#grammar
         if (re_attr.test(selector)) {
-            // prevent DOMException [foo=1] is not a valid selector.
-            selector = selector.replace(re_attrFix, function(_, $1) {
-                var s = '=', name, value;
-                $1 = $1.trim('[]').split(s);
-                name = $1[0].replace(re_attrFixEsc, '\\$1');
-                if ($1.length > 1) {
-                    value = $1.slice(1).join(s).replace(re_attrFixQuote, '');
-                    return '[' + name + '="' + value + '"]';
-                }
-                return '[' + name + ']';
+            (selector.matchAll(re_attrMatch) || []).forEach(function(match) {
+                selector = selector.replace(match[0], match[0].replace(re_attrFix, '\\$1'));
             });
         }
 
@@ -283,10 +267,7 @@
          * @return {Bool}
          */
         has: function(el) {
-            for (var i = 0, _el; _el = this[i]; i++) {
-                if (_el == el) return TRUE;
-            }
-            return FALSE;
+            return !!~this.all().indexOf(el);
         },
 
         /**
@@ -323,7 +304,7 @@
             var all = this.all(), alls;
             if (isFunction(fn)) {
                 return initDom(all.filter(fn));
-            } else if (isString(fn)) {
+            } else {
                 alls = initDom(fn);
                 return initDom(all.filter(function(el) {
                     return alls.has(el);
@@ -918,14 +899,15 @@
         },
     });
 
-    // array intersect helper
-    function intersect(a, b, match) {
-        var tmp = (b.length > a.length)
-            ? (tmp = b, b = a, a = tmp) : NULL; // loop over shorter
-
+    // array intersect helpers
+    function intersect(a, b, found, tmp /* internal */) {
+        tmp = (b.length > a.length) ? (tmp = b, b = a, a = tmp) : NULL; // loop over shorter
         return a.filter(function(search) {
-            return !match ? b.indexOf(search) < 0 : b.indexOf(search) > -1;
+            return found ? b.indexOf(search) > -1 : b.indexOf(search) < 0;
         });
+    }
+    function noIntersect(el, els) {
+        return els.filter(function(_el) { return _el != el; });
     }
 
     // walker helper
@@ -941,27 +923,33 @@
         return nodes;
     }
 
+    function toAllSelector(selector) {
+        return (selector = trim(selector)), (selector && selector[0] != '>') ? '>' + selector : selector;
+    }
+
     // dom: walkers
     extendPrototype(Dom, {
         /**
          * Not.
-         * @param  {Int|Array|String|Object} selector
+         * @param  {String|Int...arguments} selector
          * @return {Dom}
          */
         not: function(selector) {
-            var ret = [], els;
+            var ret = [];
 
-            // eg: $.dom("p").not(0) or $.dom("p").not([0,1])
-            if (isNumber(selector) || isArray(selector)) {
-                ret = this.filter(function(_, i) {
-                    return (selector != i + 1);
-                });
-            }
-            // eg: $.dom("p").not(".red") or $.dom("p").not(this)
-            else {
-                els = this.parent().findAll(selector);
-                ret = this.filter(function(el) {
-                    return !els.has(el);
+            if (isString(selector)) {
+                // eg: $.dom("p").not(".red")
+                ret = intersect(this.all(), this.parent().findAll(toAllSelector(selector)).all());
+            } else if (isNodeElement(selector)) {
+                // $.dom("p").not(element)
+                ret = noIntersect(selector, this);
+            } else {
+                // eg: $.dom("p").not(1) or $.dom("p").not(1,2,3)
+                selector = _array(arguments);
+                ret = this.filter(function(el, i) {
+                    if (!~selector.indexOf(i + 1)) {
+                        return el;
+                    }
                 });
             }
 
@@ -1012,7 +1000,7 @@
             var el = this[0], node, nodes = [], i = 0;
             if (el) {
                 while (node = el[NAME_CHILD_NODES][i++]) {
-                    if (node.nodeType === 8) {
+                    if (node[NAME_NODE_TYPE] === 8) {
                         nodes.push(node);
                     }
                 }
@@ -1026,13 +1014,11 @@
          * @return {Dom}
          */
         siblings: function(selector) {
-            var el = __(this), ret;
+            var el = this[0], ret;
             if (el) {
-                ret = walk(el[NAME_PARENT_NODE], NAME_CHILDREN).filter(function(_el) {
-                    return _el != el;
-                });
-                if (selector && ret.length) {
-                    ret = intersect(ret, this.parent().findAll(selector).all());
+                ret = noIntersect(el, walk(el[NAME_PARENT_NODE], NAME_CHILDREN));
+                if (ret.length && (selector = toAllSelector(selector))) {
+                    ret = intersect(ret, noIntersect(el, initDom(el[NAME_PARENT_NODE]).findAll(selector).all()), TRUE);
                 }
             }
             return initDom(ret);
@@ -1043,7 +1029,7 @@
          * @return {Dom}
          */
         children: function() {
-            return initDom(__(this, NAME_CHILDREN));
+            return initDom(_array(__(this, NAME_CHILDREN)));
         },
 
         /**
@@ -1061,14 +1047,12 @@
          */
         prevAll: function(selector) {
             var el = this[0], ret = [];
-
             if (el) {
                 ret = walk(el, NAME_PREVIOUS_ELEMENT_SIBLING).reverse();
-                if (ret.length && selector) {
-                    ret = intersect(ret, this.parent().findAll(selector).all());
+                if (ret.length && (selector = toAllSelector(selector))) {
+                    ret = intersect(ret, initDom(el[NAME_PARENT_NODE]).findAll(selector).all(), TRUE);
                 }
             }
-
             return initDom(ret);
         },
 
@@ -1086,15 +1070,13 @@
          * @return {Dom}
          */
         nextAll: function(selector) {
-            var el = this[0], ret = [], found;
-
+            var el = this[0], ret = [];
             if (el) {
                 ret = walk(el, NAME_NEXT_ELEMENT_SIBLING);
-                if (ret.length && selector) {
-                    ret = intersect(ret, this.parent().findAll(selector).all());
+                if (ret.length && (selector = toAllSelector(selector))) {
+                    ret = intersect(ret, initDom(el[NAME_PARENT_NODE]).findAll(selector).all(), TRUE);
                 }
             }
-
             return initDom(ret);
         },
 
@@ -1759,7 +1741,6 @@
     });
 
     var re_attrState = /^(?:(?:check|select|disabl)ed|readonly)$/i;
-    var re_attrNameFix = /[^\w:.-]+/g;
 
     // attr helpers
     function hasAttr(el, name) {
