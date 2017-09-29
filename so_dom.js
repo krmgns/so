@@ -127,7 +127,7 @@
      * @param {Bool}          one?
      */
     function Dom(selector, root, one) {
-        var els, size = 0, re, id, soid;
+        var els, size = 0, re, id, rid;
 
         if (selector) {
             if (isString(selector)) {
@@ -142,13 +142,13 @@
                         els = create(selector, root, root, re[1]);
                     } else if (selector[0] == '>' && isNodeElement(root)) {
                         // buggy :scope selector
-                        id = getAttr(root, (soid = soPrefix + 'id')) || $.rid('');
-                        setAttr(root, soid, id, FALSE);
+                        id = getAttr(root, (rid = soPrefix + 'buggy-scope-selector')) || $.rid('');
+                        setAttr(root, rid, id, FALSE);
                         // fix '>' only selector
                         if (selector.length == 1) {
                             selector = '> *';
                         }
-                        els = select((selector = '[%s="%s"] %s'.format(soid, id, selector)), NULL, one);
+                        els = select((selector = '[%s="%s"] %s'.format(rid, id, selector)), NULL, one);
                     } else {
                         els = select(selector, root, one);
                     }
@@ -394,9 +394,9 @@
                 return this.item(i);
             }
 
-            i = i.toInt();
+            i = (''+ i).toInt();
             return initDom(this.filter(function(node, _i) {
-                return !((_i + 1) % i);
+                return !((_i + 1) % i) && i;
             }));
         },
 
@@ -993,22 +993,6 @@
         },
 
         /**
-         * Comments.
-         * @return {Dom}
-         */
-        comments: function() {
-            var el = this[0], node, nodes = [], i = 0;
-            if (el) {
-                while (node = el[NAME_CHILD_NODES][i++]) {
-                    if (node[NAME_NODE_TYPE] === 8) {
-                        nodes.push(node);
-                    }
-                }
-            }
-            return initDom(nodes);
-        },
-
-        /**
          * Siblings.
          * @param  {Int|String} selector?
          * @return {Dom}
@@ -1030,6 +1014,46 @@
          */
         children: function() {
             return initDom(_array(__(this, NAME_CHILDREN)));
+        },
+
+        /**
+         * First child.
+         * @return {Dom}
+         */
+        firstChild: function() {
+            return this.find('> :first');
+        },
+
+        /**
+         * Last child.
+         * @return {Dom}
+         */
+        lastChild: function() {
+            return this.find('> :last');
+        },
+
+        /**
+         * Nth child.
+         * @return {Dom}
+         */
+        nthChild: function(i) {
+            return this.find('> :nth('+ i +')');
+        },
+
+        /**
+         * Comments.
+         * @return {Dom}
+         */
+        comments: function() {
+            var el = this[0], node, nodes = [], i = 0;
+            if (el) {
+                while (node = el[NAME_CHILD_NODES][i++]) {
+                    if (node[NAME_NODE_TYPE] === 8) {
+                        nodes.push(node);
+                    }
+                }
+            }
+            return initDom(nodes);
         },
 
         /**
@@ -1377,7 +1401,7 @@
                 value = getStyle(el, name);
                 if (value !== '') {
                     value = isFalse(convert) ? value : (
-                        re_rgb.test(value) ? $.util.parseRgbColorToHex(value) // make rgb - hex
+                        re_rgb.test(value) ? $.util.parseRgbColorAsHex(value) // make rgb - hex
                             : re_unit.test(value) || re_unitOther.test(value) // make px etc. - float
                                 // || re_noneUnitStyles.test(name) // make opacity etc. - float @cancel use String.toFloat()
                             ? value.toFloat() : value

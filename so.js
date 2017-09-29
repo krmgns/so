@@ -22,7 +22,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.30.2';
+    window.so.VERSION = '5.31.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -788,18 +788,10 @@
         /**
          * Rid (random id).
          * @param  {String} prefix?
-         * @param  {Int}    base?
          * @return {String}
          */
-        rid: function(prefix, base) {
-            base = (base >= 2 && base <= 36) ? base : 10;
-
-            for (var i = 0, ret = ''; i < base; i++) {
-                ret += (~~(Math.random() * base)).toString(base)
-                    // [Math.random() < 0.5 ? 'toString' : 'toUpperCase']();
-            }
-
-            return toValue(prefix, '__so_rid_') + ret;
+        rid: function(prefix) {
+            return toValue(prefix, '__so_rid_') + $.now() + toString(Math.random()).slice(-8);
         },
 
         /**

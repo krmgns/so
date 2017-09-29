@@ -32,7 +32,7 @@
         create: function(name, prototype) {
             if ($.isObject(name)) {
                 prototype = name;
-                name = $.rid();
+                name = $.rid('__so_class_');
             }
 
             var Class, Constructor;

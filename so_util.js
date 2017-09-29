@@ -8,12 +8,10 @@
 ;(function(window, $) { 'use strict';
 
     var re_rgb = /.*rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(.*))?\)/i;
-    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    var random = Math.random;
 
     // random hex
     function rand(limit) {
-        return random().toString(16).slice(2, 2 + limit);
+        return Math.random().toString(16).slice(-limit);
     }
 
     $.util = {
@@ -26,18 +24,6 @@
             var ret = '%s-%s-%s-%s-%s'.format(rand(8), rand(4), rand(4), rand(4), rand(12));
             if (noDash) {
                 ret = ret.replace(/-/g, '');
-            }
-            return ret;
-        },
-
-        /**
-         * Ruid.
-         * @param  {Int} limit
-         * @return {String}
-         */
-        ruid: function(limit) {
-            for (var i = 1, il = limit || 10, ret = ''; i <= il; i++) {
-                ret += chars[~~(random() * 62)];
             }
             return ret;
         },
@@ -88,11 +74,11 @@
         },
 
         /**
-         * Parse RGB color to hex.
+         * Parse RGB color as hex.
          * @param  {String} input
          * @return {String}
          */
-        parseRgbColorToHex: function(input) {
+        parseRgbColorAsHex: function(input) {
             if ((''+ input).indexOf('rgb') < 0) {
                 return input;
             }
@@ -119,8 +105,8 @@
 
     // Base64
     (function(){
-        var w=window, ab=w.atob, ba=w.btoa, s=String, r="replace", ca="charAt", cca="charCodeAt", fcc="fromCharCode";
-        var c=chars+"+/=";
+        var ab=window.atob, ba=window.btoa, s=String, r="replace", ca="charAt", cca="charCodeAt", fcc="fromCharCode";
+        var c="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
         // https://developer.mozilla.org/en/docs/Web/API/WindowBase64/Base64_encoding_and_decoding
         var d=function(a){return encodeURIComponent(a)[r](/%([0-9A-F]{2})/g,function(a,b){return s[fcc]("0x"+b)})};
         var e=function(a){return decodeURIComponent(a.split("").map(function(a){return"%"+("00"+a[cca](0).toString(16)).slice(-2)}).join(""))};
