@@ -10,7 +10,7 @@
     var re_opr = /(opr)\/([\d.]+)/;
     var re_ua = /(chrome|safari|firefox|opera|msie|trident(?=\/))(?:.*version)?\/?\s*([\d.]+)/;
     var fns_os = ['isMac', 'isWindows', 'isLinux', 'isUnix'];
-    var fns_ua = ['isChrome', 'isSafari', 'isFirefox', 'isOpera', 'isWebkitOpera', 'isIE', 'isTrident'];
+    var fns_ua = ['isChrome', 'isSafari', 'isFirefox', 'isOpera', 'isWebkitOpera', 'isIe', 'isTrident'];
     var navigator = window.navigator;
     var ua = navigator.userAgent.toLowerCase();
     var uap = navigator.platform.toLowerCase();
@@ -51,13 +51,12 @@
                 browser['name'] = name;
 
                 // re-set 'is' function
-                browser['is'+ (name == 'ie' ? name.toUpperCase()
-                    : name.toCapitalCase(false))] = function() { return true; };
+                browser['is'+ name.toCapitalCase(false)] = function() { return true; };
                 browser['isWebkitOpera'] = function() { return re[1] == 'opr'; };
             }
             if (re[2]) {
                 var versionArray = re[2].split('.').map(function(value) {
-                    return value.toInt();
+                    return $.int(value);
                 }), versionString;
                 versionString = versionArray.slice(0,2).join('.');
                 browser['version'] = versionString.toFloat();
