@@ -22,7 +22,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.31.2';
+    window.so.VERSION = '5.31.3';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -498,7 +498,7 @@
             var source = pattern.source;
             var flags = pattern.flags;
             var r, re, ret = [], slashPosition;
-            if (!flags) { // hellö ie.. ?}/=%&'|!)"
+            if (isVoid(flags)) { // hellö ie.. ?}/=%&'|!)"
                 slashPosition = (pattern = toString(pattern)).lastIndexOf('/');
                 source = pattern.substr(1, slashPosition - 1);
                 flags = pattern.substr(slashPosition + 1);
