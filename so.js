@@ -88,7 +88,7 @@
         return time;
     }
 
-    // cacheable regexp stuff
+    // cacheable regexp stuff with ttl (for gc)
     function toRegExp(pattern, flags, ttl) {
         flags = flags || '';
         if ($.isInt(flags)) {
