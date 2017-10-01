@@ -22,7 +22,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.31.0';
+    window.so.VERSION = '5.31.1';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -100,7 +100,7 @@
         }
 
         if ($.isString(ttl)) {
-            ttl = toMilliseconds(ttl, TRUE);
+            ttl = toMilliseconds(ttl);
         }
         ttl = (ttl > -1) ? ttl : 3600; // one hour
 
