@@ -1875,7 +1875,7 @@
         removeAttr: function(name) {
             name = split(name, re_comma);
             return this.for(function(el) {
-                ((name != '*') ? name : getAttrs(el, TRUE)).forEach(function(name) {
+                ((name[0] != '*') ? name : getAttrs(el, TRUE)).forEach(function(name) {
                     removeAttr(el, name)
                 });
             });
@@ -1919,7 +1919,7 @@
         removeDataAttr: function(name) {
             name = split(name, re_comma);
             return this.for(function(el) {
-                if (name == '*') {
+                if (name[0] == '*') {
                     name = getAttrs(el, TRUE).filter(function(name) {
                         return name.startsWith('data-');
                     });
@@ -2223,7 +2223,7 @@
             key = split(key, re_comma);
             return this.for(function(el) {
                 checkData(el);
-                if (key == '*') {
+                if (key[0] == '*') {
                     el.$data.empty();
                 } else {
                     key.forEach(function(key) {

@@ -22,7 +22,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.31.3';
+    window.so.VERSION = '5.32.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -572,24 +572,6 @@
          */
         replaceAll: function(searchValue, replaceValue) {
             return this.replace(toRegExp(searchValue, 'g'), replaceValue);
-        },
-
-        /**
-         * For.
-         * @param  {Function} fn
-         * @return {String}
-         */
-        for: function(fn) {
-            return $.for(toString(this), fn, this);
-        },
-
-        /**
-         * For each.
-         * @param  {Function} fn
-         * @return {String}
-         */
-        forEach: function(fn) {
-            return $.forEach(toString(this), fn, this);
         },
 
         /**
