@@ -41,7 +41,7 @@
             metaKey: FALSE, button: 1, relatedTarget: NULL, // mouse
         useCapture: FALSE, once: FALSE, passive: FALSE, data: {}
     };
-    var trim = $.trim, extend = $.extend;
+    var trim = $.trim, extend = $.extend, extendPrototype = $.extendPrototype;
     var KEY_BACKSPACE =  8,  KEY_TAB =       9, KEY_ENTER =       13, KEY_ESC =        27,  KEY_LEFT =      37,
         KEY_UP =         38, KEY_RIGHT =    39, KEY_DOWN =        40, KEY_DELETE =     46,  KEY_HOME =      36,
         KEY_END =        35, KEY_PAGE_UP =  33, KEY_PAGE_DOWN =   34, KEY_INSERT =     45,  KEY_CAPS_LOCK = 20,
@@ -270,7 +270,7 @@
         this.custom = event.eventClass == 'CustomEvent' || !re_typesStandard.test(type);
     }
 
-    $.extendPrototype(Event, {
+    extendPrototype(Event, {
         /**
          * Copy.
          * @return {Event}
@@ -382,7 +382,7 @@
         this.target = checkTarget(target);
     }
 
-    $.extendPrototype(EventTarget, {
+    extendPrototype(EventTarget, {
         /**
          * Add event.
          * @param  {Event} event
@@ -463,7 +463,7 @@
                         targetEvents[type] = !$.isEmpty(events) ? events : NULL;
                     });
                 } else if ($.isFunction(target['on'+ event.type])) { // natives
-                    target['on'+ event.type] = null;
+                    target['on'+ event.type] = NULL;
                 }
             } else {
                 $.logWarn('No `'+ event.type +'` events found to remove.');
@@ -571,8 +571,8 @@
         fire: fire,
         create: create,
         Event: initEvent,
-        CustomEvent: initCustomEvent,
         EventTarget: initEventTarget,
+        CustomEvent: initCustomEvent,
         key: {
             BACKSPACE: KEY_BACKSPACE, TAB:         KEY_TAB,         ENTER:      KEY_ENTER,      ESC:        KEY_ESC,
             LEFT:      KEY_LEFT,      UP:          KEY_UP,          RIGHT:      KEY_RIGHT,      DOWN:       KEY_DOWN,

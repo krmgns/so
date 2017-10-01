@@ -22,7 +22,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.33.0';
+    window.so.VERSION = '5.33.1';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -1040,9 +1040,9 @@
             $.forEach(properties, function(name, property) {
                 properties[name] = {
                     value: property[0],
-                    writable: toBool(!isVoid(property[1]) ? property[1] : TRUE),
-                    enumerable: toBool(!isVoid(property[2]) ? property[2] : TRUE),
-                    configurable: toBool(!isVoid(property[3]) ? property[3] : TRUE)
+                    writable: toBool(property[1] != NULL ? property[1] : TRUE),
+                    enumerable: toBool(property[2] != NULL ? property[2] : TRUE),
+                    configurable: toBool(property[3] != NULL ? property[3] : TRUE)
                 }
             });
 
