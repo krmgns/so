@@ -22,7 +22,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.31.1';
+    window.so.VERSION = '5.31.2';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -495,12 +495,14 @@
          * @return {Array?}
          */
         matchAll: function(pattern) {
-            pattern = toString(pattern);
-
-            var slashPosition = pattern.lastIndexOf('/');
-            var source = pattern.substr(1, slashPosition - 1);
-            var flags = pattern.substr(slashPosition + 1);
-            var r, re, ret = [];
+            var source = pattern.source;
+            var flags = pattern.flags;
+            var r, re, ret = [], slashPosition;
+            if (!flags) { // hellö ie.. ?}/=%&'|!)"
+                slashPosition = (pattern = toString(pattern)).lastIndexOf('/');
+                source = pattern.substr(1, slashPosition - 1);
+                flags = pattern.substr(slashPosition + 1);
+            }
 
             // never forget or lost in infinite loops..
             if (!flags.has('g')) flags += 'g';
