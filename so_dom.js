@@ -2785,7 +2785,7 @@
     }
 
     // add static methods to dom
-    $.dom.extend({
+    $.extend($.dom, {
         // find by selector
         find: function(selector, root) {
             return initDom(selector, root, TRUE);

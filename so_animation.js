@@ -18,11 +18,6 @@
     var fn_runner = window.requestAnimationFrame || function(fn) { setTimeout(fn, opt_fps); };
     var toStyleName = $.util.toCamelCaseFromDashCase;
 
-    // shortcut
-    function runner(fn) {
-        fn_runner(fn);
-    }
-
     /**
      * Animation.
      * @param {Element}  target
@@ -94,10 +89,7 @@
         }
     }
 
-    /**
-     * Animation prototype.
-     */
-    Animation.extendPrototype({
+    $.extendPrototype(Animation, {
         /**
          * Run.
          * @return {this}
@@ -111,7 +103,7 @@
             !function run() {
                 if (!_this.stopped && !_this.ended) {
                     if (_this.elapsedTime < _this.speed) {
-                        runner(run)
+                        fn_runner(run);
                         _this.start();
                     } else {
                         _this.end();

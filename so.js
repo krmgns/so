@@ -22,7 +22,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.32.0';
+    window.so.VERSION = '5.33.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -670,28 +670,6 @@
         }
     });
 
-    /**
-     * Function extends.
-     */
-    extend(Function[NAME_PROTOTYPE], {
-        /**
-         * Extend.
-         * @param  {Object} properties
-         * @return {Function}
-         */
-        extend: function(properties) {
-            return extend(this, properties, this);
-        },
-        /**
-         * Extend prototype.
-         * @param  {Object} prototype
-         * @return {Function}
-         */
-        extendPrototype: function(prototype) {
-            return extend(this[NAME_PROTOTYPE], prototype, this);
-        }
-    });
-
     var _id = 0;
     var fn_slice = [].slice;
     var fn_toString = {}.toString;
@@ -975,23 +953,23 @@
         /**
          * Copy.
          * @param  {Array|Object} input
-         * @param  {Array}        keysExclude?
+         * @param  {Array}        keysExcluded?
          * @return {Array|Object}
          */
-        copy: function(input, keysExclude) {
-            return $.copyTo($.isArray(input) ? [] : {}, input, keysExclude);
+        copy: function(input, keysExcluded) {
+            return $.copyTo($.isArray(input) ? [] : {}, input, keysExcluded);
         },
 
         /**
          * Copy to.
          * @param  {Array|Object} inputTo
          * @param  {Array|Object} inputFrom
-         * @param  {Array}        keysExclude
+         * @param  {Array}        keysExcluded
          * @param  {Bool}         overwrite? @default=true
          * @return {Array|Object}
          */
-        copyTo: function(inputTo, inputFrom, keysExclude, overwrite) {
-            var keys = keysExclude || [], key;
+        copyTo: function(inputTo, inputFrom, keysExcluded, overwrite) {
+            var keys = keysExcluded || [], key;
 
             for (key in inputFrom) {
                 if (!keys.has(key)) {

@@ -18,7 +18,7 @@
         this.init(data || {}, options);
     }
 
-    List.extendPrototype({
+    $.extendPrototype(List, {
         /**
          * Init.
          * @param  {Iterable} data
