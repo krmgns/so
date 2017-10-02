@@ -1256,7 +1256,7 @@
     var re_color = /color/i;
     var re_unit = /(?:px|em|%)/i; // short & quick
     var re_unitOther = /(?:ex|in|[cm]m|p[tc]|v[hw]?min)/i;
-    var re_noneUnitStyles = /(?:(?:fill-?)?opacity|z(?:oom|index)|(?:font-?w|line-?h)eight|column(?:-?count|s))/i;
+    var re_nonUnitStyles = /(?:(?:fill-?)?opacity|z(?:oom|index)|(?:font-?w|line-?h)eight|column(?:-?count|s))/i;
     var matchesSelector = document[NAME_DOCUMENT_ELEMENT].matches || function(selector) {
         var i = 0, all = querySelectorAll(this[NAME_OWNER_DOCUMENT], selector);
         while (i < all.length) {
@@ -1299,7 +1299,7 @@
 
     function setStyle(el, name, value) {
         name = toStyleName(name), value = (''+ value);
-        if (value && isNumeric(value) && !re_noneUnitStyles.test(name)) {
+        if (value && isNumeric(value) && !re_nonUnitStyles.test(name)) {
             value += 'px';
         }
         el[NAME_STYLE][name] = value;
@@ -1403,7 +1403,7 @@
                     value = isFalse(convert) ? value : (
                         re_rgb.test(value) ? $.util.parseRgbColorAsHex(value) // make rgb - hex
                             : re_unit.test(value) || re_unitOther.test(value) // make px etc. - float
-                                // || re_noneUnitStyles.test(name) // make opacity etc. - float @cancel use String.toFloat()
+                                // || re_nonUnitStyles.test(name) // make opacity etc. - float @cancel use String.toFloat()
                             ? value.toFloat() : value
                     );
                 } else {

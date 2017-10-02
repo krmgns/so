@@ -10,7 +10,7 @@
     var re_root = /(?:html|body)/;
     var re_digit = /^[\d.]+/;
     var re_scroll = /scroll(?:Top|Left)/;
-    var re_noneUnitStyles = /(?:(?:fill-?)?opacity|z(?:oom|index)|(?:font-?w|line-?h)eight|column(?:-?count|s))/i;
+    var re_nonUnitStyles = /(?:(?:fill-?)?opacity|z(?:oom|index)|(?:font-?w|line-?h)eight|column(?:-?count|s))/i;
     var opt_fps = 1000 / 60;
     var opt_speeds = {fast: 50, slow: 650, default: 350};
     // thanks: http://easings.net/ (easeOutQuad)
@@ -67,7 +67,7 @@
                     startValue = toFloat(style);
                     endValue = toFloat(value);
 
-                    if (!re_noneUnitStyles.test(name)) {
+                    if (!re_nonUnitStyles.test(name)) {
                         unit = style.replace(re_digit, '');
                     }
                 } else {
