@@ -266,7 +266,7 @@
 
             this.forEach(function(key, value, i) {
                 if (search(value)) {
-                    ret = opt_return == null ? value : opt_return == 0 ? key : i;
+                    ret = opt_return == null ? value : opt_return == 1 ? key : i;
                     return 0; // break
                 }
             });
@@ -275,21 +275,21 @@
         },
 
         /**
-         * Find index.
+         * Find key (by).
          * @param  {Any} searchValue
          * @return {String|undefined}
          */
         findKey: function(searchValue) {
-            return this.find(searchValue, UNDEFINED, 0);
+            return this.find(searchValue, UNDEFINED, 1);
         },
 
         /**
-         * Find index.
+         * Find index (by).
          * @param  {Any} searchValue
          * @return {Int|undefined}
          */
         findIndex: function(searchValue) {
-            return this.find(searchValue, UNDEFINED, 1);
+            return this.find(searchValue, UNDEFINED, 2);
         },
 
         /**
@@ -493,7 +493,7 @@
      * @return {Bool}
      */
     $.isList = function(input) {
-        return input && (input instanceof List);
+        return !!(input && (input instanceof List));
     };
 
 })(window.so);
