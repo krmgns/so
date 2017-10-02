@@ -71,7 +71,7 @@
 
             if ($.isString(headers)) {
                 trim(headers).split('\r\n').forEach(function(header) {
-                    header = header.split(':', 2),
+                    header = $.split(header, ':', 2), // proper split..
                         ret[trim(header[0]).toLowerCase()] = trim(header[1]);
                 });
             }
