@@ -5,7 +5,7 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function($) { 'use strict';
+;(function(window, $, NULL, TRUE, FALSE) { 'use strict';
 
     var re_root = /(?:html|body)/;
     var re_digit = /^[\d.]+/;
@@ -33,15 +33,15 @@
 
         // swap
         if ($.isFunction(easing)) {
-            callback = easing, easing = null;
+            callback = easing, easing = NULL;
         }
 
         this.easing = (easing && $.ext && $.ext.easing && $.ext.easing[easing]) || fn_easing;
         this.callback = callback;
 
-        this.running = false;
-        this.stopped = false;
-        this.ended = false;
+        this.running = FALSE;
+        this.stopped = FALSE;
+        this.ended = FALSE;
         this.startTime = 0;
         this.elapsedTime = 0;
 
@@ -96,7 +96,7 @@
          */
         run: function() {
             this.stop(); // stop if running
-            this.running = true;
+            this.running = TRUE;
             this.startTime = $.now();
 
             var _this = this;
@@ -149,12 +149,12 @@
             var target = this.$target;
 
             if (this.running) {
-                this.running = false;
-                this.stopped = true;
+                this.running = FALSE;
+                this.stopped = TRUE;
             }
 
             // set as null (for isAnimated() etc.)
-            target.setProperty('$animation', null);
+            target.setProperty('$animation', NULL);
 
             return this;
         },
@@ -176,7 +176,7 @@
                 });
             }
 
-            this.ended = true;
+            this.ended = TRUE;
 
             if ($.isFunction(this.callback)) {
                 this.callback(this);
@@ -199,4 +199,4 @@
         }
     };
 
-})(window.so);
+})(window, window.so, null, true, false);
