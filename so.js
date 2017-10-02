@@ -22,7 +22,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.34.2';
+    window.so.VERSION = '5.34.3';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -450,18 +450,18 @@
         toCapitalCase: function(all, lower) {
             var str = toString(this), i;
 
-            if (lower) {
-                str = str.toLowerCase();
-            }
-
-            if (all !== FALSE) {
-                for (i = 0, str = str.split(' '); i < str.length; i++) {
-                    str[i] = str[i].toCapitalCase(FALSE);
+            if (str) { // prevent empty string craps
+                lower && (str = str.toLowerCase());
+                if (all !== FALSE) {
+                    for (i = 0, str = str.split(' '); i < str.length; i++) {
+                        str[i] = str[i].toCapitalCase(FALSE);
+                    }
+                    return str.join(' ');
                 }
-                return str.join(' ');
+                str = str[0].toUpperCase() + str.slice(1);
             }
 
-            return str[0].toUpperCase() + str.slice(1);
+            return str;
         },
 
         /**
