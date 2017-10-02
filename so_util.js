@@ -35,7 +35,7 @@
          */
         toCamelCaseFromDashCase: function(input) {
             input = (''+ input);
-            if (input.indexOf('-') > 0) {
+            if (~input.indexOf('-')) {
                 input = input.replace(/-([a-z])/gi, function(_, $1) {
                     return $1.toUpperCase();
                 });
@@ -79,7 +79,7 @@
          * @return {String}
          */
         parseRgbColorAsHex: function(input) {
-            if ((''+ input).indexOf('rgb') < 0) {
+            if (!~(''+ input).indexOf('rgb')) {
                 return input;
             }
 
