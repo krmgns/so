@@ -8,7 +8,7 @@
 ;(function($) { 'use strict';
 
     var re_root = /(?:html|body)/;
-    var re_digit = /\d+/;
+    var re_digit = /^[\d.]+/;
     var re_scroll = /scroll(?:Top|Left)/;
     var re_noneUnitStyles = /(?:(?:fill-?)?opacity|z(?:oom|index)|(?:font-?w|line-?h)eight|column(?:-?count|s))/i;
     var opt_fps = 1000 / 60;
@@ -16,7 +16,7 @@
     // thanks: http://easings.net/ (easeOutQuad)
     var fn_easing = function(t,b,c,d) { return -c*(t/=d)*(t-2)+b; };
     var fn_runner = window.requestAnimationFrame || function(fn) { setTimeout(fn, opt_fps); };
-    var toStyleName = $.util.toCamelCaseFromDashCase;
+    var toFloat = $.float, toStyleName = $.util.toCamelCaseFromDashCase;
 
     /**
      * Animation.
@@ -64,8 +64,8 @@
                         ? _this.$target.getCssStyle(name) // get original style to catch unit sign
                         : _this.$target.getComputedStyle(name);
 
-                    startValue = $.float(style);
-                    endValue = $.float(value);
+                    startValue = toFloat(style);
+                    endValue = toFloat(value);
 
                     if (!re_noneUnitStyles.test(name)) {
                         unit = style.replace(re_digit, '');
