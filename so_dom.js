@@ -1363,7 +1363,7 @@
          */
         hasStyle: function(name) {
             var el = this[0];
-            return !!(el && el[NAME_STYLE] && el[NAME_STYLE][NAME_CSS_TEXT].indexOf(name) > -1);
+            return !!(el && el[NAME_STYLE] && ~el[NAME_STYLE][NAME_CSS_TEXT].indexOf(name));
         },
 
         /**
@@ -2248,8 +2248,8 @@
         var reader = new FileReader();
         reader.onload = function(e) {
             fileContent = trim(e.target.result);
-            // opera doesn't give base64 for 'html' files or maybe other more..
-            var encoded = fileContent.indexOf(';base64') > -1;
+            // opera(12) doesn't give base64 for 'html' files (and maybe others)..
+            var encoded = ~fileContent.indexOf(';base64');
             fileContent = fileContent.replace(re_data, '');
             if (!encoded) {
                 fileContent = toBase64(fileContent);
@@ -2262,9 +2262,8 @@
 
     function readFiles(file, callback) {
         if (file.files) {
-            var multiple = file.files.length > 1;
             _for(file.files, function(file) {
-                readFile(file, callback, multiple);
+                readFile(file, callback, file.files.length > 1);
             });
             fileContentStack = []; // reset
         } else { // ie >> https://msdn.microsoft.com/en-us/library/314cz14s(v=vs.85).aspx
@@ -2308,7 +2307,7 @@
                             break;
                         case 'radio':
                         case 'checkbox':
-                            value = el.checked ? (el.value != 'on') ? el.value : 'on' : UNDEFINED;
+                            value = el.checked ? el.value != 'on' ? el.value : 'on' : UNDEFINED;
                             break;
                         case 'submit':
                             value = (el.value != '') ? el.value : type;
