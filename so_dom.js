@@ -1307,7 +1307,7 @@
 
     function getStyle(el, name) {
         var styles = getComputedStyle(el);
-        return name ? (styles[toStyleName(name)] || '') : styles;
+        return name ? styles[toStyleName(name)] || '' : styles;
     }
 
     function parseStyleText(text) {
