@@ -22,7 +22,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.34.1';
+    window.so.VERSION = '5.34.2';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -1114,7 +1114,11 @@
         split: function(input, separator, limit) {
             input = toString(input).split(separator);
             if (limit) {
-                input = input.slice(0, limit - 1).concat(input.slice(limit - 1).join(separator));
+                var inputRest = input.slice(limit - 1);
+                input = input.slice(0, limit - 1);
+                if (inputRest.length) {
+                    input = input.concat(inputRest.join(separator));
+                }
             }
             return input;
         }

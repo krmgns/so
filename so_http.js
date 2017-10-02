@@ -14,9 +14,10 @@
     var re_json = /^(?:\{.*\}|\[.*\]|".*"|-?\d+(?:\.\d+)?|true|false|null)$/;
     var re_request = /^([A-Z]+)?\s*(.*?)\s*(?:@(json|xml|html|plain))?$/;
     var re_dataType = /\/(json|xml|html|plain)(?:[; ])?/i;
+    var xhr = 'XMLHttpRequest';
     var optionsDefault = {
         method: 'GET', uri: '', uriParams: NULL, data: NULL, dataType: NULL,
-        async: TRUE, noCache: TRUE, autoSend: TRUE, headers: {'X-Requested-With': 'XMLHttpRequest'},
+        async: TRUE, noCache: TRUE, autoSend: TRUE, headers: {'X-Requested-With': xhr},
         // onStart: NULL, onStop: NULL, /* @todo: queue */
         // onHeaders: NULL, onProgress: NULL,
         // onDone: NULL, onSuccess: NULL, onFailure: NULL,
@@ -67,12 +68,16 @@
          * @return {Object}
          */
         parseHeaders: function(headers) {
-            var ret = {};
+            var i = 0, ret = {};
 
             if ($.isString(headers)) {
                 trim(headers).split('\r\n').forEach(function(header) {
-                    header = $.split(header, ':', 2), // proper split..
+                    header = $.split(header, ':', 2); // proper split..
+                    if (header[1] == NULL) { // status line etc.
+                        ret[i++] = trim(header[0]);
+                    } else {
                         ret[trim(header[0]).toLowerCase()] = trim(header[1]);
+                    }
                 });
             }
 
@@ -265,7 +270,7 @@
         this.request = new Request(this);
         this.response = new Response(this);
 
-        this.api = new XMLHttpRequest(); // what an ugly name..
+        this.api = new window[xhr](); // what an ugly name..
         this.api.open(this.request.method, this.request.uri, !!options.async);
         this.api.onerror = function(e) {
             _this.fire('error');
