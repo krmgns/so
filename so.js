@@ -22,7 +22,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.34.7';
+    window.so.VERSION = '5.34.8';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -53,8 +53,9 @@
 
     // faster trim for space only
     function trim(input, side) {
-        return !isVoid(input) ? (''+ input)
-            .replace(side ? (side == 1 ? re_trimLeft : re_trimRight) : re_trim, '') : '';
+        return !isVoid(input) ? (''+ input).replace(
+            side ? (side == 1 ? re_trimLeft : re_trimRight) : re_trim, ''
+        ) : '';
     }
 
     // shortcut convert helpers
@@ -744,7 +745,7 @@
          * @return {String}
          */
         sid: function(prefix) {
-            return toValue(prefix,  '__so_sid_') + $.id();
+            return toValue(prefix, '__so_sid_') +''+ $.id();
         },
 
         /**
@@ -753,7 +754,7 @@
          * @return {String}
          */
         rid: function(prefix) {
-            return toValue(prefix, '__so_rid_') + $.now() + toString(Math.random()).slice(-8);
+            return toValue(prefix, '__so_rid_') +''+ $.now() + toString(Math.random()).slice(-8);
         },
 
         /**
