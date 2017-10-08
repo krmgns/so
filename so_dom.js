@@ -1611,7 +1611,6 @@
         var ret = {top: 0, left: 0};
 
         if (isNodeElement(el)) {
-            var body = getDocument(el).body;
             if (!isVisible(el) || !isVisibleParent(el)) {
                 var properties = getInvisibleElementProperties(el, [NAME_OFFSET_TOP, NAME_OFFSET_LEFT]);
                 ret.top = properties[0], ret.left = properties[1];
@@ -1619,6 +1618,7 @@
                 ret.top = el[NAME_OFFSET_TOP], ret.left = el[NAME_OFFSET_LEFT];
             }
 
+            var body = getDocument(el).body;
             ret.top += body[NAME_SCROLL_TOP], ret.left += body[NAME_SCROLL_LEFT];
             if (relative) {
                 var parentOffset = getOffset(el[NAME_PARENT_ELEMENT], relative);
