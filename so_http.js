@@ -9,7 +9,7 @@
 
     var re_query = /\?&+(.*)/;
     var re_space = /%20/g;
-    var re_httpHost = /^https?:\/\/([^:/]+)/;
+    var re_httpHost = /^(?:https?:)?\/\/([^:/]+)/i;
     var re_post = /^P(?:U|OS)T$/i;
     var re_json = /^(?:\{.*\}|\[.*\]|".*"|-?\d+(?:\.\d+)?|true|false|null)$/;
     var re_request = /^([A-Z]+)?\s*(.*?)\s*(?:@(json|xml|html|plain))?$/;
@@ -70,9 +70,9 @@
         parseHeaders: function(headers) {
             var i = 0, ret = {};
 
-            if ($.isString(headers)) {
+            if (headers) {
                 trim(headers).split('\r\n').forEach(function(header) {
-                    header = $.split(header, ':', 2); // proper split..
+                    header = $.split(header, ':', 2);
                     if (header[1] == NULL) { // status line etc.
                         ret[i++] = trim(header[0]);
                     } else {
@@ -181,12 +181,14 @@
             case STATE_DONE:             client.done = TRUE;
                 var statusCode = client.api.status;
                 var statusText = client.api.statusText;
-                var status = 'HTTP/1.1 %s %s'.format(statusCode, statusText); // HTTP/1.1?, yes for now..
+                var status = statusCode ? 'HTTP/1.1 %s %s'.format(statusCode, statusText) : NULL; // HTTP/1.1?
                 var headers = $.http.parseHeaders(client.api.getAllResponseHeaders());
                 var data = client.api.responseText;
                 var dataType = client.options.dataType || (re_dataType.exec(headers['content-type']) || [,])[1];
 
-                client.response.status = headers[0] = status;
+                if (status) {
+                    client.response.status = headers[0] = status;
+                }
                 client.response.statusCode = statusCode;
                 client.response.statusText = statusText;
                 client.response.headers = headers;
