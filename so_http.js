@@ -14,7 +14,7 @@
     var re_json = /^(?:\{.*\}|\[.*\]|".*"|-?\d+(?:\.\d+)?|true|false|null)$/;
     var re_request = /^([A-Z]+)?\s*(.*?)\s*(?:@(json|xml|html|plain))?$/;
     var re_dataType = /\/(json|xml|html|plain)(?:[; ])?/i;
-    var xhr = 'XMLHttpRequest';
+    var xhr = 'XMLHttpRequest'; // what an ugly name..
     var optionsDefault = {
         method: 'GET', uri: '', uriParams: NULL, data: NULL, dataType: NULL,
         async: TRUE, noCache: TRUE, autoSend: TRUE, headers: {'X-Requested-With': xhr},
@@ -168,10 +168,9 @@
             return offReadyStateChange(client);
         }
 
-        // hold trigger button
-        if (client.options.trigger) {
-            client.options.trigger.disabled = TRUE;
-        }
+        // hold trigger object (element)
+        var trigger = client.options.trigger;
+        if (trigger) trigger.disabled = TRUE;
 
         // handle states
         client.state = client.api.readyState;
@@ -179,17 +178,17 @@
             case STATE_OPENED:           client.fire('start');    break;
             case STATE_HEADERS_RECEIVED: client.fire('headers');  break;
             case STATE_LOADING:          client.fire('progress'); break;
-            case STATE_DONE:
-                client.done = TRUE;
-
-                var status = 'HTTP/1.1 %s %s'.format(client.api.status, client.api.statusText),
-                    headers = $.http.parseHeaders(client.api.getAllResponseHeaders()),
-                    data = client.api.responseText,
-                    dataType = client.options.dataType || (re_dataType.exec(headers['content-type']) || [,])[1];
+            case STATE_DONE:             client.done = TRUE;
+                var statusCode = client.api.status;
+                var statusText = client.api.statusText;
+                var status = 'HTTP/1.1 %s %s'.format(statusCode, statusText); // HTTP/1.1?, yes for now..
+                var headers = $.http.parseHeaders(client.api.getAllResponseHeaders());
+                var data = client.api.responseText;
+                var dataType = client.options.dataType || (re_dataType.exec(headers['content-type']) || [,])[1];
 
                 client.response.status = headers[0] = status;
-                client.response.statusCode = client.api.status;
-                client.response.statusText = client.api.statusText;
+                client.response.statusCode = statusCode;
+                client.response.statusText = statusText;
                 client.response.headers = headers;
 
                 // parse wars..
@@ -202,19 +201,16 @@
                 client.response.dataType = dataType;
 
                 // specials, eg: 200: function(){...}
-                client.fire(client.response.statusCode);
+                client.fire(statusCode);
 
                 // success or failure?
-                client.fire((client.response.statusCode > 99 && client.response.statusCode < 400
-                    ? 'success' : 'failure'), data);
+                client.fire((statusCode > 99 && statusCode < 400 ? 'success' : 'failure'), data);
 
                 // end!
                 client.fire('done', data);
 
-                // release trigger button
-                if (client.options.trigger) {
-                    client.options.trigger.disabled = FALSE;
-                }
+                // release trigger
+                if (trigger) trigger.disabled = FALSE;
 
                 offReadyStateChange(client);
                 break;
@@ -270,7 +266,7 @@
         this.request = new Request(this);
         this.response = new Response(this);
 
-        this.api = new window[xhr](); // what an ugly name..
+        this.api = new window[xhr];
         this.api.open(this.request.method, this.request.uri, !!options.async);
         this.api.onerror = function(e) {
             _this.fire('error');
@@ -395,18 +391,16 @@
          * Is success.
          * @return {Bool}
          */
-        isSuccess: function() {
-            var code = this.response.statusCode;
-            return code >= 200 && code <= 299;
+        isSuccess: function(code /* @var */) {
+            return code = this.response.statusCode, (code >= 200 && code <= 299);
         },
 
         /**
          * Is failure.
          * @return {Bool}
          */
-        isFailure: function() {
-            var code = this.response.statusCode;
-            return code >= 400 && code <= 599;
+        isFailure: function(code /* @var */) {
+            return code = this.response.statusCode, (code >= 400 && code <= 599);
         },
 
         /**
