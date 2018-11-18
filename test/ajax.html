@@ -12,6 +12,28 @@
 <script>
 so.onReady(function($) {
     var result = document.getElementById("result");
+    var options = {
+        onBeforeSend: function(client) {
+            // client.api.withCredentials = true
+            // client.api.setRequestHeader("X-Foo-1", "1")
+            log("beforeSend")
+        },
+        onDone: function() {
+            log("onDone")
+        },
+        // headers: {"X-Foo-2": "2"},
+        200: function() {log("error: 200")},
+        404: function() {log("error: 404")},
+        500: function() {log("error: 500")},
+    }
+    $.http.get("ajax.php", options, function() {
+        // this done fn overridden
+        log(arguments)
+    })
+
+    return;;;;;;;;;;;
+
+    // old tests, probably not work
     window.ajax = function() {
         var ajax = $.ajax({
             url: "ajax.php",

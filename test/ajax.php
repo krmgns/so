@@ -1,11 +1,13 @@
 <?php
+header('http/1.1 404 not found');
+// header('http/1.1 500 internal server error');
 
-// sleep(3);
+sleep(1);
 
 $response = rand() * 1.01;
 // $response = '"'. rand() .'.1"';
-$response = json_encode(["name" => "php"]);
-// $response = json_encode([["name" => "php"]]);
+$response = json_encode(["hello" => "world!"]);
+// $response = json_encode([["hello" => "world!"]]);
 // $response = json_encode(null);
 
 // $response = json_encode($_GET);
