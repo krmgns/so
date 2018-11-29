@@ -522,7 +522,8 @@
          * @return {String}
          */
         append: function() {
-            var str = toString(this); return $.for(arguments, function(value) {
+            var str = toString(this);
+            return $.for(arguments, function(value) {
                 str = str + value;
             }), str;
         },
@@ -533,7 +534,8 @@
          * @return {String}
          */
         prepend: function() {
-            var str = toString(this); return $.for(arguments, function(value) {
+            var str = toString(this);
+            return $.for(arguments, function(value) {
                 str = value + str;
             }), str;
         },
