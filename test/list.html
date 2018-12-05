@@ -1,0 +1,38 @@
+<!doctype html><html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=9" />
+<script src="so-all.php"></script>
+</head>
+<body class="body">
+
+<script>
+so.onReady(function($) {
+    var list
+
+    list = $.list("xxxy")
+    list = $.list(["x","xx","y"])
+    list = $.list({"a":"x","b":"xx","c":"y"})
+
+    list = list.append("z")
+    log(list.data)
+
+    // list.for(function(v,k) {
+    //     log(v,k)
+    // })
+    // list.forEach(function(k,v,i) {
+    //     log(k,v,i)
+    // })
+
+    // list = list.map(function(v,k,i) { return v.toUpperCase() })
+    // list = list.filter(function(v,k,i) { return v!="x" })
+    // list = list.uniq()
+    // list = list.reverse()
+
+    // log(list.data)
+
+    // log(list.first(), list.last())
+})
+</script>
+
+</body></html>

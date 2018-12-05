@@ -22,7 +22,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.34.11';
+    window.so.VERSION = '5.35.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -175,14 +175,14 @@
     extend($, {
         /**
          * For: (value, i)
-         * @inheritDoc
+         * @inheritDoc @see loop()
          */
         for: function(input, fn, _this, useLength) {
             return loop(input, fn, _this, FALSE, useLength);
         },
         /**
          * For each: (key => value, i)
-         * @inheritDoc
+         * @inheritDoc @see loop()
          */
         forEach: function(input, fn, _this, useLength) {
             return loop(input, fn, _this, TRUE, useLength);
@@ -325,7 +325,7 @@
             });
         }
 
-        return ret > -1;
+        return (ret > -1);
     }
 
     /**
