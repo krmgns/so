@@ -877,10 +877,10 @@
 
         /**
          * Is empty.
-         * @param  {Bool} trimContent?
+         * @param  {Bool} opt_trim?
          * @return {Bool}
          */
-        isEmpty: function(trimContent) {
+        isEmpty: function(opt_trim) {
             var content;
             switch (this.tag()) {
                 case 'input':
@@ -890,12 +890,12 @@
                     break;
                 case '#window':
                 case '#document':
-                    content = '1';
+                    content = '1'; // ok
                     break;
                 default:
                     content = this.html();
             }
-            return !(trimContent ? trim(content) : content);
+            return (opt_trim ? trim(content) : content) !== '';
         },
     });
 
@@ -1155,30 +1155,31 @@
         },
 
         /**
-         * Has content (alias of isEmpty()).
+         * Has content.
+         * @return {Bool}
          */
-        hasContent: function(trimContent) {
-            return this.isEmpty(trimContent);
+        hasContent: function() {
+            return !this.isEmpty(true);
         },
 
         /**
          * Window.
-         * @param  {Bool} content?
+         * @param  {Bool} opt_content?
          * @return {Dom}
          */
-        window: function(content) {
+        window: function(opt_content) {
             var el = this[0];
-            return initDom(el && (content ? el.contentWindow : getWindow(el)));
+            return initDom(el && (opt_content ? el.contentWindow : getWindow(el)));
         },
 
         /**
          * Document.
-         * @param  {Bool} content?
+         * @param  {Bool} opt_content?
          * @return {Dom}
          */
-        document: function(content) {
+        document: function(opt_content) {
             var el = this[0];
-            return initDom(el && (content ? el.contentDocument : getDocument(el)));
+            return initDom(el && (opt_content ? el.contentDocument : getDocument(el)));
         }
     });
 
@@ -2813,7 +2814,7 @@
                 Dom[prototype][name] = value;
             });
         },
-        create: function(content, doc, attrs) {
+        create: function(content, attrs, doc) {
             return create(content, doc, attrs);
         },
         loadStyle: function(src, onload, attrs) {
