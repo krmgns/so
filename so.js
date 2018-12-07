@@ -22,7 +22,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.35.1';
+    window.so.VERSION = '5.36.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -138,19 +138,19 @@
      * Loop.
      * @param  {Array|Object} input
      * @param  {Function}     fn
-     * @param  {Object}       _this?
-     * @param  {Bool}         useKey?
-     * @param  {Bool}         useLength?
+     * @param  {Object}?      _this
+     * @param  {Bool}?        opt_useKey
+     * @param  {Bool}?        opt_useLength
      * @return {Array|Object}
      * @private
      */
-    function loop(input, fn, _this, useKey, useLength) {
+    function loop(input, fn, _this, opt_useKey, opt_useLength) {
         var _this = _this || input, length = input && input.length, i = 0, key, value;
 
-        if (!isVoid(length) && useLength) {
+        if (!isVoid(length) && opt_useLength) {
             for (; i < length; i++) {
                 value = input[i];
-                if (0 === fn.apply(_this, !useKey ?
+                if (0 === fn.apply(_this, !opt_useKey ?
                         [value, i] /* for */ : [i, value, i] /* forEach */)) {
                     break;
                 }
@@ -159,7 +159,7 @@
             for (key in input) {
                 if (input.hasOwnProperty(key)) {
                     value = input[key];
-                    if (0 === fn.apply(_this, !useKey ?
+                    if (0 === fn.apply(_this, !opt_useKey ?
                             [value, i++] /* for */ : [key, value, i++] /* forEach */)) {
                         break;
                     }
@@ -177,15 +177,15 @@
          * For: (value, i)
          * @inheritDoc @see loop()
          */
-        for: function(input, fn, _this, useLength) {
-            return loop(input, fn, _this, FALSE, useLength);
+        for: function(input, fn, _this, opt_useLength) {
+            return loop(input, fn, _this, FALSE, opt_useLength);
         },
         /**
          * For each: (key => value, i)
          * @inheritDoc @see loop()
          */
-        forEach: function(input, fn, _this, useLength) {
-            return loop(input, fn, _this, TRUE, useLength);
+        forEach: function(input, fn, _this, opt_useLength) {
+            return loop(input, fn, _this, TRUE, opt_useLength);
         }
     });
 
@@ -312,14 +312,14 @@
     };
 
     // shortcut
-    function has(input, search, strict) {
+    function has(input, search, opt_strict) {
         var ret;
 
         if ($.isString(input)) {
             ret = $.isRegExp(search) ? input.search(search) : input.indexOf(search); // simply
         } else if ($.isArray(input) || $.isObject(input)) {
             $.for(input, function(value, i) {
-                if (strict ? value === search : value == search) {
+                if (opt_strict ? value === search : value == search) {
                     ret = i; return 0; // break
                 }
             });
@@ -334,12 +334,12 @@
     extend(Array[NAME_PROTOTYPE], {
         /**
          * Has.
-         * @param  {Any}  search
-         * @param  {Bool} strict?
+         * @param  {Any}   search
+         * @param  {Bool}? opt_strict
          * @return {Bool}
          */
-        has: function(search, strict) {
-            return has(this, search, strict);
+        has: function(search, opt_strict) {
+            return has(this, search, opt_strict);
         },
 
         /**
@@ -360,6 +360,7 @@
 
         /**
          * Extract.
+         * @param  {String} ...arguments
          * @return {Object}
          */
         extract: function() {
@@ -372,20 +373,20 @@
     });
 
     // string helpers
-    function prepareTrimRegExp(chars, isLeft) {
-        return toRegExp((isLeft ? '^[%s]+' : '[%s]+$')
+    function prepareTrimRegExp(chars, opt_isLeft) {
+        return toRegExp((opt_isLeft ? '^[%s]+' : '[%s]+$')
             .format(chars ? chars.replace(/([\[\]\\])/g, '\\$1') : '\\s'));
     }
 
-    function prepareSearchStuff(str, search, index, noCase) {
+    function prepareSearchStuff(str, search, index, opt_noCase) {
         if (str && search) {
             // swap arguments
             if (index === FALSE) {
-                noCase = FALSE, index = UNDEFINED;
+                opt_noCase = FALSE, index = UNDEFINED;
             }
 
             str = toString(str);
-            if (noCase) {
+            if (opt_noCase) {
                 str = s.toLowerCase();
                 search = search.toLowerCase();
             }
@@ -400,12 +401,12 @@
     extend(String[NAME_PROTOTYPE], {
         /**
          * Has.
-         * @param  {Any}  search
-         * @param  {Bool} strict?
+         * @param  {Any}   search
+         * @param  {Bool}? opt_strict
          * @return {Bool}
          */
-        has: function(search, strict) {
-            return has(this, search, strict);
+        has: function(search, opt_strict) {
+            return has(this, search, opt_strict);
         },
 
         /**
@@ -444,16 +445,16 @@
 
         /**
          * To capital case.
-         * @param  {Bool} all   @default=true
-         * @param  {Bool} lower @default=false
+         * @param  {Bool}? opt_all   @default=true
+         * @param  {Bool}? opt_lower @default=false
          * @return {String}
          */
-        toCapitalCase: function(all, lower) {
+        toCapitalCase: function(opt_all, opt_lower) {
             var str = toString(this), i;
 
             if (str) { // prevent empty string craps
-                lower && (str = str.toLowerCase());
-                if (all !== FALSE) {
+                opt_lower && (str = str.toLowerCase());
+                if (opt_all !== FALSE) {
                     for (i = 0, str = str.split(' '); i < str.length; i++) {
                         str[i] = str[i].toCapitalCase(FALSE);
                     }
@@ -469,7 +470,6 @@
          * Format.
          * @param  {Object} ...arguments
          * @return {String}
-         * @throws
          */
         format: function() {
             var str = toString(this),
@@ -493,7 +493,7 @@
         /**
          * Match all.
          * @param  {RegExp} pattern
-         * @return {Array?}
+         * @return {Array}?
          */
         matchAll: function(pattern) {
             var source = pattern.source;
@@ -506,7 +506,9 @@
             }
 
             // never forget or lost in infinite loops..
-            if (!flags.has('g')) flags += 'g';
+            if (!flags.has('g')) {
+                flags += 'g';
+            }
 
             re = toRegExp(source, flags);
             while (r = re.exec(this)) {
@@ -579,7 +581,7 @@
 
         /**
          * Trim.
-         * @param  {String} chars?
+         * @param  {String}? chars
          * @return {String}
          * @override For chars option.
          */
@@ -592,7 +594,7 @@
 
         /**
          * Trim left.
-         * @param  {String} chars?
+         * @param  {String}? chars
          * @return {String}
          * @override For chars option.
          */
@@ -610,7 +612,7 @@
 
         /**
          * Trim right.
-         * @param  {String} chars?
+         * @param  {String}? chars
          * @return {String}
          * @override For chars option.
          */
@@ -629,43 +631,43 @@
         /**
          * Starts with.
          * @param  {String} search
-         * @param  {Int}    index?
-         * @param  {Bool}   noCase?
+         * @param  {Int}?   index
+         * @param  {Bool}?  opt_noCase
          * @return {Bool}
          * @override For no-case option.
          */
-        startsWith: function(search, index, noCase) {
-            var src = prepareSearchStuff(this, search, index, noCase);
+        startsWith: function(search, index, opt_noCase) {
+            var src = prepareSearchStuff(this, search, index, opt_noCase);
             return (src.ss === src.s.substr(src.i, src.ss.length));
         },
 
         /**
          * Ends with.
          * @param  {String} search
-         * @param  {Int}    index?
-         * @param  {Bool}   noCase?
+         * @param  {Int}?   index
+         * @param  {Bool}?  opt_noCase
          * @return {Bool}
          * @override For no-case option.
          */
-        endsWith: function(search, index, noCase) {
-            var src = prepareSearchStuff(this, search, index, noCase);
+        endsWith: function(search, index, opt_noCase) {
+            var src = prepareSearchStuff(this, search, index, opt_noCase);
             return (src.ss === src.s.substr(0, src.i || src.ss.length));
         },
 
         /**
          * Contains.
          * @param  {String} search
-         * @param  {Bool}   noCase?
+         * @param  {Bool}?  opt_noCase
          * @return {Bool}
          */
-        contains: function(search, noCase) {
-            var src = prepareSearchStuff(this, search, noCase);
+        contains: function(search, opt_noCase) {
+            var src = prepareSearchStuff(this, search, opt_noCase);
             return (src.s !== src.s.split(src.ss)[0]);
         },
 
         /**
          * To reg exp.
-         * @param  {String} flags?
+         * @param  {String}? flags
          * @return {RegExp}
          */
         toRegExp: function(flags) {
@@ -680,8 +682,8 @@
     /**
      * Make array.
      * @param  {Any} input
-     * @param  {Int} begin?
-     * @param  {Int} end?
+     * @param  {Int}? begin
+     * @param  {Int}? end
      * @return {Array}
      */
     function makeArray(input, begin, end) {
@@ -743,7 +745,7 @@
 
         /**
          * Sid (string id).
-         * @param  {String} prefix?
+         * @param  {String}? prefix
          * @return {String}
          */
         sid: function(prefix) {
@@ -752,7 +754,7 @@
 
         /**
          * Rid (random id).
-         * @param  {String} prefix?
+         * @param  {String}? prefix
          * @return {String}
          */
         rid: function(prefix) {
@@ -761,9 +763,9 @@
 
         /**
          * Re.
-         * @param  {String} pattern
-         * @param  {String} flags?
-         * @param  {Int}    ttl?
+         * @param  {String}  pattern
+         * @param  {String}? flags
+         * @param  {Int}?    ttl
          * @return {RegExp}
          */
         re: function(pattern, flags, ttl) {
@@ -771,10 +773,10 @@
         },
 
         /**
-         * Fire & firer(recursive).
+         * Fire & ifire.
          * @param  {Int|String} delay (ms)
          * @param  {Function}   fn
-         * @param  {Array}      fnArgs?
+         * @param  {Array}?     fnArgs
          * @return {void}
          */
         fire: function(delay, fn, fnArgs) {
@@ -786,7 +788,7 @@
                 fn.apply(NULL, fnArgs || []);
             }, delay || 1);
         },
-        firer: function(delay, fn, fnArgs) {
+        ifire: function(delay, fn, fnArgs) {
             if ($.isString(delay)) {
                 delay = toMilliseconds(delay);
             }
@@ -799,7 +801,7 @@
         /**
          * Get window.
          * @param  {Any} object
-         * @return {Window?}
+         * @return {Window}?
          */
         getWindow: function(object) {
             if (!object) {
@@ -816,7 +818,7 @@
         /**
          * Get document.
          * @param  {Any} object
-         * @return {Document?}
+         * @return {Document}?
          */
         getDocument: function(object) {
             if (!object) {
@@ -832,8 +834,8 @@
 
         /**
          * Trim.
-         * @param  {String} input
-         * @param  {String} chars?
+         * @param  {String}  input
+         * @param  {String}? chars
          * @return {String}
          */
         trim: function(input, chars) {
@@ -842,8 +844,8 @@
 
         /**
          * Trim left.
-         * @param  {String} input
-         * @param  {String} chars?
+         * @param  {String}  input
+         * @param  {String}? chars
          * @return {String}
          */
         trimLeft: function(input, chars) {
@@ -852,8 +854,8 @@
 
         /**
          * Trim right.
-         * @param  {String} input
-         * @param  {String} chars?
+         * @param  {String}  input
+         * @param  {String}? chars
          * @return {String}
          */
         trimRight: function(input, chars) {
@@ -868,13 +870,14 @@
          */
         dig: function(input, key) {
             if ($.isArray(input) || $.isObject(input)) {
-                var keys = trim(key).split('.'), key = keys.shift();
+                var keys = trim(key).split('.');
 
+                key = keys.shift();
                 if (!keys.length) {
                     return input[key];
                 }
 
-                // recursion
+                // keep searching with recursion
                 return $.dig(input[key], keys.join('.'));
             }
         },
@@ -908,33 +911,33 @@
         value:  function(input, valueDefault) { return toValue(input, valueDefault); },
 
         /**
-         * Json encode / decode.
-         * @param  {Any}    input
-         * @param  {Bool}   encode @default=false (parse)
-         * @param  {Object} options?
+         * Json (encode/decode).
+         * @param  {Any}     input
+         * @param  {Bool}    opt_encode @default=false
+         * @param  {Object}? options
          * @return {String}
          */
-        json: function(input, encode, options) {
-            return (options = options || {}),
-                encode ? JSON.stringify(input, options.replacer, options.space)
-                       : JSON.parse(input, options.reviver);
+        json: function(input, opt_encode, options) {
+            options = options || {};
+            return !opt_encode ? JSON.parse(input, options.reviver)
+                : JSON.stringify(input, options.replacer, options.space);
         },
 
         /**
          * Has.
-         * @param  {Any}  input
-         * @param  {Any}  search
-         * @param  {Bool} strict?
+         * @param  {Any}   input
+         * @param  {Any}   search
+         * @param  {Bool}? opt_strict
          * @return {Bool}
          */
-        has: function(input, search, strict) {
-            return has(input, search, strict);
+        has: function(input, search, opt_strict) {
+            return has(input, search, opt_strict);
         },
 
         /**
          * Is set.
-         * @param  {Any}    input
-         * @param  {String} key?
+         * @param  {Any}     input
+         * @param  {String}? key
          * @return {Bool}
          */
         isSet: function(input, key) {
@@ -956,27 +959,27 @@
         /**
          * Copy.
          * @param  {Array|Object} input
-         * @param  {Array}        keysExcluded?
+         * @param  {Array}?       excludedKeys
          * @return {Array|Object}
          */
-        copy: function(input, keysExcluded) {
-            return $.copyTo($.isArray(input) ? [] : {}, input, keysExcluded);
+        copy: function(input, excludedKeys) {
+            return $.copyTo($.isArray(input) ? [] : {}, input, excludedKeys);
         },
 
         /**
          * Copy to.
          * @param  {Array|Object} inputTo
          * @param  {Array|Object} inputFrom
-         * @param  {Array}        keysExcluded
-         * @param  {Bool}         overwrite? @default=true
+         * @param  {Array}?       excludedKeys
+         * @param  {Bool}?        opt_override @default=true
          * @return {Array|Object}
          */
-        copyTo: function(inputTo, inputFrom, keysExcluded, overwrite) {
-            var keys = keysExcluded || [], key;
+        copyTo: function(inputTo, inputFrom, excludedKeys, opt_override) {
+            var keys = excludedKeys || [], key;
 
             for (key in inputFrom) {
                 if (!keys.has(key)) {
-                    if (overwrite !== FALSE && key in inputTo) {
+                    if (opt_override !== FALSE && key in inputTo) {
                         continue;
                     }
                     inputTo[key] = inputFrom[key];
@@ -1054,8 +1057,8 @@
 
         /**
          * Options.
-         * @param  {Object|void} options
-         * @param  {Object}      ...arguments
+         * @param  {Object}? options
+         * @param  {Object}  ...arguments
          * @return {Object}
          */
         options: function(options) {
@@ -1066,8 +1069,8 @@
          * Pick.
          * @param  {Array|Object} input
          * @param  {String}       key
-         * @param  {Any}          valueDefault?
-         * @return {Any?}
+         * @param  {Any}?         valueDefault
+         * @return {Any}?
          */
         pick: function(input, key, valueDefault) {
             var value = valueDefault;
@@ -1111,7 +1114,7 @@
          * Split.
          * @param  {String} input
          * @param  {String} separator
-         * @param  {Int}    limit?
+         * @param  {Int}?   limit
          * @return {Array}
          */
         split: function(input, separator, limit) {
@@ -1138,7 +1141,7 @@
     /**
      * Oh baby..
      * @param  {Function}  callback
-     * @param  {Document?} document
+     * @param  {Document}? document
      * @return {none}
      */
     $.onReady = function(callback, document) {
