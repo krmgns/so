@@ -7,10 +7,10 @@
  */
 ;(function(window, $) { 'use strict';
 
-    var re_opr = /(opr)\/([\d.]+)/;
-    var re_ua = /(chrome|safari|firefox|opera|msie|trident(?=\/))(?:.*version)?\/?\s*([\d.]+)/;
-    var fns_os = ['isMac', 'isWindows', 'isLinux', 'isUnix'];
-    var fns_ua = ['isChrome', 'isSafari', 'isFirefox', 'isOpera', 'isWebkitOpera', 'isIe', 'isTrident'];
+    var re_ua1 = /(opr|edge)\/([\d.]+)/;
+    var re_ua2 = /(chrome|safari|firefox|opera|msie|trident(?=\/))(?:.*version)?\/? *([\d.]+)/;
+    var fns_os = ['isLinux', 'isUnix', 'isMac', 'isWindows'];
+    var fns_ua = ['isChrome', 'isSafari', 'isFirefox', 'isOpera', 'isOldOpera', 'isIe', 'isEdge', 'isTrident'];
     var navigator = window.navigator;
     var ua = navigator.userAgent.toLowerCase();
     var uap = navigator.platform.toLowerCase();
@@ -18,7 +18,7 @@
     var isMobileDevice = /android|ip(hone|od|ad)|opera *mini|webos|blackberry|mobile|windows *phone/.test(ua);
 
     $.browser = (function() {
-        var re, name, test, browser = {};
+        var browser = {};
 
         browser.isTouchDevice = function() { return isTouchDevice; };
         browser.isMobileDevice = function() { return isMobileDevice; };
@@ -37,28 +37,29 @@
             }
         });
 
-        // set 'is' functions for browser
+        // set default 'is' functions for browser
         fns_ua.forEach(function(fn) {
             browser[fn] = function() { return false; };
         });
 
-        if (re = (re_opr.exec(ua) || re_ua.exec(ua))) {
+        var re;
+        if (re = (re_ua1.exec(ua) || re_ua2.exec(ua))) {
             if (re[1]) {
                 var name = (re[1] == 'msie') ? 'ie' : re[1];
-                if (name == 'opr') {
-                    name = 'opera';
+                if (name == 'opr' || name == 'edge') {
+                    name = (name == 'opr') ? 'opera' : 'edge';
                 }
                 browser['name'] = name;
 
-                // re-set 'is' function
+                // re-set 'is' function e.g browser.isOpera()
                 browser['is'+ name.toCapitalCase(false)] = function() { return true; };
-                browser['isWebkitOpera'] = function() { return re[1] == 'opr'; };
+                browser['isOldOpera'] = function() { return re[1] == 'opera'; };
             }
             if (re[2]) {
                 var versionArray = re[2].split('.').map(function(value) {
                     return $.int(value);
-                }), versionString;
-                versionString = versionArray.slice(0,2).join('.');
+                });
+                var versionString = versionArray.slice(0,2).join('.');
                 browser['version'] = versionString.toFloat();
                 browser['versionArray'] = versionArray;
                 browser['versionString'] = versionString;
@@ -69,7 +70,7 @@
         if (browser['osName']) {
             /* x86_64 x86-64 x64; amd64 amd64 wow64 x64_64 ia64 sparc64 ppc64 irix64
                 linux i386 linux i686 linux x86_64 win32 win64 macintel? */
-            test = browser.isOpera() ? ua : uap;
+            var test = browser.isOldOpera() ? ua : uap;
             if (/64/.test(test)) {
                 browser['osBit'] = 64;
             } else if (/32|86/.test(test)) {
@@ -90,16 +91,16 @@
             }, onError, options);
         };
 
-        // beacon (navigator.sendBeacon() not supported by all browsers)
+        // beacon (navigator.sendBeacon() not supported by all)
         browser.sendBeacon = function(url, data) {
             if (navigator.sendBeacon) {
-                return navigator.sendBeacon(url, data);
+                navigator.sendBeacon(url, data);
+            } else {
+                var request = new XMLHttpRequest();
+                request.open('POST', url, false);
+                request.setRequestHeader('Content-Type', 'text/plain; charset=utf-8');
+                request.send(data);
             }
-
-            var request = new XMLHttpRequest();
-            request.open('POST', url, false);
-            request.setRequestHeader('Content-Type', 'text/plain; charset=utf-8');
-            request.send(data);
         };
 
         return browser;

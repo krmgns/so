@@ -98,7 +98,7 @@
                 data = data.data;
             }
 
-            var ret = [], encode = encodeURIComponent;;
+            var ret = [], encode = encodeURIComponent;
 
             $.forEach(data, function(key, value) { // only two-dimensionals
                 key = encode(key);

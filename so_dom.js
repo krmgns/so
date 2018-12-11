@@ -1581,7 +1581,7 @@
                 if (by) return ret.width;
             }
             if ((!by || by == NAME_INNER_WIDTH) && dim.width) {
-                ret.innerWidth -= sumStyleValue(NULL, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);;
+                ret.innerWidth -= sumStyleValue(NULL, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);
                 if (by) return ret.innerWidth;
             }
             if ((!by || by == NAME_OUTER_WIDTH) && dim.width) {
