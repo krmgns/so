@@ -8,23 +8,26 @@
 ;(function(window, $) { 'use strict';
 
     var re_rgb = /.*rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(.*))?\)/i;
+    var int = $.int, $float = $.float, $string = $.string;
 
     // random hex
-    function rand(limit) {
-        return Math.random().toString(16).slice(-limit);
+    function rand(size) {
+        return Math.random().toString(16).slice(-size);
     }
 
     $.util = {
         /**
          * Uuid.
-         * @param  {Bool} noDash?
+         * @param  {Bool}? noDash
          * @return {String}
          */
         uuid: function(noDash) {
             var ret = '%s-%s-%s-%s-%s'.format(rand(8), rand(4), rand(4), rand(4), rand(12));
+
             if (noDash) {
-                ret = ret.replace(/-/g, '');
+                ret = ret.removeAll('-');
             }
+
             return ret;
         },
 
@@ -34,12 +37,14 @@
          * @return {String}
          */
         toCamelCaseFromDashCase: function(input) {
-            input = (''+ input);
-            if (~input.indexOf('-')) {
-                input = input.replace(/-([a-z])/gi, function(_, $1) {
-                    return $1.toUpperCase();
+            input = $string(input);
+
+            if (input.has('-')) {
+                input = input.replace(/-([a-z])/gi, function(_, _1) {
+                    return _1.toUpperCase();
                 });
             }
+
             return input;
         },
 
@@ -49,24 +54,26 @@
          * @return {String}
          */
         toDashCaseFromUpperCase: function(input) {
-            return (''+ input).replace(/([A-Z])/g, function(_, $1) {
-                return '-'+ $1.toLowerCase();
+            return $string(input).replace(/([A-Z])/g, function(_, _1) {
+                return '-'+ _1.toLowerCase();
             });
         },
 
         /**
-         * Parse RGB color.
+         * Parse rgb.
          * @param  {String} input
          * @return {Object}
          */
-        parseRgbColor: function(input) {
+        parseRgb: function(input) {
+            input = $string(input);
+
             var re = re_rgb.exec(input),
                 ret = {r: 0, g: 0, b: 0, opacity: 0.00};
 
             if (re) {
-                ret.r = re[1].toInt(), ret.g = re[2].toInt(), ret.b = re[3].toInt();
+                ret.r = $int(re[1]), ret.g = $int(re[2]), ret.b = $int(re[3]);
                 if (re[4]) {
-                    ret.opacity = re[4].toFloat();
+                    ret.opacity = $float(re[4]);
                 }
             }
 
@@ -74,16 +81,18 @@
         },
 
         /**
-         * Parse RGB color as hex.
+         * Parse rgb as hex.
          * @param  {String} input
          * @return {String}
          */
-        parseRgbColorAsHex: function(input) {
-            if (!~(''+ input).indexOf('rgb')) {
-                return input;
+        parseRgbAsHex: function(input) {
+            input = $string(input);
+
+            if (!input.has('rgb')) {
+                return '';
             }
 
-            var rgb = this.parseRgbColor(input),
+            var rgb = this.parseRgb(input),
                 r = rgb.r.toString(16), g = rgb.g.toString(16), b = rgb.b.toString(16);
 
             return '#'+ (
@@ -91,15 +100,6 @@
                 (g.length == 1 ? '0'+ g : g) +
                 (b.length == 1 ? '0'+ b : b)
             );
-        },
-
-        /**
-         * Escape RegExp input.
-         * @param  {String} input
-         * @return {String}
-         */
-        escapeRegExpInput: function(input) {
-            return input.replace(/[.*+?^$|{}()\[\]\\]/g, '\\$&');
         }
     };
 
