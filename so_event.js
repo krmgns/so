@@ -41,7 +41,7 @@
             metaKey: FALSE, button: 1, relatedTarget: NULL, // mouse
         useCapture: FALSE, once: FALSE, passive: FALSE, data: {}
     };
-    var $trim = $.trim, $extend = $.extend, $options = $.options,
+    var $trim = $.trim, $extend = $.extend, $options = $.options, $re = $.re,
         $isObject = $.isObject, $isFunction = $.isFunction,
         $for = $.for, $forEach = $.forEach,
         $logWarn = $.logWarn;
@@ -69,7 +69,7 @@
         var event, eventClassOrig;
         if (!eventClass) { // autodetect
             $forEach(re_types, function(_eventClass, re) {
-                re = $.re('^('+ re +')$', 'i');
+                re = $re('^('+ re +')$', 'i');
                 if (re.test(eventType)) {
                     eventClass = eventClassOrig = _eventClass;
                     return 0; // break
