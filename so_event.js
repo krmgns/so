@@ -41,7 +41,10 @@
             metaKey: FALSE, button: 1, relatedTarget: NULL, // mouse
         useCapture: FALSE, once: FALSE, passive: FALSE, data: {}
     };
-    var trim = $.trim, extend = $.extend, extendPrototype = $.extendPrototype;
+    var $trim = $.trim, $extend = $.extend, $options = $.options,
+        $isObject = $.isObject, $isFunction = $.isFunction,
+        $for = $.for, $forEach = $.forEach,
+        $logWarn = $.logWarn;
     var KEY_BACKSPACE =  8,  KEY_TAB =       9, KEY_ENTER =       13, KEY_ESC =        27,  KEY_LEFT =      37,
         KEY_UP =         38, KEY_RIGHT =    39, KEY_DOWN =        40, KEY_DELETE =     46,  KEY_HOME =      36,
         KEY_END =        35, KEY_PAGE_UP =  33, KEY_PAGE_DOWN =   34, KEY_INSERT =     45,  KEY_CAPS_LOCK = 20,
@@ -56,16 +59,16 @@
      * @return {Object}
      */
     function create(eventClass, eventType, options) {
-        eventType = trim(eventType);
+        eventType = $trim(eventType);
         if (!eventType) {
             throw ('Type required.');
         }
 
-        options = extend({}, optionsDefault, options);
+        options = $options(optionsDefault, options);
 
         var event, eventClassOrig;
         if (!eventClass) { // autodetect
-            $.forEach(re_types, function(_eventClass, re) {
+            $forEach(re_types, function(_eventClass, re) {
                 re = $.re('^('+ re +')$', 'i');
                 if (re.test(eventType)) {
                     eventClass = eventClassOrig = _eventClass;
@@ -135,7 +138,7 @@
             if (!e.target) e = objectDefineProperty(e, 'target', {value: event.target});
 
             // sugars..
-            extend(e, {
+            $extend(e, {
                 event: event,
                 eventTarget: event.eventTarget,
                 stopped: FALSE,
@@ -171,7 +174,7 @@
             if ($.isDefined(e.keyCode)) {
                 var eKeyCode = e.keyCode;
                 // key sugars..
-                extend(e, {
+                $extend(e, {
                     isKey: function(keyCode) { return eKeyCode == keyCode; },
                     isBackspaceKey: function() { return eKeyCode == KEY_BACKSPACE; },
                     isTabKey: function() { return eKeyCode == KEY_TAB; },
@@ -208,7 +211,7 @@
         return new Event(type, fn, options);
     }
     function initCustomEvent(type, fn, options) {
-        return new Event(type, fn, extend({}, options, {custom: TRUE}));
+        return new Event(type, fn, $options(options, {custom: TRUE}));
     }
     function initEventTarget(target) {
         return new EventTarget(target);
@@ -233,13 +236,13 @@
      * @param {Object}   options?
      */
     function Event(type, fn, options) {
-        type = trim(type);
+        type = $trim(type);
         options = options || {};
-        if ($.isObject(fn)) { // ..('click', {fn: function(){...}})
+        if ($isObject(fn)) { // ..('click', {fn: function(){...}})
             options = fn, fn = options.fn;
         }
 
-        options = extend({}, optionsDefault, options);
+        options = $options(optionsDefault, options);
 
         this.type = type;
         this.options = options;
@@ -270,7 +273,7 @@
         this.custom = event.eventClass == 'CustomEvent' || !re_typesStandard.test(type);
     }
 
-    extendPrototype(Event, {
+    $extend(Event.prototype, {
         /**
          * Copy.
          * @return {Event}
@@ -279,7 +282,7 @@
             var event = this;
             var eventCopy = initEvent(event.type, event.fno, event.options);
 
-            return extend(eventCopy, event);
+            return $extend(eventCopy, event);
         },
 
         /**
@@ -382,7 +385,7 @@
         this.target = checkTarget(target);
     }
 
-    extendPrototype(EventTarget, {
+    $extend(EventTarget.prototype, {
         /**
          * Add event.
          * @param  {Event} event
@@ -408,50 +411,50 @@
         removeEvent: function(event) {
             var target = checkTarget(this.target);
             var targetEvents;
-            var remove = [];
+            var removeStack = [];
 
             if (target.$events) {
                 if (event.type == '*') { // all
-                    $.for(target.$events, function(events) {
-                        $.for(events, function(event) {
-                            remove.push(event);
+                    $for(target.$events, function(events) {
+                        $for(events, function(event) {
+                            removeStack.push(event);
                         });
                     });
                 } else if (event.type == '**') { // all fired
-                    $.for(target.$events, function(events) {
-                        $.for(events, function(event) {
+                    $for(target.$events, function(events) {
+                        $for(events, function(event) {
                             if (event && event.fired) {
-                                remove.push(event);
+                                removeStack.push(event);
                             }
                         });
                     });
                 } else if (event.type.startsWith('**')) { // all fired 'x' types, eg: .off('**click')
                     var type = event.type.slice(2);
-                    $.for(target.$events, function(events) {
-                        $.for(events, function(event) {
+                    $for(target.$events, function(events) {
+                        $for(events, function(event) {
                             if (event && event.fired && event.type == type) {
-                                remove.push(event);
+                                removeStack.push(event);
                             }
                         });
                     });
                 } else if (target.$events[event.type]) {
                     var fno = event.fno, events = target.$events[event.type];
                     if (fno) { // all matched type's & fn's, eg: .off('click', fn)
-                        $.for(events, function(event) {
+                        $for(events, function(event) {
                             if (event && event.fno == fno) {
-                                remove.push(event);
+                                removeStack.push(event);
                             }
                         });
                     } else { // all matched type's, eg: .off('click')
-                        $.for(events, function(event) {
-                            remove.push(event);
+                        $for(events, function(event) {
+                            removeStack.push(event);
                         });
                     }
                 }
 
-                if (remove.length) {
+                if (removeStack.length) {
                     targetEvents = target.$events;
-                    $.for(remove, function(event) {
+                    $for(removeStack, function(event) {
                         if (event && event.id in targetEvents[event.type]) {
                             delete targetEvents[event.type][event.id];
                             target.removeEventListener(event.type, event.fn, event.useCapture);
@@ -459,14 +462,14 @@
                     });
 
                     // think memory!
-                    $.forEach(targetEvents, function(type, events) {
+                    $forEach(targetEvents, function(type, events) {
                         targetEvents[type] = !$.isEmpty(events) ? events : NULL;
                     });
-                } else if ($.isFunction(target['on'+ event.type])) { // natives
+                } else if ($isFunction(target['on'+ event.type])) { // natives
                     target['on'+ event.type] = NULL;
                 }
             } else {
-                $.logWarn('No `'+ event.type +'` events found to remove.');
+                $logWarn('No `'+ event.type +'` events found to remove.');
             }
         },
 
@@ -480,7 +483,7 @@
             var target = checkTarget(this.target);
 
             if (target.$events[event.type]) {
-                $.for(target.$events[event.type], function(event) {
+                $for(target.$events[event.type], function(event) {
                     // call-time data
                     if (data) {
                         event.event.data = event.event.data || {};
@@ -490,10 +493,10 @@
                     }
                     event.fn(event.event);
                 });
-            } else if ($.isFunction(target[event.type])) { // natives
+            } else if ($isFunction(target[event.type])) { // natives
                 target[event.type](event.event);
             } else {
-                $.logWarn('No `'+ event.type +'` type events found to fire.');
+                $logWarn('No `'+ event.type +'` type events found to fire.');
             }
         }
     });
@@ -501,10 +504,12 @@
     // on, one, off, fire helper
     function prepareArgs(fn, options, target) {
         options = options || {};
-        if ($.isObject(fn)) {
+
+        if ($isObject(fn)) {
             options = fn, fn = options.fn;
         }
-        return {fn: fn, options: extend(options, {target: target})};
+
+        return {fn: fn, options: $options(options, {target: target})};
     }
 
     /**
@@ -517,15 +522,15 @@
      */
     function on(target, type, fn, options) {
         var args = prepareArgs(fn, options, target), event, eventTarget;
-        trim(type).split(re_comma).forEach(function(type) {
+        $trim(type).split(re_comma).forEach(function(type) {
             event = initEvent(type, args.fn, args.options);
             eventTarget = initEventTarget(target);
             eventTarget.addEvent(event);
         });
     }
     function one(target, type, fn, options) {
-        var args = prepareArgs(fn, $.options(options, {once: TRUE}), target), event, eventTarget;
-        trim(type).split(re_comma).forEach(function(type) {
+        var args = prepareArgs(fn, $options(options, {once: TRUE}), target), event, eventTarget;
+        $trim(type).split(re_comma).forEach(function(type) {
             event = initEvent(type, args.fn, args.options);
             eventTarget = initEventTarget(target);
             eventTarget.addEvent(event);
@@ -533,7 +538,7 @@
     }
     function off(target, type, fn, options) {
         var args = prepareArgs(fn, options, target), event, eventTarget;
-        trim(type).split(re_comma).forEach(function(type) {
+        $trim(type).split(re_comma).forEach(function(type) {
             event = initEvent(type, args.fn, args.options);
             eventTarget = initEventTarget(target);
             eventTarget.removeEvent(event);
@@ -541,27 +546,11 @@
     }
     function fire(target, type, fn, options) {
         var args = prepareArgs(fn, options, target), event;
-        trim(type).split(re_comma).forEach(function(type) {
+        $trim(type).split(re_comma).forEach(function(type) {
             event = initEvent(type, args.fn, args.options);
             event.fire(type, args.options.data);
         });
     }
-
-    // shortcuts for Window & Node (Document, Element, ..) objects
-    var objects = [Node], prototype = 'prototype', names = ['on', 'one', 'off', 'fire'];
-    if (window.Window) {
-        objects.push(window.Window);
-    } else if (window.__proto__) { // fails on safari/5.1 (maybe others too)
-        prototype = '__proto__';
-    }
-
-    objects.forEach(function(object) {
-        names.forEach(function(name) {
-            object[prototype][name] = function(type, fn, options) {
-                $.event[name](this, type, fn, options);
-            };
-        });
-    });
 
     // add event to so
     $.event = {
