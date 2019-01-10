@@ -16,27 +16,31 @@
     // thanks: http://easings.net/ (easeOutQuad)
     var fn_easing = function(t,b,c,d) { return -c*(t/=d)*(t-2)+b; };
     var fn_runner = window.requestAnimationFrame || function(fn) { setTimeout(fn, opt_fps); };
-    var toFloat = $.float, toStyleName = $.util.toCamelCaseFromDashCase;
+    var $toStyleName = $.util.toCamelCaseFromDashCase;
+    var $easing = ($.ext && $.ext.easing) || {};
+    var $isNumber = $.isNumber, $isString = $.isString, $isFunction = $.isFunction,
+        $for = $.for, $forEach = $.forEach, $now = $.now,
+        $float = $.float;
 
     /**
      * Animation.
-     * @param {Element}  target
-     * @param {Object}   properties
-     * @param {Int}      speed?
-     * @param {String}   easing?
-     * @param {Function} callback?
+     * @param {Element}   target
+     * @param {Object}    properties
+     * @param {Int}?      speed
+     * @param {String}?   easing
+     * @param {Function}? callback
      */
     function Animation(target, properties, speed, easing, callback) {
         this.$target = $.dom(target);
         this.properties = properties;
-        this.speed = $.isNumber(speed) ? speed : opt_speeds[speed] || opt_speeds.default;
+        this.speed = $isNumber(speed) ? speed : opt_speeds[speed] || opt_speeds.default;
 
-        // swap
-        if ($.isFunction(easing)) {
+        // swap arguments
+        if ($isFunction(easing)) {
             callback = easing, easing = NULL;
         }
 
-        this.easing = (easing && $.ext && $.ext.easing && $.ext.easing[easing]) || fn_easing;
+        this.easing = $easing[easing] || fn_easing;
         this.callback = callback;
 
         this.running = FALSE;
@@ -47,35 +51,35 @@
 
         this.tasks = [];
 
-        if (this.$target._size) {
+        if (this.$target.size()) {
             // for stop tool
             this.$target.setProperty('$animation', this);
 
             // assign animation tasks
-            var _this = this;
-            $.forEach(properties, function(name, value) {
+            $forEach(properties, function(name, value) {
                 var root, scroll, startValue, endValue, style, unit = '';
-                name = toStyleName(name);
-                root = re_root.test(_this.$target.tag());
+
+                name = $toStyleName(name);
+                root = re_root.test(this.$target.tag());
                 scroll = re_scroll.test(name);
 
                 if (!scroll) {
-                    style = $.isString(value)
-                        ? _this.$target.getCssStyle(name) // get original style to catch unit sign
-                        : _this.$target.getComputedStyle(name);
+                    style = $isString(value)
+                        ? this.$target.getCssStyle(name) // get original style to catch unit sign
+                        : this.$target.getComputedStyle(name);
 
-                    startValue = toFloat(style);
-                    endValue = toFloat(value);
+                    startValue = $float(style);
+                    endValue = $float(value);
 
                     if (!re_nonUnitStyles.test(name)) {
                         unit = style.replace(re_digit, '');
                     }
                 } else {
-                    startValue = _this.$target.scroll()[name.slice(6).toLowerCase()];
+                    startValue = this.$target.scroll()[name.slice(6).toLowerCase()];
                     endValue = value;
                 }
 
-                _this.tasks.push({
+                this.tasks.push({
                     name: name,
                     root: root,
                     scroll: scroll,
@@ -85,21 +89,22 @@
                     diff: Math.abs(endValue - startValue),
                     unit: unit
                 });
-            });
+            }, this);
         }
     }
 
-    $.extendPrototype(Animation, {
+    $.extend(Animation.prototype, {
         /**
          * Run.
-         * @return {this}
+         * @return {self}
          */
         run: function() {
-            this.stop(); // stop if running
-            this.running = TRUE;
-            this.startTime = $.now();
-
             var _this = this;
+
+            _this.stop(); // stop if running
+            _this.running = TRUE;
+            _this.startTime = $now();
+
             !function run() {
                 if (!_this.stopped && !_this.ended) {
                     if (_this.elapsedTime < _this.speed) {
@@ -112,25 +117,24 @@
                 }
             }();
 
-            return this;
+            return _this;
         },
 
         /**
          * Start.
-         * @return {this}
+         * @return {self}
          */
         start: function() {
-            var target = this.$target, scroll, value;
+            var _this = this, target = _this.$target, scroll, value;
 
-            if (target._size) {
-                this.elapsedTime = $.now() - this.startTime;
+            if (target.size()) {
+                _this.elapsedTime = $now() - _this.startTime;
 
-                var _this = this;
-                this.tasks.forEach(function(task) {
+                $for(_this.tasks, function(task) {
                     value = fn_easing(_this.elapsedTime, 0.00, task.diff, _this.speed);
                     value = task.reverse ? task.startValue - value : task.startValue + value;
                     if (!task.scroll) {
-                        target.setStyle(task.name, value.toFixed(9) /* use 'toFixed' to get a good percent */
+                        target.setStyle(task.name, value.toFixed(9) /* use 'toFixed' for a good percent */
                             + task.unit);
                     } else {
                         target.setProperty(task.name, value.toFixed(0));
@@ -138,36 +142,36 @@
                 });
             }
 
-            return this;
+            return _this;
         },
 
         /**
          * Stop.
-         * @return {this}
+         * @return {self}
          */
         stop: function() {
-            var target = this.$target;
+            var _this = this, target = _this.$target;
 
-            if (this.running) {
-                this.running = FALSE;
-                this.stopped = TRUE;
+            if (_this.running) {
+                _this.running = FALSE;
+                _this.stopped = TRUE;
             }
 
             // set as null (for isAnimated() etc.)
             target.setProperty('$animation', NULL);
 
-            return this;
+            return _this;
         },
 
         /**
          * End.
-         * @return {this}
+         * @return {self}
          */
         end: function() {
-            var target = this.$target;
+            var _this = this, target = _this.$target;
 
-            if (target._size) {
-                this.tasks.forEach(function(task) {
+            if (target.size()) {
+                $for(_this.tasks, function(task) {
                     if (!task.scroll) {
                         target.setStyle(task.name, task.endValue + task.unit);
                     } else {
@@ -176,13 +180,13 @@
                 });
             }
 
-            this.ended = TRUE;
+            _this.ended = TRUE;
 
-            if ($.isFunction(this.callback)) {
-                this.callback(this);
+            if ($isFunction(_this.callback)) {
+                _this.callback(_this);
             }
 
-            return this;
+            return _this;
         }
     });
 
