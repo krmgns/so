@@ -233,7 +233,7 @@
      * Event.
      * @param {String}   type
      * @param {Function} fn
-     * @param {Object}   options?
+     * @param {Object}?  options
      */
     function Event(type, fn, options) {
         type = $trim(type);
@@ -287,7 +287,7 @@
 
         /**
          * Bind.
-         * @param  {String} type?
+         * @param  {String}? type
          * @return {Event}
          */
         bind: function(type) {
@@ -328,7 +328,7 @@
 
         /**
          * Unbind.
-         * @param  {String} type?
+         * @param  {String}? type
          * @return {Event}
          */
         unbind: function(type) {
@@ -349,8 +349,8 @@
 
         /**
          * Fire.
-         * @param  {String} type?
-         * @param  {Object} data
+         * @param  {String}? type
+         * @param  {Object}  data
          * @return {Event}
          */
         fire: function(type, data) {
