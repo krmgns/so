@@ -1,7 +1,7 @@
 /**
  * @package so
  * @object  so.http
- * @depends so, so.list, so.class
+ * @depends so, so.class
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
@@ -25,10 +25,14 @@
         ons: {} // all other on.. stuff
     };
     var STATE_OPENED = 1, STATE_HEADERS_RECEIVED = 2, STATE_LOADING = 3, STATE_DONE = 4;
-    var trim = $.trim, extend = $.extend, extendPrototype = $.extendPrototype;
+    var $trim = $.trim, $extend = $.extend, $options = $.options, $forEach = $.forEach,
+        $isFunction = $.isFunction, $isString = $.isString, $isArray = $.isArray,
+        $isObject = $.isObject, $isIterable = $.isIterable, $isDocument = $.isDocument,
+        $isNumeric = $.isNumeric, $isDefined = $.isDefined, $split = $.split, $class = $.class,
+        $logWarn = $.logWarn, $jsonDecode = $.util.jsonDecode;
 
-    // export base methods
-    $.http = {
+    // add base methods
+    var $http = {
         /**
          * Parse XML.
          * @param  {Any}    input
@@ -36,12 +40,12 @@
          * @return {Document}
          */
         parseXml: function(input, inputType) {
-            if ($.isDocument(input)) {
+            if ($isDocument(input)) {
                 return input;
             }
 
-            if (!$.isString(input)) {
-                return NULL;
+            if (!$isString(input)) {
+                return $logWarn('No valid XML given.'), NULL;
             }
 
             return new DOMParser.parseFromString(input, inputType || 'text/xml');
@@ -53,13 +57,13 @@
          * @return {Any}
          */
         parseJson: function(input) {
-            input = trim(input);
+            input = $trim(input);
 
             if (!re_json.test(input)) {
-                return $.logWarn('No valid JSON given.'), NULL;
+                return $logWarn('No valid JSON given.'), NULL;
             }
 
-            return $.json(input);
+            return $jsonDecode(input);
         },
 
         /**
@@ -70,13 +74,14 @@
         parseHeaders: function(headers) {
             var i = 0, ret = {};
 
+            headers = $trim(headers);
             if (headers) {
-                trim(headers).split('\r\n').forEach(function(header) {
-                    header = $.split(header, ':', 2);
+                headers.split('\r\n').forEach(function(header) {
+                    header = $split(header, ':', 2);
                     if (header[1] == NULL) { // status line etc.
-                        ret[i++] = trim(header[0]);
+                        ret[i++] = $trim(header[0]);
                     } else {
-                        ret[trim(header[0]).toLowerCase()] = trim(header[1]);
+                        ret[$trim(header[0]).toLowerCase()] = $trim(header[1]);
                     }
                 });
             }
@@ -90,26 +95,23 @@
          * @return {String}
          */
         serialize: function(data) {
-            if ($.isString(data) || !$.isIterable(data)) {
+            if ($isString(data) || !$isIterable(data)) {
                 return data;
-            }
-
-            if ($.isList(data)) {
-                data = data.data;
             }
 
             var ret = [], encode = encodeURIComponent;
 
-            $.forEach(data, function(key, value) { // only two-dimensionals
+            // only two-dimensionals prosessed
+            $forEach(data, function(key, value) {
                 key = encode(key);
-                if ($.isArray(value)) {
+                if ($isArray(value)) {
                     if (value.length) {
                         while (value.length) {
                             ret.push('%s[]=%s'.format(key, encode(value.shift())));
                         }
                     } else ret.push('%s[]='.format(key));
-                } else if ($.isObject(value)) {
-                    $.forEach(value, function(_key, _value) {
+                } else if ($isObject(value)) {
+                    $forEach(value, function(_key, _value) {
                         ret.push('%s[%s]=%s'.format(key, _key, encode(_value)));
                     });
                 } else {
@@ -155,12 +157,12 @@
     }
 
     // extend request & response
-    $.class(Request).extends(Stream);
-    $.class(Response).extends(Stream);
+    $class(Request).extends(Stream);
+    $class(Response).extends(Stream);
 
     // shortcut helpers
     function addUriParams(uri, uriParams) {
-        return (uri += (!uri.has('?') ? '?' : '&') + $.http.serialize(uriParams));
+        return (uri += (!uri.has('?') ? '?' : '&') + $http.serialize(uriParams));
     }
 
     function onReadyStateChange(client) {
@@ -182,7 +184,7 @@
                 var statusCode = client.api.status;
                 var statusText = client.api.statusText;
                 var status = statusCode ? 'HTTP/1.1 %s %s'.format(statusCode, statusText) : NULL; // HTTP/1.1?
-                var headers = $.http.parseHeaders(client.api.getAllResponseHeaders());
+                var headers = $http.parseHeaders(client.api.getAllResponseHeaders());
                 var data = client.api.responseText;
                 var dataType = client.options.dataType || (re_dataType.exec(headers['content-type']) || [,])[1];
 
@@ -195,9 +197,9 @@
 
                 // parse wars..
                 if (dataType == 'json') {
-                    data = $.http.parseJson(data);
+                    data = $http.parseJson(data);
                 } else if (dataType == 'xml') {
-                    data = $.http.parseXml(data);
+                    data = $http.parseXml(data);
                 }
                 client.response.data = data;
                 client.response.dataType = dataType;
@@ -206,7 +208,7 @@
                 client.fire(statusCode);
 
                 // success or failure?
-                client.fire((statusCode > 99 && statusCode < 400 ? 'success' : 'failure'), data);
+                client.fire(statusCode > 99 && statusCode < 400 ? 'success' : 'failure', data);
 
                 // end!
                 client.fire('done', data);
@@ -217,7 +219,7 @@
                 offReadyStateChange(client);
                 break;
             default:
-                throw ('Unknown HTTP error!');
+                $logWarn('Unknown HTTP error.');
         }
     }
 
@@ -231,15 +233,15 @@
      * @param {Object} options
      */
     function Client(uri, options) {
-        uri = trim(uri);
+        uri = $trim(uri);
         if (!uri) {
             throw ('URI required!');
         }
 
-        options = extend({}, optionsDefault, options);
+        options = $options(optionsDefault, options);
         options.method = (options.method || optionsDefault.method).toUpperCase();
         options.uri = uri;
-        options.headers = extend({}, optionsDefault.headers, options.headers);
+        options.headers = $options(optionsDefault.headers, options.headers);
 
         // cross domain?
         var match = uri.match(re_httpHost);
@@ -263,20 +265,21 @@
         }
         options.uri = options.uri.replace(re_query, '?$1');
 
-        var _this = this;
         this.options = options;
         this.request = new Request(this);
         this.response = new Response(this);
+
+        this.request.data = options.data;
+        this.request.dataType = options.dataType;
+        this.request.headers = options.headers;
+
+        var _this = this;
 
         this.api = new window[xhr];
         this.api.open(this.request.method, this.request.uri, !!options.async);
         this.api.onerror = function(e) {
             _this.fire('error');
         };
-
-        this.request.data = options.data;
-        this.request.dataType = options.dataType;
-        this.request.headers = options.headers;
 
         if (options.async) {
             this.api.onreadystatechange = function() {
@@ -291,47 +294,48 @@
 
         this.api.client = this;
 
-        // sen if auto-send
+        // sen if autoSend true
         if (options.autoSend) {
             this.send();
         }
     }
 
-    extendPrototype(Client, {
+    $extend(Client.prototype, {
         /**
          * Send.
-         * @return {this}
+         * @return {self}
          */
         send: function() {
-            if (!this.sent && !this.aborted) {
-                var _this = this, data;
+            var _this = this, data;
 
-                this.fire('beforeSend');
+            if (!_this.sent && !_this.aborted) {
 
-                $.forEach(this.request.headers, function(name, value) {
+                _this.fire('beforeSend');
+
+                $forEach(_this.request.headers, function(name, value) {
                     _this.api.setRequestHeader(name, value);
                 });
 
                 // check data
-                if (re_post.test(this.request.method)) {
-                    data = $.http.serialize(this.request.data);
+                if (re_post.test(_this.request.method)) {
+                    data = $http.serialize(_this.request.data);
                 }
 
-                this.api.send(data);
+                _this.api.send(data);
 
-                this.fire('afterSend');
+                _this.fire('afterSend');
 
-                if (this.options.timeout) {
-                    $.fire(this.options.timeout, function(){
+                if (_this.options.timeout) {
+                    $.fire(_this.options.timeout, function(){
                         _this.cancel();
                         _this.fire('timeout');
                     });
                 }
 
-                this.sent = TRUE;
+                _this.sent = TRUE;
             }
 
-            return this;
+            return _this;
         },
 
         /**
@@ -341,24 +345,26 @@
          * @return {void}
          */
         fire: function(fn, fnArgs) {
+            var _this = this;
+
             // check 'ons'
-            if (this.options.ons[fn]) {
-                fn = this.options.ons[fn];
-            } else if (!$.isFunction(fn)) {
-                fn = $.isNumeric(fn) // status code functions
+            if (_this.options.ons[fn]) {
+                fn = _this.options.ons[fn];
+            } else if (!$isFunction(fn)) {
+                fn = $isNumeric(fn) // status code functions
                     ? fn : fn.toCapitalCase().prepend('on');
-                if (this.options[fn]) {
-                    fn = this.options[fn];
+                if (_this.options[fn]) {
+                    fn = _this.options[fn];
                 }
             }
 
-            if ($.isFunction(fn)) {
-                var args = [this];
+            if ($isFunction(fn)) {
+                var args = [_this];
                 // prepend
-                if ($.isDefined(fnArgs)) {
+                if ($isDefined(fnArgs)) {
                     args = [fnArgs].concat(args);
                 }
-                fn.apply(this, args);
+                fn.apply(_this, args);
             }
         },
 
@@ -367,15 +373,17 @@
          * @return {void}
          */
         cancel: function() {
-            this.api.abort();
-            this.fire('abort');
-            this.aborted = TRUE;
+            var _this = this;
+
+            _this.api.abort();
+            _this.fire('abort');
+            _this.aborted = TRUE;
         },
 
         /**
          * End.
          * @param  {Function} fn
-         * @return {this}
+         * @return {self}
          */
         end: function(fn) {
             return this.on('done', fn);
@@ -393,23 +401,27 @@
          * Is success.
          * @return {Bool}
          */
-        isSuccess: function(code /* @var */) {
-            return code = this.response.statusCode, (code >= 200 && code <= 299);
+        isSuccess: function() {
+            var code = this.response.statusCode;
+
+            return code >= 200 && code <= 299;
         },
 
         /**
          * Is failure.
          * @return {Bool}
          */
-        isFailure: function(code /* @var */) {
-            return code = this.response.statusCode, (code >= 400 && code <= 599);
+        isFailure: function() {
+            var code = this.response.statusCode;
+
+            return code >= 400 && code <= 599;
         },
 
         /**
          * On.
          * @param  {String}   name
          * @param  {Function} callback
-         * @return {this}
+         * @return {self}
          */
         on: function(name, callback) {
             return this.options.ons[name] = callback, this;
@@ -434,17 +446,17 @@
      * @param  {Function}        onDone?
      * @param  {Function}        onSuccess?
      * @param  {Function}        onFailure?
-     * @param  {String}          method?
+     * @param  {String}          method? @internal
      * @return {Client}
      */
     function init(uri, options, onDone, onSuccess, onFailure, method) {
         options = options || {};
-        if (!$.isString(uri)) throw ('URI must be a string!');
-        if (!$.isObject(options)) throw ('Options must be an object!');
+        if (!$isString(uri)) throw ('URI must be a string!');
+        if (!$isObject(options)) throw ('Options must be an object!');
 
-        uri = trim(uri);
+        uri = $trim(uri);
         if (uri.has(' ')) {
-            // <method> <uri> @<data type>, eg: '/foo', '/foo @json', 'GET /foo', 'GET /foo @json'
+            // <method> <uri> @<data type>, ie: '/foo', '/foo @json', 'GET /foo', 'GET /foo @json'
             var re = re_request.exec(uri);
             if (re) {
                 options.method = re[1] || method;
@@ -456,15 +468,15 @@
             options.uri = uri;
         }
 
-        return initClient(uri, extend(options, {
+        return initClient(uri, $options(options, {
             onDone: options.onDone || onDone,
             onSuccess: options.onSuccess || onSuccess,
             onFailure: options.onFailure || onFailure
         }));
     }
 
-    // export more methods
-    extend($.http, {
+    // add more methods
+    $extend($http, {
         Client: initClient,
         Request: initRequest,
         Response: initResponse,
@@ -478,5 +490,8 @@
             return init(uri, options, onDone, onSuccess, onFailure);
         }
     });
+
+    // export http
+    $.http = $http;
 
 })(window, window.so, null, true, false);
