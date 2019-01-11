@@ -5,10 +5,11 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function(window, $) { 'use strict';
+;(function(window, $, UNDEFINED) { 'use strict';
 
+    var JSON = window.JSON;
     var re_rgb = /.*rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(.*))?\)/i;
-    var int = $.int, $float = $.float, $string = $.string;
+    var $int = $.int, $float = $.float, $string = $.string;
 
     // random hex
     function rand(size) {
@@ -18,7 +19,7 @@
     $.util = {
         /**
          * Uuid.
-         * @param  {Bool}? noDash
+         * @param  {Bool} noDash?
          * @return {String}
          */
         uuid: function(noDash) {
@@ -100,6 +101,36 @@
                 (g.length == 1 ? '0'+ g : g) +
                 (b.length == 1 ? '0'+ b : b)
             );
+        },
+
+        /**
+         * Json encode.
+         * @param  {Any}    input
+         * @param  {Object} options?
+         * @return {String|undefined}
+         */
+        jsonEncode: function(input, options) {
+            try {
+                options = options || {};
+                return JSON.stringify(input, options.replacer, options.space);
+            } catch(e) {
+                return UNDEFINED;
+            }
+        },
+
+        /**
+         * Json decode.
+         * @param  {String} input
+         * @param  {Object} options?
+         * @return {Any|undefined}
+         */
+        jsonDecode: function(input, options) {
+            try {
+                options = options || {};
+                return JSON.parse(input, options.reviver);
+            } catch(e) {
+                return UNDEFINED;
+            }
         }
     };
 
