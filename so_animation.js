@@ -12,23 +12,22 @@
     var re_scroll = /scroll(?:Top|Left)/;
     var re_nonUnitStyles = /(?:(?:fill-?)?opacity|z(?:oom|index)|(?:font-?w|line-?h)eight|column(?:-?count|s))/i;
     var opt_fps = 1000 / 60;
-    var opt_speeds = {fast: 50, slow: 650, default: 350};
+    var opt_speeds = {fast: 50, slow: 650, default: 325};
     // thanks: http://easings.net/ (easeOutQuad)
     var fn_easing = function(t,b,c,d) { return -c*(t/=d)*(t-2)+b; };
     var fn_runner = window.requestAnimationFrame || function(fn) { setTimeout(fn, opt_fps); };
     var $toStyleName = $.util.toCamelCaseFromDashCase;
     var $easing = ($.ext && $.ext.easing) || {};
-    var $isNumber = $.isNumber, $isString = $.isString, $isFunction = $.isFunction,
-        $for = $.for, $forEach = $.forEach, $now = $.now,
-        $float = $.float;
+    var $extend = $.extend, $for = $.for, $forEach = $.forEach, $float = $.float, $now = $.now,
+        $isNumber = $.isNumber, $isString = $.isString, $isFunction = $.isFunction;
 
     /**
      * Animation.
-     * @param {Element}   target
-     * @param {Object}    properties
-     * @param {Int}?      speed
-     * @param {String}?   easing
-     * @param {Function}? callback
+     * @param {Element}  target
+     * @param {Object}   properties
+     * @param {Int}      speed?
+     * @param {String}   easing?
+     * @param {Function} callback?
      */
     function Animation(target, properties, speed, easing, callback) {
         this.$target = $.dom(target);
@@ -93,7 +92,7 @@
         }
     }
 
-    $.extend(Animation.prototype, {
+    $extend(Animation.prototype, {
         /**
          * Run.
          * @return {self}
