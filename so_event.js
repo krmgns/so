@@ -9,8 +9,7 @@
 
     var document = $.document;
     var id = 0;
-    var objectValues = Object.values;
-    var objectDefineProperty = Object.defineProperty;
+    var objectValues = Object.values, objectDefineProperty = Object.defineProperty;
     var re_types = {
         UIEvent: 'resize|scroll|select|(un)?load|DOMActivate',
         MouseEvent: '(dbl)?click|mouse(up|down|enter|leave|in|out|over|move|wheel)|show|contextmenu|DOMMouseScroll',
@@ -41,10 +40,9 @@
             metaKey: FALSE, button: 1, relatedTarget: NULL, // mouse
         useCapture: FALSE, once: FALSE, passive: FALSE, data: {}
     };
-    var $trim = $.trim, $extend = $.extend, $options = $.options, $re = $.re,
-        $isObject = $.isObject, $isFunction = $.isFunction,
-        $for = $.for, $forEach = $.forEach,
-        $logWarn = $.logWarn;
+    var $trim = $.trim, $extend = $.extend, $for = $.for, $forEach = $.forEach,  $options = $.options,
+        $isObject = $.isObject, $isFunction = $.isFunction, $isDefined = $.isDefined, $isEmpty = $.isEmpty,
+        $re = $.re, $logWarn = $.logWarn;
     var KEY_BACKSPACE =  8,  KEY_TAB =       9, KEY_ENTER =       13, KEY_ESC =        27,  KEY_LEFT =      37,
         KEY_UP =         38, KEY_RIGHT =    39, KEY_DOWN =        40, KEY_DELETE =     46,  KEY_HOME =      36,
         KEY_END =        35, KEY_PAGE_UP =  33, KEY_PAGE_DOWN =   34, KEY_INSERT =     45,  KEY_CAPS_LOCK = 20,
@@ -171,7 +169,7 @@
                 }
             });
 
-            if ($.isDefined(e.keyCode)) {
+            if ($isDefined(e.keyCode)) {
                 var eKeyCode = e.keyCode;
                 // key sugars..
                 $extend(e, {
@@ -463,7 +461,7 @@
 
                     // think memory!
                     $forEach(targetEvents, function(type, events) {
-                        targetEvents[type] = !$.isEmpty(events) ? events : NULL;
+                        targetEvents[type] = !$isEmpty(events) ? events : NULL;
                     });
                 } else if ($isFunction(target['on'+ event.type])) { // natives
                     target['on'+ event.type] = NULL;
