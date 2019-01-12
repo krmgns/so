@@ -8,7 +8,7 @@
 ;(function($, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
 
     var $extend = $.extend, $for = $.for, $forEach = $.forEach, $bool = $.bool;
-    var _break;
+    var _break = 0;
 
     /**
      * List.
@@ -30,7 +30,7 @@
          */
         init: function(data, options) {
             if (!$.isIterable(data)) {
-                throw ('Only iterable objects accepted for List.');
+                throw ('No iterable object given.');
             }
 
             var type = $.type(data);
