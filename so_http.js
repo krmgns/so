@@ -352,7 +352,7 @@
                 fn = _this.options.ons[fn];
             } else if (!$isFunction(fn)) {
                 fn = $isNumeric(fn) // status code functions
-                    ? fn : fn.toCapitalCase().prepend('on');
+                    ? fn : 'on'+ fn.toCapitalCase();
                 if (_this.options[fn]) {
                     fn = _this.options[fn];
                 }
