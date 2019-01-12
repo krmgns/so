@@ -17,8 +17,8 @@
     var NAME_DEFAULT_VIEW = 'defaultView';
     var NAME_OWNER_DOCUMENT = 'ownerDocument';
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
-    var Array = window.Array, Object = window.Object, JSON = window.JSON;
-    var String = window.String, RegExp = window.RegExp, Function = window.Function;
+    var Array = window.Array, Object = window.Object, String = window.String;
+    var Date = window.Date, RegExp = window.RegExp, Math = window.Math, Function = window.Function;
 
     // globals
     window.so = $;
@@ -48,20 +48,17 @@
 
     // null/undefined checker
     function isVoid(input) {
-        return input == NULL;
+        return (input == NULL);
     }
 
     // faster trim for space only
-    function trim(input, side) {
+    function trim(input, opt_side) {
         return !isVoid(input) ? (''+ input).replace(
-            side ? (side == 1 ? re_trimLeft : re_trimRight) : re_trim, ''
+            opt_side ? (opt_side == 1 ? re_trimLeft : re_trimRight) : re_trim, ''
         ) : '';
     }
 
-    // shortcut convert helpers
-    function toValue(input, valueDefault) {
-        return isVoid(input) ? valueDefault : input;
-    }
+    // convert helpers
     function toInt(input, base) {
         return parseInt(trim(input).replace(re_dot, '0.'), base || 10) || 0;
     }
@@ -75,10 +72,17 @@
         return !!input;
     }
 
+    function toLower(input) {
+        return !isVoid(input) ? toString(input).toLowerCase() : '';
+    }
+    function toUpper(input) {
+        return !isVoid(input) ? toString(input).toUpperCase() : '';
+    }
+
     function toMilliseconds(time) {
-        var s = time.split(re_time);
-        var time = toFloat(s[1]);
-        var timeDir = s[2];
+        var t = time.split(re_time);
+        var time = toFloat(t[1]);
+        var timeDir = t[2];
 
         switch (timeDir) {
             case 's': case 'sec': time *= 1000; break;
@@ -89,29 +93,43 @@
         return time;
     }
 
+    function toRegExpEsc(input) {
+        // @note slash (/) is escaped already
+        return input.replace(/[.*+?^$|{}()\[\]\\]/g, '\\$&');
+    }
+
     // cacheable regexp stuff with ttl (for gc)
-    function toRegExp(pattern, flags, ttl) {
+    function toRegExp(pattern, flags, ttl, opt_esc) {
         flags = flags || '';
-        if ($.isInt(flags)) {
+        if (flags && isInt(flags)) {
             ttl = flags, flags = '';
+        }
+
+        if (opt_esc) { // escape
+            pattern = toRegExpEsc(pattern);
         }
 
         if (!ttl) { // no cache
             return new RegExp(pattern, flags);
         }
 
-        if ($.isString(ttl)) {
+        if (isString(ttl)) {
             ttl = toMilliseconds(ttl);
         }
-        ttl = (ttl > -1) ? ttl : 3600; // one hour
+        ttl = (ttl >= 0) ? ttl : 60000; // 1min
 
-        var i = pattern + (flags || '');
+        var i = pattern + flags;
         var ret = _reCache[i] || new RegExp(pattern, flags);
 
         // simple gc
-        $.fire(ttl, function(){ delete _reCache[i]; });
+        $.fire(ttl, function(){ delete _reCache[i] });
 
         return ret;
+    }
+
+    // safer length getter
+    function getLength(input) {
+        return input && input.length;
     }
 
     /**
@@ -121,12 +139,12 @@
      * @private
      */
     function extend() {
-        var i = 1, key, value, args = arguments, source, target = args[0] || {};
+        var name, source, args = arguments, target = args[0] || {}, i = 1;
 
         while (source = args[i++]) {
-            for (key in source) {
-                if (source.hasOwnProperty(key)) {
-                    target[key] = source[key];
+            for (name in source) {
+                if (source.hasOwnProperty(name)) {
+                    target[name] = source[name];
                 }
             }
         }
@@ -138,18 +156,18 @@
      * Loop.
      * @param  {Array|Object} input
      * @param  {Function}     fn
-     * @param  {Object}?      _this
-     * @param  {Bool}?        opt_useKey
-     * @param  {Bool}?        opt_useLength
+     * @param  {Object}       _this?
+     * @param  {Bool}         opt_useKey?
+     * @param  {Bool}         opt_useLength?
      * @return {Array|Object}
      * @private
      */
     function loop(input, fn, _this, opt_useKey, opt_useLength) {
-        var _this = _this || input, length = input && input.length, i = 0, key, value;
+        var _this = _this || input, inputLength = getLength(input), i = 0, key, value;
 
-        if (!isVoid(length) && opt_useLength) {
-            for (; i < length; i++) {
-                value = input[i];
+        if (inputLength && opt_useLength) {
+            while (i < inputLength) {
+                value = input[i++];
                 if (0 === fn.apply(_this, !opt_useKey ?
                         [value, i] /* for */ : [i, value, i] /* forEach */)) {
                     break;
@@ -189,6 +207,53 @@
         }
     });
 
+    // checkers
+    function isNull(input) {
+        return (input === NULL);
+    }
+    function isNulls(input) {
+        return (input === '');
+    }
+    function isDefined(input) {
+        return (input !== UNDEFINED);
+    }
+    function isUndefined(input) {
+        return (input === UNDEFINED);
+    }
+    function isNumber(input) {
+        return (typeof input == 'number');
+    }
+    function isNumeric(input) {
+        return isNumber(input) || re_numeric.test(input);
+    }
+    function isInt(input) {
+        return isNumber(input) && (input == (input | 0));
+    }
+    function isFloat(input) {
+        return isNumber(input) && (input != (input | 0));
+    }
+    function isString(input) {
+        return (typeof input == 'string' || toBool(input && input.constructor == String));
+    }
+    function isRegExp(input) {
+        return toBool(input && input.constructor == RegExp);
+    }
+    function isFunction(input) {
+        return (typeof input == 'function');
+    }
+    function isArray(input) {
+        return Array.isArray(input);
+    }
+    function isObject(input) {
+        return toBool(input && (input.constructor == Object));
+    }
+    function isWindow(input) {
+        return toBool(input && input == input[NAME_WINDOW] && input == input[NAME_WINDOW][NAME_WINDOW]);
+    }
+    function isDocument(input) {
+        return toBool(input && input[NAME_NODE_TYPE] === 9);
+    }
+
     // so: type functions.
     extend($, {
         /** Is void. @param {Any} input @return {Bool} */
@@ -198,37 +263,47 @@
 
         /** Is null. @param {Any} input @return {Bool} */
         isNull: function(input) {
-            return (input === NULL);
+            return isNull(input);
         },
 
         /** Is nulls. @param {Any} input @return {Bool} */
         isNulls: function(input) {
-            return (input === '');
+            return isNulls(input);
         },
 
         /** Is defined. @param {Any} input @return {Bool} */
         isDefined: function(input) {
-            return (input !== UNDEFINED);
+            return isDefined(input);
         },
 
         /** Is undefined. @param {Any} input @return {Bool} */
         isUndefined: function(input) {
-            return (input === UNDEFINED);
+            return isUndefined(input);
         },
 
-        /** Is string. @param {Any} input @return {Bool} */
-        isString: function(input) {
-            return (typeof input == 'string' || (input && input.constructor == String));
+        /** Is number. @param {Any} input @return {Bool} */
+        isNumber: function(input) {
+            return isNumber(input);
+        },
+
+        /** Is numeric. @param {Any} input @return {Bool} */
+        isNumeric: function(input) {
+            return isNumeric(input);
         },
 
         /** Is int. @param {Any} input @return {Bool} */
         isInt: function(input) {
-            return $.isNumber(input) && input == (input | 0);
+            return isInt(input);
         },
 
         /** Is float. @param {Any} input @return {Bool} */
         isFloat: function(input) {
-            return $.isNumber(input) && input != (input | 0);
+            return isFloat(input);
+        },
+
+        /** Is string. @param {Any} input @return {Bool} */
+        isString: function(input) {
+            return isString(input);
         },
 
         /** Is bool. @param {Any} input @return {Bool} */
@@ -238,48 +313,38 @@
 
         /** Is true. @param {Any} input @return {Bool} */
         isTrue: function(input) {
-            return input === TRUE;
+            return (input === TRUE);
         },
 
         /** Is false. @param {Any} input @return {Bool} */
         isFalse: function(input) {
-            return input === FALSE;
-        },
-
-        /** Is number. @param {Any} input @return {Bool} */
-        isNumber: function(input) {
-            return (typeof input == 'number');
-        },
-
-        /** Is numeric. @param {Any} input @return {Bool} */
-        isNumeric: function(input) {
-            return $.isNumber(input) || re_numeric.test(input);
+            return (input === FALSE);
         },
 
         /** Is RegExp. @param {Any} input @return {Bool} */
         isRegExp: function(input) {
-            return input && input.constructor == RegExp;
+            return isRegExp(input);
         },
 
         /** Is function. @param {Any} input @return {Bool} */
         isFunction: function(input) {
-            return (typeof input == 'function');
+            return isFunction(input);
         },
 
         /** Is array. @param {Any} input @return {Bool} */
         isArray: function(input) {
-            return Array.isArray(input);
+            return isArray(input);
         },
 
         /** Is object. @param {Any} input @return {Bool} */
         isObject: function(input) {
-            return input && (input.constructor == Object);
+            return isObject(input);
         },
 
         /** Is iterable. @param {Any} input @return {Bool} */
         isIterable: function(input) {
-            return $.isArray(input) || $.isObject(input) || (input && (
-                (!isVoid(input.length) && !input[NAME_NODE_TYPE]) // dom, nodelist, string etc.
+            return isArray(input) || isObject(input) || toBool(input && (
+                input.length != NULL && !input[NAME_NODE_TYPE] // dom, nodelist, string etc.
             ));
         },
 
@@ -290,12 +355,12 @@
 
         /** Is window. @param {Any} input @return {Bool} */
         isWindow: function(input) {
-            return toBool(input && input == input[NAME_WINDOW] && input == input[NAME_WINDOW][NAME_WINDOW]);
+            return isWindow(input);
         },
 
         /** Is document. @param {Any} input @return {Bool} */
         isDocument: function(input) {
-            return toBool(input && input[NAME_NODE_TYPE] === 9);
+            return isDocument(input);
         }
     });
 
@@ -304,20 +369,21 @@
      * @param  {Object} object
      * @return {Array}
      */
-    Object.keys = Object.keys || function(object) {
-        var ret = []; $.forEach(object, function(key) { ret.push(key) }); return ret;
+    Object.keys = Object.keys || function(object, ret /* @internal */) {
+        return (ret = []), $.forEach(object, function(key) { ret.push(key) }), ret;
     };
-    Object.values = Object.values || function(object) {
-        var ret = []; $.forEach(object, function(_, value) { ret.push(value) }); return ret;
+    Object.values = Object.values || function(object, ret /* @internal */) {
+        return (ret = []), $.forEach(object, function(_, value) { ret.push(value) }), ret;
     };
 
     // shortcut
     function has(input, search, opt_strict) {
         var ret;
 
-        if ($.isString(input)) {
-            ret = $.isRegExp(search) ? input.search(search) : input.indexOf(search); // simply
-        } else if ($.isArray(input) || $.isObject(input)) {
+        if (isString(input)) {
+            ret = isNulls(search) ? -1 // fix empty string issue
+                : isRegExp(search) ? input.search(search) : input.indexOf(search); // simply
+        } else if (isArray(input) || isObject(input)) {
             $.for(input, function(value, i) {
                 if (opt_strict ? value === search : value == search) {
                     ret = i; return 0; // break
@@ -325,7 +391,14 @@
             });
         }
 
-        return (ret > -1);
+        return ret > -1;
+    }
+
+    // uniq/ununiq helper
+    function toUniqUnuniq(array, opt_uniq) {
+        return opt_uniq
+            ? array.filter(function(el, i, _array) { return _array.indexOf(el) == i; })
+            : array.filter(function(el, i, _array) { return _array.indexOf(el) != i; });
     }
 
     /**
@@ -333,9 +406,17 @@
      */
     extend(Array[NAME_PROTOTYPE], {
         /**
+         * Len.
+         * @return {Int}
+         */
+        len: function() {
+            return getLength(this);
+        },
+
+        /**
          * Has.
-         * @param  {Any}   search
-         * @param  {Bool}? opt_strict
+         * @param  {Any}  search
+         * @param  {Bool} opt_strict?
          * @return {Bool}
          */
         has: function(search, opt_strict) {
@@ -359,6 +440,22 @@
         },
 
         /**
+         * Uniq.
+         * @return {Array}
+         */
+        uniq: function() {
+            return toUniqUnuniq(this, TRUE);
+        },
+
+        /**
+         * Ununiq.
+         * @return {Array}
+         */
+        ununiq: function() {
+            return toUniqUnuniq(this);
+        },
+
+        /**
          * Extract.
          * @param  {String} ...arguments
          * @return {Object}
@@ -366,33 +463,25 @@
         extract: function() {
             var keys = makeArray(arguments), values = {};
 
-            return $.for(keys, function(key, i) {
-                values[key] = this[i];
-            }, this), values;
+            $.for(keys, function(key, i) {
+                // [1,2,3].extract('one', '', 'three') => {one: 1, three: 3}
+                key && (values[key] = this[i]);
+            }, this);
+
+            return values;
         }
     });
 
     // string helpers
-    function prepareTrimRegExp(chars, opt_isLeft) {
-        return toRegExp((opt_isLeft ? '^[%s]+' : '[%s]+$')
-            .format(chars ? chars.replace(/([\[\]\\])/g, '\\$1') : '\\s'));
+    function prepareTrimRegExp(chars, opt_noCase, opt_side) {
+        return toRegExp((opt_side == 1 ? '^%s+' : '%s+$').format(
+            chars.split('').uniq().map(toRegExpEsc).join('|').wrap(['(', ')'])
+        ), opt_noCase ? 'i' : '');
     }
-
-    function prepareSearchStuff(str, search, index, opt_noCase) {
-        if (str && search) {
-            // swap arguments
-            if (index === FALSE) {
-                opt_noCase = FALSE, index = UNDEFINED;
-            }
-
-            str = toString(str);
-            if (opt_noCase) {
-                str = s.toLowerCase();
-                search = search.toLowerCase();
-            }
-
-            return {s: str, ss: search, i: index || 0};
-        }
+    function prepareSearchRegExp(search, opt_noCase, opt_side, opt_esc) {
+        return toRegExp((!opt_side ? '%s' : opt_side == 1 ? '^%s' : '%s$').format(
+            opt_esc ? toRegExpEsc(search): search
+        ), opt_noCase ? 'i' : '');
     }
 
     /**
@@ -400,9 +489,17 @@
      */
     extend(String[NAME_PROTOTYPE], {
         /**
+         * Len.
+         * @return {Int}
+         */
+        len: function() {
+            return getLength(this);
+        },
+
+        /**
          * Has.
-         * @param  {Any}   search
-         * @param  {Bool}? opt_strict
+         * @param  {Any}  search
+         * @param  {Bool} opt_strict?
          * @return {Bool}
          */
         has: function(search, opt_strict) {
@@ -410,12 +507,12 @@
         },
 
         /**
-         * Test.
-         * @param  {RegExp} re
+         * Is equal.
+         * @param  {String} input
          * @return {Bool}
          */
-        test: function(re) {
-            return re.test(this);
+        isEqual: function(input) {
+            return this === input;
         },
 
         /**
@@ -423,12 +520,12 @@
          * @return {Bool}
          */
         isNumeric: function() {
-            return $.isNumeric(this);
+            return isNumeric(this);
         },
 
         /**
          * To int.
-         * @param  {Int} base
+         * @param  {Int} base?
          * @return {Int}
          */
         toInt: function(base) {
@@ -445,64 +542,62 @@
 
         /**
          * To capital case.
-         * @param  {Bool}? opt_all   @default=true
-         * @param  {Bool}? opt_lower @default=false
+         * @param  {Bool} opt_all?   @default=true
+         * @param  {Bool} opt_lower? @default=false
          * @return {String}
          */
         toCapitalCase: function(opt_all, opt_lower) {
-            var str = toString(this), i;
+            var string = toString(this), i;
 
-            if (str) { // prevent empty string craps
-                opt_lower && (str = str.toLowerCase());
+            if (string) { // prevent empty string craps
+                opt_lower && (string = toLower(string));
                 if (opt_all !== FALSE) {
-                    for (i = 0, str = str.split(' '); i < str.length; i++) {
-                        str[i] = str[i].toCapitalCase(FALSE);
+                    for (i = 0, string = string.split(' '); i < string.length; i++) {
+                        string[i] = string[i].toCapitalCase(FALSE);
                     }
-                    return str.join(' ');
+                    string = string.join(' ');
+                } else {
+                    string = toUpper(string[0]) + string.slice(1);
                 }
-                str = str[0].toUpperCase() + str.slice(1);
             }
 
-            return str;
+            return string;
         },
 
         /**
          * Format.
-         * @param  {Object} ...arguments
+         * @param  {Any} ...arguments
          * @return {String}
          */
         format: function() {
-            var str = toString(this),
-                arg, args = arguments,
-                match = str.match(/(%s)/g) || [], i = 0;
+            var string = toString(this), args = arguments, i = 0,
+                match = string.match(/(%s)/g) || [];
 
             if (args.length < match.length) {
-                $.logWarn('No enough arguments!');
+                $.logWarn('No enough arguments for format().');
             }
 
             while (match.shift()) {
-                arg = args[i++];
-                if (!isVoid(arg)) {
-                    str = str.replace(/(%s)/, arg);
-                }
+                string = string.replace(/(%s)/, args[i++]);
             }
 
-            return str;
+            return string;
         },
 
         /**
          * Match all.
          * @param  {RegExp} pattern
-         * @return {Array}?
+         * @return {Array|null}
          */
         matchAll: function(pattern) {
             var source = pattern.source;
             var flags = pattern.flags;
             var r, re, ret = [], slashPosition;
-            if (isVoid(flags)) { // hellö ie.. ?}/=%&'|!)"
+
+            if (isVoid(flags)) { // hellö ie.. ?}/=%&'|!)"^*1
                 slashPosition = (pattern = toString(pattern)).lastIndexOf('/');
-                source = pattern.substr(1, slashPosition - 1);
-                flags = pattern.substr(slashPosition + 1);
+                source = pattern.substring(1, slashPosition - 1);
+                flags = pattern.substring(slashPosition + 1);
             }
 
             // never forget or lost in infinite loops..
@@ -519,27 +614,12 @@
         },
 
         /**
-         * Append.
-         * @param  {String} ...arguments
-         * @return {String}
+         * Test.
+         * @param  {RegExp} re
+         * @return {Bool}
          */
-        append: function() {
-            var str = toString(this);
-            return $.for(arguments, function(value) {
-                str = str + value;
-            }), str;
-        },
-
-        /**
-         * Prepen.
-         * @param  {String} ...arguments
-         * @return {String}
-         */
-        prepend: function() {
-            var str = toString(this);
-            return $.for(arguments, function(value) {
-                str = value + str;
-            }), str;
+        test: function(re) {
+            return re.test(this);
         },
 
         /**
@@ -548,25 +628,27 @@
          * @return {String}
          */
         wrap: function(input) {
-            return $.isString(input)
+            return isString(input)
                 ? input + toString(this) + input
                 : input[0] + toString(this) + input[1];
         },
 
         /**
-         * Unwrap.
-         * @param  {String} input
+         * Remove.
+         * @param  {String} searchValue
          * @return {String}
          */
-        unwrap: function(input) {
-            var str = toString(this);
-            input = toString(input);
+        remove: function(searchValue) {
+            return this.replace(toRegExp(searchValue, NULL, NULL, TRUE), '');
+        },
 
-            if (str.has(input)) {
-                return str.substr(input.length).substr(-input.length);
-            }
-
-            return str;
+        /**
+         * Remove all.
+         * @param  {String} searchValue
+         * @return {String}
+         */
+        removeAll: function(searchValue) {
+            return this.replace(toRegExp(searchValue, 'g', NULL, TRUE), '');
         },
 
         /**
@@ -576,102 +658,127 @@
          * @return {String}
          */
         replaceAll: function(searchValue, replaceValue) {
-            return this.replace(toRegExp(searchValue, 'g'), replaceValue);
+            return this.replace(toRegExp(searchValue, 'g', NULL, TRUE), replaceValue);
         },
 
         /**
          * Trim.
-         * @param  {String}? chars
+         * @param  {String} chars?
+         * @param  {Bool}   opt_noCase?
          * @return {String}
          * @override For chars option.
          */
-        trim: function(chars) {
-            if (!chars) {
-                return trim(this);
-            }
-            return this.trimLeft(chars).trimRight(chars);
+        trim: function(chars, opt_noCase) {
+            return !chars ? trim(this) : this.trimLeft(chars, opt_noCase).trimRight(chars, opt_noCase);
         },
 
         /**
          * Trim left.
-         * @param  {String}? chars
+         * @param  {String} chars?
+         * @param  {Bool}   opt_noCase?
          * @return {String}
          * @override For chars option.
          */
-        trimLeft: function(chars) {
-            if (!chars) {
-                return trim(this, 1);
+        trimLeft: function(chars, opt_noCase) {
+            if (!chars) return trim(this, 1);
+
+            var string = toString(this), re = prepareTrimRegExp(chars, opt_noCase, 1);
+            while (re.test(string)) {
+                string = string.replace(re, '');
             }
 
-            var str = toString(this), re = prepareTrimRegExp(chars, TRUE);
-            while (re.test(str)) {
-                str = str.replace(re, '');
-            }
-            return str;
+            return string;
         },
 
         /**
          * Trim right.
-         * @param  {String}? chars
+         * @param  {String} chars?
+         * @param  {Bool}   opt_noCase?
          * @return {String}
          * @override For chars option.
          */
-        trimRight: function(chars) {
-            if (!chars) {
-                return trim(this, 2);
+        trimRight: function(chars, opt_noCase) {
+            if (!chars) return trim(this, 2);
+
+            var string = toString(this), re = prepareTrimRegExp(chars, opt_noCase, 2);
+            while (re.test(string)) {
+                string = string.replace(re, '');
             }
 
-            var str = toString(this), re = prepareTrimRegExp(chars);
-            while (re.test(str)) {
-                str = str.replace(re, '');
-            }
-            return str;
-        },
-
-        /**
-         * Starts with.
-         * @param  {String} search
-         * @param  {Int}?   index
-         * @param  {Bool}?  opt_noCase
-         * @return {Bool}
-         * @override For no-case option.
-         */
-        startsWith: function(search, index, opt_noCase) {
-            var src = prepareSearchStuff(this, search, index, opt_noCase);
-            return (src.ss === src.s.substr(src.i, src.ss.length));
-        },
-
-        /**
-         * Ends with.
-         * @param  {String} search
-         * @param  {Int}?   index
-         * @param  {Bool}?  opt_noCase
-         * @return {Bool}
-         * @override For no-case option.
-         */
-        endsWith: function(search, index, opt_noCase) {
-            var src = prepareSearchStuff(this, search, index, opt_noCase);
-            return (src.ss === src.s.substr(0, src.i || src.ss.length));
+            return string;
         },
 
         /**
          * Contains.
          * @param  {String} search
-         * @param  {Bool}?  opt_noCase
+         * @param  {Int}    offset?
+         * @param  {Bool}   opt_noCase?
          * @return {Bool}
          */
-        contains: function(search, opt_noCase) {
-            var src = prepareSearchStuff(this, search, opt_noCase);
-            return (src.s !== src.s.split(src.ss)[0]);
+        contains: function(search, offset, opt_noCase) {
+            return this.substring(offset | 0).test(prepareSearchRegExp(search, opt_noCase, NULL, TRUE));
+        },
+
+        /**
+         * Contains any.
+         * @param  {String|Array} chars
+         * @param  {Int}          offset?
+         * @param  {Bool}         opt_noCase?
+         * @return {Bool}
+         */
+        containsAny: function(chars, offset, opt_noCase) {
+            return this.substring(offset | 0).test(prepareSearchRegExp((
+                isString(chars) ? chars.split('') : chars // array
+            ).uniq().map(toRegExpEsc).join('|').wrap(['(', ')']), opt_noCase));
+        },
+
+        /**
+         * Starts with.
+         * @param  {String} search
+         * @param  {Int}    offset?
+         * @param  {Bool}   opt_noCase?
+         * @return {Bool}
+         * @override For no-case option.
+         */
+        startsWith: function(search, offset, opt_noCase) {
+            return this.substring(offset | 0).test(prepareSearchRegExp(search, opt_noCase, 1, TRUE));
+        },
+
+        /**
+         * Ends with.
+         * @param  {String} search
+         * @param  {Int}    offset?
+         * @param  {Bool}   opt_noCase?
+         * @return {Bool}
+         * @override For no-case option.
+         */
+        endsWith: function(search, offset, opt_noCase) {
+            return this.substring(offset | 0).test(prepareSearchRegExp(search, opt_noCase, 2, TRUE));
         },
 
         /**
          * To reg exp.
-         * @param  {String}? flags
+         * @param  {String} flags?
+         * @param  {int}    ttl?
+         * @param  {Bool}   opt_esc?
          * @return {RegExp}
          */
-        toRegExp: function(flags) {
-            return toRegExp(this, flags);
+        toRegExp: function(flags, ttl, opt_esc) {
+            return toRegExp(this, flags, ttl, opt_esc);
+        }
+    });
+
+    /**
+     * Number extends.
+     */
+    extend(Number[NAME_PROTOTYPE], {
+        /**
+         * Is equal.
+         * @param  {Number} input
+         * @return {Bool}
+         */
+        isEqual: function(input) {
+            return this === input;
         }
     });
 
@@ -679,13 +786,7 @@
     var fn_slice = [].slice;
     var fn_toString = {}.toString;
 
-    /**
-     * Make array.
-     * @param  {Any} input
-     * @param  {Int}? begin
-     * @param  {Int}? end
-     * @return {Array}
-     */
+    // array maker
     function makeArray(input, begin, end) {
         var ret = [], inputType = $.type(input);
 
@@ -729,10 +830,11 @@
 
         /**
          * Now.
+         * @param  {Bool} opt_unix?
          * @return {Int}
          */
-        now: function() {
-            return Date.now();
+        now: function(opt_unix) {
+            return !opt_unix ? Date.now() : Math.round(Date.now() / 1000);
         },
 
         /**
@@ -745,42 +847,61 @@
 
         /**
          * Sid (string id).
-         * @param  {String}? prefix
+         * @param  {String} prefix?
          * @return {String}
          */
         sid: function(prefix) {
-            return toValue(prefix, '__so_sid_') +''+ $.id();
+            return toString(prefix || '') + $.id();
         },
 
         /**
          * Rid (random id).
-         * @param  {String}? prefix
+         * @param  {String} prefix?
          * @return {String}
          */
         rid: function(prefix) {
-            return toValue(prefix, '__so_rid_') +''+ $.now() + toString(Math.random()).slice(-8);
+            return toString(prefix || '') + $.now(TRUE) + toString(Math.random()).slice(-6);
         },
 
         /**
          * Re.
          * @param  {String}  pattern
-         * @param  {String}? flags
-         * @param  {Int}?    ttl
+         * @param  {String}  flags?
+         * @param  {Int}     ttl?
+         * @param  {Bool}    opt_esc?
          * @return {RegExp}
          */
-        re: function(pattern, flags, ttl) {
-            return toRegExp(pattern, flags, ttl);
+        re: function(pattern, flags, ttl, opt_esc) {
+            return toRegExp(pattern, flags, ttl, opt_esc);
+        },
+
+        /**
+         * Re esc.
+         * @param  {String} input
+         * @return {String}
+         */
+        reEsc: function(input) {
+            return toRegExpEsc(input);
+        },
+
+        /**
+         * Len.
+         * @param  {Any} input
+         * @return {Int|null|undefined}
+         */
+        len: function(input) {
+            return getLength(input);
         },
 
         /**
          * Fire & ifire.
          * @param  {Int|String} delay (ms)
          * @param  {Function}   fn
-         * @param  {Array}?     fnArgs
+         * @param  {Array}      fnArgs?
          * @return {void}
          */
         fire: function(delay, fn, fnArgs) {
-            if ($.isString(delay)) {
+            if (isString(delay)) {
                 delay = toMilliseconds(delay);
             }
 
@@ -789,7 +910,7 @@
             }, delay || 1);
         },
         ifire: function(delay, fn, fnArgs) {
-            if ($.isString(delay)) {
+            if (isString(delay)) {
                 delay = toMilliseconds(delay);
             }
 
@@ -801,41 +922,31 @@
         /**
          * Get window.
          * @param  {Any} object
-         * @return {Window}?
+         * @return {Window}
          */
         getWindow: function(object) {
-            if (!object) {
-                return window;
-            } if (object[NAME_OWNER_DOCUMENT]) {
-                return object[NAME_OWNER_DOCUMENT][NAME_DEFAULT_VIEW];
-            } if ($.isWindow(object)) {
-                return object;
-            } if ($.isDocument(object)) {
-                return object[NAME_DEFAULT_VIEW];
-            }
+            if (!object)                     return window;
+            if (object[NAME_OWNER_DOCUMENT]) return object[NAME_OWNER_DOCUMENT][NAME_DEFAULT_VIEW];
+            if (isWindow(object))            return object;
+            if (isDocument(object))          return object[NAME_DEFAULT_VIEW];
         },
 
         /**
          * Get document.
          * @param  {Any} object
-         * @return {Document}?
+         * @return {Document}
          */
         getDocument: function(object) {
-            if (!object) {
-                return window[NAME_DOCUMENT];
-            } if (object[NAME_OWNER_DOCUMENT]) {
-                return object[NAME_OWNER_DOCUMENT]; // node
-            } if ($.isDocument(object)) {
-                return object;
-            } if ($.isWindow(object)) {
-                return object[NAME_DOCUMENT];
-            }
+            if (!object)                     return window[NAME_DOCUMENT];
+            if (object[NAME_OWNER_DOCUMENT]) return object[NAME_OWNER_DOCUMENT]; // node
+            if (isDocument(object))          return object;
+            if (isWindow(object))            return object[NAME_DOCUMENT];
         },
 
         /**
          * Trim.
-         * @param  {String}  input
-         * @param  {String}? chars
+         * @param  {String} input
+         * @param  {String} chars?
          * @return {String}
          */
         trim: function(input, chars) {
@@ -844,8 +955,8 @@
 
         /**
          * Trim left.
-         * @param  {String}  input
-         * @param  {String}? chars
+         * @param  {String} input
+         * @param  {String} chars?
          * @return {String}
          */
         trimLeft: function(input, chars) {
@@ -854,8 +965,8 @@
 
         /**
          * Trim right.
-         * @param  {String}  input
-         * @param  {String}? chars
+         * @param  {String} input
+         * @param  {String} chars?
          * @return {String}
          */
         trimRight: function(input, chars) {
@@ -869,7 +980,7 @@
          * @return {Any}
          */
         dig: function(input, key) {
-            if ($.isArray(input) || $.isObject(input)) {
+            if (isArray(input) || isObject(input)) {
                 var keys = trim(key).split('.');
 
                 key = keys.shift();
@@ -888,15 +999,11 @@
          * @return {String}
          */
         type: function(input) {
-            var type;
-
-            if ($.isNull(input))             type = 'null';
-            else if ($.isUndefined(input))   type = 'undefined';
-            else if ($.isWindow(input))      type = NAME_WINDOW;
-            else if ($.isDocument(input))    type = NAME_DOCUMENT;
-            else type = fn_toString.call(input).slice(8, -1).toLowerCase();
-
-            return type;
+            return isNull(input) ? 'null'
+                : isUndefined(input) ? 'undefined'
+                : isWindow(input) ? NAME_WINDOW
+                : isDocument(input) ? NAME_DOCUMENT
+                : toLower(fn_toString.call(input).slice(8, -1));
         },
 
         /**
@@ -904,30 +1011,32 @@
          * @param  {Any} input
          * @return {Any}
          */
-        int:    function(input, base) { return toInt(input, base); },
-        float:  function(input) { return toFloat(input); },
-        string: function(input) { return toString(input); },
-        bool:   function(input) { return toBool(input); },
-        value:  function(input, valueDefault) { return toValue(input, valueDefault); },
-
-        /**
-         * Json (encode/decode).
-         * @param  {Any}     input
-         * @param  {Bool}    opt_encode @default=false
-         * @param  {Object}? options
-         * @return {String}
-         */
-        json: function(input, opt_encode, options) {
-            options = options || {};
-            return !opt_encode ? JSON.parse(input, options.reviver)
-                : JSON.stringify(input, options.replacer, options.space);
+        int: function(input, base) {
+            return toInt(input, base);
+        },
+        float: function(input) {
+            return toFloat(input);
+        },
+        string: function(input) {
+            return toString(input);
+        },
+        bool: function(input) {
+            return toBool(input);
         },
 
         /**
+         * Lower, upper.
+         * @param  {String} input
+         * @return {String}
+         */
+        lower: function(input) { return toLower(input); },
+        upper: function(input) { return toUpper(input); },
+
+        /**
          * Has.
-         * @param  {Any}   input
-         * @param  {Any}   search
-         * @param  {Bool}? opt_strict
+         * @param  {Any}  input
+         * @param  {Any}  search
+         * @param  {Bool} opt_strict?
          * @return {Bool}
          */
         has: function(input, search, opt_strict) {
@@ -936,12 +1045,12 @@
 
         /**
          * Is set.
-         * @param  {Any}     input
-         * @param  {String}? key
+         * @param  {Any}    input
+         * @param  {String} key?
          * @return {Bool}
          */
         isSet: function(input, key) {
-            return !isVoid(isVoid(key) ? input : $.dig(input, key));
+            return !isVoid(!isVoid(key) ? $.dig(input, key) : input);
         },
 
         /**
@@ -950,43 +1059,10 @@
          * @return {Bool}
          */
         isEmpty: function(input) {
-            return !input // '', null, undefined, false, 0, -0, NaN
-                || ($.isNumber(input.length) && !input.length)
-                || ($.isObject(input) && !Object.keys(input).length)
-                || ($.isArray(input) && !Object.values(input).length);
-        },
-
-        /**
-         * Copy.
-         * @param  {Array|Object} input
-         * @param  {Array}?       excludedKeys
-         * @return {Array|Object}
-         */
-        copy: function(input, excludedKeys) {
-            return $.copyTo($.isArray(input) ? [] : {}, input, excludedKeys);
-        },
-
-        /**
-         * Copy to.
-         * @param  {Array|Object} inputTo
-         * @param  {Array|Object} inputFrom
-         * @param  {Array}?       excludedKeys
-         * @param  {Bool}?        opt_override @default=true
-         * @return {Array|Object}
-         */
-        copyTo: function(inputTo, inputFrom, excludedKeys, opt_override) {
-            var keys = excludedKeys || [], key;
-
-            for (key in inputFrom) {
-                if (!keys.has(key)) {
-                    if (opt_override !== FALSE && key in inputTo) {
-                        continue;
-                    }
-                    inputTo[key] = inputFrom[key];
-                }
-            };
-
-            return inputTo;
+            return toBool(!input // '', null, undefined, false, 0, -0, NaN
+                || (isNumber(input.length) && !input.length)
+                || (isObject(input) && !Object.keys(input).length)
+            );
         },
 
         /**
@@ -996,7 +1072,7 @@
          * @return {Object}
          */
         extend: function(target, source) {
-            if ($.isArray(target)) {
+            if (isArray(target)) {
                 while (target.length) {
                     $.extend(target.shift(), source);
                 }
@@ -1006,19 +1082,13 @@
         },
 
         /**
-         * Extend prototype.
-         * @param  {Function} target
-         * @param  {Object}   prototype
-         * @return {Function}
+         * Options.
+         * @param  {Object} optionsDefault
+         * @param  {Object} options
+         * @return {Object}
          */
-        extendPrototype: function(target, prototype) {
-            if ($.isArray(target)) {
-                while (target.length) {
-                    $.extendPrototype(target.shift(), prototype);
-                }
-            } else {
-                return extend(target[NAME_PROTOTYPE], prototype);
-            }
+        options: function(optionsDefault, options) {
+            return $.extend({}, optionsDefault, options);
         },
 
         /**
@@ -1027,9 +1097,9 @@
          * @return {Array}
          */
         array: function() {
-            var ret = [], args = arguments, argsLen = args.length, i = 0;
+            var ret = [], args = arguments, argsLength = getLength(args), i = 0;
 
-            while (i < argsLen) {
+            while (i < argsLength) {
                 ret = ret.concat(makeArray(args[i++]));
             }
 
@@ -1037,84 +1107,10 @@
         },
 
         /**
-         * Object.
-         * @param  {Object} object
-         * @param  {Object} properties
-         * @return {Object}
-         */
-        object: function(object, properties) {
-            $.forEach(properties, function(name, property) {
-                properties[name] = {
-                    value: property[0],
-                    writable: toBool(property[1] != NULL ? property[1] : TRUE),
-                    enumerable: toBool(property[2] != NULL ? property[2] : TRUE),
-                    configurable: toBool(property[3] != NULL ? property[3] : TRUE)
-                }
-            });
-
-            return Object.create(object, properties);
-        },
-
-        /**
-         * Options.
-         * @param  {Object}? options
-         * @param  {Object}  ...arguments
-         * @return {Object}
-         */
-        options: function(options) {
-            return $.extend.apply(NULL, [options || {}].concat(makeArray(arguments, 1)));
-        },
-
-        /**
-         * Pick.
-         * @param  {Array|Object} input
-         * @param  {String}       key
-         * @param  {Any}?         valueDefault
-         * @return {Any}?
-         */
-        pick: function(input, key, valueDefault) {
-            var value = valueDefault;
-
-            if (key in input) {
-                if ($.isArray(input)) {
-                    value = input.splice(key, 1)[0];
-                } else {
-                    value = input[key], delete input[key];
-                    if (input.length) input.length--; // fix length
-                }
-            }
-
-            return value;
-        },
-
-        /**
-         * Pick all.
-         * @param  {Array|Object} input
-         * @param  {Object}       ...arguments
-         * @return {Object}
-         */
-        pickAll: function(input) {
-            var keys = makeArray(arguments, 1), values = {};
-
-            $.forEach(input, function(key, value) {
-                // if ($.isNumeric(key)) key *= 1; // fix for index
-                if (keys.has(key)) {
-                    values[key] = value, delete input[key];
-                }
-            });
-
-            if (input.length && !$.isEmpty(values)) {
-                input.length -= values.length; // fix keys & length
-            }
-
-            return values;
-        },
-
-        /**
          * Split.
          * @param  {String} input
          * @param  {String} separator
-         * @param  {Int}?   limit
+         * @param  {Int}    limit?
          * @return {Array}
          */
         split: function(input, separator, limit) {
@@ -1140,12 +1136,12 @@
 
     /**
      * Oh baby..
-     * @param  {Function}  callback
-     * @param  {Document}? document
+     * @param  {Function} callback
+     * @param  {Document} document?
      * @return {none}
      */
     $.onReady = function(callback, document) {
-        if ($.isFunction(callback)) {
+        if (isFunction(callback)) {
             onReadyCallbacks.push(callback);
         }
 

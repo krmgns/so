@@ -1,23 +1,47 @@
 <!doctype html>
 <html><head></head><body>
 
+<style>
+.p0 {color: blue}
+.p1 {color: yellow}
+.p2 {color: red}
+.x {color: maroon}
+.outer {height: 100px; font-size: 100px; background-color: green}
+</style>
 
 <div id="container">
-    <p class="p p0">The p.p0</p>
-    <p class="p p1">The p.p1</p>
-    <p class="p p2 x">The p.p2</p>
-    <p>Just p</p>
-    <div class="p"></div>
+    <p class="p p0">#container > p.p0</p>
+    <p class="p p1">#container > p.p1</p>
+    <p class="p p2 x">#container > p.p2.x</p>
+    <p>#container > p</p>
+    <div class="p">
+        #container > div.p
+        <p>#container > div.p > p</p>
+    </div>
 </div>
-<p></p>
+
+<button show>Button [show]</button>
+<button hide>Button [hide]</button>
+<button toggle>Button [toggle]</button>
+<br>
+<!-- <p class="outer">Outer p.outer</p> -->
+<s class="outer">Outer s.outer</s>
 
 <script src="so-all.php"></script>
 <script>
 so.onReady(function($) {
-    var els = $.dom(".p", "#container")
-    // log(els)
+
+    $.dom("button[show]").on("click", () => $.dom(".outer").show("slow"))
+    $.dom("button[hide]").on("click", () => $.dom(".outer").hide("slow"))
+    $.dom("button[toggle]").on("click", () => $.dom(".outer").toggle("slow"))
+
+    // var els = $.dom(".p", "#container")
+    // var els = $.dom("#container").findAll("> p")
+    // log(els.nth('.0'))
+    // log(els.size())
+    // log(els.toArray())
     // els.addClass("x")
-    els = els.toggleClass("p0")
+    // els = els.toggleClass("p0")
     // log(els)
 
     // var el = $.dom(".p0")
@@ -25,10 +49,10 @@ so.onReady(function($) {
 
     // log($.dom("#container").tag())
 
-    els.forEach(function(el){
-        log(el.tagName == "DIV")
-        log($.dom(el).tag() == "div")
-    });
+    // els.forEach(function(el){
+    //     log(el.tagName == "DIV")
+    //     log($.dom(el).tag() == "div")
+    // });
 });
 
 // just onReady test
@@ -65,12 +89,5 @@ so.onReady(function($) {
 // so.onReady(function($) { log(i++) });
 // so.onReady(function($) { log(i++) });
 </script>
-
-<style>
-.p0 {color: blue}
-.p1 {color: yellow}
-.p2 {color: red}
-.x {color: maroon}
-</style>
 
 </body></html>
