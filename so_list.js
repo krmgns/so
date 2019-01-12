@@ -110,19 +110,19 @@
         /**
          * Remove.
          * @param  {Any} value
-         * @return {Bool}
+         * @return {self}
          */
         remove: function(value) {
-            return (UNDEFINED !== this.pick(this.findKey(value)));
+            return this.pick(this.findIndex(value)), this;
         },
 
         /**
          * Remove at.
          * @param  {Int|String} key
-         * @return {Bool}
+         * @return {self}
          */
         removeAt: function(key) {
-            return (UNDEFINED !== this.pick(key));
+            return this.pick(key), this;
         },
 
         /**
@@ -238,21 +238,20 @@
         /**
          * Find.
          * @param  {Any} searchValue
-         * @param  {Any} valueDefault
-         * @param  {Int} opt_return?
+         * @param  {Int} opt_returnKey?
          * @return {Any|undefined}
          */
-        find: function(searchValue, valueDefault, opt_return) {
-            var search = searchValue, ret = valueDefault;
+        find: function(searchValue, opt_returnKey) {
+            var ret, fn = searchValue;
 
             // make test function
-            if (!$.isFunction(searchValue)) {
-                search = function(value) { return (value === searchValue); };
+            if (!$.isFunction(fn)) {
+                fn = function(key, value) { return value === searchValue; };
             }
 
             this.forEach(function(key, value, i) {
-                if (search(value)) {
-                    ret = (opt_return == NULL) ? value : ((opt_return == 1) ? key : i);
+                if (fn(key, value)) {
+                    ret = opt_returnKey ? key : value;
                     return _break;
                 }
             });
@@ -261,36 +260,34 @@
         },
 
         /**
-         * Find key.
+         * Find index (key).
          * @param  {Any} searchValue
          * @return {String|undefined}
          */
-        findKey: function(searchValue) {
-            return this.find(searchValue, UNDEFINED, 1);
-        },
-
-        /**
-         * Find index.
-         * @param  {Any} searchValue
-         * @return {Int|undefined}
-         */
         findIndex: function(searchValue) {
-            return this.find(searchValue, UNDEFINED, 2);
+            return this.find(searchValue, TRUE);
         },
 
         /**
          * Pick.
          * @param  {Any} key
-         * @param  {Any} valueDefault
-         * @return {Any}
+         * @return {Any|undefined}
          */
-        pick: function(key, valueDefault) {
-            var _this = this, ret = valueDefault;
+        pick: function(key) {
+            var _this = this, ret, data = {};
 
             if (key in _this.data) {
                 ret = _this.data[key];
-                // delete key and increase size
+
+                // delete key and decrease size
                 delete _this.data[key], _this.size--;
+
+                // reset indexes
+                if (_this.type != 'object') {
+                    $for(_this.values(), function(value, i) {
+                        _this.data[i] = value;
+                    });
+                }
             }
 
             return ret;
@@ -298,19 +295,27 @@
 
         /**
          * Pick all.
-         * @param  {Object} ...arguments
+         * @param  {Object} ...arguments (keys)
          * @return {Object}
          */
         pickAll: function() {
-            var _this = this, ret = {};
+            var _this = this, ret = {}, i = 0;
 
-            $forEach($.array(arguments), function(key) {
+            $for(arguments, function(key) {
+                ret[i] = UNDEFINED;
                 if (key in _this.data) {
-                    ret[key] = _this.data[key];
-                    // delete key and increase size
-                    delete _this.data[key], _this.size--;
+                    ret[i] = _this.data[key];
+                    // delete key and decrease size
+                    delete _this.data[key], _this.size--, i++;
                 }
             });
+
+            // reset indexes
+            if (_this.type != 'object' && !$.isEmpty(ret)) {
+                $for(_this.values(), function(value, i) {
+                    _this.data[i] = value;
+                });
+            }
 
             return ret;
         },
