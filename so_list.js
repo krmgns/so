@@ -386,15 +386,15 @@
          * @return {List}
          */
         uniq: function() {
-            var data = {}, values = [];
+            return $.list(this.values().uniq(), {type: this.type});
+        },
 
-            this.forEach(function(key, value) {
-                if (!~values.indexOf(value)) {
-                    data[key] = value, values.push(value);
-                }
-            });
-
-            return $.list(data, {type: this.type});
+        /**
+         * Ununiq.
+         * @return {List}
+         */
+        ununiq: function() {
+            return $.list(this.values().ununiq(), {type: this.type});
         },
 
         /**
