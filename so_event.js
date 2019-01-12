@@ -48,6 +48,7 @@
         KEY_END =        35, KEY_PAGE_UP =  33, KEY_PAGE_DOWN =   34, KEY_INSERT =     45,  KEY_CAPS_LOCK = 20,
         KEY_ARROW_LEFT = 37, KEY_ARROW_UP = 38, KEY_ARROW_RIGHT = 39, KEY_ARROW_DOWN = 40,
         KEY_SHIFT =      16, KEY_CONTROL =  17, KEY_ALT =         18, KEY_ALT_GRAPH =  225;
+    var _break = 0;
 
     /**
      * Create.
@@ -70,7 +71,7 @@
                 re = $re('^('+ re +')$', 'i');
                 if (re.test(eventType)) {
                     eventClass = eventClassOrig = _eventClass;
-                    return 0; // break
+                    return _break;
                 }
             });
         }

@@ -152,6 +152,9 @@
         return target;
     }
 
+    // loop breaker (for & forEach)
+    var _break = 0;
+
     /**
      * Loop.
      * @param  {Array|Object} input
@@ -168,7 +171,7 @@
         if (inputLength && opt_useLength) {
             while (i < inputLength) {
                 value = input[i++];
-                if (0 === fn.apply(_this, !opt_useKey ?
+                if (_break === fn.apply(_this, !opt_useKey ?
                         [value, i] /* for */ : [i, value, i] /* forEach */)) {
                     break;
                 }
@@ -177,7 +180,7 @@
             for (key in input) {
                 if (input.hasOwnProperty(key)) {
                     value = input[key];
-                    if (0 === fn.apply(_this, !opt_useKey ?
+                    if (_break === fn.apply(_this, !opt_useKey ?
                             [value, i++] /* for */ : [key, value, i++] /* forEach */)) {
                         break;
                     }
@@ -386,7 +389,7 @@
         } else if (isArray(input) || isObject(input)) {
             $.for(input, function(value, i) {
                 if (opt_strict ? value === search : value == search) {
-                    ret = i; return 0; // break
+                    return (ret = i), _break;
                 }
             });
         }

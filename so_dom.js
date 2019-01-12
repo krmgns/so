@@ -44,7 +44,6 @@
         $isNumber = $.isNumber, $isArray = $.isArray, $isObject = $.isObject, $isFunction = $.isFunction,
         $isTrue = $.isTrue, $isFalse = $.isFalse, $isWindow = $.isWindow, $isDocument = $.isDocument,
         $getWindow = $.getWindow, $getDocument = $.getDocument;
-    var _break = 0; // break tick: $for, $forEach
 
     // general helpers
     function split(s, re) {
@@ -503,7 +502,9 @@
         // clone.cloneOf = el; // @debug
         setAttr(clone, soPrefix +'clone', $.id(), FALSE);
         if (!$isFalse(opt_deep)) {
-            if (el.$data) clone.$data = el.$data;
+            if (el.$data) {
+                clone.$data = el.$data;
+            }
 
             if (el.$events) {
                 $for(el.$events, function(events) {
@@ -1320,6 +1321,7 @@
     // style helpers
     function getCssStyle(el) {
         var sheets = el[NAME_OWNER_DOCUMENT].styleSheets, rules, ret = [];
+
         $for(sheets, function(sheet) {
             rules = sheet.rules || sheet.cssRules;
             $for(rules, function(rule) {
@@ -1328,6 +1330,7 @@
                 }
             });
         });
+
         return ret[ret.length - 1] /* return last rule */ || {};
     }
 
@@ -1390,8 +1393,9 @@
         var name, ret = {};
 
         for (name in style) {
-            if (!$isNumeric(name) /* skip '"0": "width"' etc. */ &&
-                 $isString(style[name]) /* has own doesn't work (firefox/51) */) {
+            if (!$isNumeric(name) // skip '"0": "width"' etc.
+                && $isString(style[name]) // has own doesn't work (firefox/51)
+            ) {
                 ret[name] = style[name];
             }
         }
@@ -1431,6 +1435,7 @@
          */
         setStyle: function(name, value) {
             var styles = name;
+
             if ($isString(styles)) {
                 styles = $isVoid(value) ? parseStyleText(name) : toKeyValueObject(name, value);
             }
@@ -1531,7 +1536,8 @@
          * @return {Dom}
          */
         removeStyle: function(name) {
-            return (name == '*') ? this.attr('style', '')
+            return (name == '*')
+                ? this.attr('style', '')
                 : (name = split(name, re_comma)), this.for(function(el) {
                     name.forEach(function(name) { setStyle(el, name, ''); });
                 });
@@ -2034,7 +2040,7 @@
         /**
          * Value.
          * @param  {String} value?
-         * @return {String|Dom}
+         * @return {String|Dom|undefined}
          */
         value: function(value) {
             return $isDefined(value) ? this.setValue(value) : this.getValue();
@@ -2156,9 +2162,7 @@
          * @return {Dom}
          */
         addClass: function(name) {
-            return this.for(function(el) {
-                addClass(el, name);
-            });
+            return this.for(function(el) { addClass(el, name); });
         },
 
         /**
@@ -2179,9 +2183,8 @@
          */
         replaceClass: function(oldName, newName) {
             return this.for(function(el) {
-                el[NAME_CLASS_NAME] = $trim(
-                    el[NAME_CLASS_NAME].replace(toClassRegExp(oldName), (' '+ $trim(newName) +' '))
-                );
+                el[NAME_CLASS_NAME] = $trim(el[NAME_CLASS_NAME].replace(toClassRegExp(oldName),
+                    ' '+ $trim(newName) +' '));
             });
         },
 
@@ -2202,9 +2205,7 @@
          * @return {Dom}
          */
         setClass: function(name) {
-            return this.for(function(el) {
-                el[NAME_CLASS_NAME] = name;
-            });
+            return this.for(function(el) { el[NAME_CLASS_NAME] = name; });
         },
 
         /**
@@ -2283,9 +2284,7 @@
          * @return {Dom}
          */
         setData: function(key, value) {
-            return this.for(function(el) {
-                setData(el, key, value);
-            });
+            return this.for(function(el) { setData(el, key, value); });
         },
 
         /**
@@ -2619,9 +2618,7 @@
              * @return {Dom}
              */
             on: function(type, fn, options) {
-                return this.for(function(el) {
-                    event.on(el, type, fn, options);
-                });
+                return this.for(function(el) { event.on(el, type, fn, options); });
             },
 
             /**
@@ -2632,9 +2629,7 @@
              * @return {Dom}
              */
             one: function(type, fn, options) {
-                return this.for(function(el) {
-                    event.one(el, type, fn, options);
-                });
+                return this.for(function(el) { event.one(el, type, fn, options); });
             },
 
             /**
@@ -2645,9 +2640,7 @@
              * @return {Dom}
              */
             off: function(type, fn, options) {
-                return this.for(function(el) {
-                    event.off(el, type, fn, options);
-                });
+                return this.for(function(el) { event.off(el, type, fn, options); });
             },
 
             /**
@@ -2658,9 +2651,7 @@
              * @return {Dom}
              */
             fire: function(type, fn, options) {
-                return this.for(function(el) {
-                    event.fire(el, type, fn, options);
-                });
+                return this.for(function(el) { event.fire(el, type, fn, options); });
             }
         });
     }
