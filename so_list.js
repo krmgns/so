@@ -113,7 +113,7 @@
          * @return {self}
          */
         remove: function(value) {
-            return this.pick(this.findIndex(value)), this;
+            return this.pull(this.findIndex(value)), this;
         },
 
         /**
@@ -122,7 +122,7 @@
          * @return {self}
          */
         removeAt: function(key) {
-            return this.pick(key), this;
+            return this.pull(key), this;
         },
 
         /**
@@ -224,7 +224,7 @@
          * @return {Any}
          */
         top: function() {
-            return this.pick(this.keys().shift());
+            return this.pull(this.keys().shift());
         },
 
         /**
@@ -232,7 +232,7 @@
          * @return {Any}
          */
         pop: function() {
-            return this.pick(this.keys().pop());
+            return this.pull(this.keys().pop());
         },
 
         /**
@@ -269,24 +269,44 @@
         },
 
         /**
-         * Pick.
+         * Push (alias of append()).
+         * @param  {Any} value
+         * @return {self}
+         */
+        push: function(value) {
+            return this.append(value);
+        },
+
+        /**
+         * Push all.
+         * @param  {Any} ...arguments
+         * @return {self}
+         */
+        pushAll: function() {
+            return $for(arguments, function(value) {
+                this.append(value);
+            }, this);
+        },
+
+        /**
+         * Pull.
          * @param  {Any} key
          * @return {Any|undefined}
          */
-        pick: function(key) {
-            var _this = this, ret, data = {};
+        pull: function(key) {
+            var _this = this, data = {}, ret;
 
             if (key in _this.data) {
                 ret = _this.data[key];
-
                 // delete key and decrease size
                 delete _this.data[key], _this.size--;
 
-                // reset indexes
+                // reset data with indexes
                 if (_this.type != 'object') {
-                    $for(_this.values(), function(value, i) {
-                        _this.data[i] = value;
+                    $for(_this.data, function(value, i) {
+                        data[i] = value;
                     });
+                    _this.data = data;
                 }
             }
 
@@ -294,12 +314,12 @@
         },
 
         /**
-         * Pick all.
+         * Pull all.
          * @param  {Object} ...arguments (keys)
          * @return {Object}
          */
-        pickAll: function() {
-            var _this = this, ret = {}, i = 0;
+        pullAll: function() {
+            var _this = this, data = {}, ret = {}, i = 0;
 
             $for(arguments, function(key) {
                 ret[i] = UNDEFINED;
@@ -310,11 +330,12 @@
                 }
             });
 
-            // reset indexes
+            // reset data with indexes
             if (_this.type != 'object' && !$.isEmpty(ret)) {
                 $for(_this.values(), function(value, i) {
-                    _this.data[i] = value;
+                    data[i] = value;
                 });
+                _this.data = data;
             }
 
             return ret;
@@ -417,7 +438,7 @@
                 });
             }
 
-            return $.list(data, {type: _this.type});
+            return (_this.data = data), _this
         },
 
         /**
