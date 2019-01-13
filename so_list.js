@@ -449,8 +449,8 @@
         test: function(fn) {
             var ret = FALSE;
 
-            this.for(function(value) {
-                if (fn(value)) {
+            this.forEach(function(key, value, i) {
+                if (fn(value, key, i)) {
                     return (ret = TRUE), _break;
                 }
             });
@@ -466,8 +466,8 @@
         testAll: function(fn) {
             var ret = TRUE;
 
-            this.for(function(value) {
-                if (!fn(value)) {
+            this.forEach(function(key, value, i) {
+                if (!fn(value, key, i)) {
                     return (ret = FALSE), _break;
                 }
             });
