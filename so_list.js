@@ -7,7 +7,7 @@
  */
 ;(function($, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
 
-    var $extend = $.extend, $for = $.for, $forEach = $.forEach, $bool = $.bool;
+    var $for = $.for, $forEach = $.forEach, $bool = $.bool;
     var _break = 0;
 
     /**
@@ -21,7 +21,7 @@
         this.init(data || {}, options);
     }
 
-    $extend(List.prototype, {
+    List.prototype = {
         /**
          * Init.
          * @param  {Iterable} data
@@ -513,7 +513,7 @@
         isEmpty: function() {
             return !this.size;
         }
-    });
+    };
 
     /**
      * List.
