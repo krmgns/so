@@ -146,7 +146,7 @@
          * @return {self}
          */
         replaceAt: function(key, replaceValue) {
-            return this.data[key] = replaceValue, this;
+            return (this.data[key] = replaceValue), this;
         },
 
         /**
@@ -154,7 +154,7 @@
          * @return {self}
          */
         empty: function() {
-            return this.data = {}, this.size = 0, this;
+            return (this.data = {}, this.size = 0), this;
         },
 
         /**
@@ -249,7 +249,7 @@
                 fn = function(key, value) { return value === searchValue; };
             }
 
-            this.forEach(function(key, value, i) {
+            this.forEach(function(key, value) {
                 if (fn(key, value)) {
                     ret = opt_returnKey ? key : value;
                     return _break;
@@ -303,7 +303,7 @@
 
                 // reset data with indexes
                 if (_this.type != 'object') {
-                    $for(_this.data, function(value, i) {
+                    $for(_this.values(), function(value, i) {
                         data[i] = value;
                     });
                     _this.data = data;
