@@ -124,10 +124,10 @@
     };
 
     /**
-     * Stream.
+     * Message.
      * @param {Client} client
      */
-    function Stream(client) {
+    function Message(client) {
         this.client = client;
         this.headers = {};
         this.data = NULL;
@@ -157,8 +157,8 @@
     }
 
     // extend request & response
-    $class(Request).extends(Stream);
-    $class(Response).extends(Stream);
+    $class(Request).extends(Message);
+    $class(Response).extends(Message);
 
     // shortcut helpers
     function addUriParams(uri, uriParams) {
@@ -249,7 +249,7 @@
             delete options.headers['X-Requested-With'];
         }
 
-        // handle post streams
+        // handle post content type
         if (re_post.test(options.method)) {
             options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
         }
