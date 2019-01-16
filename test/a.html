@@ -31,6 +31,39 @@
 <script>
 so.onReady(function($) {
 
+// function Person(id) {
+//     this.id = id
+//     this.getId = () => { return this.id }
+// }
+// function User(id) {
+//     this.super(id)
+// }
+// $.class(User).extends(Person)
+
+// var User = $
+//     .class(function(id) {
+//         this.super(id)
+//     })
+//     .extends(function(id) {
+//         this.id = id
+//         this.getId = () => { return this.id }
+//     })
+
+// class Person {
+//     constructor(id) { this.id = id }
+//     getId() { return this.id }
+// }
+// class User extends Person {
+//     // constructor(id) { super(id) }
+// }
+
+// all same above
+// var u = new User("ali")
+// log(u)
+// log(u.id)
+// log(u.getId())
+// return
+
     $.dom("button[show]").on("click", () => $.dom(".outer").show("slow"))
     $.dom("button[hide]").on("click", () => $.dom(".outer").hide("slow"))
     $.dom("button[toggle]").on("click", () => $.dom(".outer").toggle("slow"))
