@@ -8,7 +8,30 @@
 ;(function($, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
 
     var $for = $.for, $forEach = $.forEach, $bool = $.bool;
+    var fn_slice = [].slice;
     var _break = 0;
+
+    function copyArray(array) {
+        return fn_slice.call(array);
+    }
+
+    // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm
+    function shuffle(items) {
+        var ret = copyArray(items), i = ret.length - 1, ir, tmp;
+        for (i; i > 0; i--) {
+            ir = ~~(Math.random() * (i + 1));
+            tmp = ret[i], ret[i] = ret[ir], ret[ir] = tmp;
+        }
+        return ret;
+    }
+
+    function flip(items) {
+        var ret = {};
+        $forEach(items, function(key, value) {
+            ret[value] = key;
+        });
+        return ret;
+    }
 
     /**
      * List.
@@ -430,15 +453,71 @@
         reverse: function() {
             var _this = this, data = {};
 
-            if (_this.type == 'array' || _this.type == 'string') {
-                data = _this.values().reverse(); // keys also will be reversed
-            } else {
+            if (_this.type == 'object') {
                 _this.keys().reverse().forEach(function(key) {
                     data[key] = _this.data[key];
                 });
+            } else {
+                data = _this.values().reverse(); // keys also will be reversed
             }
 
             return (_this.data = data), _this
+        },
+
+        /**
+         * Rand.
+         * @param  {Int} size
+         * @return {Any}
+         */
+        rand: function(size) {
+            var _this = this, values = shuffle(this.values()), ret = [], i = size = size || 1;
+
+            while (i--) {
+                ret[i] = values[i];
+            }
+
+            return size == 1 ? ret[0] : ret;
+        },
+
+        /**
+         * Shuffle.
+         * @return {List}
+         */
+        shuffle: function() {
+            var _this = this, data = {}, keys, shuffledKeys, i;
+
+            if (_this.type == 'object') {
+                keys = _this.keys(), shuffledKeys = shuffle(_this.keys()), i = keys.length;
+                while (i--) {
+                    data[shuffledKeys[i]] = _this.data[keys[i]];
+                }
+            } else {
+                data = shuffle(_this.values());
+            }
+
+            return $.list(data, {type: _this.type});
+        },
+
+        /**
+         * Sort.
+         * @param  {Function} fn?
+         * @return {self}
+         */
+        sort: function(fn) {
+            var _this = this, data = {}, flippedData;
+
+            if (_this.type == "object") {
+                flippedData = flip(_this.data);
+                $forEach(_this.values().sort(fn), function(key, value) {
+                    data[flippedData[value]] = value;
+                });
+            } else {
+                $forEach(_this.values().sort(fn), function(key, value) {
+                    data[key] = value;
+                });
+            }
+
+            return (_this.data = data), _this;
         },
 
         /**
@@ -473,21 +552,6 @@
             });
 
             return ret;
-        },
-
-        /**
-         * Sort.
-         * @param  {Function} fn?
-         * @return {self}
-         */
-        sort: function(fn) {
-            var data = {};
-
-            $forEach(this.values().sort(fn), function(key, value) {
-                data[key] = value;
-            });
-
-            return this.init(data, {type: this.type}); // reset data
         },
 
         /**
