@@ -17,12 +17,15 @@
     var NAME_DEFAULT_VIEW = 'defaultView';
     var NAME_OWNER_DOCUMENT = 'ownerDocument';
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
-    var Array = window.Array, Object = window.Object, String = window.String;
+    var Array = window.Array, Object = window.Object, String = window.String, Number = window.Number;
     var Date = window.Date, RegExp = window.RegExp, Math = window.Math, Function = window.Function;
+
+    var MAX_INT = Number.MAX_SAFE_INTEGER || Math.pow(2, 53) - 1;
+    var MAX_FLOAT = Number.MAX_VALUE;
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.41.3';
+    window.so.VERSION = '5.42.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -1126,6 +1129,30 @@
                 }
             }
             return input;
+        },
+
+        /**
+         * Rand int.
+         * @param  {Int} min
+         * @param  {Int} max
+         * @return {Int}
+         */
+        randInt: function(min, max) {
+            min = min || 0;
+            max = max || MAX_INT;
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        },
+
+        /**
+         * Rand float.
+         * @param  {Float} min
+         * @param  {Float} max
+         * @return {Float}
+         */
+        randFloat: function(min, max) {
+            min = min || 0;
+            max = max || 1 + min;
+            return Math.random() * (max - min) + min;
         }
     });
 
