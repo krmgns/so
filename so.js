@@ -25,7 +25,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.42.0';
+    window.so.VERSION = '5.43.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -459,6 +459,33 @@
          */
         ununiq: function() {
             return toUniqUnuniq(this);
+        },
+
+        /**
+         * Rand.
+         * @return {Any}
+         * @source https://stackoverflow.com/a/23976260/362780
+         */
+        rand: function() {
+            return this[~~(this.length * Math.random())];
+        },
+
+        /**
+         * Range.
+         * @param  {Number} min
+         * @param  {Number} max
+         * @param  {Number} step
+         * @return {Array}
+         * @source https://stackoverflow.com/a/15453499/362780
+         */
+        range: function(min, max, step) {
+            var ret = [min];
+
+            while (min < max) {
+                ret.push(min += step || 1);
+            }
+
+            return ret;
         },
 
         /**
