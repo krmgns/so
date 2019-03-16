@@ -25,7 +25,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.43.1';
+    window.so.VERSION = '5.43.2';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 

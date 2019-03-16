@@ -170,6 +170,15 @@
                 }
             });
 
+            // workaround for key,keyCode for (on)input events
+            if (e.type == 'input') {
+                var char = !$isObject(e.data) ? e.data : NULL;
+                if (char != NULL) {
+                    e.key = char;
+                    e.keyCode = char.toUpperCase().charCodeAt();
+                }
+            }
+
             if ($isDefined(e.keyCode)) {
                 var eKeyCode = e.keyCode;
                 // key sugars..
@@ -201,7 +210,7 @@
                 });
             }
 
-            return fn.call(event.target, e);
+            return fn.call(event.target, e, event.target);
         };
     }
 
