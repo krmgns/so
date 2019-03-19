@@ -25,7 +25,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.43.2';
+    window.so.VERSION = '5.44.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -75,11 +75,11 @@
         return !!input;
     }
 
-    function toLower(input) {
-        return !isVoid(input) ? toString(input).toLowerCase() : '';
+    function lower(input) {
+        return toString(input).toLowerCase();
     }
-    function toUpper(input) {
-        return !isVoid(input) ? toString(input).toUpperCase() : '';
+    function upper(input) {
+        return toString(input).toUpperCase();
     }
 
     function toMilliseconds(time) {
@@ -96,13 +96,12 @@
         return time;
     }
 
-    function toRegExpEsc(input) {
-        // @note slash (/) is escaped already
-        return input.replace(/[.*+?^$|{}()\[\]\\]/g, '\\$&');
-    }
-
     // cacheable regexp stuff with ttl (for gc)
     function toRegExp(pattern, flags, ttl, opt_esc) {
+        if (!pattern) {
+            throw ('Pattern required!');
+        }
+
         flags = flags || '';
         if (flags && isInt(flags)) {
             ttl = flags, flags = '';
@@ -130,8 +129,13 @@
         return ret;
     }
 
+    function toRegExpEsc(input) {
+        // @note slash (/) is escaped already
+        return input.replace(/[.*+?^$|{}()\[\]\\]/g, '\\$&');
+    }
+
     // safer length getter
-    function getLength(input) {
+    function len(input) {
         return input && input.length;
     }
 
@@ -155,7 +159,7 @@
         return target;
     }
 
-    // loop breaker (for & forEach)
+    // loop breaker (for, forEach)
     var _break = 0;
 
     /**
@@ -164,15 +168,15 @@
      * @param  {Function}     fn
      * @param  {Object}       _this?
      * @param  {Bool}         opt_useKey?
-     * @param  {Bool}         opt_useLength?
+     * @param  {Bool}         opt_useLen?
      * @return {Array|Object}
      * @private
      */
-    function loop(input, fn, _this, opt_useKey, opt_useLength) {
-        var _this = _this || input, inputLength = getLength(input), i = 0, key, value;
+    function loop(input, fn, _this, opt_useKey, opt_useLen) {
+        var _this = _this || input, inputLen = len(input), i = 0, key, value;
 
-        if (inputLength && opt_useLength) {
-            while (i < inputLength) {
+        if (inputLen && opt_useLen) {
+            while (i < inputLen) {
                 value = input[i++];
                 if (_break === fn.apply(_this, !opt_useKey ?
                         [value, i] /* for */ : [i, value, i] /* forEach */)) {
@@ -198,18 +202,26 @@
     // so: for, forEach
     extend($, {
         /**
-         * For: (value, i)
-         * @inheritDoc @see loop()
+         * Each: (value, i), (key, value, i)
+         * @see loop()
          */
-        for: function(input, fn, _this, opt_useLength) {
-            return loop(input, fn, _this, FALSE, opt_useLength);
+        each: function(input, fn, _this, opt_useKey, opt_useLen) {
+            return loop(input, fn, _this, opt_useKey, opt_useLen);
+        },
+
+        /**
+         * For: (value, i)
+         * @see loop()
+         */
+        for: function(input, fn, _this, opt_useLen) {
+            return loop(input, fn, _this, FALSE, opt_useLen);
         },
         /**
          * For each: (key => value, i)
-         * @inheritDoc @see loop()
+         * @see loop()
          */
-        forEach: function(input, fn, _this, opt_useLength) {
-            return loop(input, fn, _this, TRUE, opt_useLength);
+        forEach: function(input, fn, _this, opt_useLen) {
+            return loop(input, fn, _this, TRUE, opt_useLen);
         }
     });
 
@@ -401,10 +413,10 @@
     }
 
     // uniq/ununiq helper
-    function toUniqUnuniq(array, opt_uniq) {
-        return opt_uniq
-            ? array.filter(function(el, i, _array) { return _array.indexOf(el) == i; })
-            : array.filter(function(el, i, _array) { return _array.indexOf(el) != i; });
+    function toUniqUnuniq(array, opt_ununiq) {
+        return opt_ununiq
+            ? array.filter(function(el, i, _array) { return _array.indexOf(el) != i; })
+            : array.filter(function(el, i, _array) { return _array.indexOf(el) == i; });
     }
 
     /**
@@ -416,7 +428,7 @@
          * @return {Int}
          */
         len: function() {
-            return getLength(this);
+            return len(this);
         },
 
         /**
@@ -427,6 +439,15 @@
          */
         has: function(search, opt_strict) {
             return has(this, search, opt_strict);
+        },
+
+        /**
+         * Each.
+         * @param  {Function} fn
+         * @return {Array}
+         */
+        each: function(fn) {
+            return loop(this, fn);
         },
 
         /**
@@ -450,7 +471,7 @@
          * @return {Array}
          */
         uniq: function() {
-            return toUniqUnuniq(this, TRUE);
+            return toUniqUnuniq(this);
         },
 
         /**
@@ -458,7 +479,26 @@
          * @return {Array}
          */
         ununiq: function() {
-            return toUniqUnuniq(this);
+            return toUniqUnuniq(this, TRUE);
+        },
+
+        /**
+         * Filter.
+         * @param  {Function} fn
+         * @return {Array}
+         * @override
+         */
+        filter: function(fn) {
+            // prevent: undefined is not a function
+            fn = fn || function(el) { return trim(el) };
+
+            var ret = [];
+
+            this.each(function(el, i) {
+                fn(el, i) && ret.push(el);
+            });
+
+            return ret;
         },
 
         /**
@@ -508,7 +548,7 @@
          * @return {Int}
          */
         len: function() {
-            return getLength(this);
+            return len(this);
         },
 
         /**
@@ -556,27 +596,81 @@
         },
 
         /**
+         * Lower.
+         * @return {String}
+         */
+        lower: function() {
+            return lower(this);
+        },
+
+        /**
+         * Upper.
+         * @return {String}
+         */
+        upper: function() {
+            return upper(this);
+        },
+
+        /**
+         * To camel case.
+         * @param  {String|RegExp} separator
+         * @return {String}
+         */
+        toCamelCase: function(separator) {
+            var s = toString(this), ss;
+
+            if (s) { // prevent empty string craps
+                ss = s.split(separator || ' ');
+                s = ss[0].lower() + ss.slice(1).map(function(s) {
+                    return s.lower().toCapitalCase();
+                }).join('');
+            }
+
+            return s;
+        },
+
+        /**
          * To capital case.
-         * @param  {Bool} opt_all?   @default=true
-         * @param  {Bool} opt_lower? @default=false
+         * @param  {Bool} opt_all?
+         * @param  {Bool} opt_lower?
          * @return {String}
          */
         toCapitalCase: function(opt_all, opt_lower) {
-            var string = toString(this), i;
+            var s = toString(this), i;
 
-            if (string) { // prevent empty string craps
-                opt_lower && (string = toLower(string));
-                if (opt_all !== FALSE) {
-                    for (i = 0, string = string.split(' '); i < string.length; i++) {
-                        string[i] = string[i].toCapitalCase(FALSE);
+            if (s) { // prevent empty string craps
+                opt_lower && (s = lower(s));
+                if (opt_all) {
+                    for (i = 0, s = s.split(' '); i < s.length; i++) {
+                        s[i] = s[i].toCapitalCase(FALSE);
                     }
-                    string = string.join(' ');
+                    s = s.join(' ');
                 } else {
-                    string = toUpper(string[0]) + string.slice(1);
+                    s = upper(s[0]) + s.slice(1);
                 }
             }
 
-            return string;
+            return s;
+        },
+
+        /**
+         * Splits.
+         * @param  {String} separator
+         * @param  {Int}    limit?
+         * @return {Array}
+         */
+        splits: function(separator, limit) {
+            var s = toString(this).split(separator);
+
+            if (limit) {
+                var sRest = s.slice(limit - 1);
+                s = s.slice(0, limit - 1);
+                if (sRest.length) {
+                    s = s.concat(sRest.join(separator));
+                }
+            }
+
+            return s;
         },
 
         /**
@@ -585,18 +679,17 @@
          * @return {String}
          */
         format: function() {
-            var string = toString(this), args = arguments, i = 0,
-                match = string.match(/(%s)/g) || [];
+            var s = toString(this), args = arguments, i = 0, match = s.match(/(%s)/g) || [];
 
             if (args.length < match.length) {
                 $.logWarn('No enough arguments for format().');
             }
 
             while (match.shift()) {
-                string = string.replace(/(%s)/, args[i++]);
+                s = s.replace(/(%s)/, args[i++]);
             }
 
-            return string;
+            return s;
         },
 
         /**
@@ -697,12 +790,12 @@
         trimLeft: function(chars, opt_noCase) {
             if (!chars) return trim(this, 1);
 
-            var string = toString(this), re = prepareTrimRegExp(chars, opt_noCase, 1);
-            while (re.test(string)) {
-                string = string.replace(re, '');
+            var s = toString(this), re = prepareTrimRegExp(chars, opt_noCase, 1);
+            while (re.test(s)) {
+                s = s.replace(re, '');
             }
 
-            return string;
+            return s;
         },
 
         /**
@@ -715,12 +808,12 @@
         trimRight: function(chars, opt_noCase) {
             if (!chars) return trim(this, 2);
 
-            var string = toString(this), re = prepareTrimRegExp(chars, opt_noCase, 2);
-            while (re.test(string)) {
-                string = string.replace(re, '');
+            var s = toString(this), re = prepareTrimRegExp(chars, opt_noCase, 2);
+            while (re.test(s)) {
+                s = s.replace(re, '');
             }
 
-            return string;
+            return s;
         },
 
         /**
@@ -905,7 +998,7 @@
          * @return {Int|null|undefined}
          */
         len: function(input) {
-            return getLength(input);
+            return len(input);
         },
 
         /**
@@ -1018,7 +1111,7 @@
                 : isUndefined(input) ? 'undefined'
                 : isWindow(input) ? NAME_WINDOW
                 : isDocument(input) ? NAME_DOCUMENT
-                : toLower(fn_toString.call(input).slice(8, -1));
+                : lower(fn_toString.call(input).slice(8, -1));
         },
 
         /**
@@ -1026,26 +1119,10 @@
          * @param  {Any} input
          * @return {Any}
          */
-        int: function(input, base) {
-            return toInt(input, base);
-        },
-        float: function(input) {
-            return toFloat(input);
-        },
-        string: function(input) {
-            return toString(input);
-        },
-        bool: function(input) {
-            return toBool(input);
-        },
-
-        /**
-         * Lower, upper.
-         * @param  {String} input
-         * @return {String}
-         */
-        lower: function(input) { return toLower(input); },
-        upper: function(input) { return toUpper(input); },
+        int: function(input, base) { return toInt(input, base); },
+        float: function(input) { return toFloat(input); },
+        string: function(input) { return toString(input); },
+        bool: function(input) { return toBool(input); },
 
         /**
          * Has.
@@ -1112,32 +1189,13 @@
          * @return {Array}
          */
         array: function() {
-            var ret = [], args = arguments, argsLength = getLength(args), i = 0;
+            var ret = [], args = arguments, argsLen = len(args), i = 0;
 
-            while (i < argsLength) {
+            while (i < argsLen) {
                 ret = ret.concat(makeArray(args[i++]));
             }
 
             return ret;
-        },
-
-        /**
-         * Split.
-         * @param  {String} input
-         * @param  {String} separator
-         * @param  {Int}    limit?
-         * @return {Array}
-         */
-        split: function(input, separator, limit) {
-            input = toString(input).split(separator);
-            if (limit) {
-                var inputRest = input.slice(limit - 1);
-                input = input.slice(0, limit - 1);
-                if (inputRest.length) {
-                    input = input.concat(inputRest.join(separator));
-                }
-            }
-            return input;
         },
 
         /**
@@ -1183,11 +1241,10 @@
         }
     });
 
-    // onReady stuff
-    var onReadyCallbacks = [];
-    var onReadyCallbacksFire = function() {
-        while (onReadyCallbacks.length) {
-            onReadyCallbacks.shift()($);
+    var readyCallbacks = [];
+    var readyCallbacksFire = function() {
+        while (readyCallbacks.length) {
+            readyCallbacks.shift()($, $.dom /* will be ready on call */);
         }
     };
 
@@ -1197,9 +1254,9 @@
      * @param  {Document} document?
      * @return {none}
      */
-    $.onReady = function(callback, document) {
+    $.ready = $.onReady = function(callback, document) {
         if (isFunction(callback)) {
-            onReadyCallbacks.push(callback);
+            readyCallbacks.push(callback);
         }
 
         // iframe support
@@ -1208,7 +1265,7 @@
         var type = 'DOMContentLoaded';
         document.addEventListener(type, function _() {
             document.removeEventListener(type, _, FALSE);
-            onReadyCallbacksFire();
+            readyCallbacksFire();
         }, FALSE);
     };
 

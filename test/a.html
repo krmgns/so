@@ -29,7 +29,7 @@
 
 <script src="so-all.php"></script>
 <script>
-so.onReady(function($) {
+so.ready(function($, $$) {
 
 // function Person(id) {
 //     this.id = id
@@ -64,9 +64,9 @@ so.onReady(function($) {
 // log(u.getId())
 // return
 
-    $.dom("button[show]").on("click", () => $.dom(".outer").show("slow"))
-    $.dom("button[hide]").on("click", () => $.dom(".outer").hide("slow"))
-    $.dom("button[toggle]").on("click", () => $.dom(".outer").toggle("slow"))
+    $$("button[show]").on("click", () => $$(".outer").show("normal"))
+    $$("button[hide]").on("click", () => $$(".outer").hide("normal"))
+    $$("button[toggle]").on("click", () => $$(".outer").toggle("normal"))
 
     // var els = $.dom(".p", "#container")
     // var els = $.dom("#container").findAll("> p")

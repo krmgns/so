@@ -33,31 +33,12 @@
         },
 
         /**
-         * To camel case from dash case.
+         * To style name.
          * @param  {String} input
          * @return {String}
          */
-        toCamelCaseFromDashCase: function(input) {
-            input = $string(input);
-
-            if (input.has('-')) {
-                input = input.replace(/-([a-z])/gi, function(_, _1) {
-                    return _1.toUpperCase();
-                });
-            }
-
-            return input;
-        },
-
-        /**
-         * To dash case from upper case.
-         * @param  {String} input
-         * @return {String}
-         */
-        toDashCaseFromUpperCase: function(input) {
-            return $string(input).replace(/([A-Z])/g, function(_, _1) {
-                return '-'+ _1.toLowerCase();
-            });
+        toStyleName: function(name) {
+            return $string(name).toCamelCase('-');
         },
 
         /**

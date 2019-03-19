@@ -175,7 +175,7 @@
                 var char = !$isObject(e.data) ? e.data : NULL;
                 if (char != NULL) {
                     e.key = char;
-                    e.keyCode = char.toUpperCase().charCodeAt();
+                    e.keyCode = char.upper().charCodeAt();
                 }
             }
 

@@ -28,7 +28,7 @@
     var $trim = $.trim, $extend = $.extend, $options = $.options, $forEach = $.forEach,
         $isFunction = $.isFunction, $isString = $.isString, $isArray = $.isArray,
         $isObject = $.isObject, $isIterable = $.isIterable, $isDocument = $.isDocument,
-        $isNumeric = $.isNumeric, $isDefined = $.isDefined, $split = $.split, $class = $.class,
+        $isNumeric = $.isNumeric, $isDefined = $.isDefined, $class = $.class,
         $logWarn = $.logWarn, $jsonDecode = $.util.jsonDecode;
 
     // add base methods
@@ -76,12 +76,12 @@
 
             headers = $trim(headers);
             if (headers) {
-                headers.split('\r\n').forEach(function(header) {
-                    header = $split(header, ':', 2);
+                headers.split('\r\n').each(function(header) {
+                    header = header.splits(':', 2);
                     if (header[1] == NULL) { // status line etc.
                         ret[i++] = $trim(header[0]);
                     } else {
-                        ret[$trim(header[0]).toLowerCase()] = $trim(header[1]);
+                        ret[$trim(header[0]).toCamelCase('-')] = $trim(header[1]);
                     }
                 });
             }
@@ -186,7 +186,7 @@
                 var status = statusCode ? 'HTTP/1.1 %s %s'.format(statusCode, statusText) : NULL; // HTTP/1.1?
                 var headers = $http.parseHeaders(client.api.getAllResponseHeaders());
                 var data = client.api.responseText;
-                var dataType = client.options.dataType || (re_dataType.exec(headers['content-type']) || [,])[1];
+                var dataType = client.options.dataType || (re_dataType.exec(headers.contentType) || [, NULL])[1];
 
                 if (status) {
                     client.response.status = headers[0] = status;
@@ -239,7 +239,7 @@
         }
 
         options = $options(optionsDefault, options);
-        options.method = (options.method || optionsDefault.method).toUpperCase();
+        options.method = (options.method || optionsDefault.method).upper();
         options.uri = uri;
         options.headers = $options(optionsDefault.headers, options.headers);
 

@@ -7,13 +7,10 @@
 ;(function(window, $, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
 
     // minify candies
-    var NAME_NODE_TYPE = 'nodeType';
-    var NAME_PARENT_NODE  = 'parentNode';
-    var NAME_PARENT_ELEMENT = 'parentElement';
-    var NAME_FIRST_CHILD = 'firstChild';
-    var NAME_CHILDREN = 'children', NAME_CHILD_NODES = 'childNodes';
-    var NAME_NEXT_ELEMENT_SIBLING = 'nextElementSibling';
-    var NAME_PREVIOUS_ELEMENT_SIBLING = 'previousElementSibling';
+    var NAME_NODE_NAME = 'nodeName', NAME_NODE_TYPE = 'nodeType';
+    var NAME_PARENT_NODE = 'parentNode', NAME_PARENT_ELEMENT = 'parentElement';
+    var NAME_CHILDREN = 'children', NAME_CHILD_NODES = 'childNodes', NAME_FIRST_CHILD = 'firstChild';
+    var NAME_NEXT_ELEMENT_SIBLING = 'nextElementSibling', NAME_PREVIOUS_ELEMENT_SIBLING = 'previousElementSibling';
     var NAME_PADDING_TOP = 'paddingTop', NAME_PADDING_BOTTOM = 'paddingBottom';
     var NAME_PADDING_LEFT = 'paddingLeft', NAME_PADDING_RIGHT = 'paddingRight';
     var NAME_MARGIN_TOP = 'marginTop', NAME_MARGIN_BOTTOM = 'marginBottom';
@@ -36,8 +33,8 @@
     var re_space = /\s+/g;
     var re_comma = /\s*,\s*/;
     var re_tag = /^<([\w-]+)[^>]*>/i;
-    var $toStyleName = $.util.toCamelCaseFromDashCase, $jsonEncode = $.util.jsonEncode;
-    var $re = $.re, $array = $.array, $for = $.for, $forEach = $.forEach;
+    var $toStyleName = $.util.toStyleName, $jsonEncode = $.util.jsonEncode;
+    var $re = $.re, $array = $.array, $each = $.each, $for = $.for, $forEach = $.forEach;
     var $trim = $.trim, $extend = $.extend, $int = $.int, $string = $.string, $bool = $.bool,
         $isVoid = $.isVoid, $isNull = $.isNull, $isNulls = $.isNulls, $isDefined = $.isDefined,
         $isUndefined = $.isUndefined, $isString = $.isString, $isNumeric = $.isNumeric,
@@ -56,7 +53,7 @@
         return root.querySelectorAll(selector);
     }
     function getTag(el) {
-        return (el && el.nodeName) ? el.nodeName.toLowerCase() : $isWindow(el) ? TAG_WINDOW : NULL;
+        return (el && el[NAME_NODE_NAME]) ? el[NAME_NODE_NAME].lower() : $isWindow(el) ? TAG_WINDOW : NULL;
     }
     function isDom(input) {
         return (input instanceof Dom);
@@ -253,6 +250,15 @@
          */
         toText: function() {
             return this.getText();
+        },
+
+        /**
+         * Each.
+         * @param  {Function} fn
+         * @return {Dom}
+         */
+        each: function(fn) {
+            return $each(this.all(), fn, this);
         },
 
         /**
@@ -457,7 +463,7 @@
         // fix table stuff
         tag = tag || ((content && content.match(re_tag)) || [,])[1];
         if (tag) {
-            switch (tag.toLowerCase()) {
+            switch (tag.lower()) {
                 case 'tr': tmpTag = 'tbody'; break;
                 case 'th': case 'td': tmpTag = 'tr'; break;
                 case 'thead': case 'tbody': case 'tfoot': tmpTag = 'table'; break;
@@ -1307,6 +1313,8 @@
     var re_unit = /(?:px|em|%)/i; // short & quick
     var re_unitOther = /(?:ex|in|[cm]m|p[tc]|v[hw]?min)/i;
     var re_nonUnitStyles = /(?:(?:fill-?)?opacity|z(?:oom|index)|(?:font-?w|line-?h)eight|column(?:-?count|s))/i;
+    var re_colon = /\s*:\s*/;
+    var re_scolon = /\s*;\s*/;
     var matchesSelector = document[NAME_DOCUMENT_ELEMENT].matches || function(selector) {
         var i = 0, all = querySelectorAll(this[NAME_OWNER_DOCUMENT], selector);
         while (i < all.length) {
@@ -1368,10 +1376,10 @@
     function parseStyleText(text) {
         var styles = {}, s;
 
-        text = $string(text).split($re('\\s*;\\s*'));
+        text = $string(text).split(re_scolon);
         while (text.length) {
             // wtf! :)
-            (s = text.shift().split($re('\\s*:\\s*')))
+            (s = text.shift().split(re_colon))
                 && (s[0] = $trim(s[0]))
                     && (styles[s[0]] = s[1] || '');
         }

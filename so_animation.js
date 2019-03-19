@@ -1,7 +1,7 @@
 /**
  * @package so
  * @object  so.animation
- * @depends so, so.util
+ * @depends so, so.util, so.dom
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
@@ -12,11 +12,11 @@
     var re_scroll = /scroll(?:Top|Left)/;
     var re_nonUnitStyles = /(?:(?:fill-?)?opacity|z(?:oom|index)|(?:font-?w|line-?h)eight|column(?:-?count|s))/i;
     var opt_fps = 1000 / 60;
-    var opt_speeds = {fast: 50, slow: 650, default: 325};
+    var opt_speeds = {fast: 50, slow: 650, normal: 150, default: 325};
     // thanks: http://easings.net/ (easeOutQuad)
     var fn_easing = function(t,b,c,d) { return -c*(t/=d)*(t-2)+b; };
     var fn_runner = window.requestAnimationFrame || function(fn) { setTimeout(fn, opt_fps); };
-    var $toStyleName = $.util.toCamelCaseFromDashCase;
+    var $toStyleName = $.util.toStyleName;
     var $easing = ($.ext && $.ext.easing) || {};
     var $extend = $.extend, $for = $.for, $forEach = $.forEach, $float = $.float, $now = $.now,
         $isNumber = $.isNumber, $isString = $.isString, $isFunction = $.isFunction;
@@ -74,7 +74,7 @@
                         unit = style.replace(re_digit, '');
                     }
                 } else {
-                    startValue = this.$target.scroll()[name.slice(6).toLowerCase()];
+                    startValue = this.$target.scroll()[name.slice(6).lower()];
                     endValue = value;
                 }
 

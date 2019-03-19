@@ -12,8 +12,8 @@
     var fns_os = ['isLinux', 'isUnix', 'isMac', 'isWindows'];
     var fns_ua = ['isChrome', 'isSafari', 'isFirefox', 'isOpera', 'isOldOpera', 'isIe', 'isEdge', 'isTrident'];
     var navigator = window.navigator;
-    var ua = navigator.userAgent.toLowerCase();
-    var uap = navigator.platform.toLowerCase();
+    var ua = navigator.userAgent.lower();
+    var uap = navigator.platform.lower();
     var isTouchDevice = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
     var isMobileDevice = /android|ip(hone|od|ad)|opera *mini|webos|blackberry|mobile|windows *phone/.test(ua);
 
@@ -25,7 +25,7 @@
 
         // set 'is' functions for os
         fns_os.forEach(function(fn) {
-            var osName = fn.slice(2).toLowerCase();
+            var osName = fn.slice(2).lower();
 
             browser[fn] = (fn == 'isUnix')
                 ? function() { return ua.has('x11') && !ua.has('linux'); }
@@ -52,7 +52,7 @@
                 browser['name'] = name;
 
                 // re-set 'is' function e.g browser.isOpera()
-                browser['is'+ name.toCapitalCase(false)] = function() { return true; };
+                browser['is'+ name.toCapitalCase()] = function() { return true; };
                 browser['isOldOpera'] = function() { return re[1] == 'opera'; };
             }
             if (re[2]) {
