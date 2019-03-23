@@ -8,7 +8,6 @@
 ;(function(window, $, NULL, TRUE, FALSE) { 'use strict';
 
     var document = $.document;
-    var id = 0;
     var objectValues = Object.values, objectDefineProperty = Object.defineProperty;
     var re_types = {
         UIEvent: 'resize|scroll|select|(un)?load|DOMActivate',
@@ -48,6 +47,7 @@
         KEY_END =        35, KEY_PAGE_UP =  33, KEY_PAGE_DOWN =   34, KEY_INSERT =     45,  KEY_CAPS_LOCK = 20,
         KEY_ARROW_LEFT = 37, KEY_ARROW_UP = 38, KEY_ARROW_RIGHT = 39, KEY_ARROW_DOWN = 40,
         KEY_SHIFT =      16, KEY_CONTROL =  17, KEY_ALT =         18, KEY_ALT_GRAPH =  225;
+    var _id = 0;
     var _break = 0;
 
     /**
@@ -275,7 +275,7 @@
         this.once = options.once;
         this.passive = options.passive;
 
-        this.id = ++id;
+        this.id = ++_id;
         this.fired = 0;
         this.cancalled = FALSE;
         this.custom = event.eventClass == 'CustomEvent' || !re_typesStandard.test(type);

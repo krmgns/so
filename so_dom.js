@@ -41,6 +41,7 @@
         $isNumber = $.isNumber, $isArray = $.isArray, $isObject = $.isObject, $isFunction = $.isFunction,
         $isTrue = $.isTrue, $isFalse = $.isFalse, $isWindow = $.isWindow, $isDocument = $.isDocument,
         $getWindow = $.getWindow, $getDocument = $.getDocument;
+    var _id = 0;
 
     // general helpers
     function split(s, re) {
@@ -506,7 +507,7 @@
         var clone = el.cloneNode();
 
         // clone.cloneOf = el; // @debug
-        setAttr(clone, soPrefix +'clone', $.id(), FALSE);
+        setAttr(clone, soPrefix +'clone', ++_id, FALSE);
         if (!$isFalse(opt_deep)) {
             if (el.$data) {
                 clone.$data = el.$data;
@@ -1216,25 +1217,28 @@
          */
         hasContent: function() {
             return !this.isEmpty(true);
-        },
+        }
+    });
 
+    // dom: window,document
+    extendDomPrototype(Dom, {
         /**
-         * Window.
+         * Get window.
          * @param  {Bool} opt_content?
          * @return {Dom}
          */
-        window: function(opt_content) {
+        getWindow: function(opt_content) {
             var el = this[0];
 
             return initDom(el && (opt_content ? el.contentWindow : $getWindow(el)));
         },
 
         /**
-         * Document.
+         * Get document.
          * @param  {Bool} opt_content?
          * @return {Dom}
          */
-        document: function(opt_content) {
+        getDocument: function(opt_content) {
             var el = this[0];
 
             return initDom(el && (opt_content ? el.contentDocument : $getDocument(el)));
@@ -1573,7 +1577,7 @@
     function getInvisibleElementProperties(el, properties) {
         var ret = [];
         var doc, css;
-        var sid = $.sid(), className = ' '+ sid;
+        var rid = $.rid(), className = ' '+ rid;
         var styleText = el[NAME_STYLE][NAME_CSS_TEXT];
         var parent = el[NAME_PARENT_ELEMENT], parents = [], parentStyle;
 
@@ -1590,7 +1594,7 @@
 
         doc = $getDocument(el);
         css = createElement(doc, 'style', {
-            textContent: '.'+ sid +'{display:block!important;visibility:hidden!important}'
+            textContent: '.'+ rid +'{display:block!important;visibility:hidden!important}'
         });
         doc.body.appendChild(css);
 
@@ -1922,6 +1926,20 @@
         },
 
         /**
+         * Attribute (alias of attr()).
+         */
+        attribute: function(name, value) {
+            return this.attr(name, value);
+        },
+
+        /**
+         * Attributes (alias of attrs()).
+         */
+        attributes: function() {
+            return this.attrs();
+        },
+
+        /**
          * Has attr.
          * @param  {String} name
          * @return {Bool}
@@ -1968,20 +1986,6 @@
                     removeAttr(el, name)
                 });
             });
-        },
-
-        /**
-         * Attribute (alias of attr()).
-         */
-        attribute: function(name, value) {
-            return this.attr(name, value);
-        },
-
-        /**
-         * Attributes (alias of attrs()).
-         */
-        attributes: function() {
-            return this.attrs();
         },
 
         /**
@@ -2832,7 +2836,13 @@
              * @return {Dom}
              */
             scrollTo: function(top, left, speed, easing, callback) {
-                return this.for(function(el) {
+                // swap window => html ('cos window won't be animated so..)
+                var _this = this;
+                if (_this.isWindow()) {
+                    _this = _this.find(TAG_HTML);
+                }
+
+                return _this.for(function(el) {
                     animate(el, {scrollTop: top || el[NAME_SCROLL_TOP], scrollLeft: left || el[NAME_SCROLL_LEFT]},
                         speed, easing, callback);
                 });

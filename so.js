@@ -20,12 +20,9 @@
     var Array = window.Array, Object = window.Object, String = window.String, Number = window.Number;
     var Date = window.Date, RegExp = window.RegExp, Math = window.Math, Function = window.Function;
 
-    var MAX_INT = Number.MAX_SAFE_INTEGER || Math.pow(2, 53) - 1;
-    var MAX_FLOAT = Number.MAX_VALUE;
-
     // globals
     window.so = $;
-    window.so.VERSION = '5.44.0';
+    window.so.VERSION = '5.45.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -912,21 +909,16 @@
         return ret;
     }
 
-    // shortcut
-    function _log(fn, args) {
-        consoleBind(fn, ['>> so:'].concat(makeArray(args)));
-    }
-
     // so: base functions.
     extend($, {
         /**
          * Debug tools.
          * @return {void}
          */
-        log: function() { _log('log', arguments); },
-        logInfo: function() { _log('info', arguments); },
-        logWarn: function() { _log('warn', arguments); },
-        logError: function() { _log('error', arguments); },
+        log: function() { consoleBind('log', arguments); },
+        logInfo: function() { consoleBind('info', arguments); },
+        logWarn: function() { consoleBind('warn', arguments); },
+        logError: function() { consoleBind('error', arguments); },
 
         /**
          * Fn.
@@ -954,21 +946,11 @@
         },
 
         /**
-         * Sid (string id).
-         * @param  {String} prefix?
-         * @return {String}
-         */
-        sid: function(prefix) {
-            return toString(prefix || '') + $.id();
-        },
-
-        /**
          * Rid (random id).
-         * @param  {String} prefix?
          * @return {String}
          */
-        rid: function(prefix) {
-            return toString(prefix || '') + $.now(TRUE) + toString(Math.random()).slice(-6);
+        rid: function() {
+            return $.now(TRUE) + Math.random().toFixed(14).slice(2);
         },
 
         /**
@@ -1196,48 +1178,6 @@
             }
 
             return ret;
-        },
-
-        /**
-         * Range.
-         * @param  {Number} min
-         * @param  {Number} max
-         * @param  {Number} step
-         * @return {Array}
-         * @source https://stackoverflow.com/a/15453499/362780
-         */
-        range: function(min, max, step) {
-            var ret = [min];
-
-            while (min < max) {
-                ret.push(min += step || 1);
-            }
-
-            return ret;
-        },
-
-        /**
-         * Rand int.
-         * @param  {Int} min
-         * @param  {Int} max
-         * @return {Int}
-         */
-        randInt: function(min, max) {
-            min = min || 0;
-            max = max || MAX_INT;
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        },
-
-        /**
-         * Rand float.
-         * @param  {Float} min
-         * @param  {Float} max
-         * @return {Float}
-         */
-        randFloat: function(min, max) {
-            min = min || 0;
-            max = max || 1 + min;
-            return Math.random() * (max - min) + min;
         }
     });
 

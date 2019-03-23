@@ -7,7 +7,6 @@
  */
 ;(function(window, $, NULL, TRUE, FALSE) { 'use strict';
 
-    var re_root = /(?:html|body)/;
     var re_digit = /^[\d.]+/;
     var re_scroll = /scroll(?:Top|Left)/;
     var re_nonUnitStyles = /(?:(?:fill-?)?opacity|z(?:oom|index)|(?:font-?w|line-?h)eight|column(?:-?count|s))/i;
@@ -56,10 +55,9 @@
 
             // assign animation tasks
             $forEach(properties, function(name, value) {
-                var root, scroll, startValue, endValue, style, unit = '';
+                var scroll, startValue, endValue, diff, style, unit = '';
 
                 name = $toStyleName(name);
-                root = re_root.test(this.$target.tag());
                 scroll = re_scroll.test(name);
 
                 if (!scroll) {
@@ -78,14 +76,18 @@
                     endValue = value;
                 }
 
+                diff = Math.abs(endValue - startValue);
+
+                // no need to get excited
+                if (!diff) return;
+
                 this.tasks.push({
                     name: name,
-                    root: root,
                     scroll: scroll,
                     startValue: startValue,
                     endValue: endValue,
                     reverse: startValue > endValue,
-                    diff: Math.abs(endValue - startValue),
+                    diff: diff,
                     unit: unit
                 });
             }, this);
@@ -105,6 +107,11 @@
             _this.startTime = $now();
 
             !function run() {
+                if (!_this.$target.size()) {
+                    return (_this.running = FALSE, _this.stopped = TRUE = _this.ended = TRUE),
+                        $.logWarn('No element(s) to animate.');
+                }
+
                 if (!_this.stopped && !_this.ended) {
                     if (_this.elapsedTime < _this.speed) {
                         fn_runner(run);
@@ -126,19 +133,41 @@
         start: function() {
             var _this = this, target = _this.$target, scroll, value;
 
-            if (target.size()) {
-                _this.elapsedTime = $now() - _this.startTime;
+            _this.elapsedTime = $now() - _this.startTime;
 
-                $for(_this.tasks, function(task) {
-                    value = fn_easing(_this.elapsedTime, 0.00, task.diff, _this.speed);
-                    value = task.reverse ? task.startValue - value : task.startValue + value;
-                    if (!task.scroll) {
-                        target.setStyle(task.name, value.toFixed(9) /* use 'toFixed' for a good percent */
-                            + task.unit);
-                    } else {
-                        target.setProperty(task.name, value.toFixed(0));
-                    }
-                });
+            $for(_this.tasks, function(task) {
+                value = fn_easing(_this.elapsedTime, 0.00, task.diff, _this.speed);
+                value = task.reverse ? task.startValue - value : task.startValue + value;
+                if (!task.scroll) {
+                    target.setStyle(task.name, value.toFixed(9) /* use 'toFixed' for a good percent */
+                        + task.unit);
+                } else {
+                    target.setProperty(task.name, value.toFixed(0));
+                }
+            });
+
+            return _this;
+        },
+
+        /**
+         * End.
+         * @return {self}
+         */
+        end: function() {
+            var _this = this, target = _this.$target;
+
+            $for(_this.tasks, function(task) {
+                if (!task.scroll) {
+                    target.setStyle(task.name, task.endValue + task.unit);
+                } else {
+                    target.setProperty(task.name, task.endValue);
+                }
+            });
+
+            _this.ended = TRUE;
+
+            if ($isFunction(_this.callback)) {
+                _this.callback(_this);
             }
 
             return _this;
@@ -158,32 +187,6 @@
 
             // set as null (for isAnimated() etc.)
             target.setProperty('$animation', NULL);
-
-            return _this;
-        },
-
-        /**
-         * End.
-         * @return {self}
-         */
-        end: function() {
-            var _this = this, target = _this.$target;
-
-            if (target.size()) {
-                $for(_this.tasks, function(task) {
-                    if (!task.scroll) {
-                        target.setStyle(task.name, task.endValue + task.unit);
-                    } else {
-                        target.setProperty(task.name, task.endValue);
-                    }
-                });
-            }
-
-            _this.ended = TRUE;
-
-            if ($isFunction(_this.callback)) {
-                _this.callback(_this);
-            }
 
             return _this;
         }

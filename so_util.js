@@ -7,9 +7,11 @@
  */
 ;(function(window, $, UNDEFINED) { 'use strict';
 
-    var JSON = window.JSON;
+    var MAX_INT = Number.MAX_SAFE_INTEGER || Math.pow(2, 53) - 1;
+    var MAX_FLOAT = Number.MAX_VALUE;
     var re_rgb = /.*rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(.*))?\)/i;
     var $int = $.int, $float = $.float, $string = $.string;
+    var JSON = window.JSON, Math = window.Math;
 
     // random hex
     function rand(size) {
@@ -33,12 +35,45 @@
         },
 
         /**
-         * To style name.
-         * @param  {String} input
-         * @return {String}
+         * Range.
+         * @param  {Number} min
+         * @param  {Number} max
+         * @param  {Number} step
+         * @return {Array}
+         * @source https://stackoverflow.com/a/15453499/362780
          */
-        toStyleName: function(name) {
-            return $string(name).toCamelCase('-');
+        range: function(min, max, step) {
+            var ret = [min];
+
+            while (min < max) {
+                ret.push(min += step || 1);
+            }
+
+            return ret;
+        },
+
+        /**
+         * Rand int.
+         * @param  {Int} min
+         * @param  {Int} max
+         * @return {Int}
+         */
+        randInt: function(min, max) {
+            min = min || 0;
+            max = max || MAX_INT;
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        },
+
+        /**
+         * Rand float.
+         * @param  {Float} min
+         * @param  {Float} max
+         * @return {Float}
+         */
+        randFloat: function(min, max) {
+            min = min || 0;
+            max = max || 1 + min;
+            return Math.random() * (max - min) + min;
         },
 
         /**
@@ -112,6 +147,17 @@
             } catch(e) {
                 return UNDEFINED;
             }
+        },
+
+        /**
+         * To style name.
+         * @param  {String} name
+         * @return {String}
+         */
+        toStyleName: function(name) {
+            name = $string(name);
+
+            return name.has('-') ? name.toCamelCase('-') : name;
         }
     };
 
