@@ -22,7 +22,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.45.0';
+    window.so.VERSION = '5.45.1';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -724,6 +724,9 @@
          * @return {Bool}
          */
         test: function(re) {
+            if (!isRegExp(re)) {
+                re = toRegExp(re);
+            }
             return re.test(this);
         },
 
