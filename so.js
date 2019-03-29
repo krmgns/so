@@ -22,7 +22,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.45.1';
+    window.so.VERSION = '5.45.2';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -489,10 +489,10 @@
             // prevent: undefined is not a function
             fn = fn || function(el) { return trim(el) };
 
-            var ret = [];
+            var _this = this, ret = [];
 
-            this.each(function(el, i) {
-                fn(el, i) && ret.push(el);
+            _this.each(function(el, i) {
+                fn(el, i, _this) && ret.push(el);
             });
 
             return ret;

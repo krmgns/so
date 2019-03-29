@@ -5,9 +5,8 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function(window, $, NULL, TRUE, FALSE) { 'use strict';
+;(function(window, $, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
 
-    var re_query = /\?&+(.*)/;
     var re_space = /%20/g;
     var re_httpHost = /^(?:https?:)?\/\/([^:/]+)/i;
     var re_post = /^P(?:OST|UT|ATCH)$/i;
@@ -16,9 +15,12 @@
     var re_dataType = /\/(json|xml|html|plain)(?:[; ])?/i;
     var xhr = 'XMLHttpRequest'; // what an ugly name..
     var optionsDefault = {
-        method: 'GET', uri: '', uriParams: NULL, data: NULL, dataType: NULL,
-        async: TRUE, noCache: TRUE, autoSend: TRUE, headers: {'X-Requested-With': xhr},
-        // onStart: NULL, onStop: NULL, /* @todo: queue */
+        method: 'GET',
+        uri: '', uriParams: NULL,
+        data: NULL, dataType: NULL,
+        async: TRUE, autoSend: TRUE, noCache: UNDEFINED,
+        headers: {'X-Requested-With': xhr},
+        // onStart: NULL, onStop: NULL, /* @todo: queue? */
         // onHeaders: NULL, onProgress: NULL,
         // onDone: NULL, onSuccess: NULL, onFailure: NULL,
         // onAbort: NULL, onTimeout: NULL, onBeforeSend: NULL, onAfterSend: NULL,
@@ -162,7 +164,7 @@
 
     // shortcut helpers
     function addUriParams(uri, uriParams) {
-        return (uri += (!uri.has('?') ? '?' : '&') + $http.serialize(uriParams));
+        return $.isEmpty(uriParams) ? uri : (uri += (!uri.has('?') ? '?' : '&') + $http.serialize(uriParams));
     }
 
     function onReadyStateChange(client) {
@@ -261,9 +263,19 @@
         }
 
         if (options.noCache) {
-            options.uri = addUriParams(options.uri, {'_': $.now()});
+            options.uri = addUriParams(options.uri, {_: $.now()});
         }
-        options.uri = options.uri.replace(re_query, '?$1');
+
+        // update uriParams
+        if (options.uri.has('?')) {
+            options.uriParams = options.uriParams || {}
+            options.uri.split('?')[1].split('&').each(function(query) {
+                query = query.splits('=', 2);
+                if (query[0]) {
+                    options.uriParams[query[0]] = query[1];
+                }
+            });
+        }
 
         this.options = options;
         this.request = new Request(this);
