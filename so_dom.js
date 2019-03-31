@@ -552,10 +552,9 @@
     function cloneIf(opt_cloning, node) { // inserts only once without 'clone'
         if ($isFalse(opt_cloning)) {
             // pass
-        } else if ($isTrue(opt_cloning) || !hasAttr(node, soPrefix +'clone')) {
+        } else if ($isTrue(opt_cloning) && !hasAttr(node, soPrefix +'clone')) {
             node = cloneElement(node);
         }
-
         return node;
     }
 
