@@ -478,7 +478,7 @@
 
         uri = $trim(uri);
         if (uri.has(' ')) {
-            // <method> <uri> @<data type>, ie: '/foo', '/foo @json', 'GET /foo', 'GET /foo @json'
+            // <method> <uri> @<dataType>, ie: '/foo', '/foo @json', 'GET /foo', 'GET /foo @json'
             var re = re_request.exec(uri);
             if (re) {
                 options.method = re[1] || method;
@@ -507,6 +507,12 @@
         },
         post: function(uri, options, onDone, onSuccess, onFailure) {
             return init(uri, options, onDone, onSuccess, onFailure, 'post');
+        },
+        put: function(uri, options, onDone, onSuccess, onFailure) {
+            return init(uri, options, onDone, onSuccess, onFailure, 'put');
+        },
+        delete: function(uri, options, onDone, onSuccess, onFailure) {
+            return init(uri, options, onDone, onSuccess, onFailure, 'delete');
         },
         request: function(uri, options, onDone, onSuccess, onFailure) {
             return init(uri, options, onDone, onSuccess, onFailure);
