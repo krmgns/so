@@ -256,10 +256,20 @@
         /**
          * Each.
          * @param  {Function} fn
+         * @param  {Bool}     init
          * @return {Dom}
          */
-        each: function(fn) {
-            return $each(this.all(), fn, this);
+        each: function(fn, init) {
+            var all = this.all();
+
+            if (init) {
+                // shortcut for: ...each(function(el) { $el = $.dom(el) ...
+                all = all.map(function(el) {
+                    return initDom(el, NULL, TRUE);
+                });
+            }
+
+            return $each(all, fn, this);
         },
 
         /**
@@ -278,27 +288,6 @@
          */
         forEach: function(fn) {
             return $forEach(this.all(), fn, this);
-        },
-
-        /**
-         * Has.
-         * @param  {Node|String} search
-         * @return {Bool}
-         */
-        has: function(search) {
-            if ($isString(search)) {
-                search = initDom(search)[0];
-            }
-
-            return $bool(search && this.all().has(search));
-        },
-
-        /**
-         * Has size.
-         * @return {Bool}
-         */
-        hasSize: function() {
-            return this._size > 0;
         },
 
         /**
@@ -531,8 +520,10 @@
         return clone;
     }
 
-    function cleanElement(el) {
-        el.$data = el.$events = el.$animation = NULL;
+    function cleanElement(el, self) {
+        if (!$isFalse(self)) {
+            el.$data = el.$events = el.$animation = NULL;
+        }
 
         var child;
         while (child = el[NAME_FIRST_CHILD]) {
@@ -576,12 +567,22 @@
         },
 
         /**
+         * clean.
+         * @return {Dom}
+         */
+        clean: function() {
+            return this.for(function(el) {
+                cleanElement(el);
+            });
+        },
+
+        /**
          * Empty.
          * @return {Dom}
          */
         empty: function() {
             return this.for(function(el) {
-                cleanElement(el);
+                cleanElement(el, FALSE);
             });
         },
 
@@ -769,7 +770,8 @@
                 this.for(function(el) {
                     clone = cloneElement(el);
                     clones.push(clone);
-                    wrapper.appendChild(clone), parent.removeChild(cleanElement(el));
+                    wrapper.appendChild(clone);
+                    parent.removeChild(cleanElement(el));
                 });
                 parent.replaceChild(wrapper, replace);
             }
@@ -790,7 +792,8 @@
                 this.for(function(el) {
                     clone = cloneElement(el);
                     clones.push(clone);
-                    parentParent.insertBefore(clone, parent), parent.removeChild(cleanElement(el));
+                    parentParent.insertBefore(clone, parent);
+                    parent.removeChild(cleanElement(el));
                 });
                 // removes if opt_remove=true or no child anymore
                 if (opt_remove || !parentParent.hasChildNodes()) {
@@ -1176,6 +1179,19 @@
          */
         contains: function(selector) {
             return $bool(this[0] && initDom(selector, this[0]).size());
+        },
+
+        /**
+         * Has.
+         * @param  {String|Element} selector
+         * @return {Bool}
+         */
+        has: function(selector) {
+            if ($isString(selector)) {
+                selector = initDom(selector)[0];
+            }
+
+            return $bool(selector && this.all().has(selector));
         },
 
         /**
@@ -2663,6 +2679,23 @@
              */
             fire: function(type, fn, options) {
                 return this.for(function(el) { event.fire(el, type, fn, options); });
+            },
+
+            /**
+             * Event (alias of on()).
+             */
+            event: function(type, fn, options) {
+                return this.on(type, fn, options);
+            },
+
+            /**
+             * Has event.
+             * @param  {String}   type
+             * @param  {Function} fn
+             * @return {Bool}
+             */
+            hasEvent: function(type, fn) {
+                return event.has(this[0], type, fn);
             }
         });
     }

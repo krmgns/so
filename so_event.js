@@ -133,40 +133,29 @@
             event.event = e; // overwrite on initial
             event.fired++;
 
-            if (!e.data) e = objectDefineProperty(e, 'data', {value: event.data});
-            if (!e.target) e = objectDefineProperty(e, 'target', {value: event.target});
+            if (!e.data) {
+                e = objectDefineProperty(e, 'data', {value: event.data});
+            }
+            if (!e.target) {
+                e = objectDefineProperty(e, 'target', {value: event.target});
+            }
 
             // sugars..
             $extend(e, {
                 event: event,
                 eventTarget: event.eventTarget,
-                stopped: FALSE,
-                stoppedAll: FALSE,
-                stoppedDefault: FALSE,
-                stoppedBubble: FALSE,
-                stoppedBubbleAll: FALSE,
                 stop: function() {
                     e.stopDefault();
-                    e.stopBubble();
-                    e.stopped = TRUE;
-                },
-                stopAll: function() {
-                    e.stopDefault();
-                    e.stopBubble();
-                    e.stopBubbleAll();
-                    e.stoppedAll = TRUE;
+                    e.stopPropagation();
                 },
                 stopDefault: function() {
                     e.preventDefault();
-                    e.stoppedDefault = TRUE;
                 },
-                stopBubble: function() {
+                stopPropagation: function(all) {
                     e.stopPropagation();
-                    e.stoppedBubble = TRUE;
-                },
-                stopBubbleAll: function() {
-                    e.stopImmediatePropagation();
-                    e.stoppedBubbleAll = TRUE;
+                    if (all) {
+                        e.stopImmediatePropagation();
+                    }
                 }
             });
 
@@ -403,10 +392,16 @@
             var target = checkTarget(this.target, event.type);
             var targetEvents = target.$events;
 
-            event.id = (event.id || ++id);
+            event.id = (event.id || ++_id);
             event.target = target;
             event.eventTarget = this;
             targetEvents[event.type][event.id] = event;
+            targetEvents.$count = (function(count) {
+                $for(targetEvents, function(e) {
+                    count++;
+                });
+                return (count > 1) ? count - 1 : count;
+            })(0);
 
             target.addEventListener(event.type, event.fn, event.useCapture);
         },
@@ -521,7 +516,7 @@
     }
 
     /**
-     * On, one, off, fire.
+     * On, one, off, fire, has.
      * @param  {Object}   target
      * @param  {String}   type
      * @param  {Function} fn
@@ -559,6 +554,25 @@
             event.fire(type, args.options.data);
         });
     }
+    function has(target, type, fn) {
+        var ret = FALSE;
+        var events = target && target.$events;
+        if (!events) {
+            return ret;
+        }
+
+        if (events[type]) {
+            $for(events[type], function(event) {
+                if (fn && event.fno && fn == event.fno) {
+                    ret = TRUE; return _break;
+                }
+            });
+        } else if ($isFunction(target[type])) { // natives
+            ret = TRUE;
+        }
+
+        return ret;
+    }
 
     // add event to so
     $.event = {
@@ -566,6 +580,7 @@
         one: one,
         off: off,
         fire: fire,
+        has: has,
         create: create,
         Event: initEvent,
         EventTarget: initEventTarget,

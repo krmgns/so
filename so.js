@@ -22,7 +22,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.45.3';
+    window.so.VERSION = '5.46.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -174,9 +174,9 @@
 
         if (inputLen && opt_useLen) {
             while (i < inputLen) {
-                value = input[i++];
+                value = input[i];
                 if (_break === fn.apply(_this, !opt_useKey ?
-                        [value, i] /* for */ : [i, value, i] /* forEach */)) {
+                        [value, i++] /* for */ : [i, value, i++] /* forEach */)) {
                     break;
                 }
             }
@@ -391,7 +391,7 @@
         return (ret = []), $.forEach(object, function(_, value) { ret.push(value) }), ret;
     };
 
-    // shortcut
+    // shortcuts
     function has(input, search, opt_strict) {
         var ret;
 
@@ -409,7 +409,10 @@
         return ret > -1;
     }
 
-    // uniq/ununiq helper
+    function equals(a, b) {
+        return a === b;
+    }
+
     function toUniqUnuniq(array, opt_ununiq) {
         return opt_ununiq
             ? array.filter(function(el, i, _array) { return _array.indexOf(el) != i; })
@@ -439,12 +442,21 @@
         },
 
         /**
+         * Equals.
+         * @param  {Array} input
+         * @return {Bool}
+         */
+        equals: function(input) {
+            return equals(input, this);
+        },
+
+        /**
          * Each.
          * @param  {Function} fn
          * @return {Array}
          */
         each: function(fn) {
-            return loop(this, fn);
+            return loop(this, fn, this, FALSE, TRUE);
         },
 
         /**
@@ -559,12 +571,12 @@
         },
 
         /**
-         * Is equal.
+         * Equals.
          * @param  {String} input
          * @return {Bool}
          */
-        isEqual: function(input) {
-            return this === input;
+        equals: function(input) {
+            return equals(input, this);
         },
 
         /**
@@ -881,12 +893,12 @@
      */
     extend(Number[NAME_PROTOTYPE], {
         /**
-         * Is equal.
+         * Equals.
          * @param  {Number} input
          * @return {Bool}
          */
-        isEqual: function(input) {
-            return this === input;
+        equals: function(input) {
+            return equals(input, this);
         }
     });
 
