@@ -24,7 +24,7 @@
         browser.isMobileDevice = function() { return isMobileDevice; };
 
         // set 'is' functions for os
-        fns_os.forEach(function(fn) {
+        fns_os.each(function(fn) {
             var osName = fn.slice(2).lower();
 
             browser[fn] = (fn == 'isUnix')
@@ -38,7 +38,7 @@
         });
 
         // set default 'is' functions for browser
-        fns_ua.forEach(function(fn) {
+        fns_ua.each(function(fn) {
             browser[fn] = function() { return false; };
         });
 

@@ -50,6 +50,10 @@
     var _id = 0;
     var _break = 0;
 
+    function split(s, re) {
+        return $trim(s).split(re);
+    }
+
     /**
      * Create.
      * @param  {String} eventClass
@@ -241,33 +245,34 @@
 
         options = $options(optionsDefault, options);
 
-        this.type = type;
-        this.options = options;
-        this.data = options.data;
+        var _this = this; // just as minify candy
+        _this.type = type;
+        _this.options = options;
+        _this.data = options.data;
 
-        this.custom = options.custom;
-        if (this.custom) {
-            this.options.eventClass = 'CustomEvent';
+        _this.custom = options.custom;
+        if (_this.custom) {
+            _this.options.eventClass = 'CustomEvent';
         }
 
-        var event = create(this.options.eventClass, this.type, options);
-        this.event = event.event;
-        this.eventClass = event.eventClass;
-        this.eventTarget = NULL;
+        var event = create(_this.options.eventClass, _this.type, options);
+        _this.event = event.event;
+        _this.eventClass = event.eventClass;
+        _this.eventTarget = NULL;
 
-        this.target = options.target;
-        this.useCapture = options.useCapture;
+        _this.target = options.target;
+        _this.useCapture = options.useCapture;
 
-        this.fn = extendFn(this, fn);
-        this.fno = fn; // original fn
+        _this.fn = extendFn(_this, fn);
+        _this.fno = fn; // original fn
 
-        this.once = options.once;
-        this.passive = options.passive;
+        _this.once = options.once;
+        _this.passive = options.passive;
 
-        this.id = ++_id;
-        this.fired = 0;
-        this.cancalled = FALSE;
-        this.custom = event.eventClass == 'CustomEvent' || !re_typesStandard.test(type);
+        _this.id = ++_id;
+        _this.fired = 0;
+        _this.cancalled = FALSE;
+        _this.custom = event.eventClass == 'CustomEvent' || !re_typesStandard.test(type);
     }
 
     $extend(Event.prototype, {
@@ -294,7 +299,7 @@
             if (!type) {
                 eventTarget.addEvent(event);
             } else {
-                type.split(re_comma).forEach(function(type) {
+                split(type, re_comma).each(function(type) {
                     event.type = type;
                     eventTarget.addEvent(event);
                 });
@@ -335,7 +340,7 @@
             if (!type) {
                 eventTarget.removeEvent(event);
             } else {
-                type.split(re_comma).forEach(function(type) {
+                split(type, re_comma).each(function(type) {
                     event.type = type;
                     eventTarget.removeEvent(event);
                 });
@@ -357,7 +362,7 @@
             if (!type) {
                 eventTarget.dispatch(event, data);
             } else {
-                type.split(re_comma).forEach(function(type) {
+                split(type, re_comma).each(function(type) {
                     event.type = type;
                     eventTarget.dispatch(event, data);
                 });
@@ -525,7 +530,7 @@
      */
     function on(target, type, fn, options) {
         var args = prepareArgs(fn, options, target), event, eventTarget;
-        $trim(type).split(re_comma).forEach(function(type) {
+        split(type, re_comma).each(function(type) {
             event = initEvent(type, args.fn, args.options);
             eventTarget = initEventTarget(target);
             eventTarget.addEvent(event);
@@ -533,7 +538,7 @@
     }
     function one(target, type, fn, options) {
         var args = prepareArgs(fn, $options(options, {once: TRUE}), target), event, eventTarget;
-        $trim(type).split(re_comma).forEach(function(type) {
+        split(type, re_comma).each(function(type) {
             event = initEvent(type, args.fn, args.options);
             eventTarget = initEventTarget(target);
             eventTarget.addEvent(event);
@@ -541,7 +546,7 @@
     }
     function off(target, type, fn, options) {
         var args = prepareArgs(fn, options, target), event, eventTarget;
-        $trim(type).split(re_comma).forEach(function(type) {
+        split(type, re_comma).each(function(type) {
             event = initEvent(type, args.fn, args.options);
             eventTarget = initEventTarget(target);
             eventTarget.removeEvent(event);
@@ -549,7 +554,7 @@
     }
     function fire(target, type, fn, options) {
         var args = prepareArgs(fn, options, target), event;
-        $trim(type).split(re_comma).forEach(function(type) {
+        split(type, re_comma).each(function(type) {
             event = initEvent(type, args.fn, args.options);
             event.fire(type, args.options.data);
         });

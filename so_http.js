@@ -27,7 +27,7 @@
         ons: {} // all other on.. stuff
     };
     var STATE_OPENED = 1, STATE_HEADERS_RECEIVED = 2, STATE_LOADING = 3, STATE_DONE = 4;
-    var $trim = $.trim, $extend = $.extend, $options = $.options, $forEach = $.forEach,
+    var $trim = $.trim, $extend = $.extend, $options = $.options, $for = $.for, $forEach = $.forEach,
         $isFunction = $.isFunction, $isString = $.isString, $isArray = $.isArray,
         $isObject = $.isObject, $isIterable = $.isIterable, $isDocument = $.isDocument,
         $isNumeric = $.isNumeric, $isDefined = $.isDefined, $class = $.class,
@@ -93,33 +93,41 @@
 
         /**
          * Serialize.
-         * @param  {Any} data
+         * @param  {Any}  data
+         * @param  {Bool} opt_array?
          * @return {String}
          */
-        serialize: function(data) {
+        serialize: function(data, opt_array) {
             if ($isString(data) || !$isIterable(data)) {
                 return data;
             }
 
             var ret = [], encode = encodeURIComponent;
 
-            // only two-dimensionals prosessed
-            $forEach(data, function(key, value) {
-                key = encode(key);
-                if ($isArray(value)) {
-                    if (value.length) {
-                        while (value.length) {
-                            ret.push('%s[]=%s'.format(key, encode(value.shift())));
-                        }
-                    } else ret.push('%s[]='.format(key));
-                } else if ($isObject(value)) {
-                    $forEach(value, function(_key, _value) {
-                        ret.push('%s[%s]=%s'.format(key, _key, encode(_value)));
-                    });
-                } else {
-                    ret.push('%s=%s'.format(key, encode(value)));
-                }
-            });
+            // check if comes from $.dom.serializeArray()
+            if (opt_array) {
+                $for(data, function(item) {
+                    ret.push('%s=%s'.format(item.key, encode(item.value)));
+                });
+            } else {
+                // only two-dimensionals prosessed
+                $forEach(data, function(key, value) {
+                    key = encode(key);
+                    if ($isArray(value)) {
+                        if (value.length) {
+                            while (value.length) {
+                                ret.push('%s[]=%s'.format(key, encode(value.shift())));
+                            }
+                        } else ret.push('%s[]='.format(key));
+                    } else if ($isObject(value)) {
+                        $forEach(value, function(_key, _value) {
+                            ret.push('%s[%s]=%s'.format(key, _key, encode(_value)));
+                        });
+                    } else {
+                        ret.push('%s=%s'.format(key, encode(value)));
+                    }
+                });
+            }
 
             return ret.join('&').replace(re_space, '+');
         }
@@ -128,34 +136,40 @@
     /**
      * Message.
      * @param {Client} client
+     * @param {Object} _this @internal // just as minify candy
      */
-    function Message(client) {
-        this.client = client;
-        this.headers = {};
-        this.data = NULL;
-        this.dataType = NULL;
+    function Message(client, _this) {
+        _this = this;
+        _this.client = client;
+        _this.headers = {};
+        _this.data = NULL;
+        _this.dataType = NULL;
     }
 
     /**
      * Request.
      * @param {Client} client
+     * @param {Object} _this @internal // just as minify candy
      */
-    function Request(client) {
-        this.super(client);
-        this.method = client.options.method;
-        this.uri = client.options.uri;
-        this.uriParams = client.options.uriParams;
+    function Request(client, _this) {
+        _this = this;
+        _this.super(client);
+        _this.method = client.options.method;
+        _this.uri = client.options.uri;
+        _this.uriParams = client.options.uriParams;
     }
 
     /**
      * Response.
      * @param {Client} client
+     * @param {Object} _this @internal // just as minify candy
      */
-    function Response(client) {
-        this.super(client);
-        this.status = NULL;
-        this.statusCode = NULL;
-        this.statusText = NULL;
+    function Response(client, _this) {
+        _this = this;
+        _this.super(client);
+        _this.status = NULL;
+        _this.statusCode = NULL;
+        _this.statusText = NULL;
     }
 
     // extend request & response
@@ -277,38 +291,35 @@
             });
         }
 
-        this.options = options;
-        this.request = new Request(this);
-        this.response = new Response(this);
+        var _this = this; // just as minify candy
+        _this.sent = _this.done = _this.error = _this.aborted = FALSE;
+        _this.state = NULL;
 
-        this.request.data = options.data;
-        this.request.dataType = options.dataType;
-        this.request.headers = options.headers;
+        _this.options = options;
+        _this.request = new Request(_this);
+        _this.response = new Response(_this);
 
-        var _this = this;
+        _this.request.data = options.data;
+        _this.request.dataType = options.dataType;
+        _this.request.headers = options.headers;
 
-        this.api = new window[xhr];
-        this.api.open(this.request.method, this.request.uri, !!options.async);
-        this.api.onerror = function(e) {
-            _this.fire('error');
+        _this.api = new window[xhr];
+        _this.api.open(_this.request.method, _this.request.uri, !!options.async);
+        _this.api.onerror = function(e) {
+            _this.fire('error', e);
+            _this.error = TRUE;
         };
+        _this.api.client = _this;
 
         if (options.async) {
-            this.api.onreadystatechange = function() {
+            _this.api.onreadystatechange = function() {
                 onReadyStateChange(_this);
             };
         }
 
-        this.state = 0;
-        this.sent = FALSE;
-        this.done = FALSE;
-        this.aborted = FALSE;
-
-        this.api.client = this;
-
         // sen if autoSend true
         if (options.autoSend) {
-            this.send();
+            _this.send();
         }
     }
 
@@ -384,9 +395,8 @@
          * Cancel
          * @return {void}
          */
-        cancel: function() {
-            var _this = this;
-
+        cancel: function(_this /* @internal */) {
+            _this = this;
             _this.api.abort();
             _this.fire('abort');
             _this.aborted = TRUE;

@@ -118,7 +118,7 @@
 
         // grammar: https://www.w3.org/TR/css3-selectors/#grammar
         if (re_attr.test(selector)) {
-            (selector.matchAll(re_attrMatch) || []).forEach(function(match) {
+            (selector.matchAll(re_attrMatch) || []).each(function(match) {
                 selector = selector.replace(match[0], match[0].replace(re_attrFix, '\\$1'));
             });
         }
@@ -171,7 +171,7 @@
                     els = [selector];
                 }
             } else if ($isArray(selector)) {
-                els = [], selector.forEach(function(el) {
+                els = [], selector.each(function(el) {
                     isDom(el) ? els = els.concat(el.all()) : els.push(el);
                 });
             } else {
@@ -628,7 +628,7 @@
          */
         append: function(content, opt_cloning, attributes) {
             return this.for(function(el) {
-                createFor(el, content, attributes).forEach(function(node) {
+                createFor(el, content, attributes).each(function(node) {
                     el.appendChild(cloneIf(opt_cloning, node));
                 });
             });
@@ -661,7 +661,7 @@
          */
         prepend: function(content, opt_cloning, attributes) {
             return this.for(function(el) {
-                createFor(el, content, attributes).forEach(function(node) {
+                createFor(el, content, attributes).each(function(node) {
                     el.insertBefore(cloneIf(opt_cloning, node), el[NAME_FIRST_CHILD]);
                 });
             });
@@ -1517,7 +1517,7 @@
 
             if (names) {
                 el = initDom(el);
-                split(names, re_comma).forEach(function(name) {
+                split(names, re_comma).each(function(name) {
                     styles[name] = el.getStyle(name, opt_convert, opt_raw);
                 });
             } else {
@@ -1566,7 +1566,7 @@
             return (name == '*')
                 ? this.attr('style', '')
                 : (name = split(name, re_comma)), this.for(function(el) {
-                    name.forEach(function(name) { setStyle(el, name, ''); });
+                    name.each(function(name) { setStyle(el, name, ''); });
                 });
         }
     });
@@ -1618,7 +1618,7 @@
         el[NAME_STYLE][NAME_VISIBILITY] = ''; // for !important annots
 
         // finally, grap it!
-        properties.forEach(function(name) {
+        properties.each(function(name) {
             var value = el[name];
             if (value.call) { // getBoundingClientRect() etc.
                 value = value.call(el);
@@ -1932,7 +1932,7 @@
             var el = this[0], ret = {};
 
             if (el) {
-                getAttrs(el).forEach(function(attr) {
+                getAttrs(el).each(function(attr) {
                     ret[attr.name] = re_attrState.test(attr.name) ? attr.name : attr.value;
                 });
             }
@@ -1997,7 +1997,7 @@
             name = split(name, re_comma);
 
             return this.for(function(el) {
-                ((name[0] != '*') ? name : getAttrs(el, TRUE)).forEach(function(name) {
+                ((name[0] != '*') ? name : getAttrs(el, TRUE)).each(function(name) {
                     removeAttr(el, name)
                 });
             });
@@ -2037,7 +2037,7 @@
                         return toDataAttrName(name);
                     });
                 }
-                name.forEach(function(name) { removeAttr(el, name); });
+                name.each(function(name) { removeAttr(el, name); });
             });
         },
 
@@ -2147,7 +2147,7 @@
     }
 
     function addClass(el, name) {
-        split(name, re_space).forEach(function(name) {
+        split(name, re_space).each(function(name) {
             if (!hasClass(el, name)) {
                 el[NAME_CLASS_NAME] = $trim(el[NAME_CLASS_NAME] +' '+ name);
             }
@@ -2155,7 +2155,7 @@
     }
 
     function removeClass(el, name) {
-        split(name, re_space).forEach(function(name) {
+        split(name, re_space).each(function(name) {
             el[NAME_CLASS_NAME] = $trim(el[NAME_CLASS_NAME].replace(toClassRegExp(name), ' '));
         });
     }
@@ -2336,7 +2336,7 @@
                 if (key[0] == '*') {
                     el.$data.empty();
                 } else {
-                    key.forEach(function(key) {
+                    key.each(function(key) {
                         el.$data.removeAt(key);
                     });
                 }
@@ -2403,14 +2403,13 @@
                 var data = [];
                 var done = TRUE;
                 $for(el, function(el) {
-                    if (!el.name || el.disabled) {
+                    var name = $trim(el.name), value, type;
+                    if (!name || el.disabled) {
                         return;
                     }
 
-                    var type = el.options ? 'select' : el.type ? el.type : getTag(el);
-                    var name = encode(el.name).replace(/%5([BD])/g, function(_, _1) {
-                        return (_1 == 'B') ? '[' : ']';
-                    }), value;
+                    name = encode(el.name);
+                    type = el.options ? 'select' : el.type ? el.type : getTag(el);
 
                     switch (type) {
                         case 'select':
@@ -2418,10 +2417,10 @@
                             break;
                         case 'radio':
                         case 'checkbox':
-                            value = el.checked ? el.value != 'on' ? el.value : 'on' : UNDEFINED;
+                            value = el.checked ? el.value || 'on' : UNDEFINED;
                             break;
                         case 'submit':
-                            value = (el.value != '') ? el.value : type;
+                            value = el.value ? el.value : type;
                             break;
                         case 'file':
                             if (callback) {
@@ -2481,9 +2480,12 @@
          */
         serializeArray: function(callback) {
             var _ret = function(data, ret) {
-                return ret = [], data.split('&').forEach(function(item) {
-                    item = item.split('='), ret.push({
-                        name: decode(item[0]), value: decode(item[1])
+                return ret = [], data.split('&').each(function(item) {
+                    item = item.splits('=', 2), ret.push({
+                        key: decode(item[0]),
+                        // type cast
+                        value: $isNumeric(item[1]) || item[1] == 'true' || item[1] == 'false'
+                            ? window.eval(item[1]) : decode(item[1])
                     });
                 }), ret;
             };
@@ -2498,14 +2500,35 @@
         },
 
         /**
+         * Serialize object.
+         * @param  {Function} callback?
+         * @return {Object|undefined}
+         */
+        serializeObject: function(callback) {
+            var _ret = function(data, ret) {
+                return ret = {}, $for(data, function(item) {
+                    ret[item.key] = item.value;
+                }), ret;
+            };
+
+            if (!callback) {
+                return _ret(this.serializeArray());
+            }
+
+            this.serializeArray(function(data) {
+                callback(_ret(data));
+            });
+        },
+
+        /**
          * Serialize json.
          * @param  {Function} callback?
          * @return {String|undefined}
          */
         serializeJson: function(callback) {
             var _ret = function(data, ret) {
-                return ret = {}, data.forEach(function(item) {
-                    ret[item.name] = item.value;
+                return ret = {}, $for(data, function(item) {
+                    ret[item.key] = item.value;
                 }), $jsonEncode(ret);
             };
 

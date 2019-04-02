@@ -28,6 +28,7 @@
 <s class="outer">Outer s.outer</s>
 
 <script src="so-all.php"></script>
+<!-- <script src="../so-all.js"></script> -->
 <script>
 so.ready(function($, $$) {
 
@@ -64,9 +65,13 @@ so.ready(function($, $$) {
 // log(u.getId())
 // return
 
-    $$("button[show]").on("click", () => $$(".outer").show("normal"))
-    $$("button[hide]").on("click", () => $$(".outer").hide("normal"))
-    $$("button[toggle]").on("click", () => $$(".outer").toggle("normal"))
+    // $$("button[show]").on("click", () => $$(".outer").show("normal"))
+    // $$("button[hide]").on("click", () => $$(".outer").hide("normal"))
+    $$("button[toggle]").on("click", function() {
+        $$(".outer").toggle("normal", "", function(a) {
+            log(a)
+        })
+    })
 
     // var els = $.dom(".p", "#container")
     // var els = $.dom("#container").findAll("> p")

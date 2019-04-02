@@ -22,7 +22,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.46.0';
+    window.so.VERSION = '5.47.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -602,6 +602,14 @@
          */
         toFloat: function() {
             return toFloat(this);
+        },
+
+        /**
+         * To number.
+         * @return {Number}
+         */
+        toNumber: function() {
+            return Number(this);
         },
 
         /**

@@ -29,29 +29,27 @@
      * @param {Function} callback?
      */
     function Animation(target, properties, speed, easing, callback) {
-        this.$target = $.dom(target);
-        this.properties = properties;
-        this.speed = $isNumber(speed) ? speed : opt_speeds[speed] || opt_speeds.default;
+        var _this = this; // just as minify candy
+        _this.$target = $.dom(target);
+        _this.properties = properties;
+        _this.speed = $isNumber(speed) ? speed : opt_speeds[speed] || opt_speeds.default;
 
         // swap arguments
         if ($isFunction(easing)) {
             callback = easing, easing = NULL;
         }
 
-        this.easing = $easing[easing] || fn_easing;
-        this.callback = callback;
+        _this.easing = $easing[easing] || fn_easing;
+        _this.callback = callback;
 
-        this.running = FALSE;
-        this.stopped = FALSE;
-        this.ended = FALSE;
-        this.startTime = 0;
-        this.elapsedTime = 0;
+        _this.running = _this.stopped = _this.ended = FALSE;
+        _this.startTime = _this.elapsedTime = 0;
 
-        this.tasks = [];
+        _this.tasks = [];
 
-        if (this.$target.size()) {
+        if (_this.$target.size()) {
             // for stop tool
-            this.$target.setProperty('$animation', this);
+            _this.$target.setProperty('$animation', _this);
 
             // assign animation tasks
             $forEach(properties, function(name, value) {
@@ -62,8 +60,8 @@
 
                 if (!scroll) {
                     style = $isString(value)
-                        ? this.$target.getCssStyle(name) // get original style to catch unit sign
-                        : this.$target.getComputedStyle(name);
+                        ? _this.$target.getCssStyle(name) // get original style to catch unit sign
+                        : _this.$target.getComputedStyle(name);
 
                     startValue = $float(style);
                     endValue = $float(value);
@@ -72,7 +70,7 @@
                         unit = style.replace(re_digit, '');
                     }
                 } else {
-                    startValue = this.$target.scroll()[name.slice(6).lower()];
+                    startValue = _this.$target.scroll()[name.slice(6).lower()];
                     endValue = value;
                 }
 
@@ -81,7 +79,7 @@
                 // no need to get excited
                 if (!diff) return;
 
-                this.tasks.push({
+                _this.tasks.push({
                     name: name,
                     scroll: scroll,
                     startValue: startValue,
@@ -90,7 +88,7 @@
                     diff: diff,
                     unit: unit
                 });
-            }, this);
+            });
         }
     }
 
@@ -108,7 +106,7 @@
 
             !function run() {
                 if (!_this.$target.size()) {
-                    return (_this.running = FALSE, _this.stopped = TRUE = _this.ended = TRUE),
+                    return (_this.running = FALSE, _this.stopped = _this.ended = TRUE),
                         $.logWarn('No element(s) to animate.');
                 }
 
@@ -181,8 +179,7 @@
             var _this = this, target = _this.$target;
 
             if (_this.running) {
-                _this.running = FALSE;
-                _this.stopped = TRUE;
+                _this.running = FALSE, _this.stopped = TRUE;
             }
 
             // set as null (for isAnimated() etc.)
