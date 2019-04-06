@@ -22,7 +22,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.48.0';
+    window.so.VERSION = '5.48.1';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -104,7 +104,7 @@
             ttl = flags, flags = '';
         }
 
-        if (opt_esc) { // escape
+        if (opt_esc && !isRegExp(pattern)) { // escape
             pattern = toRegExpEsc(pattern);
         }
 
@@ -128,7 +128,7 @@
 
     function toRegExpEsc(input) {
         // @note slash (/) is escaped already
-        return input.replace(/[.*+?^$|{}()\[\]\\]/g, '\\$&');
+        return toString(input).replace(/[.*+?^$|{}()\[\]\\]/g, '\\$&');
     }
 
     // safer length getter
