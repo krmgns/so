@@ -2372,8 +2372,8 @@
 
     function readFiles(file, callback) {
         if (file.files) {
-            $for(file.files, function(file) {
-                readFile(file, callback, file.files.length > 1);
+            $for(file.files, function(_file) {
+                readFile(_file, callback, file.files.length > 1);
             });
             fileContentStack = []; // reset
         } else { // ie >> https://msdn.microsoft.com/en-us/library/314cz14s(v=vs.85).aspx
