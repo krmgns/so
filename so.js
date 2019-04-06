@@ -22,7 +22,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.48.1';
+    window.so.VERSION = '5.49.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -634,7 +634,7 @@
          * @return {String}
          */
         toCamelCase: function(separator) {
-            var s = toString(this), ss;
+            var s = this, ss;
 
             if (s) { // prevent empty string craps
                 ss = s.split(separator || ' ');
@@ -653,7 +653,7 @@
          * @return {String}
          */
         toCapitalCase: function(opt_all, opt_lower) {
-            var s = toString(this), i;
+            var s = this, i;
 
             if (s) { // prevent empty string craps
                 opt_lower && (s = lower(s));
@@ -677,7 +677,7 @@
          * @return {Array}
          */
         splits: function(separator, limit) {
-            var s = toString(this).split(separator);
+            var s = this.split(separator);
 
             if (limit) {
                 var sRest = s.slice(limit - 1);
@@ -696,7 +696,7 @@
          * @return {String}
          */
         format: function() {
-            var s = toString(this), args = arguments, i = 0, match = s.match(/(%s)/g) || [];
+            var s = this, args = arguments, i = 0, match = s.match(/(%s)/g) || [];
 
             if (args.length < match.length) {
                 $.logWarn('No enough arguments for format().');
@@ -747,6 +747,7 @@
             if (!isRegExp(re)) {
                 re = toRegExp(re);
             }
+
             return re.test(this);
         },
 
@@ -756,9 +757,7 @@
          * @return {String}
          */
         wrap: function(input) {
-            return isString(input)
-                ? input + toString(this) + input
-                : input[0] + toString(this) + input[1];
+            return isString(input) ? input + this + input : input[0] + this + input[1];
         },
 
         /**
@@ -790,6 +789,23 @@
         },
 
         /**
+         * Translate.
+         * @param  {Object} charMap
+         * @return {String}
+         */
+        translate: function(charMap) {
+            var s = this, i = 0, c;
+
+            while (c = s[i++]) {
+                if (c in charMap) {
+                    s = s.replace(c, charMap[c]);
+                }
+            }
+
+            return s;
+        },
+
+        /**
          * Trim.
          * @param  {String} chars?
          * @param  {Bool}   opt_noCase?
@@ -810,7 +826,7 @@
         trimLeft: function(chars, opt_noCase) {
             if (!chars) return trim(this, 1);
 
-            var s = toString(this), re = prepareTrimRegExp(chars, opt_noCase, 1);
+            var s = this, re = prepareTrimRegExp(chars, opt_noCase, 1);
             while (re.test(s)) {
                 s = s.replace(re, '');
             }
@@ -828,7 +844,7 @@
         trimRight: function(chars, opt_noCase) {
             if (!chars) return trim(this, 2);
 
-            var s = toString(this), re = prepareTrimRegExp(chars, opt_noCase, 2);
+            var s = this, re = prepareTrimRegExp(chars, opt_noCase, 2);
             while (re.test(s)) {
                 s = s.replace(re, '');
             }

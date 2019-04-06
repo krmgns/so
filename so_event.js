@@ -148,9 +148,9 @@
             $extend(e, {
                 event: event,
                 eventTarget: event.eventTarget,
-                stop: function() {
+                stop: function(all) {
                     e.stopDefault();
-                    e.stopPropagation();
+                    e.stopPropagation(all);
                 },
                 stopDefault: function() {
                     e.preventDefault();
