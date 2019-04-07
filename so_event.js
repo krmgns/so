@@ -460,7 +460,7 @@
                     }
                 }
 
-                if (removeStack.length) {
+                if (removeStack.len()) {
                     targetEvents = target.$events;
                     $for(removeStack, function(event) {
                         if (event && event.id in targetEvents[event.type]) {
@@ -477,7 +477,7 @@
                     target['on'+ event.type] = NULL;
                 }
             } else {
-                $logWarn('No `'+ event.type +'` events found to remove.');
+                $logWarn('No '+ event.type +' to remove.');
             }
         },
 
@@ -504,7 +504,7 @@
             } else if ($isFunction(target[event.type])) { // natives
                 target[event.type](event.event);
             } else {
-                $logWarn('No `'+ event.type +'` type events found to fire.');
+                $logWarn('No '+ event.type +' to fire.');
             }
         }
     });

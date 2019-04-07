@@ -134,7 +134,7 @@
      * @param {Bool}          one?
      */
     function Dom(selector, root, one) {
-        var els, size = 0, re, id, rid;
+        var _this = this, els, len = 0, re, id, rid;
 
         if (selector) {
             if ($isString(selector)) {
@@ -154,7 +154,7 @@
                         id = getAttr(root, (rid = soPrefix +'buggy-scope-selector')) || $.rid();
                         setAttr(root, rid, id, FALSE);
                         // fix '>' only selector
-                        if (selector.length == 1) {
+                        if (selector.len() == 1) {
                             selector = '> *';
                         }
                         els = select((selector = '[%s="%s"] %s'.format(rid, id, selector)), NULL, one);
@@ -179,13 +179,13 @@
             }
 
             $for(els, function(el) {
-                if (el) this[size++] = el;
-            }, this);
+                if (el) _this[len++] = el;
+            });
         }
 
         // define all read-only, but selector
-        Object.defineProperties(this, {
-                '_size': {value: size},
+        Object.defineProperties(_this, {
+                 '_len': {value: len},
                 '_root': {value: root},
             '_selector': {value: selector, writable: TRUE}
         });
@@ -194,11 +194,11 @@
     // dom: base
     extendDomPrototype(Dom, {
         /**
-         * Size.
+         * Len.
          * @return {Int}
          */
-        size : function() {
-            return this._size;
+        len: function() {
+            return this._len;
         },
 
         /**
@@ -348,9 +348,9 @@
          * @return {Array}
          */
         getAll: function() {
-            var el, els = [], _this = this, args = arguments;
+            var el, els = [], _this = this, args = $array(arguments);
 
-            if (!args.length) {
+            if (!args.len()) {
                 els = _this.all();
             } else {
                 $for(args, function(i) {
@@ -394,7 +394,7 @@
          * @return {Dom}
          */
         last: function() {
-            return this.item(this._size);
+            return this.item(this._len);
         },
 
         /**
@@ -948,7 +948,7 @@
     // array intersect helpers
     function intersect(a, b, opt_found) {
         var tmp, i;
-        tmp = (b.length > a.length) ? (tmp = b, b = a, a = tmp) : NULL; // loop over shortest
+        tmp = (b.len() > a.len()) ? (tmp = b, b = a, a = tmp) : NULL; // loop over shortest
 
         return a.filter(function(search) {
             return (i = b.indexOf(search)), opt_found ? i > -1 : i < 0;
@@ -974,9 +974,7 @@
     }
 
     function toAllSelector(selector) {
-        selector = $trim(selector);
-
-        return (selector && selector[0] != '>') ? '>'+ selector : selector;
+        return ((selector = $trim(selector)) && selector[0] != '>') ? '>'+ selector : selector;
     }
 
     // dom: walkers
@@ -1054,7 +1052,7 @@
 
             if (el) {
                 ret = noIntersect(el, walk(el[NAME_PARENT_NODE], NAME_CHILDREN));
-                if (ret.length && (selector = toAllSelector(selector))) {
+                if (ret.len() && (selector = toAllSelector(selector))) {
                     ret = intersect(ret, noIntersect(el, initDom(el[NAME_PARENT_NODE]).findAll(selector).all()), TRUE);
                 }
             }
@@ -1129,7 +1127,7 @@
 
             if (el) {
                 ret = walk(el, NAME_PREVIOUS_ELEMENT_SIBLING).reverse();
-                if (ret.length && (selector = toAllSelector(selector))) {
+                if (ret.len() && (selector = toAllSelector(selector))) {
                     ret = intersect(ret, initDom(el[NAME_PARENT_NODE]).findAll(selector).all(), TRUE);
                 }
             }
@@ -1155,7 +1153,7 @@
 
             if (el) {
                 ret = walk(el, NAME_NEXT_ELEMENT_SIBLING);
-                if (ret.length && (selector = toAllSelector(selector))) {
+                if (ret.len() && (selector = toAllSelector(selector))) {
                     ret = intersect(ret, initDom(el[NAME_PARENT_NODE]).findAll(selector).all(), TRUE);
                 }
             }
@@ -1178,7 +1176,7 @@
          * @return {Bool}
          */
         contains: function(selector) {
-            return $bool(this[0] && initDom(selector, this[0]).size());
+            return $bool(this[0] && initDom(selector, this[0]).len());
         },
 
         /**
@@ -1199,7 +1197,7 @@
          * @return {Bool}
          */
         hasParent: function() {
-            return this.parent().size() > 0;
+            return this.parent().len() > 0;
         },
 
         /**
@@ -1207,7 +1205,7 @@
          * @return {Bool}
          */
         hasParents: function() {
-            return this.parent().parent().size() > 1;
+            return this.parent().parent().len() > 1;
         },
 
         /**
@@ -1215,7 +1213,7 @@
          * @return {Bool}
          */
         hasChild: function() {
-            return this.children().size() > 0;
+            return this.children().len() > 0;
         },
 
         /**
@@ -1223,7 +1221,7 @@
          * @return {Bool}
          */
         hasChildren: function() {
-            return this.children().size() > 1;
+            return this.children().len() > 1;
         },
 
         /**
@@ -1335,8 +1333,8 @@
     var re_colon = /\s*:\s*/;
     var re_scolon = /\s*;\s*/;
     var matchesSelector = document[NAME_DOCUMENT_ELEMENT].matches || function(selector) {
-        var i = 0, all = querySelectorAll(this[NAME_OWNER_DOCUMENT], selector);
-        while (i < all.length) {
+        var i = 0, all = $array(querySelectorAll(this[NAME_OWNER_DOCUMENT], selector));
+        while (i < all.len()) {
             if (all[i++] == this) {
                 return TRUE;
             }
@@ -1358,7 +1356,7 @@
             });
         });
 
-        return ret[ret.length - 1] /* return last rule */ || {};
+        return ret[ret.len() - 1] /* return last rule */ || {};
     }
 
     function getComputedStyle(el) {
@@ -1396,7 +1394,7 @@
         var styles = {}, s;
 
         text = $string(text).split(re_scolon);
-        while (text.length) {
+        while (text.len()) {
             // wtf! :)
             (s = text.shift().split(re_colon))
                 && (s[0] = $trim(s[0]))
@@ -1451,7 +1449,7 @@
          * @return {Bool}
          */
         hasStyle: function(name) {
-            return $bool(this[0] && this[0][NAME_STYLE] && ~this[0][NAME_STYLE][NAME_CSS_TEXT].indexOf(name));
+            return $bool(this[0] && this[0][NAME_STYLE] && this[0][NAME_STYLE][NAME_CSS_TEXT].has(name));
         },
 
         /**
@@ -1479,10 +1477,10 @@
          * @param  {String} name
          * @param  {Bool}   opt_convert? @default=true
          * @param  {Bool}   opt_raw?     @default=false
-         * @return {String|null}
+         * @return {String|null|undefined}
          */
         getStyle: function(name, opt_convert, opt_raw) {
-            var el = this[0], value = NULL, opt_convert;
+            var el = this[0], value, opt_convert;
 
             if (el) {
                 if (opt_raw) {
@@ -1510,51 +1508,48 @@
          * @param  {String} name
          * @param  {Bool}  opt_convert? @default=true
          * @param  {Bool}  opt_raw?     @default=false
-         * @return {Object}
+         * @return {Object|undefined}
          */
         getStyles: function(names, opt_convert, opt_raw) {
             var el = this[0], styles = {};
+            if (el) {
+                if (names) {
+                    el = initDom(el);
+                    split(names, re_comma).each(function(name) {
+                        styles[name] = el.getStyle(name, opt_convert, opt_raw);
+                    });
+                } else {
+                    styles = toStyleObject(getStyle(el));
+                }
 
-            if (names) {
-                el = initDom(el);
-                split(names, re_comma).each(function(name) {
-                    styles[name] = el.getStyle(name, opt_convert, opt_raw);
-                });
-            } else {
-                styles = toStyleObject(getStyle(el));
+                return styles;
             }
-
-            return styles;
         },
 
         /**
          * Get css (original) style.
-         * @param  {String}  name?
-         * @return {String}
+         * @param  {String} name?
+         * @return {String|Object|undefined}
          */
         getCssStyle: function(name) {
             var el = this[0], ret = {};
-
             if (el) {
                 ret = toStyleObject(getCssStyle(el));
+                return name ? ret[name] || '' : ret;
             }
-
-            return name ? ret[name] || '' : ret;
         },
 
         /**
          * Get computed (rendered) style.
          * @param  {String} name?
-         * @return {String}
+         * @return {String|Object|undefined}
          */
         getComputedStyle: function(name) {
             var el = this[0], ret = {};
-
             if (el) {
                 ret = toStyleObject(getComputedStyle(el));
+                return name ? ret[name] || '' : ret;
             }
-
-            return name ? ret[name] || '' : ret;
         },
 
         /**
@@ -2344,59 +2339,17 @@
         }
     });
 
-    var re_plus = /%20/g
-    var re_data = /^data:(?:.+)(?:;base64)?,/;
+    var re_plus = /%20/g;
     var encode = encodeURIComponent, decode = decodeURIComponent;
-    var fileContent, fileContentStack = [];
-
-    // file reader helpers
-    function toBase64(input) {
-        return $.util.base64Encode(decode(input));
-    }
-
-    function readFile(file, callback, opt_multiple) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            fileContent = $trim(e.target.result);
-            // opera(12) doesn't give base64 for html files (and maybe others)..
-            var encoded = ~fileContent.indexOf(';base64');
-            fileContent = fileContent.replace(re_data, '');
-            if (!encoded) {
-                fileContent = toBase64(fileContent);
-            }
-            fileContentStack.push(fileContent);
-            callback(opt_multiple ? fileContentStack : fileContent);
-        };
-        reader.readAsDataURL(file);
-    }
-
-    function readFiles(file, callback) {
-        if (file.files) {
-            $for(file.files, function(_file) {
-                readFile(_file, callback, file.files.length > 1);
-            });
-            fileContentStack = []; // reset
-        } else { // ie >> https://msdn.microsoft.com/en-us/library/314cz14s(v=vs.85).aspx
-            var fso, file, fileName = file.value, fileContent = '';
-            fso = new ActiveXObject('Scripting.FileSystemObject');
-            if (fileName && fso.fileExists(fileName)) {
-                file = fso.openTextFile(fileName, 1);
-                fileContent = toBase64(file.readAll());
-                file.close();
-            }
-            callback(fileContent);
-        }
-    }
 
     // dom: form
     extendDomPrototype(Dom, {
         /**
          * Serialize.
-         * @param  {Function} callback?
-         * @param  {Bool}     opt_plus?
+         * @param  {Bool} opt_plus?
          * @return {String}
          */
-        serialize: function(callback, opt_plus) {
+        serialize: function(opt_plus) {
             var el = this[0], ret = '';
 
             if (getTag(el) == 'form') {
@@ -2422,24 +2375,6 @@
                         case 'submit':
                             value = el.value ? el.value : type;
                             break;
-                        case 'file':
-                            if (callback) {
-                                done = !(el.files && el.files.length);
-                                readFiles(el, function(value) {
-                                    if (!$isArray(value)) { // single, one read
-                                        done = TRUE;
-                                        data.push(name +'='+ encode(value));
-                                    } else {
-                                        done = (value.length == el.files.length);
-                                        if (done) { // multiple, wait for all read
-                                            $for(value, function(value, i) {
-                                                data.push(name +'['+ i +']='+ encode(value));
-                                            });
-                                        }
-                                    }
-                                });
-                            }
-                            break;
                         default:
                             value = el.value;
                     }
@@ -2449,25 +2384,10 @@
                     }
                 });
 
-                var _ret = function() {
-                    ret = data.join('&');
-                    if (!$isFalse(opt_plus)) {
-                        ret = ret.replace(re_plus, '+');
-                    }
-                    return ret;
-                };
-
-                if (!callback) {
-                    return _ret();
+                ret = data.join('&');
+                if (!$isFalse(opt_plus)) {
+                    ret = ret.replace(re_plus, '+');
                 }
-
-                // callback waiter
-                ;(function _() {
-                    if (done) {
-                        return callback(_ret());
-                    }
-                    $.fire(1, _);
-                })();
             }
 
             return ret;
@@ -2475,10 +2395,9 @@
 
         /**
          * Serialize array.
-         * @param  {Function} callback?
          * @return {Array|undefined}
          */
-        serializeArray: function(callback) {
+        serializeArray: function() {
             var _ret = function(data, ret) {
                 return ret = [], data.split('&').each(function(item) {
                     item = item.splits('=', 2), ret.push({
@@ -2490,55 +2409,35 @@
                 }), ret;
             };
 
-            if (!callback) {
-                return _ret(this.serialize(NULL, FALSE));
-            }
-
-            this.serialize(function(data) {
-                callback(_ret(data));
-            }, FALSE);
+            return _ret(this.serialize(FALSE));
         },
 
         /**
          * Serialize object.
-         * @param  {Function} callback?
          * @return {Object|undefined}
          */
-        serializeObject: function(callback) {
+        serializeObject: function() {
             var _ret = function(data, ret) {
                 return ret = {}, $for(data, function(item) {
                     ret[item.key] = item.value;
                 }), ret;
             };
 
-            if (!callback) {
-                return _ret(this.serializeArray());
-            }
-
-            this.serializeArray(function(data) {
-                callback(_ret(data));
-            });
+            return _ret(this.serializeArray());
         },
 
         /**
          * Serialize json.
-         * @param  {Function} callback?
          * @return {String|undefined}
          */
-        serializeJson: function(callback) {
+        serializeJson: function() {
             var _ret = function(data, ret) {
                 return ret = {}, $for(data, function(item) {
                     ret[item.key] = item.value;
                 }), $jsonEncode(ret);
             };
 
-            if (!callback) {
-                return _ret(this.serializeArray());
-            }
-
-            this.serializeArray(function(data) {
-                callback(_ret(data));
-            });
+            return _ret(this.serializeArray());
         }
     });
 

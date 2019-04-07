@@ -22,7 +22,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.49.1';
+    window.so.VERSION = '5.50.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -409,8 +409,22 @@
         return ret > -1;
     }
 
-    function equals(a, b) {
-        return a === b;
+    function equals(a, b, opt_sort, opt_deep /* @todo */) {
+        if (a === b) return TRUE;
+
+        if (isArray(a) && isArray(b)) {
+            if (len(a) !== len(b)) return FALSE;
+            if (opt_sort) {
+                // make copies (do not modify original inputs)
+                a = makeArray(a).sort(), makeArray(b).sort();
+            }
+            for (var i = 0, il = a.len(); i < il; i++) {
+                if (a[i] !== b[i]) return FALSE;
+            }
+            return TRUE;
+        }
+
+        return FALSE;
     }
 
     function toUniqUnuniq(array, opt_ununiq) {
@@ -446,8 +460,8 @@
          * @param  {Array} input
          * @return {Bool}
          */
-        equals: function(input) {
-            return equals(input, this);
+        equals: function(input, opt_sort) {
+            return equals(this, input, opt_sort);
         },
 
         /**
@@ -472,7 +486,7 @@
          * @return {Any}
          */
         last: function() {
-            return this[this.length - 1];
+            return this[len(this) - 1];
         },
 
         /**
@@ -516,7 +530,7 @@
          * @source https://stackoverflow.com/a/23976260/362780
          */
         rand: function() {
-            return this[~~(this.length * Math.random())];
+            return this[~~(len(this) * Math.random())];
         },
 
         /**
@@ -576,7 +590,7 @@
          * @return {Bool}
          */
         equals: function(input) {
-            return equals(input, this);
+            return equals(this, input);
         },
 
         /**
@@ -658,7 +672,7 @@
             if (s) { // prevent empty string craps
                 opt_lower && (s = lower(s));
                 if (opt_all) {
-                    for (i = 0, s = s.split(' '); i < s.length; i++) {
+                    for (i = 0, s = s.split(' '), il = len(s); i < il; i++) {
                         s[i] = s[i].toCapitalCase(FALSE);
                     }
                     s = s.join(' ');
@@ -682,7 +696,7 @@
             if (limit) {
                 var sRest = s.slice(limit - 1);
                 s = s.slice(0, limit - 1);
-                if (sRest.length) {
+                if (sRest.len()) {
                     s = s.concat(sRest.join(separator));
                 }
             }
@@ -698,7 +712,7 @@
         format: function() {
             var s = this, args = arguments, i = 0, match = s.match(/(%s)/g) || [];
 
-            if (args.length < match.length) {
+            if (len(args) < len(match)) {
                 $.logWarn('No enough arguments for format().');
             }
 
@@ -735,7 +749,7 @@
                 ret.push(r);
             }
 
-            return ret.length ? ret : NULL;
+            return ret.len() ? ret : NULL;
         },
 
         /**
@@ -922,7 +936,7 @@
          * @return {Bool}
          */
         equals: function(input) {
-            return equals(input, this);
+            return equals(this, input);
         }
     });
 
@@ -933,10 +947,6 @@
     // array maker
     function makeArray(input, begin, end) {
         var ret = [], inputType = $.type(input);
-
-        if (inputType == 'array') {
-            return input;
-        }
 
         if (!input || inputType == 'string' || inputType == 'window'
             || input[NAME_NODE_TYPE] || isVoid(input.length)) {
@@ -1113,7 +1123,7 @@
                 var keys = trim(key).split('.');
 
                 key = keys.shift();
-                if (!keys.length) {
+                if (!keys.len()) {
                     return input[key];
                 }
 
@@ -1174,7 +1184,7 @@
         isEmpty: function(input) {
             return toBool(!input // '', null, undefined, false, 0, -0, NaN
                 || (isNumber(input.length) && !input.length)
-                || (isObject(input) && !Object.keys(input).length)
+                || (isObject(input) && !Object.keys(input).len())
             );
         },
 
@@ -1186,12 +1196,24 @@
          */
         extend: function(target, source) {
             if (isArray(target)) {
-                while (target.length) {
+                while (target.len()) {
                     $.extend(target.shift(), source);
                 }
             } else {
                 return extend.apply(NULL, [target, source].concat(makeArray(arguments, 2)));
             }
+        },
+
+        /**
+         * Equals.
+         * @param  {Any} a
+         * @param  {Any} b
+         * @param  {Bool} opt_sort?
+         * @param  {Bool} opt_deep?
+         * @return {Bool}
+         */
+        equals: function(a, b, opt_sort, opt_deep) {
+            return equals(a, b, opt_sort, opt_deep);
         },
 
         /**
@@ -1222,7 +1244,7 @@
 
     var readyCallbacks = [];
     var readyCallbacksFire = function() {
-        while (readyCallbacks.length) {
+        while (readyCallbacks.len()) {
             readyCallbacks.shift()($, $.dom /* will be ready on call */);
         }
     };

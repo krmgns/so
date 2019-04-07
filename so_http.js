@@ -114,8 +114,8 @@
                 $forEach(data, function(key, value) {
                     key = encode(key);
                     if ($isArray(value)) {
-                        if (value.length) {
-                            while (value.length) {
+                        if (value.len()) {
+                            while (value.len()) {
                                 ret.push('%s[]=%s'.format(key, encode(value.shift())));
                             }
                         } else ret.push('%s[]='.format(key));

@@ -17,7 +17,7 @@
 
     // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm
     function shuffle(items) {
-        var ret = copyArray(items), i = ret.length - 1, ir, tmp;
+        var ret = copyArray(items), i = ret.len() - 1, ir, tmp;
         for (i; i > 0; i--) {
             ir = ~~(Math.random() * (i + 1));
             tmp = ret[i], ret[i] = ret[ir], ret[ir] = tmp;
@@ -53,7 +53,7 @@
          */
         init: function(data, options) {
             if (!$.isIterable(data)) {
-                throw ('No iterable object given.');
+                throw ('No iterable object.');
             }
 
             var type = $.type(data);
@@ -64,16 +64,17 @@
 
             options = $.options({type: type}, options);
 
-            this.type = options.type;
-            this.data = {};
-            this.size = 0;
+            var _this = this; // just as minify candy
+            _this.type = options.type;
+            _this.data = {};
+            _this._len = 0;
 
             $forEach(data, function(key, value) {
-                this.data[key] = value;
-                this.size++; // why naming as 'length' sucks?!
-            }, this);
+                _this.data[key] = value;
+                _this._len++; // why naming as 'length' sucks?!
+            });
 
-            return this;
+            return _this;
         },
 
         /**
@@ -101,10 +102,10 @@
          * @return {self}
          */
         set: function(key, value) {
-            var _this = this, key = (key != NULL) ? key : _this.size;
+            var _this = this, key = (key != NULL) ? key : _this._len;
 
             if (!(key in _this.data)) { // increase size
-                _this.size++;
+                _this._len++;
             }
             _this.data[key] = value;
 
@@ -177,7 +178,7 @@
          * @return {self}
          */
         empty: function() {
-            return (this.data = {}, this.size = 0), this;
+            return (this.data = {}, this._len = 0), this;
         },
 
         /**
@@ -322,7 +323,7 @@
             if (key in _this.data) {
                 ret = _this.data[key];
                 // delete key and decrease size
-                delete _this.data[key], _this.size--;
+                delete _this.data[key], _this._len--;
 
                 // reset data with indexes
                 if (_this.type != 'object') {
@@ -349,7 +350,7 @@
                 if (key in _this.data) {
                     ret[i] = _this.data[key];
                     // delete key and decrease size
-                    delete _this.data[key], _this.size--, i++;
+                    delete _this.data[key], _this._len--, i++;
                 }
             });
 
@@ -487,7 +488,7 @@
             var _this = this, data = {}, keys, shuffledKeys, i;
 
             if (_this.type == 'object') {
-                keys = _this.keys(), shuffledKeys = shuffle(_this.keys()), i = keys.length;
+                keys = _this.keys(), shuffledKeys = shuffle(_this.keys()), i = keys.len();
                 while (i--) {
                     data[shuffledKeys[i]] = _this.data[keys[i]];
                 }
@@ -556,18 +557,35 @@
 
         /**
          * First.
-         * @return {Any}
+         * @return {Any|undefined}
          */
         first: function() {
-            return this.data[this.keys()[0]];
+            return this.nth(1);
         },
 
         /**
          * Last.
-         * @return {Any}
+         * @return {Any|undefined}
          */
         last: function() {
-            return this.data[this.keys()[this.size - 1]];
+            return this.nth(this._len);
+        },
+
+        /**
+         * Nth.
+         * @param  {Int} i
+         * @return {Any|undefined}
+         */
+        nth: function(i) {
+            return this.data[this.keys()[i - 1]];
+        },
+
+        /**
+         * Len.
+         * @return {Int}
+         */
+        len: function() {
+            return this._len;
         },
 
         /**
@@ -575,7 +593,7 @@
          * @return {Bool}
          */
         isEmpty: function() {
-            return !this.size;
+            return !this._len;
         }
     };
 

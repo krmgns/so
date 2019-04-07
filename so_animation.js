@@ -47,7 +47,7 @@
 
         _this.tasks = [];
 
-        if (_this.$target.size()) {
+        if (_this.$target.len()) {
             // for stop tool
             _this.$target.setProperty('$animation', _this);
 
@@ -105,7 +105,7 @@
             _this.startTime = $now();
 
             !function run() {
-                if (!_this.$target.size()) {
+                if (!_this.$target.len()) {
                     return (_this.running = FALSE, _this.stopped = _this.ended = TRUE),
                         $.logWarn('No element(s) to animate.');
                 }
