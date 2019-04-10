@@ -2419,7 +2419,7 @@
         serializeObject: function() {
             var _ret = function(data, ret) {
                 return ret = {}, $for(data, function(item) {
-                    ret[item.key] = item.value;
+                    if (item.key) ret[item.key] = item.value;
                 }), ret;
             };
 
@@ -2433,7 +2433,7 @@
         serializeJson: function() {
             var _ret = function(data, ret) {
                 return ret = {}, $for(data, function(item) {
-                    ret[item.key] = item.value;
+                    if (item.key) ret[item.key] = item.value;
                 }), $jsonEncode(ret);
             };
 
