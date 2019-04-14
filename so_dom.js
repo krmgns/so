@@ -23,7 +23,7 @@
     var NAME_OFFSET_TOP = 'offsetTop', NAME_OFFSET_LEFT = 'offsetLeft';
     var NAME_SCROLL_TOP = 'scrollTop', NAME_SCROLL_LEFT = 'scrollLeft';
     var NAME_INNER_HTML = 'innerHTML', NAME_TEXT_CONTENT = 'textContent';
-    var NAME_STYLE = 'style', NAME_CLASS_NAME = 'className', NAME_TAG_NAME = 'tagName';
+    var NAME_STYLE = 'style', NAME_CLASS_NAME = 'className', NAME_TAG_NAME = 'tagName', NAME_VALUE = 'value';
     var NAME_DISPLAY = 'display', NAME_VISIBILITY = 'visibility', NAME_CSS_TEXT = 'cssText';
     var NAME_OWNER_DOCUMENT = 'ownerDocument', NAME_DOCUMENT_ELEMENT = 'documentElement'
     var NAME_PROTOTYPE = 'prototype';
@@ -1870,6 +1870,8 @@
         if (isElementNode(el)) {
             if ($isNull(value)) {
                 removeAttr(el, name);
+            } else if (name == NAME_VALUE) {
+                el.value = value;
             } else if (!$isFalse(opt_state) /* speed */ && (opt_state || re_attrState.test(name))) {
                 (value || $isUndefined(value)) ? (el.setAttribute(name, ''), el[name] = !!value)
                     : (removeAttr(el, name), el[name] = FALSE);
@@ -2084,7 +2086,7 @@
                         }
                     });
                 } else {
-                    setAttr(el, 'value', (el.value = value), FALSE);
+                    setAttr(el, NAME_VALUE, (el.value = value), FALSE);
                 }
             });
         },
@@ -2097,7 +2099,7 @@
             var el = this[0];
 
             if (el) {
-                return el.options ? getAttr(el.options[el.selectedIndex], 'value') // <select>
+                return el.options ? getAttr(el.options[el.selectedIndex], NAME_VALUE) // <select>
                     : el.value;
             }
         }
@@ -2366,7 +2368,7 @@
 
                     switch (type) {
                         case 'select':
-                            value = getAttr(el.options[el.selectedIndex], 'value');
+                            value = getAttr(el.options[el.selectedIndex], NAME_VALUE);
                             break;
                         case 'radio':
                         case 'checkbox':
