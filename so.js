@@ -13,12 +13,15 @@
 
     /**
      * So.
-     * @param  {String|Object} selector
-     * @param  {Document}      root?
+     * @param  {String|Object|Function} selector
+     * @param  {Object}                 root?
      * @return {Object}
      */
     function $(selector, root) {
-        return $.dom(selector, root);
+        if (!isFunction(selector)) {
+            return $.dom(selector, root);
+        }
+        $.ready(selector, root); // (callback, document?)
     }
 
     // minify candies
@@ -32,7 +35,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.60.0';
+    window.so.VERSION = '5.61.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 

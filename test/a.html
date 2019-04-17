@@ -9,14 +9,14 @@
 .outer {height: 100px; font-size: 100px; background-color: green}
 </style>
 
-<div id="container">
-    <p class="p p0">#container > p.p0</p>
-    <p class="p p1">#container > p.p1</p>
-    <p class="p p2 x">#container > p.p2.x</p>
-    <p>#container > p</p>
+<div id="div">
+    <p class="p p0">#div > p.p0</p>
+    <p class="p p1">#div > p.p1</p>
+    <p class="p p2 x">#div > p.p2.x</p>
+    <p>#div > p</p>
     <div class="p">
-        #container > div.p
-        <p>#container > div.p > p</p>
+        #div > div.p
+        <p>#div > div.p > p</p>
     </div>
 </div>
 
@@ -24,60 +24,33 @@
 <button hide>Button [hide]</button>
 <button toggle>Button [toggle]</button>
 <br>
-<!-- <p class="outer">Outer p.outer</p> -->
 <s class="outer">Outer s.outer</s>
 
 <script src="so-all.php"></script>
 <!-- <script src="../so-all.js"></script> -->
 <script>
-so.ready(function($, $) {
+// so.ready(function($, $$) {
+so(function($, $$) {
 
-    var s = $("body")
-    log(s)
+    var s = $(">").each((el) => $(el).findAll(">"))
 
-// function Person(id) {
-//     this.id = id
-//     this.getId = () => { return this.id }
-// }
-// function User(id) {
-//     this.super(id)
-// }
-// $.class(User).extends(Person)
+    // $$.loadStyle("x.css", "", () => log("ok css"))
+    // $$.loadScript("x.js", "", () => log("ok js", x))
 
-// var User = $
-//     .class(function(id) {
-//         this.super(id)
-//     })
-//     .extends(function(id) {
-//         this.id = id
-//         this.getId = () => { return this.id }
-//     })
+    // var s = $("#div").findAll(">").filter(":not(p)")
+    // var s = $("#div").findAll(">").filter((el) => {  return el.tagName != "P" })
+    // log(s)
 
-// class Person {
-//     constructor(id) { this.id = id }
-//     getId() { return this.id }
-// }
-// class User extends Person {
-//     // constructor(id) { super(id) }
-// }
-
-// all same above
-// var u = new User("ali")
-// log(u)
-// log(u.id)
-// log(u.getId())
-// return
-
-    // $("button[show]").on("click", () => $(".outer").show("normal"))
-    // $("button[hide]").on("click", () => $(".outer").hide("normal"))
-    $("button[toggle]").on("click", function() {
-        $(".outer").toggle("normal", "", function(a) {
+    $("[show]").on("click", () => $(".outer").show("normal"))
+    $("[hide]").on("click", () => $(".outer").hide("normal"))
+    $("[toggle]").on("click", () => {
+        $(".outer").toggle("normal", "", (a) => {
             log(a)
         })
     })
 
-    // var els = $.dom(".p", "#container")
-    // var els = $.dom("#container").findAll("> p")
+    // var els = $.dom(".p", "#div")
+    // var els = $.dom("#div").findAll("> p")
     // log(els.nth('.0'))
     // log(els.len())
     // log(els.toArray())
@@ -88,7 +61,7 @@ so.ready(function($, $) {
     // var el = $.dom(".p0")
     // log(el.hasClass("p"))
 
-    // log($.dom("#container").tag())
+    // log($.dom("#div").tag())
 
     // els.forEach(function(el){
     //     log(el.tagName == "DIV")

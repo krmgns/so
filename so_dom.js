@@ -27,14 +27,14 @@
     var NAME_DISPLAY = 'display', NAME_VISIBILITY = 'visibility', NAME_CSS_TEXT = 'cssText';
     var NAME_OWNER_DOCUMENT = 'ownerDocument', NAME_DOCUMENT_ELEMENT = 'documentElement'
     var NAME_PROTOTYPE = 'prototype';
-    var TAG_WINDOW = '#window', TAG_DOCUMENT = '#document', TAG_HTML = 'html', TAG_BODY = 'body';
+    var TAG_WINDOW = '#window', TAG_DOCUMENT = '#document', TAG_HTML = 'html', TAG_HEAD = 'head', TAG_BODY = 'body';
 
-    var document = $.document;
     var re_space = /\s+/g;
     var re_comma = /\s*,\s*/;
     var re_tag = /^<([\w-]+)[^>]*>/i;
+    var $document = $.document;
     var $toStyleName = $.util.toStyleName, $jsonEncode = $.util.jsonEncode;
-    var $re = $.re, $array = $.array, $each = $.each, $for = $.for, $forEach = $.forEach;
+    var $re = $.re, $rid = $.rid, $array = $.array, $each = $.each, $for = $.for, $forEach = $.forEach;
     var $trim = $.trim, $extend = $.extend, $int = $.int, $string = $.string, $bool = $.bool,
         $isVoid = $.isVoid, $isNull = $.isNull, $isNulls = $.isNulls, $isDefined = $.isDefined,
         $isUndefined = $.isUndefined, $isString = $.isString, $isNumeric = $.isNumeric,
@@ -69,7 +69,7 @@
         return $bool(el && (el[NAME_NODE_TYPE] === 1 || el[NAME_NODE_TYPE] === 9 || el[NAME_NODE_TYPE] === 11));
     }
     function isElementNode(el) {
-        return $bool(el && el[NAME_NODE_TYPE] === 1);
+        return $bool(el && (el[NAME_NODE_TYPE] === 1));
     }
     function toKeyValueObject(key, value) {
         var ret = key || {}; if ($isString(ret)) ret = {}, ret[key] = value; return ret;
@@ -78,7 +78,7 @@
         return isDom(selector) ? selector : new Dom(selector, root, one);
     }
     function extendDomPrototype(Dom, prototype) {
-        $extend(Dom.prototype, prototype);
+        $extend(Dom[NAME_PROTOTYPE], prototype);
     }
 
     var soPrefix = 'so:';
@@ -99,17 +99,18 @@
     function select(selector, root, one) {
         if (!selector) return;
 
-        // selector given
+        // selector given as root
         if ($isString(root)) {
-            root = querySelector(document, root);
+            root = querySelector($document, root);
         }
 
         if (!isNode(root)) {
-            root = document;
+            root = $document;
         }
 
         selector = selector.replace(re_space, ' ');
 
+        // eg: p:first => p:first-child
         if (re_child.test(selector)) {
             selector = selector.replace(re_childFix, function(_, _1, _2, _3) {
                 return _1 +':'+ (_3 ? 'nth-child'+ _3 : _2 +'-child');
@@ -123,8 +124,10 @@
             });
         }
 
-        return $array(one ? querySelector(root, selector) // speed issues..
-            : querySelectorAll(root, selector));
+        return $array(
+            one ? querySelector(root, selector) // speed issue
+                : querySelectorAll(root, selector)
+        );
     }
 
     /**
@@ -134,30 +137,30 @@
      * @param {Bool}          one?
      */
     function Dom(selector, root, one) {
-        var _this = this, els, len = 0, re, id, rid;
+        var _this = this, els, len = 0, re, idn, idv;
 
         if (selector) {
             if ($isString(selector)) {
                 selector = $trim(selector);
-                // prevent empty selector error
                 if (selector) {
                     // id & class check (speed issue)
                     if (re = selector.match(re_idOrClass)) {
-                        els = ((root = document) && re[1])
+                        els = ((root = $document) && re[1])
                             ? [root.getElementById(re[1])] : root.getElementsByClassName(re[2]);
                     } else if (re = selector.match(re_tag)) {
                         // root could be document or attributes
                         els = create(selector, root, root, re[1]);
                     } else if (selector[0] == '>') {
-                        root = isElementNode(root) ? root : document.body;
+                        root = isElementNode(root) ? root : $document[NAME_DOCUMENT_ELEMENT];
                         // buggy :scope selector
-                        id = getAttr(root, (rid = soPrefix +'buggy-scope-selector')) || $.rid();
-                        setAttr(root, rid, id, FALSE);
+                        idv = getAttr(root, (idn = soPrefix +'buggy-scope-selector')) || $rid();
+                        setAttr(root, idn, idv, FALSE);
                         // fix '>' only selector
                         if (selector.len() == 1) {
                             selector = '> *';
                         }
-                        els = select((selector = '[%s="%s"] %s'.format(rid, id, selector)), NULL, one);
+                        selector = '[%s="%s"] %s'.format(idn, idv, selector);
+                        els = select(selector, NULL, one);
                     } else {
                         els = select(selector, root, one);
                     }
@@ -442,7 +445,20 @@
         }
     });
 
-    // create helpers
+    // modify helpers
+    function appendChild(node, childNode) {
+        node.appendChild(childNode);
+    }
+    function removeChild(node, childNode) {
+        node.removeChild(childNode);
+    }
+    function replaceChild(node, childNode, childNodeReplace) {
+        node.replaceChild(childNode, childNodeReplace);
+    }
+    function insertBefore(node, childNode, childNodeBefore) {
+        node.insertBefore(childNode, childNodeBefore);
+    }
+
     function create(content, doc, attributes, tag) {
         if (isDom(content)) return content.all();
         if (isNode(content)) return [content];
@@ -459,11 +475,11 @@
             }
         }
 
-        doc = doc && $isDocument(doc) ? doc : document;
+        doc = doc && $isDocument(doc) ? doc : $document;
         tmp = createElement(doc, tmpTag, {innerHTML: content});
         fragment = doc.createDocumentFragment();
         while (tmp[NAME_FIRST_CHILD]) {
-            fragment.appendChild(tmp[NAME_FIRST_CHILD]);
+            appendChild(fragment, tmp[NAME_FIRST_CHILD]);
         }
 
         if (attributes && $isObject(attributes)) {
@@ -480,7 +496,7 @@
     }
 
     function createElement(doc, tag, properties) {
-        var el = doc.createElement(tag);
+        var el = (doc || $document).createElement(tag);
 
         if (properties) {
             $forEach(properties, function(name, value) {
@@ -511,7 +527,7 @@
 
             if (el[NAME_CHILD_NODES]) {
                 $for(el[NAME_CHILD_NODES], function(child) {
-                    clone.appendChild(cloneElement(child, opt_deep));
+                    appendChild(clone, cloneElement(child, opt_deep));
                 });
             }
         }
@@ -529,7 +545,7 @@
             if (isElementNode(child)) {
                 cleanElement(child);
             }
-            el.removeChild(child);
+            removeChild(el, child);
         }
 
         return el;
@@ -610,7 +626,7 @@
                 this.findAll(selector).for(function(el) {
                     _parent = el[NAME_PARENT_NODE];
                     if (_parent && _parent == parent) {
-                        parent.removeChild(cleanElement(el));
+                        removeChild(parent, cleanElement(el));
                     }
                 });
             }
@@ -627,8 +643,8 @@
          */
         append: function(content, opt_cloning, attributes) {
             return this.for(function(el) {
-                createFor(el, content, attributes).each(function(node) {
-                    el.appendChild(cloneIf(opt_cloning, node));
+                createFor(el, content, attributes).each(function(_el) {
+                    appendChild(el, cloneIf(opt_cloning, _el));
                 });
             });
         },
@@ -645,8 +661,8 @@
             }
 
             return this.for(function(el) {
-                selector.for(function(node) {
-                    node.appendChild(cloneIf(opt_cloning, el));
+                selector.for(function(_el) {
+                    appendChild(_el, cloneIf(opt_cloning, el));
                 });
             });
         },
@@ -660,8 +676,8 @@
          */
         prepend: function(content, opt_cloning, attributes) {
             return this.for(function(el) {
-                createFor(el, content, attributes).each(function(node) {
-                    el.insertBefore(cloneIf(opt_cloning, node), el[NAME_FIRST_CHILD]);
+                createFor(el, content, attributes).each(function(_el) {
+                    insertBefore(el, cloneIf(opt_cloning, _el), el[NAME_FIRST_CHILD]);
                 });
             });
         },
@@ -678,8 +694,8 @@
             }
 
             return this.for(function(el) {
-                selector.for(function(node) {
-                    node.insertBefore(cloneIf(opt_cloning, el), node[NAME_FIRST_CHILD]);
+                selector.for(function(_el) {
+                    insertBefore(_el, cloneIf(opt_cloning, el), _el[NAME_FIRST_CHILD]);
                 });
             });
         },
@@ -710,8 +726,8 @@
             }
 
             return this.for(function(el) {
-                selector.for(function(node) {
-                    node[NAME_PARENT_NODE].insertBefore(cloneIf(opt_cloning, el), node);
+                selector.for(function(_el) {
+                    insertBefore(_el[NAME_PARENT_NODE], cloneIf(opt_cloning, el), _el);
                 });
             });
         },
@@ -728,8 +744,8 @@
             }
 
             return this.for(function(el) {
-                selector.for(function(node) {
-                    node[NAME_PARENT_NODE].insertBefore(cloneIf(opt_cloning, el), node.nextSibling)
+                selector.for(function(_el) {
+                    insertBefore(_el[NAME_PARENT_NODE], cloneIf(opt_cloning, el), _el.nextSibling)
                 });
             });
         },
@@ -746,8 +762,8 @@
             }
 
             return this.for(function(el) {
-                selector.for(function(node) {
-                    el[NAME_PARENT_NODE].replaceChild(cloneIf(opt_cloning, node), el);
+                selector.for(function(_el) {
+                    replaceChild(el[NAME_PARENT_NODE], cloneIf(opt_cloning, _el), el);
                 });
             });
         },
@@ -765,14 +781,14 @@
             if (parent) {
                 wrapper = createFor(el, content, attributes)[0];
                 replace = createFor(parent, '<so-tmp>', {style: 'display:none'})[0];
-                parent.insertBefore(replace, el);
+                insertBefore(parent, replace, el);
                 this.for(function(el) {
                     clone = cloneElement(el);
                     clones.push(clone);
-                    wrapper.appendChild(clone);
-                    parent.removeChild(cleanElement(el));
+                    appendChild(wrapper, clone);
+                    removeChild(parent, cleanElement(el));
                 });
-                parent.replaceChild(wrapper, replace);
+                replaceChild(parent, wrapper, replace);
             }
 
             return initDom(clones);
@@ -791,12 +807,13 @@
                 this.for(function(el) {
                     clone = cloneElement(el);
                     clones.push(clone);
-                    parentParent.insertBefore(clone, parent);
-                    parent.removeChild(cleanElement(el));
+                    insertBefore(parentParent, clone, parent);
+                    removeChild(parent, cleanElement(el));
                 });
+
                 // removes if opt_remove=true or no child anymore
                 if (opt_remove || !parentParent.hasChildNodes()) {
-                    parentParent.removeChild(cleanElement(parent));
+                    removeChild(parentParent, cleanElement(parent));
                 }
             }
 
@@ -1331,7 +1348,7 @@
     var re_nonUnitStyles = /(?:(?:fill-?)?opacity|z(?:oom|index)|(?:font-?w|line-?h)eight|column(?:-?count|s))/i;
     var re_colon = /\s*:\s*/;
     var re_scolon = /\s*;\s*/;
-    var matchesSelector = document[NAME_DOCUMENT_ELEMENT].matches || function(selector) {
+    var matchesSelector = $document[NAME_DOCUMENT_ELEMENT].matches || function(selector) {
         var i = 0, all = $array(querySelectorAll(this[NAME_OWNER_DOCUMENT], selector));
         while (i < all.len()) {
             if (all[i++] == this) {
@@ -1363,13 +1380,13 @@
     }
 
     function getDefaultStyle(el, name) {
-        var doc = $getDocument(el), body = doc.body, tag = el[NAME_TAG_NAME];
+        var doc = $getDocument(el), body = doc[TAG_BODY], tag = el[NAME_TAG_NAME];
 
         if (!_defaultStylesCache[tag]) {
             el = createElement(doc, tag);
-            body.appendChild(el);
-            _defaultStylesCache[tag] = getComputedStyle(el)[$toStyleName(name)];
-            body.removeChild(el);
+            appendChild(body, el);
+            _defaultStylesCache[tag] = getComputedStyle(el)[$toStyleName(name)]; // grab
+            removeChild(body, el);
         }
 
         return _defaultStylesCache[tag];
@@ -1585,8 +1602,8 @@
 
     function getInvisibleElementProperties(el, properties) {
         var ret = [];
-        var doc, css;
-        var rid = $.rid(), className = ' '+ rid;
+        var doc = $getDocument(el), body = doc[TAG_BODY];
+        var rid = $rid(), className = ' '+ rid, css;
         var styleText = el[NAME_STYLE][NAME_CSS_TEXT];
         var parent = el[NAME_PARENT_ELEMENT], parents = [], parentStyle;
 
@@ -1601,11 +1618,10 @@
             parent = parent[NAME_PARENT_ELEMENT];
         }
 
-        doc = $getDocument(el);
         css = createElement(doc, 'style', {
             textContent: '.'+ rid +'{display:block!important;visibility:hidden!important}'
         });
-        doc.body.appendChild(css);
+        appendChild(body, css);
 
         el[NAME_CLASS_NAME] += className;
         el[NAME_STYLE][NAME_DISPLAY] = '';
@@ -1621,7 +1637,7 @@
         });
 
         // restore all
-        doc.body.removeChild(css);
+        removeChild(body, css);
         el[NAME_CLASS_NAME] = el[NAME_CLASS_NAME].remove(className);
         if (styleText) {
             el[NAME_STYLE][NAME_CSS_TEXT] = styleText;
@@ -1712,7 +1728,7 @@
                 ret.top = el[NAME_OFFSET_TOP], ret.left = el[NAME_OFFSET_LEFT];
             }
 
-            var body = $getDocument(el).body;
+            var body = $getDocument(el)[TAG_BODY];
             ret.top += body[NAME_SCROLL_TOP], ret.left += body[NAME_SCROLL_LEFT];
             if (opt_relative) {
                 var parentOffset = getOffset(el[NAME_PARENT_ELEMENT], opt_relative);
@@ -2807,7 +2823,7 @@
 
     // xpath helper
     function initXDom(selector, root, one) {
-        var doc = root || document;
+        var doc = root || $document;
         var docEl = doc && doc[NAME_DOCUMENT_ELEMENT];
         var nodes = [], node, iter, ret;
         if (!docEl) {
@@ -2874,25 +2890,25 @@
         create: function(content, attributes, doc) {
             return create(content, doc, attributes);
         },
-        loadStyle: function(src, onload, attributes) {
-            var el = document.createElement('link');
+        loadStyle: function(src, root, onload, attributes) {
+            var el = createElement(NULL, 'link');
             el.href = src, el.onload = onload, el.rel = 'stylesheet';
-            if (attributes) {
-                for (var name in attributes) {
-                    setAttr(el, name, attributes[name]);
-                }
-            }
-            document.head.appendChild(el);
+
+            if (attributes) $forEach(attributes, function(name, value) {
+                setAttr(el, name, value);
+            });
+
+            appendChild(initDom(root || $document[TAG_HEAD])[0], el);
         },
-        loadScript: function(src, onload, attributes) {
-            var el = document.createElement('script');
+        loadScript: function(src, root, onload, attributes) {
+            var el = createElement(NULL, 'script');
             el.src = src, el.onload = onload;
-            if (attributes) {
-                for (var name in attributes) {
-                    setAttr(el, name, attributes[name]);
-                }
-            }
-            document.head.appendChild(el);
+
+            if (attributes) $forEach(attributes, function(name, value) {
+                setAttr(el, name, value);
+            });
+
+            appendChild(initDom(root || $document[TAG_HEAD])[0], el);
         },
         isNode: function(el) {
             return isNode(el);
