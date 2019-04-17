@@ -30,7 +30,10 @@
 <script src="so-all.php"></script>
 <!-- <script src="../so-all.js"></script> -->
 <script>
-so.ready(function($, $$) {
+so.ready(function($, $) {
+
+    var s = $("body")
+    log(s)
 
 // function Person(id) {
 //     this.id = id
@@ -65,10 +68,10 @@ so.ready(function($, $$) {
 // log(u.getId())
 // return
 
-    // $$("button[show]").on("click", () => $$(".outer").show("normal"))
-    // $$("button[hide]").on("click", () => $$(".outer").hide("normal"))
-    $$("button[toggle]").on("click", function() {
-        $$(".outer").toggle("normal", "", function(a) {
+    // $("button[show]").on("click", () => $(".outer").show("normal"))
+    // $("button[hide]").on("click", () => $(".outer").hide("normal"))
+    $("button[toggle]").on("click", function() {
+        $(".outer").toggle("normal", "", function(a) {
             log(a)
         })
     })

@@ -4,11 +4,21 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function(window, $, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
+;(function(window, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
 
     // simply support check
     if (!''.trim) {
         throw ('Archaic browser!');
+    }
+
+    /**
+     * So.
+     * @param  {String|Object} selector
+     * @param  {Document}      root?
+     * @return {Object}
+     */
+    function $(selector, root) {
+        return $.dom(selector, root);
     }
 
     // minify candies
@@ -22,7 +32,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.50.2';
+    window.so.VERSION = '5.60.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -999,7 +1009,7 @@
          * @return {String}
          */
         rid: function() {
-            return $.now(TRUE) + Math.random().toFixed(14).slice(2);
+            return $.now() + Math.random().toFixed(7).slice(2);
         },
 
         /**
@@ -1273,4 +1283,4 @@
     // for later
     $.ext = {};
 
-})(window, {}, null, true, false);
+})(window, null, true, false);

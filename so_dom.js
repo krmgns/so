@@ -227,7 +227,6 @@
             for (var i = 0, ret = [], el; el = this[i]; i++) {
                 ret[i] = el;
             }
-
             return ret;
         },
 
@@ -2807,7 +2806,7 @@
     }
 
     // xpath helper
-    function initXDom(selector, root, opt_one) {
+    function initXDom(selector, root, one) {
         var doc = root || document;
         var docEl = doc && doc[NAME_DOCUMENT_ELEMENT];
         var nodes = [], node, iter, ret;
@@ -2817,29 +2816,29 @@
 
         if (doc.evaluate) {
             iter = doc.evaluate(selector, docEl, NULL, XPathResult.ANY_TYPE, NULL);
-            if (opt_one) {
-                nodes = iter.iterateNext();
-            } else {
-                while (node = iter.iterateNext()) {
-                    nodes.push(node);
+            while (node = iter.iterateNext()) {
+                nodes.push(node);
+                if (one) {
+                    break;
                 }
             }
         } else if (docEl.selectNodes) { // ie (still..)
             nodes = docEl.selectNodes(selector);
-            if (opt_one) {
+            if (one) {
                 nodes = nodes[0];
             }
         }
 
         ret = initDom(nodes);
         ret._selector = selector;
+
         return ret;
     }
 
     /**
      * Dom.
-     * @param  {String} selector
-     * @param  {Object} root?
+     * @param  {String|Object} selector
+     * @param  {Object}        root?
      * @return {Dom}
      */
     var $dom = function(selector, root) {
