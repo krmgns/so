@@ -32,7 +32,13 @@
 // so.ready(function($, $$) {
 so(function($, $$) {
 
-    var s = $(">").each((el) => $(el).findAll(">"))
+    $('html').setAttr('async')
+    // $('html').toggleAttr('async')
+    $.fire(1500, () => {
+        $('html').toggleAttr('async', 1)
+    })
+
+    // var s = $(">").each((el) => $(el).findAll(">"))
 
     // $$.loadStyle("x.css", "", () => log("ok css"))
     // $$.loadScript("x.js", "", () => log("ok js", x))

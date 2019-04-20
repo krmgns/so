@@ -278,7 +278,7 @@
     $extend(Event.prototype, {
         /**
          * Copy.
-         * @return {Event}
+         * @return {self}
          */
         copy: function() {
             var event = this;
@@ -290,7 +290,7 @@
         /**
          * Bind.
          * @param  {String} type?
-         * @return {Event}
+         * @return {self}
          */
         bind: function(type) {
             var event = this.copy();
@@ -311,7 +311,7 @@
         /**
          * Bind to.
          * @param  {Object} target
-         * @return {Event}
+         * @return {self}
          */
         bindTo: function(target) {
             var event = this.copy(), fn;
@@ -331,7 +331,7 @@
         /**
          * Unbind.
          * @param  {String} type?
-         * @return {Event}
+         * @return {self}
          */
         unbind: function(type) {
             var event = this.copy();
@@ -353,7 +353,7 @@
          * Fire.
          * @param  {String} type?
          * @param  {Object} data
-         * @return {Event}
+         * @return {self}
          */
         fire: function(type, data) {
             var event = this.copy();

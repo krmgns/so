@@ -68,7 +68,7 @@
     function isNode(el) {
         return $bool(el && (el[NAME_NODE_TYPE] === 1 || el[NAME_NODE_TYPE] === 9 || el[NAME_NODE_TYPE] === 11));
     }
-    function isElementNode(el) {
+    function isENode(el) {
         return $bool(el && (el[NAME_NODE_TYPE] === 1));
     }
     function toKeyValueObject(key, value) {
@@ -151,7 +151,7 @@
                         // root could be document or attributes
                         els = create(selector, root, root, re[1]);
                     } else if (selector[0] == '>') {
-                        root = isElementNode(root) ? root : $document[NAME_DOCUMENT_ELEMENT];
+                        root = isENode(root) ? root : $document[NAME_DOCUMENT_ELEMENT];
                         // buggy :scope selector
                         idv = getAttr(root, (idn = soPrefix +'buggy-scope-selector')) || $rid();
                         setAttr(root, idn, idv, FALSE);
@@ -207,7 +207,7 @@
         /**
          * Find.
          * @param  {String|Object} selector
-         * @return {Dom}
+         * @return {self}
          */
         find: function(selector) {
             return this[0] ? initDom(selector, this[0], TRUE) : this;
@@ -216,7 +216,7 @@
         /**
          * Find all.
          * @param  {String|Object} selector
-         * @return {Dom}
+         * @return {self}
          */
         findAll: function(selector) {
             return this[0] ? initDom(selector, this[0]) : this;
@@ -259,7 +259,7 @@
          * Each.
          * @param  {Function} fn
          * @param  {Bool}     init
-         * @return {Dom}
+         * @return {self}
          */
         each: function(fn, init) {
             var all = this.all();
@@ -277,7 +277,7 @@
         /**
          * For.
          * @param  {Function} fn
-         * @return {Dom}
+         * @return {self}
          */
         for: function(fn) {
             return $for(this.all(), fn, this);
@@ -286,7 +286,7 @@
         /**
          * For each.
          * @param  {Function} fn
-         * @return {Dom}
+         * @return {self}
          */
         forEach: function(fn) {
             return $forEach(this.all(), fn, this);
@@ -294,7 +294,7 @@
 
         /**
          * Copy.
-         * @return {Dom}
+         * @return {self}
          */
         copy: function() {
             return initDom(this.all());
@@ -303,7 +303,7 @@
         /**
          * Map.
          * @param  {Function} fn
-         * @return {Dom}
+         * @return {self}
          */
         map: function(fn) {
             return initDom(this.all().map(fn));
@@ -312,7 +312,7 @@
         /**
          * Filter.
          * @param  {Function|String} fn
-         * @return {Dom}
+         * @return {self}
          */
         filter: function(fn) {
             var all = this.all(), alls;
@@ -329,7 +329,7 @@
 
         /**
          * Reverse.
-         * @return {Dom}
+         * @return {self}
          */
         reverse: function() {
             return initDom(this.all().reverse());
@@ -369,7 +369,7 @@
         /**
          * Item.
          * @param  {Int} i
-         * @return {Dom}
+         * @return {self}
          */
         item: function(i) {
             return initDom(this[i - 1]);
@@ -377,7 +377,7 @@
 
         /**
          * Items.
-         * @return {Dom}
+         * @return {self}
          */
         items: function() {
             return initDom(this.getAll.apply(this, arguments));
@@ -385,7 +385,7 @@
 
         /**
          * First.
-         * @return {Dom}
+         * @return {self}
          */
         first: function() {
             return this.item(1);
@@ -393,7 +393,7 @@
 
         /**
          * Last.
-         * @return {Dom}
+         * @return {self}
          */
         last: function() {
             return this.item(this._len);
@@ -402,7 +402,7 @@
         /**
          * Nth.
          * @param  {Int|String} i
-         * @return {Dom}
+         * @return {self}
          */
         nth: function(i) {
             if ($isNumber(i)) {
@@ -484,7 +484,7 @@
 
         if (attributes && $isObject(attributes)) {
             $for(fragment[NAME_CHILD_NODES], function(node) {
-                if (isElementNode(node)) {
+                if (isENode(node)) {
                     $forEach(attributes, function(name, value) {
                         setAttr(node, name, value);
                     });
@@ -542,7 +542,7 @@
 
         var child;
         while (child = el[NAME_FIRST_CHILD]) {
-            if (isElementNode(child)) {
+            if (isENode(child)) {
                 cleanElement(child);
             }
             removeChild(el, child);
@@ -569,7 +569,7 @@
         /**
          * Colne.
          * @param  {Bool} opt_deep?
-         * @return {Dom}
+         * @return {self}
          */
         clone: function(opt_deep) {
             var clones = [];
@@ -583,7 +583,7 @@
 
         /**
          * clean.
-         * @return {Dom}
+         * @return {self}
          */
         clean: function() {
             return this.for(function(el) {
@@ -593,7 +593,7 @@
 
         /**
          * Empty.
-         * @return {Dom}
+         * @return {self}
          */
         empty: function() {
             return this.for(function(el) {
@@ -603,7 +603,7 @@
 
         /**
          * Remove.
-         * @return {Dom}
+         * @return {self}
          */
         remove: function() {
             return this.for(function(el) {
@@ -617,7 +617,7 @@
         /**
          * Remove all.
          * @param  {String} selector
-         * @return {Dom}
+         * @return {self}
          */
         removeAll: function(selector) {
             var parent = this[0], _parent;
@@ -639,7 +639,7 @@
          * @param  {String|Object|Dom} content
          * @param  {Bool}              opt_cloning?
          * @param  {Object}            attributes?
-         * @return {Dom}
+         * @return {self}
          */
         append: function(content, opt_cloning, attributes) {
             return this.for(function(el) {
@@ -653,7 +653,7 @@
          * Append to.
          * @param  {String} selector
          * @param  {Bool}   opt_cloning?
-         * @return {Dom}
+         * @return {self}
          */
         appendTo: function(selector, opt_cloning) {
             if (!isDom(selector)) {
@@ -672,7 +672,7 @@
          * @param  {String|Object|Dom} content
          * @param  {Bool}              opt_cloning?
          * @param  {Object}            attributes?
-         * @return {Dom}
+         * @return {self}
          */
         prepend: function(content, opt_cloning, attributes) {
             return this.for(function(el) {
@@ -686,7 +686,7 @@
          * Prepend to.
          * @param  {String} selector
          * @param  {Bool}   opt_cloning?
-         * @return {Dom}
+         * @return {self}
          */
         prependTo: function(selector, opt_cloning) {
             if (!isDom(selector)) {
@@ -718,7 +718,7 @@
          * Insert before.
          * @param  {String} selector
          * @param  {Bool}   opt_cloning?
-         * @return {Dom}
+         * @return {self}
          */
         insertBefore: function(selector, opt_cloning) {
             if (!isDom(selector)) {
@@ -736,7 +736,7 @@
          * Insert before.
          * @param  {String} selector
          * @param  {Bool}   opt_cloning?
-         * @return {Dom}
+         * @return {self}
          */
         insertAfter: function(selector, opt_cloning) {
             if (!isDom(selector)) {
@@ -754,7 +754,7 @@
          * Replace with.
          * @param  {String} selector
          * @param  {Bool}   opt_cloning?
-         * @return {Dom}
+         * @return {self}
          */
         replaceWith: function(selector, opt_cloning) {
             if (!isDom(selector)) {
@@ -772,7 +772,7 @@
          * Wrap.
          * @param  {String|Object|Dom} content
          * @param  {Object}            attributes?
-         * @return {Dom}
+         * @return {self}
          */
         wrap: function(content, attributes) {
             var el = this[0], parent = el && el[NAME_PARENT_NODE],
@@ -797,7 +797,7 @@
         /**
          * Unwrap
          * @param  {Bool} opt_remove?
-         * @return {Dom}
+         * @return {self}
          */
         unwrap: function(opt_remove) {
             var el = this[0], parent = el && el[NAME_PARENT_NODE],
@@ -854,7 +854,7 @@
          * Set property.
          * @param  {String} name
          * @param  {Any}    value
-         * @return {Dom}
+         * @return {self}
          */
         setProperty: function(name, value) {
             var properties = toKeyValueObject(name, value);
@@ -890,7 +890,7 @@
         /**
          * Set text.
          * @param  {String} input
-         * @return {Dom}
+         * @return {self}
          */
         setText: function(input) {
             return this.for(function(el) {
@@ -918,7 +918,7 @@
         /**
          * Set html
          * @param  {String} input
-         * @return {Dom}
+         * @return {self}
          */
         setHtml: function(input) {
             return this.for(function(el) {
@@ -998,7 +998,7 @@
         /**
          * Not.
          * @param  {String|Element|Int ...arguments} selector
-         * @return {Dom}
+         * @return {self}
          */
         not: function(selector) {
             var ret = [];
@@ -1006,7 +1006,7 @@
             if ($isString(selector)) {
                 // eg: $.dom("p").not(".red")
                 ret = intersect(this.all(), this.parent().findAll(toAllSelector(selector)).all());
-            } else if (isElementNode(selector)) {
+            } else if (isENode(selector)) {
                 // $.dom("p").not(element)
                 ret = noIntersect(selector, this);
             } else {
@@ -1024,7 +1024,7 @@
 
         /**
          * Odd.
-         * @return {Dom}
+         * @return {self}
          */
         odd: function() {
             return initDom(this.filter(function(el, i) {
@@ -1034,7 +1034,7 @@
 
         /**
          * Even.
-         * @return {Dom}
+         * @return {self}
          */
         even: function() {
             return initDom(this.filter(function(el, i) {
@@ -1044,7 +1044,7 @@
 
         /**
          * Parent.
-         * @return {Dom}
+         * @return {self}
          */
         parent: function() {
             return initDom(__(this, NAME_PARENT_NODE));
@@ -1052,7 +1052,7 @@
 
         /**
          * Parents.
-         * @return {Dom}
+         * @return {self}
          */
         parents: function() {
             return initDom(walk(this[0], NAME_PARENT_NODE));
@@ -1061,7 +1061,7 @@
         /**
          * Siblings.
          * @param  {Int|String} selector?
-         * @return {Dom}
+         * @return {self}
          */
         siblings: function(selector) {
             var el = this[0], ret;
@@ -1078,7 +1078,7 @@
 
         /**
          * Children.
-         * @return {Dom}
+         * @return {self}
          */
         children: function() {
             return initDom($array(__(this, NAME_CHILDREN)));
@@ -1086,7 +1086,7 @@
 
         /**
          * First child.
-         * @return {Dom}
+         * @return {self}
          */
         firstChild: function() {
             return this.find('> :first');
@@ -1094,7 +1094,7 @@
 
         /**
          * Last child.
-         * @return {Dom}
+         * @return {self}
          */
         lastChild: function() {
             return this.find('> :last');
@@ -1103,7 +1103,7 @@
         /**
          * Nth child.
          * @param  {Int} i
-         * @return {Dom}
+         * @return {self}
          */
         nthChild: function(i) {
             return this.find('> :nth('+ i +')');
@@ -1111,7 +1111,7 @@
 
         /**
          * Comments.
-         * @return {Dom}
+         * @return {self}
          */
         comments: function() {
             var el = this[0], node, nodes = [], i = 0;
@@ -1127,7 +1127,7 @@
 
         /**
          * Prev.
-         * @return {Dom}
+         * @return {self}
          */
         prev: function() {
             return initDom(__(this, NAME_PREVIOUS_ELEMENT_SIBLING));
@@ -1136,7 +1136,7 @@
         /**
          * Prev all.
          * @param  {String} selector?
-         * @return {Dom}
+         * @return {self}
          */
         prevAll: function(selector) {
             var el = this[0], ret = [];
@@ -1153,7 +1153,7 @@
 
         /**
          * Next.
-         * @return {Dom}
+         * @return {self}
          */
         next: function() {
             return initDom(__(this, NAME_NEXT_ELEMENT_SIBLING));
@@ -1162,7 +1162,7 @@
         /**
          * Next all.
          * @param  {String} selector?
-         * @return {Dom}
+         * @return {self}
          */
         nextAll: function(selector) {
             var el = this[0], ret = [];
@@ -1254,7 +1254,7 @@
         /**
          * Get window.
          * @param  {Bool} opt_content?
-         * @return {Dom}
+         * @return {self}
          */
         getWindow: function(opt_content) {
             var el = this[0];
@@ -1265,7 +1265,7 @@
         /**
          * Get document.
          * @param  {Bool} opt_content?
-         * @return {Dom}
+         * @return {self}
          */
         getDocument: function(opt_content) {
             var el = this[0];
@@ -1321,7 +1321,7 @@
         path: function(opt_string) {
             var el = this[0], ret = [];
 
-            if (isElementNode(el)) {
+            if (isENode(el)) {
                 return (ret = getPath(el).reverse()),
                     opt_string ? ret.slice(1).join(' > ') : ret;
             }
@@ -1335,7 +1335,7 @@
         xpath: function(opt_string) {
             var el = this[0], ret = [];
 
-            if (isElementNode(el)) {
+            if (isENode(el)) {
                 return (ret = getXPath(el)),
                     opt_string ? '/'+ ret.join('/') : ret;
             }
@@ -1472,7 +1472,7 @@
          * Set style.
          * @param  {String|Object} name
          * @param  {String}        value?
-         * @return {Dom}
+         * @return {self}
          */
         setStyle: function(name, value) {
             var styles = name;
@@ -1571,7 +1571,7 @@
         /**
          * Remove style.
          * @param  {String} name
-         * @return {Dom}
+         * @return {self}
          */
         removeStyle: function(name) {
             return (name == '*')
@@ -1657,7 +1657,7 @@
         // @note: offset(width|height) = (width|height) + padding + border
         var ret = {width: 0, height: 0};
 
-        if (isElementNode(el)) {
+        if (isENode(el)) {
             if (!isVisible(el) || !isVisibleParent(el)) {
                 var properties = getInvisibleElementProperties(el, [NAME_OFFSET_WIDTH, NAME_OFFSET_HEIGHT]);
                 ret.width = properties[0], ret.height = properties[1];
@@ -1680,7 +1680,7 @@
         });
         var style;
 
-        if (isElementNode(el)) {
+        if (isENode(el)) {
             style = getStyle(el);
             if ((!by || by == NAME_WIDTH) && dim.width) {
                 ret.width -= sumStyleValue(NULL, style, NAME_PADDING_LEFT, NAME_PADDING_RIGHT)
@@ -1720,7 +1720,7 @@
     function getOffset(el, opt_relative) {
         var ret = {top: 0, left: 0};
 
-        if (isElementNode(el)) {
+        if (isENode(el)) {
             if (!isVisible(el) || !isVisibleParent(el)) {
                 var properties = getInvisibleElementProperties(el, [NAME_OFFSET_TOP, NAME_OFFSET_LEFT]);
                 ret.top = properties[0], ret.left = properties[1];
@@ -1742,7 +1742,7 @@
     function getScroll(el) {
         var ret = {top: 0, left: 0};
 
-        if (isElementNode(el)) {
+        if (isENode(el)) {
             ret.top = el[NAME_SCROLL_TOP], ret.left = el[NAME_SCROLL_LEFT];
         } else if (isRoot(el) || isRootElement(el)) {
             var win = $getWindow(el);
@@ -1882,7 +1882,7 @@
     }
 
     function setAttr(el, name, value, opt_state /* @internal */) {
-        if (isElementNode(el)) {
+        if (isENode(el)) {
             if ($isNull(value)) {
                 removeAttr(el, name);
             } else if (name == NAME_VALUE) {
@@ -1913,7 +1913,7 @@
     }
 
     function removeAttr(el, name) {
-        if (isElementNode(el)) {
+        if (isENode(el)) {
             el.removeAttribute(name);
         }
     }
@@ -1979,7 +1979,7 @@
          * Set attr.
          * @param  {String} name
          * @param  {String} value?
-         * @return {Dom}
+         * @return {self}
          */
         setAttr: function(name, value) {
             var attributes = toKeyValueObject(name, value);
@@ -2003,15 +2003,29 @@
         /**
          * Remve attr.
          * @param  {String} name
-         * @return {Dom}
+         * @return {self}
          */
         removeAttr: function(name) {
             name = split(name, re_comma);
 
             return this.for(function(el) {
-                ((name[0] != '*') ? name : getAttrs(el, TRUE)).each(function(name) {
-                    removeAttr(el, name)
+                $each(name[0] != '*' ? name : getAttrs(el, TRUE), function(name) {
+                    removeAttr(el, name);
                 });
+            });
+        },
+
+        /**
+         * Toggle attr.
+         * @param  {String} name
+         * @param  {String} value?
+         * @return {self}
+         */
+        toggleAttr: function(name, value) {
+            name = split(name, re_comma);
+
+            return this.for(function(el) {
+                hasAttr(el, name) ? removeAttr(el, name) : setAttr(el, name, !$isVoid(value) ? value : '');
             });
         },
 
@@ -2035,7 +2049,7 @@
         /**
          * Remove data attr.
          * @param  {String} name
-         * @return {Dom}
+         * @return {self}
          */
         removeDataAttr: function(name) {
             name = split(name, re_comma);
@@ -2061,16 +2075,8 @@
          */
         soAttr: function(name, value) {
             return (name = soPrefix + name),
-                $isDefined(value) ? this.attr(name, value) : this.attr(name);
-        },
-
-        /**
-         * So attr remove.
-         * @param  {String} name
-         * @return {Dom}
-         */
-        soAttrRemove: function(name) {
-            return this.attr(soPrefix + name, null);
+                $isDefined(value) || $isNull($value)
+                    ? this.attr(name, value) /* set or remove (if null) */ : this.attr(name); /* get */
         }
     });
 
@@ -2088,7 +2094,7 @@
         /**
          * Set value.
          * @param  {String} value?
-         * @return {Dom}
+         * @return {self}
          */
         setValue: function(value) {
             value = $isNull(value) ? '' : (value += ''); // @important
@@ -2134,7 +2140,7 @@
         /**
          * Set id.
          * @param  {String} id
-         * @return {Dom}
+         * @return {self}
          */
         setId: function(id) {
             return setAttr(this[0], 'id', id, FALSE), this;
@@ -2198,7 +2204,7 @@
         /**
          * Add class.
          * @param  {String} name
-         * @return {Dom}
+         * @return {self}
          */
         addClass: function(name) {
             return this.for(function(el) { addClass(el, name); });
@@ -2207,7 +2213,7 @@
         /**
          * Remove class.
          * @param  {String} name
-         * @return {Dom}
+         * @return {self}
          */
         removeClass: function(name) {
             return (name == '*') ? this.attr('class', '')
@@ -2218,7 +2224,7 @@
          * Replace class.
          * @param  {String} oldName
          * @param  {String} newName
-         * @return {Dom}
+         * @return {self}
          */
         replaceClass: function(oldName, newName) {
             return this.for(function(el) {
@@ -2230,7 +2236,7 @@
         /**
          * Toggle.
          * @param  {String} name
-         * @return {Dom}
+         * @return {self}
          */
         toggleClass: function(name) {
             return this.for(function(el) {
@@ -2241,7 +2247,7 @@
         /**
          * Set class.
          * @param  {String} name
-         * @return {Dom}
+         * @return {self}
          */
         setClass: function(name) {
             return this.for(function(el) { el[NAME_CLASS_NAME] = name; });
@@ -2320,7 +2326,7 @@
          * Set data.
          * @param  {String|Object} key
          * @param  {Any}           value
-         * @return {Dom}
+         * @return {self}
          */
         setData: function(key, value) {
             return this.for(function(el) { setData(el, key, value); });
@@ -2338,7 +2344,7 @@
         /**
          * Remove data.
          * @param  {String} key
-         * @return {Dom}
+         * @return {self}
          */
         removeData: function(key) {
             key = split(key, re_comma);
@@ -2551,8 +2557,8 @@
          * Is element node.
          * @return {Bool}
          */
-        isElementNode: function() {
-            return isElementNode(this[0]);
+        isENode: function() {
+            return isENode(this[0]);
         },
 
         /**
@@ -2581,7 +2587,7 @@
              * @param  {String}   type
              * @param  {Function} fn
              * @param  {Object}   options?
-             * @return {Dom}
+             * @return {self}
              */
             on: function(type, fn, options) {
                 return this.for(function(el) { event.on(el, type, fn, options); });
@@ -2592,7 +2598,7 @@
              * @param  {String}   type
              * @param  {Function} fn
              * @param  {Object}   options?
-             * @return {Dom}
+             * @return {self}
              */
             one: function(type, fn, options) {
                 return this.for(function(el) { event.one(el, type, fn, options); });
@@ -2603,7 +2609,7 @@
              * @param  {String}   type
              * @param  {Function} fn
              * @param  {Object}   options?
-             * @return {Dom}
+             * @return {self}
              */
             off: function(type, fn, options) {
                 return this.for(function(el) { event.off(el, type, fn, options); });
@@ -2614,7 +2620,7 @@
              * @param  {String}   type
              * @param  {Function} fn
              * @param  {Object}   options?
-             * @return {Dom}
+             * @return {self}
              */
             fire: function(type, fn, options) {
                 return this.for(function(el) { event.fire(el, type, fn, options); });
@@ -2649,7 +2655,7 @@
              * @param  {Int|String}    speed?
              * @param  {String}        easing?
              * @param  {Function}      callback?
-             * @return {Dom}
+             * @return {self}
              */
             animate: function(properties, speed, easing, callback) {
                 return (properties === 'stop') // stop previous animation
@@ -2669,7 +2675,7 @@
              * @param  {Float}      to
              * @param  {Int|String} speed?
              * @param  {Function}   callback?
-             * @return {Dom}
+             * @return {self}
              */
             fade: function(to, speed, callback) {
                 return this.animate({opacity: to}, speed, callback);
@@ -2679,7 +2685,7 @@
              * Fade in.
              * @param  {Int|String} speed?
              * @param  {Function}   callback?
-             * @return {Dom}
+             * @return {self}
              */
             fadeIn: function(speed, callback) {
                 return this.fade(1, speed, callback);
@@ -2689,7 +2695,7 @@
              * Fade out.
              * @param  {Int|String}    speed?
              * @param  {Function|Bool} callback?
-             * @return {Dom}
+             * @return {self}
              */
             fadeOut: function(speed, callback) {
                 if ($isTrue(callback)) { // remove element after fading out
@@ -2706,7 +2712,7 @@
              * @param  {Int|String} speed?
              * @param  {String}     easing?
              * @param  {Function}   callback?
-             * @return {Dom}
+             * @return {self}
              */
             show: function(speed, easing, callback) {
                 speed = speed || 0;
@@ -2721,7 +2727,7 @@
              * @param  {Int|String}      speed?
              * @param  {String|Function} easing?
              * @param  {Function}        callback?
-             * @return {Dom}
+             * @return {self}
              */
             hide: function(speed, easing, callback) {
                 if ($isFunction(easing)) {
@@ -2742,7 +2748,7 @@
              * @param  {Int|String}      speed?
              * @param  {String|Function} easing?
              * @param  {Function}        callback?
-             * @return {Dom}
+             * @return {self}
              */
             toggle: function(speed, easing, callback) {
                 if ($isFunction(easing)) {
@@ -2766,7 +2772,7 @@
             /**
              * Display.
              * @param  {String} option
-             * @return {Dom}
+             * @return {self}
              */
             display: function(option) {
                 return this.for(function(el) {
@@ -2778,7 +2784,7 @@
              * Blip.
              * @param  {Int}        times?
              * @param  {Int|String} speed?
-             * @return {Dom}
+             * @return {self}
              */
             blip: function(times, speed) {
                 times = times || Infinity;
@@ -2804,7 +2810,7 @@
              * @param  {Int|String} speed?
              * @param  {String}     easing?
              * @param  {Function}   callback?
-             * @return {Dom}
+             * @return {self}
              */
             scrollTo: function(top, left, speed, easing, callback) {
                 // swap window => html ('cos window won't be animated so..)
@@ -2855,7 +2861,7 @@
      * Dom.
      * @param  {String|Object} selector
      * @param  {Object}        root?
-     * @return {Dom}
+     * @return {self}
      */
     var $dom = function(selector, root) {
         return initDom(selector, root);
@@ -2913,8 +2919,8 @@
         isNode: function(el) {
             return isNode(el);
         },
-        isElementNode: function(el) {
-            return isElementNode(el);
+        isENode: function(el) {
+            return isENode(el);
         }
     });
 
