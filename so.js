@@ -35,7 +35,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.62.0';
+    window.so.VERSION = '5.63.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -409,7 +409,7 @@
         var ret;
 
         if (isString(input)) {
-            ret = isNulls(search) ? -1 // fix empty string issue
+            ret = isNulls(search) ? -1 // fix empty search issue
                 : isRegExp(search) ? input.search(search) : input.indexOf(search); // simply
         } else if (isArray(input) || isObject(input)) {
             $.for(input, function(value, i) {
@@ -431,7 +431,7 @@
                 // make copies (do not modify original inputs)
                 a = makeArray(a).sort(), makeArray(b).sort();
             }
-            for (var i = 0, il = a.len(); i < il; i++) {
+            for (var i = 0, il = len(a); i < il; i++) {
                 if (a[i] !== b[i]) return FALSE;
             }
             return TRUE;
@@ -640,6 +640,17 @@
         },
 
         /**
+         * To reg exp.
+         * @param  {String} flags?
+         * @param  {int}    ttl?
+         * @param  {Bool}   opt_esc?
+         * @return {RegExp}
+         */
+        toRegExp: function(flags, ttl, opt_esc) {
+            return toRegExp(this, flags, ttl, opt_esc);
+        },
+
+        /**
          * Lower.
          * @return {String}
          */
@@ -709,7 +720,7 @@
             if (limit) {
                 var sRest = s.slice(limit - 1);
                 s = s.slice(0, limit - 1);
-                if (sRest.len()) {
+                if (len(sRest)) {
                     s = s.concat(sRest.join(separator));
                 }
             }
@@ -744,12 +755,12 @@
         matchAll: function(pattern) {
             var source = pattern.source;
             var flags = pattern.flags;
-            var r, re, ret = [], slashPosition;
+            var r, re, ret = [], slashPos;
 
-            if (isVoid(flags)) { // hellö ie.. ?}/=%&'|!)"^*1
-                slashPosition = (pattern = toString(pattern)).lastIndexOf('/');
-                source = pattern.substring(1, slashPosition - 1);
-                flags = pattern.substring(slashPosition + 1);
+            if (!flags) { // hellö ie.. ?}/=%&'|#)"^*1...!
+                slashPos = (pattern = toString(pattern)).pos('/', TRUE);
+                source = pattern.sub(1, slashPos - 1);
+                flags = pattern.sub(slashPos + 1);
             }
 
             // never forget or lost in infinite loops..
@@ -762,12 +773,12 @@
                 ret.push(r);
             }
 
-            return ret.len() ? ret : NULL;
+            return len(ret) ? ret : NULL;
         },
 
         /**
          * Test.
-         * @param  {RegExp} re
+         * @param  {RegExp|String} re
          * @return {Bool}
          */
         test: function(re) {
@@ -783,8 +794,8 @@
          * @param  {String|Array} input
          * @return {String}
          */
-        wrap: function(input) {
-            return isString(input) ? input + this + input : input[0] + this + input[1];
+        wrap: function(input, s /* @internal */) {
+            return (s = this), isString(input) ? input + s + input : input[0] + s + input[1];
         },
 
         /**
@@ -839,8 +850,9 @@
          * @return {String}
          * @override For chars option.
          */
-        trim: function(chars, opt_noCase) {
-            return !chars ? trim(this) : this.trimLeft(chars, opt_noCase).trimRight(chars, opt_noCase);
+        trim: function(chars, opt_noCase, s /* @internal */) {
+            return (s = this), !chars ? trim(s)
+                : s.trimLeft(chars, opt_noCase).trimRight(chars, opt_noCase);
         },
 
         /**
@@ -851,9 +863,10 @@
          * @override For chars option.
          */
         trimLeft: function(chars, opt_noCase) {
-            if (!chars) return trim(this, 1);
+            var s = this, re;
+            if (!chars) return trim(s, 1);
 
-            var s = this, re = prepareTrimRegExp(chars, opt_noCase, 1);
+            re = prepareTrimRegExp(chars, opt_noCase, 1);
             while (re.test(s)) {
                 s = s.replace(re, '');
             }
@@ -869,14 +882,48 @@
          * @override For chars option.
          */
         trimRight: function(chars, opt_noCase) {
-            if (!chars) return trim(this, 2);
+            var s = this, re;
+            if (!chars) return trim(s, 2);
 
-            var s = this, re = prepareTrimRegExp(chars, opt_noCase, 2);
+            re = prepareTrimRegExp(chars, opt_noCase, 2);
             while (re.test(s)) {
                 s = s.replace(re, '');
             }
 
             return s;
+        },
+
+        /**
+         * Pos.
+         * @param  {String} search
+         * @param  {Bool}   opt_last?
+         * @return {Int}
+         */
+        pos: function(search, opt_last) {
+            var s = this, ret = -1;
+
+            if (!isNulls(search)) { // fix empty search issue
+                ret = !opt_last ? s.indexOf(search) : s.lastIndexOf(search);
+            }
+
+            return ret;
+        },
+
+        /**
+         * Sub.
+         * @param  {Int} start?
+         * @param  {Int} end?
+         * @return {String}
+         */
+        sub: function(start, end) {
+            var s = this;
+            if (start < 0) {
+                start = len(s) + start; // eg: 'Kerem'.(-3) => 'rem', not 'Kerem'
+            } else {
+                end = end > 0 ? end : len(s) + (end | 0); // eg: 'Kerem'.(1, -2) => 'er', not 'K'
+            }
+
+            return s.substring(start, end);
         },
 
         /**
@@ -887,7 +934,7 @@
          * @return {Bool}
          */
         contains: function(search, offset, opt_noCase) {
-            return this.substring(offset | 0).test(prepareSearchRegExp(search, opt_noCase, NULL, TRUE));
+            return this.sub(offset).test(prepareSearchRegExp(search, opt_noCase, NULL, TRUE));
         },
 
         /**
@@ -898,7 +945,7 @@
          * @return {Bool}
          */
         containsAny: function(chars, offset, opt_noCase) {
-            return this.substring(offset | 0).test(prepareSearchRegExp((
+            return this.sub(offset).test(prepareSearchRegExp((
                 isString(chars) ? chars.split('') : chars // array
             ).uniq().map(toRegExpEsc).join('|').wrap(['(', ')']), opt_noCase));
         },
@@ -912,7 +959,7 @@
          * @override For no-case option.
          */
         startsWith: function(search, offset, opt_noCase) {
-            return this.substring(offset | 0).test(prepareSearchRegExp(search, opt_noCase, 1, TRUE));
+            return this.sub(offset).test(prepareSearchRegExp(search, opt_noCase, 1, TRUE));
         },
 
         /**
@@ -924,18 +971,7 @@
          * @override For no-case option.
          */
         endsWith: function(search, offset, opt_noCase) {
-            return this.substring(offset | 0).test(prepareSearchRegExp(search, opt_noCase, 2, TRUE));
-        },
-
-        /**
-         * To reg exp.
-         * @param  {String} flags?
-         * @param  {int}    ttl?
-         * @param  {Bool}   opt_esc?
-         * @return {RegExp}
-         */
-        toRegExp: function(flags, ttl, opt_esc) {
-            return toRegExp(this, flags, ttl, opt_esc);
+            return this.sub(offset).test(prepareSearchRegExp(search, opt_noCase, 2, TRUE));
         }
     });
 
@@ -1136,7 +1172,7 @@
                 var keys = trim(key).split('.');
 
                 key = keys.shift();
-                if (!keys.len()) {
+                if (!len(keys)) {
                     return input[key];
                 }
 
@@ -1196,8 +1232,8 @@
          */
         isEmpty: function(input) {
             return toBool(!input // '', null, undefined, false, 0, -0, NaN
-                || (isNumber(input.length) && !input.length)
-                || (isObject(input) && !Object.keys(input).len())
+                || (isNumber(input.length) && !len(input))
+                || (isObject(input) && !len(Object.keys(input)))
             );
         },
 
@@ -1208,13 +1244,7 @@
          * @return {Object}
          */
         extend: function(target, source) {
-            if (isArray(target)) {
-                while (target.len()) {
-                    $.extend(target.shift(), source);
-                }
-            } else {
-                return extend.apply(NULL, [target, source].concat(makeArray(arguments, 2)));
-            }
+            return extend.apply(NULL, [target, source].concat(makeArray(arguments, 2)));
         },
 
         /**
@@ -1257,7 +1287,7 @@
 
     var readyCallbacks = [];
     var readyCallbacksFire = function() {
-        while (readyCallbacks.len()) {
+        while (len(readyCallbacks)) {
             readyCallbacks.shift()($, $.dom /* will be ready on call */);
         }
     };

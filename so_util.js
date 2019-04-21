@@ -37,7 +37,7 @@
          * Range.
          * @param  {Number} min
          * @param  {Number} max
-         * @param  {Number} step
+         * @param  {Number} step?
          * @return {Array}
          * @source https://stackoverflow.com/a/15453499/362780
          */
@@ -64,7 +64,7 @@
                 ret += rand(0, base);
             }
 
-            return ret.substring(0, len);
+            return ret.sub(0, len);
         },
 
         /**
@@ -76,6 +76,7 @@
         randInt: function(min, max) {
             min = min || 0;
             max = max || MAX_INT;
+
             return Math.floor(Math.random() * (max - min + 1)) + min;
         },
 
@@ -88,6 +89,7 @@
         randFloat: function(min, max) {
             min = min || 0;
             max = max || 1 + min;
+
             return Math.random() * (max - min) + min;
         },
 

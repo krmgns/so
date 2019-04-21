@@ -1001,19 +1001,18 @@
          * @return {self}
          */
         not: function(selector) {
-            var ret = [];
+            var _this = this, ret = [], args;
 
             if ($isString(selector)) {
                 // eg: $.dom("p").not(".red")
-                ret = intersect(this.all(), this.parent().findAll(toAllSelector(selector)).all());
+                ret = intersect(_this.all(), _this.parent().findAll(toAllSelector(selector)).all());
             } else if (isENode(selector)) {
                 // $.dom("p").not(element)
-                ret = noIntersect(selector, this);
+                ret = noIntersect(selector, _this);
             } else {
                 // eg: $.dom("p").not(1) or $.dom("p").not(1,2,3)
-                selector = $array(arguments);
-                ret = this.filter(function(el, i) {
-                    if (!~selector.indexOf(i + 1)) {
+                args = $array(arguments), ret = _this.filter(function(el, i) {
+                    if (!args.has(i + 1)) {
                         return el;
                     }
                 });
