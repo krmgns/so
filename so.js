@@ -25,17 +25,16 @@
     }
 
     // minify candies
-    var NAME_NODE_TYPE = 'nodeType';
-    var NAME_PROTOTYPE = 'prototype';
-    var NAME_DEFAULT_VIEW = 'defaultView';
-    var NAME_OWNER_DOCUMENT = 'ownerDocument';
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
-    var Array = window.Array, Object = window.Object, String = window.String, Number = window.Number;
-    var Date = window.Date, RegExp = window.RegExp, Math = window.Math, Function = window.Function;
+    var NAME_NODE_TYPE = 'nodeType', NAME_PROTOTYPE = 'prototype';
+    var NAME_DEFAULT_VIEW = 'defaultView', NAME_OWNER_DOCUMENT = 'ownerDocument';
+    var Array = window.Array, Object = window.Object;
+    var String = window.String, Number = window.Number;
+    var Date = window.Date, RegExp = window.RegExp, Math = window.Math;
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.63.0';
+    window.so.VERSION = '5.64.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -255,10 +254,10 @@
         return isNumber(input) || re_numeric.test(input);
     }
     function isInt(input) {
-        return isNumber(input) && (input == (input | 0));
+        return isNumber(input) && (input === (input | 0));
     }
     function isFloat(input) {
-        return isNumber(input) && (input != (input | 0));
+        return isNumber(input) && (input !== (input | 0));
     }
     function isString(input) {
         return (typeof input == 'string' || toBool(input && input.constructor == String));
@@ -276,7 +275,8 @@
         return toBool(input && (input.constructor == Object));
     }
     function isWindow(input) {
-        return toBool(input && input == input[NAME_WINDOW] && input == input[NAME_WINDOW][NAME_WINDOW]);
+        return toBool(input && input == input[NAME_WINDOW]
+                            && input == input[NAME_WINDOW][NAME_WINDOW] /* window.window.window... */);
     }
     function isDocument(input) {
         return toBool(input && input[NAME_NODE_TYPE] === 9);

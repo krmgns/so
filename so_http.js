@@ -31,7 +31,7 @@
         $isFunction = $.isFunction, $isString = $.isString, $isArray = $.isArray,
         $isObject = $.isObject, $isIterable = $.isIterable, $isDocument = $.isDocument,
         $isNumeric = $.isNumeric, $isDefined = $.isDefined, $class = $.class,
-        $logWarn = $.logWarn, $jsonDecode = $.util.jsonDecode;
+        $logWarn = $.logWarn;
 
     // add base methods
     var $http = {
@@ -47,7 +47,7 @@
             }
 
             if (!$isString(input)) {
-                return $logWarn('No valid XML given.'), NULL;
+                return $logWarn('No valid XML.'), NULL;
             }
 
             return new DOMParser.parseFromString(input, inputType || 'text/xml');
@@ -62,10 +62,10 @@
             input = $trim(input);
 
             if (!re_json.test(input)) {
-                return $logWarn('No valid JSON given.'), NULL;
+                return $logWarn('No valid JSON.'), NULL;
             }
 
-            return $jsonDecode(input);
+            return $.util.jsonDecode(input);
         },
 
         /**
@@ -102,7 +102,7 @@
                 return data;
             }
 
-            var ret = [], encode = encodeURIComponent;
+            var ret = [], encode = $.util.urlEncode;
 
             // check if comes from $.dom.serializeArray()
             if (opt_array) {

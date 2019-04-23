@@ -5,11 +5,10 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function(window, $, UNDEFINED) { 'use strict';
+;(function(window, $) { 'use strict';
 
     var JSON = window.JSON, Math = window.Math;
-    var MAX_INT = Number.MAX_SAFE_INTEGER || Math.pow(2, 53) - 1;
-    var MAX_FLOAT = Number.MAX_VALUE;
+    // var MAX_INT = Number.MAX_SAFE_INTEGER || Math.pow(2, 53) - 1, MAX_FLOAT = Number.MAX_VALUE;
     var re_rgb = /.*rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(.*))?\)/i;
     var $int = $.int, $float = $.float, $string = $.string;
 
@@ -75,7 +74,7 @@
          */
         randInt: function(min, max) {
             min = min || 0;
-            max = max || MAX_INT;
+            max = max || Math.pow(2, 53) - 1; // max int
 
             return Math.floor(Math.random() * (max - min + 1)) + min;
         },
@@ -137,33 +136,36 @@
         },
 
         /**
+         * Url encode/decode.
+         * @param  {String} input
+         * @return {String}
+         */
+        urlEncode: function(input) { return encodeURIComponent(input); },
+        urlDecode: function(input) { return decodeURIComponent(input); },
+
+        /**
          * Json encode.
-         * @param  {Any}    input
-         * @param  {Object} options?
+         * @param  {Any}            input
+         * @param  {Function|Array} replacer?
+         * @param  {Number|String}  space?
          * @return {String|undefined}
          */
-        jsonEncode: function(input, options) {
+        jsonEncode: function(input, replacer, space) {
             try {
-                options = options || {};
-                return JSON.stringify(input, options.replacer, options.space);
-            } catch(e) {
-                return UNDEFINED;
-            }
+                return JSON.stringify(input, replacer, space);
+            } catch(e) {}
         },
 
         /**
          * Json decode.
-         * @param  {String} input
-         * @param  {Object} options?
+         * @param  {String}   input
+         * @param  {Function} reviver?
          * @return {Any|undefined}
          */
-        jsonDecode: function(input, options) {
+        jsonDecode: function(input, reviver) {
             try {
-                options = options || {};
-                return JSON.parse(input, options.reviver);
-            } catch(e) {
-                return UNDEFINED;
-            }
+                return JSON.parse(input, reviver);
+            } catch(e) {}
         },
 
         /**

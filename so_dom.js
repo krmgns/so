@@ -23,9 +23,11 @@
     var NAME_OFFSET_TOP = 'offsetTop', NAME_OFFSET_LEFT = 'offsetLeft';
     var NAME_SCROLL_TOP = 'scrollTop', NAME_SCROLL_LEFT = 'scrollLeft';
     var NAME_INNER_HTML = 'innerHTML', NAME_TEXT_CONTENT = 'textContent';
-    var NAME_STYLE = 'style', NAME_CLASS_NAME = 'className', NAME_TAG_NAME = 'tagName', NAME_VALUE = 'value';
-    var NAME_DISPLAY = 'display', NAME_VISIBILITY = 'visibility', NAME_CSS_TEXT = 'cssText';
-    var NAME_OWNER_DOCUMENT = 'ownerDocument', NAME_DOCUMENT_ELEMENT = 'documentElement'
+    var NAME_NAME = 'name', NAME_VALUE = 'value', NAME_OPTIONS = 'options';
+    var NAME_STYLE = 'style', NAME_CLASS_NAME = 'className', NAME_TAG_NAME = 'tagName';
+    var NAME_CHECKED = 'checked', NAME_SELECTED = 'selected', NAME_DISABLED = 'disabled', NAME_READONLY = 'readOnly';
+    var NAME_DISPLAY = 'display', NAME_VISIBILITY = 'visibility', NAME_NONE = 'none', NAME_CSS_TEXT = 'cssText';
+    var NAME_OWNER_DOCUMENT = 'ownerDocument', NAME_DOCUMENT_ELEMENT = 'documentElement', NAME_SCROLLING_ELEMENT = 'scrollingElement';
     var NAME_PROTOTYPE = 'prototype';
     var TAG_WINDOW = '#window', TAG_DOCUMENT = '#document', TAG_HTML = 'html', TAG_HEAD = 'head', TAG_BODY = 'body';
 
@@ -775,20 +777,21 @@
          * @return {self}
          */
         wrap: function(content, attributes) {
-            var el = this[0], parent = el && el[NAME_PARENT_NODE],
-                wrapper, replace, clone, clones = [];
+            var el = this[0], elParent = el && el[NAME_PARENT_NODE];
+            var clone, clones = [];
+            var wrapper, replace;
 
-            if (parent) {
+            if (elParent) {
                 wrapper = createFor(el, content, attributes)[0];
-                replace = createFor(parent, '<so-tmp>', {style: 'display:none'})[0];
-                insertBefore(parent, replace, el);
+                replace = createFor(elParent, '<so-tmp>', {style: 'display:none'})[0];
+                insertBefore(elParent, replace, el);
                 this.for(function(el) {
                     clone = cloneElement(el);
                     clones.push(clone);
                     appendChild(wrapper, clone);
-                    removeChild(parent, cleanElement(el));
+                    removeChild(elParent, cleanElement(el));
                 });
-                replaceChild(parent, wrapper, replace);
+                replaceChild(elParent, wrapper, replace);
             }
 
             return initDom(clones);
@@ -800,20 +803,20 @@
          * @return {self}
          */
         unwrap: function(opt_remove) {
-            var el = this[0], parent = el && el[NAME_PARENT_NODE],
-                parentParent = parent && parent[NAME_PARENT_NODE], clone, clones = [];
+            var el = this[0], elParent = el && el[NAME_PARENT_NODE], elParentParent = elParent && elParent[NAME_PARENT_NODE];
+            var clone, clones = [];
 
-            if (parentParent) {
+            if (elParentParent) {
                 this.for(function(el) {
                     clone = cloneElement(el);
                     clones.push(clone);
-                    insertBefore(parentParent, clone, parent);
-                    removeChild(parent, cleanElement(el));
+                    insertBefore(elParentParent, clone, elParent);
+                    removeChild(elParent, cleanElement(el));
                 });
 
-                // removes if opt_remove=true or no child anymore
-                if (opt_remove || !parentParent.hasChildNodes()) {
-                    removeChild(parentParent, cleanElement(parent));
+                // remove if opt_remove=true or no child anymore
+                if (opt_remove || !elParentParent.hasChildNodes()) {
+                    removeChild(elParentParent, cleanElement(elParent));
                 }
             }
 
@@ -835,7 +838,7 @@
          * Property.
          * @param  {String} name
          * @param  {Any}    value?
-         * @return {Any|Dom}
+         * @return {Any|self}
          */
         property: function(name, value) {
             return $isDefined(value) ? this.setProperty(name, value) : this.getProperty(name);
@@ -881,7 +884,7 @@
         /**
          * Text.
          * @param  {String} input?
-         * @return {String|Dom}
+         * @return {String|self}
          */
         text: function(input) {
             return $isDefined(input) ? this.setText(input) : this.getText();
@@ -1464,7 +1467,9 @@
          * @return {Bool}
          */
         hasStyle: function(name) {
-            return $bool(this[0] && this[0][NAME_STYLE] && this[0][NAME_STYLE][NAME_CSS_TEXT].has(name));
+            var el = this[0];
+
+            return $bool(el && el[NAME_STYLE] && el[NAME_STYLE][NAME_CSS_TEXT].has(name));
         },
 
         /**
@@ -1573,11 +1578,10 @@
          * @return {self}
          */
         removeStyle: function(name) {
-            return (name == '*')
-                ? this.attr('style', '')
-                : (name = split(name, re_comma)), this.for(function(el) {
-                    name.each(function(name) { setStyle(el, name, ''); });
-                });
+            return (name == '*') ? this.attr('style', '') :
+                   (name = split(name, re_comma)), this.for(function(el) {
+                       name.each(function(name) { setStyle(el, name, ''); });
+                   });
         }
     });
 
@@ -1602,27 +1606,28 @@
     function getInvisibleElementProperties(el, properties) {
         var ret = [];
         var doc = $getDocument(el), body = doc[TAG_BODY];
-        var rid = $rid(), className = ' '+ rid, css;
-        var styleText = el[NAME_STYLE][NAME_CSS_TEXT];
+        var rid = $rid(), ridClass = (' '+ rid);
+        var style, styleText = el[NAME_STYLE][NAME_CSS_TEXT];
         var parent = el[NAME_PARENT_ELEMENT], parents = [], parentStyle;
 
-        while (parent) { // doesn't give if parents are invisible
+        while (parent) { // doesn't give the properties if parents are invisible
             if (!isVisible(parent)) {
                 parentStyle = getStyle(parent);
                 parents.push({el: parent, styleText: parent[NAME_STYLE][NAME_CSS_TEXT]});
-                parent[NAME_CLASS_NAME] += className;
+                parent[NAME_CLASS_NAME] += ridClass;
                 parent[NAME_STYLE][NAME_DISPLAY] = '';
                 parent[NAME_STYLE][NAME_VISIBILITY] = ''; // for !important annots
             }
             parent = parent[NAME_PARENT_ELEMENT];
         }
 
-        css = createElement(doc, 'style', {
+        // tmp style element
+        style = createElement(doc, 'style', {
             textContent: '.'+ rid +'{display:block!important;visibility:hidden!important}'
         });
-        appendChild(body, css);
+        appendChild(body, style);
 
-        el[NAME_CLASS_NAME] += className;
+        el[NAME_CLASS_NAME] += ridClass;
         el[NAME_STYLE][NAME_DISPLAY] = '';
         el[NAME_STYLE][NAME_VISIBILITY] = ''; // for !important annots
 
@@ -1636,14 +1641,14 @@
         });
 
         // restore all
-        removeChild(body, css);
-        el[NAME_CLASS_NAME] = el[NAME_CLASS_NAME].remove(className);
+        removeChild(body, style);
+        el[NAME_CLASS_NAME] = el[NAME_CLASS_NAME].remove(ridClass);
         if (styleText) {
             el[NAME_STYLE][NAME_CSS_TEXT] = styleText;
         }
 
         while (parent = parents.shift()) {
-            parent.el[NAME_CLASS_NAME] = parent.el[NAME_CLASS_NAME].remove(className);
+            parent.el[NAME_CLASS_NAME] = parent.el[NAME_CLASS_NAME].remove(ridClass);
             if (parent.styleText) {
                 parent.el[NAME_STYLE][NAME_CSS_TEXT] = parent.styleText;
             }
@@ -1655,16 +1660,17 @@
     function getDimensions(el) {
         // @note: offset(width|height) = (width|height) + padding + border
         var ret = {width: 0, height: 0};
+        var properties, win;
 
         if (isENode(el)) {
             if (!isVisible(el) || !isVisibleParent(el)) {
-                var properties = getInvisibleElementProperties(el, [NAME_OFFSET_WIDTH, NAME_OFFSET_HEIGHT]);
+                properties = getInvisibleElementProperties(el, [NAME_OFFSET_WIDTH, NAME_OFFSET_HEIGHT]);
                 ret.width = properties[0], ret.height = properties[1];
             } else {
                 ret.width = el[NAME_OFFSET_WIDTH], ret.height = el[NAME_OFFSET_HEIGHT];
             }
         } else if (isRoot(el)) {
-            var win = $getWindow(el);
+            win = $getWindow(el);
             width = win[NAME_INNER_WIDTH], height = win[NAME_INNER_HEIGHT];
         }
 
@@ -1718,19 +1724,20 @@
 
     function getOffset(el, opt_relative) {
         var ret = {top: 0, left: 0};
+        var properties, body, parentOffset;
 
         if (isENode(el)) {
             if (!isVisible(el) || !isVisibleParent(el)) {
-                var properties = getInvisibleElementProperties(el, [NAME_OFFSET_TOP, NAME_OFFSET_LEFT]);
+                properties = getInvisibleElementProperties(el, [NAME_OFFSET_TOP, NAME_OFFSET_LEFT]);
                 ret.top = properties[0], ret.left = properties[1];
             } else {
                 ret.top = el[NAME_OFFSET_TOP], ret.left = el[NAME_OFFSET_LEFT];
             }
 
-            var body = $getDocument(el)[TAG_BODY];
+            body = $getDocument(el)[TAG_BODY];
             ret.top += body[NAME_SCROLL_TOP], ret.left += body[NAME_SCROLL_LEFT];
             if (opt_relative) {
-                var parentOffset = getOffset(el[NAME_PARENT_ELEMENT], opt_relative);
+                parentOffset = getOffset(el[NAME_PARENT_ELEMENT], opt_relative);
                 ret.top += parentOffset.top, ret.left += parentOffset.left;
             }
         }
@@ -1740,11 +1747,12 @@
 
     function getScroll(el) {
         var ret = {top: 0, left: 0};
+        var win;
 
         if (isENode(el)) {
             ret.top = el[NAME_SCROLL_TOP], ret.left = el[NAME_SCROLL_LEFT];
         } else if (isRoot(el) || isRootElement(el)) {
-            var win = $getWindow(el);
+            win = $getWindow(el);
             ret.top = win.pageYOffset, ret.left = win.pageXOffset;
         }
 
@@ -1873,11 +1881,12 @@
         }
     });
 
+    var fn_hasAttr = 'hasAttribute', fn_setAttr = 'setAttribute';
     var re_attrState = /^(?:(?:check|select|disabl)ed|readonly)$/i;
 
     // attr helpers
     function hasAttr(el, name) {
-        return $bool(el && el.hasAttribute && el.hasAttribute(name));
+        return $bool(el && el[fn_hasAttr] && el[fn_hasAttr](name));
     }
 
     function setAttr(el, name, value, opt_state /* @internal */) {
@@ -1885,12 +1894,12 @@
             if ($isNull(value)) {
                 removeAttr(el, name);
             } else if (name == NAME_VALUE) {
-                el.value = value;
+                el[NAME_VALUE] = value;
             } else if (!$isFalse(opt_state) /* speed */ && (opt_state || re_attrState.test(name))) {
-                (value || $isUndefined(value)) ? (el.setAttribute(name, ''), el[name] = !!value)
+                (value || $isUndefined(value)) ? (el[fn_setAttr](name, ''), el[name] = !!value)
                     : (removeAttr(el, name), el[name] = FALSE);
             } else {
-                el.setAttribute(name, value);
+                el[fn_setAttr](name, value);
             }
         }
     }
@@ -1901,13 +1910,9 @@
 
     function getAttrs(el, opt_namesOnly) {
         var ret = $array(el.attributes);
-
         if (opt_namesOnly) {
-            ret = ret.map(function(attr) {
-                return attr.name;
-            });
+            ret = ret.map(function(attr) { return attr[NAME_NAME] });
         }
-
         return ret;
     }
 
@@ -1931,8 +1936,8 @@
          */
         attr: function(name, value) {
             return $isNull(value) ? this.removeAttr(name)
-                : $isObject(name) || $isDefined(value) ? this.setAttr(name, value)
-                    : this.getAttr(name);
+                 : $isObject(name) || $isDefined(value) ? this.setAttr(name, value)
+                 : this.getAttr(name);
         },
 
         /**
@@ -1944,7 +1949,8 @@
 
             if (el) {
                 getAttrs(el).each(function(attr) {
-                    ret[attr.name] = re_attrState.test(attr.name) ? attr.name : attr.value;
+                    ret[attr[NAME_NAME]] = re_attrState.test(attr[NAME_NAME])
+                        ? attr[NAME_NAME] : attr[NAME_VALUE];
                 });
             }
 
@@ -2052,8 +2058,9 @@
          */
         removeDataAttr: function(name) {
             name = split(name, re_comma);
+
             return this.for(function(el) {
-                if (name[0] == '*') {
+                if (name[0] == '*') { // all
                     name = getAttrs(el, TRUE).filter(function(name) {
                         return name.startsWith('data-');
                     });
@@ -2070,7 +2077,7 @@
          * So attr (so:* attributes).
          * @param  {String} name
          * @param  {String} value?
-         * @return {String?|Dom}
+         * @return {String?|self}
          */
         soAttr: function(name, value) {
             return (name = soPrefix + name),
@@ -2084,7 +2091,7 @@
         /**
          * Value.
          * @param  {String} value?
-         * @return {String|Dom|undefined}
+         * @return {String|self|undefined}
          */
         value: function(value) {
             return $isDefined(value) ? this.setValue(value) : this.getValue();
@@ -2096,17 +2103,17 @@
          * @return {self}
          */
         setValue: function(value) {
-            value = $isNull(value) ? '' : (value += ''); // @important
+            value = $isNull(value) ? '' : (''+ value); // @important
 
             return this.for(function(el) {
-                if (el.options) { // <select>
-                    $for(el.options, function(option) {
-                        if (option.value === value) {
-                            option.selected = TRUE;
+                if (el[NAME_OPTIONS]) { // <select> element
+                    $for(el[NAME_OPTIONS], function(option) {
+                        if (option[NAME_VALUE] === value) {
+                            option[NAME_SELECTED] = TRUE;
                         }
                     });
                 } else {
-                    setAttr(el, NAME_VALUE, (el.value = value), FALSE);
+                    setAttr(el, NAME_VALUE, (el[NAME_VALUE] = value), FALSE);
                 }
             });
         },
@@ -2119,8 +2126,9 @@
             var el = this[0];
 
             if (el) {
-                return el.options ? getAttr(el.options[el.selectedIndex], NAME_VALUE) // <select>
-                    : el.value;
+                return el[NAME_OPTIONS]
+                    ? getAttr(el[NAME_OPTIONS][el.selectedIndex], NAME_VALUE) // <select> element
+                    : el[NAME_VALUE];
             }
         }
     });
@@ -2130,7 +2138,7 @@
         /**
          * Id.
          * @param  {String} id?
-         * @return {String|Dom}
+         * @return {String|self}
          */
         id: function(id) {
             return $isDefined(id) ? this.setId(id) : this.getId();
@@ -2183,7 +2191,7 @@
          * Class.
          * @param  {String}      name?
          * @param  {String|Bool} option?
-         * @return {Bool|Dom}
+         * @return {Bool|self}
          */
         class: function(name, option) {
             return $isUndefined(option) ? this.addClass(name)
@@ -2362,7 +2370,7 @@
     });
 
     var re_plus = /%20/g;
-    var encode = encodeURIComponent, decode = decodeURIComponent;
+    var encode = $.util.urlEncode, decode = $.util.urlDecode;
 
     // dom: form
     extendDomPrototype(Dom, {
@@ -2372,37 +2380,35 @@
          * @return {String}
          */
         serialize: function(opt_plus) {
-            var el = this[0], ret = '';
+            var el = this[0], elTag = getTag(el);
+            var name, value, type;
+            var ret, data = [];
 
-            if (getTag(el) == 'form') {
-                var data = [];
-                var done = TRUE;
+            if (elTag == 'form') {
                 $for(el, function(el) {
-                    var name = $trim(el.name), value, type;
-                    if (!name || el.disabled) {
+                    name = $trim(el[NAME_NAME]);
+                    if (!name || el[NAME_DISABLED]) {
                         return;
                     }
 
-                    name = encode(el.name);
-                    type = el.options ? 'select' : el.type ? el.type : getTag(el);
-
+                    type = el[NAME_OPTIONS] ? 'select' : (el.type || getTag(el));
                     switch (type) {
                         case 'select':
-                            value = getAttr(el.options[el.selectedIndex], NAME_VALUE);
+                            value = getAttr(el[NAME_OPTIONS][el.selectedIndex], NAME_VALUE);
                             break;
                         case 'radio':
                         case 'checkbox':
-                            value = el.checked ? el.value || 'on' : UNDEFINED;
+                            value = el[NAME_CHECKED] ? (el[NAME_VALUE] || 'on') : UNDEFINED;
                             break;
                         case 'submit':
-                            value = el.value ? el.value : type;
+                            value = el[NAME_VALUE] ? el[NAME_VALUE] : type;
                             break;
                         default:
-                            value = el.value;
+                            value = el[NAME_VALUE];
                     }
 
                     if (!$isVoid(value)) {
-                        data.push(name +'='+ encode(value));
+                        data.push(encode(name) +'='+ encode(value));
                     }
                 });
 
@@ -2476,13 +2482,11 @@
         /**
          * Checked.
          * @param  {Bool} option?
-         * @return {Bool|Dom}
+         * @return {Bool|self}
          */
         checked: function(option) {
-            var name = 'checked';
-
-            return $isVoid(option) ? getState(this[0], name) : this.for(function(el) {
-                setState(el, name, option);
+            return $isVoid(option) ? getState(this[0], NAME_CHECKED) : this.for(function(el) {
+                setState(el, NAME_CHECKED, option);
             });
         },
 
@@ -2492,10 +2496,8 @@
          * @return {Bool|self}
          */
         selected: function(option) {
-            var name = 'selected';
-
-            return $isVoid(option) ? getState(this[0], name) : this.for(function(el) {
-                setState(el, name, option);
+            return $isVoid(option) ? getState(this[0], NAME_SELECTED) : this.for(function(el) {
+                setState(el, NAME_SELECTED, option);
             });
         },
 
@@ -2505,10 +2507,8 @@
          * @return {Bool|self}
          */
         disabled: function(option) {
-            var name = 'disabled';
-
-            return $isVoid(option) ? getState(this[0], name) : this.for(function(el) {
-                setState(el, name, option);
+            return $isVoid(option) ? getState(this[0], NAME_DISABLED) : this.for(function(el) {
+                setState(el, NAME_DISABLED, option);
             });
         },
 
@@ -2518,10 +2518,8 @@
          * @return {Bool|self}
          */
         readonly: function(option) {
-            var name = 'readOnly';
-
-            return $isVoid(option) ? getState(this[0], name) : this.for(function(el) {
-                setState(el, name, option);
+            return $isVoid(option) ? getState(this[0], NAME_READONLY) : this.for(function(el) {
+                setState(el, NAME_READONLY, option);
             });
         }
     });
@@ -2553,7 +2551,7 @@
         },
 
         /**
-         * Is element node.
+         * Is e(lement) node.
          * @return {Bool}
          */
         isENode: function() {
@@ -2658,8 +2656,8 @@
              */
             animate: function(properties, speed, easing, callback) {
                 return (properties === 'stop') // stop previous animation
-                    ? this.for(function(el) {
-                        var animation = el.$animation;
+                    ? this.for(function(el, animation) {
+                        animation = el.$animation;
                         if (animation && animation.running) {
                             animation.stop();
                         }
@@ -2714,10 +2712,9 @@
              * @return {self}
              */
             show: function(speed, easing, callback) {
-                speed = speed || 0;
                 return this.for(function(el) {
-                    el[NAME_STYLE][NAME_DISPLAY] = getDefaultStyle(el, 'display');
-                    animate(el, {opacity: 1}, speed, easing, callback);
+                    el[NAME_STYLE][NAME_DISPLAY] = getDefaultStyle(el, NAME_DISPLAY);
+                    animate(el, {opacity: 1}, speed || 0, easing, callback);
                 });
             },
 
@@ -2733,11 +2730,9 @@
                     callback = easing, easing = NULL;
                 }
 
-                speed = speed || 0;
                 return this.for(function(el) {
-                    animate(el, {opacity: 0}, speed, easing, function() {
-                        el[NAME_STYLE][NAME_DISPLAY] = 'none';
-                        callback && callback(this);
+                    animate(el, {opacity: 0}, speed || 0, easing, function() {
+                        el[NAME_STYLE][NAME_DISPLAY] = NAME_NONE, (callback && callback(this));
                     });
                 });
             },
@@ -2754,29 +2749,28 @@
                     callback = easing, easing = NULL;
                 }
 
-                speed = speed || 0;
                 return this.for(function(el) {
                     if (!isVisible(el)) {
-                        el[NAME_STYLE][NAME_DISPLAY] = getDefaultStyle(el, 'display');
-                        animate(el, {opacity: 1}, speed, easing, callback);
+                        el[NAME_STYLE][NAME_DISPLAY] = getDefaultStyle(el, NAME_DISPLAY);
+                        animate(el, {opacity: 1}, speed || 0, easing, callback);
                     } else {
-                        animate(el, {opacity: 0}, speed, easing, function() {
-                            el[NAME_STYLE][NAME_DISPLAY] = 'none';
-                            callback && callback(this);
+                        animate(el, {opacity: 0}, speed || 0, easing, function() {
+                            el[NAME_STYLE][NAME_DISPLAY] = NAME_NONE, (callback && callback(this));
                         });
                     }
                 });
             },
 
             /**
-             * Display.
-             * @param  {String} option
+             * Toggle display.
+             * @param  {Bool}            option
+             * @param  {Int|String}      speed?
+             * @param  {String|Function} easing?
+             * @param  {Function}        callback?
              * @return {self}
              */
-            display: function(option) {
-                return this.for(function(el) {
-                    el[NAME_STYLE][NAME_DISPLAY] == option ? getDefaultStyle(el, 'display') : 'none';
-                });
+            toggleDisplay: function(option, speed, easing, callback) {
+                return option ? this.show(speed, easing, callback) : this.hide(speed, easing, callback);
             },
 
             /**
@@ -2788,6 +2782,7 @@
             blip: function(times, speed) {
                 times = times || Infinity;
                 speed = speed || 255;
+
                 return this.for(function(el) {
                     var count = times > 0 ? 1 : 0;
                     !function callback() {
@@ -2812,15 +2807,17 @@
              * @return {self}
              */
             scrollTo: function(top, left, speed, easing, callback) {
-                // swap window => html ('cos window won't be animated so..)
-                var _this = this;
-                if (_this.isWindow()) {
-                    _this = _this.find(TAG_HTML);
-                }
+                return this.for(function(el) {
+                    // 'cos window, document or (even body, for chrome & its gangs) won't be animated so..
+                    if (isRoot(el) || isRootElement(el)) {
+                        el = $getDocument(el)[NAME_SCROLLING_ELEMENT] || $getDocument(el)[NAME_DOCUMENT_ELEMENT];
+                    }
 
-                return _this.for(function(el) {
-                    animate(el, {scrollTop: top || el[NAME_SCROLL_TOP], scrollLeft: left || el[NAME_SCROLL_LEFT]},
-                        speed, easing, callback);
+                    var properties = {};
+                    properties[NAME_SCROLL_TOP] = top || el[NAME_SCROLL_TOP];
+                    properties[NAME_SCROLL_LEFT] = left || el[NAME_SCROLL_LEFT];
+
+                    animate(el, properties, speed, easing, callback);
                 });
             }
         });
