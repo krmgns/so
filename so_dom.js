@@ -2429,10 +2429,7 @@
             var _ret = function(data, ret) {
                 return ret = [], data.split('&').each(function(item) {
                     item = item.splits('=', 2), ret.push({
-                        key: decode(item[0]),
-                        // type cast
-                        value: $isNumeric(item[1]) || item[1] == 'true' || item[1] == 'false'
-                            ? window.eval(item[1]) : decode(item[1])
+                        key: decode(item[0]), value: decode(item[1])
                     });
                 }), ret;
             };
