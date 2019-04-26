@@ -23,7 +23,7 @@
     var NAME_OFFSET_TOP = 'offsetTop', NAME_OFFSET_LEFT = 'offsetLeft';
     var NAME_SCROLL_TOP = 'scrollTop', NAME_SCROLL_LEFT = 'scrollLeft';
     var NAME_INNER_HTML = 'innerHTML', NAME_TEXT_CONTENT = 'textContent';
-    var NAME_NAME = 'name', NAME_VALUE = 'value', NAME_TYPE = 'type', NAME_OPTIONS = 'options';
+    var NAME_NAME = 'name', NAME_VALUE = 'value', NAME_TYPE = 'type', NAME_OPTIONS = 'options', NAME_TEXT = 'text', NAME_SELECTED_INDEX = 'selectedIndex';
     var NAME_STYLE = 'style', NAME_CLASS_NAME = 'className', NAME_TAG_NAME = 'tagName';
     var NAME_CHECKED = 'checked', NAME_SELECTED = 'selected', NAME_DISABLED = 'disabled', NAME_READONLY = 'readOnly';
     var NAME_DISPLAY = 'display', NAME_VISIBILITY = 'visibility', NAME_NONE = 'none', NAME_CSS_TEXT = 'cssText';
@@ -464,6 +464,7 @@
     function create(content, doc, attributes, tag) {
         if (isDom(content)) return content.all();
         if (isNode(content)) return [content];
+        if ($isArray(content)) return content;
 
         var fragment, tmp, tmpTag = 'so-tmp';
 
@@ -1000,7 +1001,7 @@
     extendDomPrototype(Dom, {
         /**
          * Not.
-         * @param  {String|Element|Int ...arguments} selector
+         * @param  {String|HTMLElement|Int ...arguments} selector
          * @return {self}
          */
         not: function(selector) {
@@ -1181,7 +1182,7 @@
 
         /**
          * Matches.
-         * @param  {String|Element} selector
+         * @param  {String|Node} selector
          * @return {Bool}
          */
         matches: function(selector) {
@@ -1190,7 +1191,7 @@
 
         /**
          * Contains.
-         * @param  {String|Element} selector
+         * @param  {String|Node} selector
          * @return {Bool}
          */
         contains: function(selector) {
@@ -1199,7 +1200,7 @@
 
         /**
          * Has.
-         * @param  {String|Element} selector
+         * @param  {String|Node} selector
          * @return {Bool}
          */
         has: function(selector) {
@@ -1894,6 +1895,8 @@
                 removeAttr(el, name);
             } else if (name == NAME_VALUE) {
                 el[NAME_VALUE] = value;
+            } else if (name == NAME_TEXT && getTag(el) == 'option') {
+                el[NAME_TEXT] = value;
             } else if (!$isFalse(opt_state) /* speed */ && (opt_state || re_attrState.test(name))) {
                 (value || $isUndefined(value)) ? (el[fn_setAttr](name, ''), el[name] = !!value)
                     : (removeAttr(el, name), el[name] = FALSE);
@@ -1906,16 +1909,14 @@
         return hasAttr(el, name) ? el.getAttribute(name) : UNDEFINED;
     }
     function getAttrs(el, opt_namesOnly) {
-        var ret = $array(el.attributes);
+        var ret = $array(el && el.attributes);
         if (opt_namesOnly) {
             ret = ret.map(function(attr) { return attr[NAME_NAME] });
         }
         return ret;
     }
     function removeAttr(el, name) {
-        if (isENode(el)) {
-            el.removeAttribute(name);
-        }
+        if (isENode(el)) el.removeAttribute(name);
     }
 
     function toDataAttrName(name) {
@@ -2090,7 +2091,7 @@
         }
     });
 
-    // dom: values
+    // dom: values, options
     extendDomPrototype(Dom, {
         /**
          * Value.
@@ -2133,9 +2134,9 @@
 
             if (el) {
                 if (isSelectInput(el)) {
-                    value = getAttr(el[NAME_OPTIONS][el.selectedIndex], NAME_VALUE);
+                    value = el[NAME_OPTIONS][el[NAME_SELECTED_INDEX]][NAME_VALUE];
                 } else if (isCheckInput(el)) {
-                    value = el[NAME_CHECKED] ? (el[NAME_VALUE] || 'on') : UNDEFINED;
+                    value = el[NAME_CHECKED] ? el[NAME_VALUE] || 'on' : UNDEFINED;
                 } else {
                     value = el[NAME_VALUE];
                 }
@@ -2143,6 +2144,31 @@
 
             return value;
         }
+
+        // /**
+        //  * Option.
+        //  * @return {HTMLOptionElement|undefined}
+        //  */
+        // option: function() {
+        //    var el = this[0];
+        //
+        //    if (isSelectInput(el)) {
+        //        return el[NAME_OPTIONS][el[NAME_SELECTED_INDEX]];
+        //    }
+        // },
+
+        // /**
+        //  * Options.
+        //  * @param  {Bool} opt_toArray?
+        //  * @return {HTMLOptionsCollection|Array|undefined}
+        //  */
+        // options: function(opt_toArray) {
+        //    var el = this[0];
+        //
+        //    if (isSelectInput(el)) {
+        //        return !opt_toArray ? el[NAME_OPTIONS] : $array(el[NAME_OPTIONS]);
+        //    }
+        // }
     });
 
     // dom: id
