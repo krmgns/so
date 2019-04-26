@@ -2112,6 +2112,8 @@
                             option[NAME_SELECTED] = TRUE;
                         }
                     });
+                } else if (el.type == 'radio' || el.type == 'checkbox') {
+                    setAttr(el, NAME_CHECKED, (el[NAME_VALUE] === value), TRUE);
                 } else {
                     setAttr(el, NAME_VALUE, (el[NAME_VALUE] = value), FALSE);
                 }
@@ -2126,8 +2128,7 @@
             var el = this[0];
 
             if (el) {
-                return el[NAME_OPTIONS]
-                    ? getAttr(el[NAME_OPTIONS][el.selectedIndex], NAME_VALUE) // <select> element
+                return el[NAME_OPTIONS] ? getAttr(el[NAME_OPTIONS][el.selectedIndex], NAME_VALUE) // <select> element
                     : el[NAME_VALUE];
             }
         }
