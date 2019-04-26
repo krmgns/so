@@ -23,7 +23,7 @@
     var NAME_OFFSET_TOP = 'offsetTop', NAME_OFFSET_LEFT = 'offsetLeft';
     var NAME_SCROLL_TOP = 'scrollTop', NAME_SCROLL_LEFT = 'scrollLeft';
     var NAME_INNER_HTML = 'innerHTML', NAME_TEXT_CONTENT = 'textContent';
-    var NAME_NAME = 'name', NAME_VALUE = 'value', NAME_OPTIONS = 'options';
+    var NAME_NAME = 'name', NAME_VALUE = 'value', NAME_TYPE = 'type', NAME_OPTIONS = 'options';
     var NAME_STYLE = 'style', NAME_CLASS_NAME = 'className', NAME_TAG_NAME = 'tagName';
     var NAME_CHECKED = 'checked', NAME_SELECTED = 'selected', NAME_DISABLED = 'disabled', NAME_READONLY = 'readOnly';
     var NAME_DISPLAY = 'display', NAME_VISIBILITY = 'visibility', NAME_NONE = 'none', NAME_CSS_TEXT = 'cssText';
@@ -1888,7 +1888,6 @@
     function hasAttr(el, name) {
         return $bool(el && el[fn_hasAttr] && el[fn_hasAttr](name));
     }
-
     function setAttr(el, name, value, opt_state /* @internal */) {
         if (isENode(el)) {
             if ($isNull(value)) {
@@ -1903,11 +1902,9 @@
             }
         }
     }
-
     function getAttr(el, name) {
         return hasAttr(el, name) ? el.getAttribute(name) : UNDEFINED;
     }
-
     function getAttrs(el, opt_namesOnly) {
         var ret = $array(el.attributes);
         if (opt_namesOnly) {
@@ -1915,7 +1912,6 @@
         }
         return ret;
     }
-
     function removeAttr(el, name) {
         if (isENode(el)) {
             el.removeAttribute(name);
@@ -1924,6 +1920,14 @@
 
     function toDataAttrName(name) {
         return 'data-'+ $trim(name);
+    }
+
+    // input helpers
+    function isCheckInput(el) {
+        return $bool(el && (el[NAME_TYPE] == 'radio' || el[NAME_TYPE] == 'checkbox'));
+    }
+    function isSelectInput(el) {
+        return $bool(el && el[NAME_OPTIONS]);
     }
 
     // dom: attributes
@@ -2106,13 +2110,13 @@
             value = $isNull(value) ? '' : (''+ value); // @important
 
             return this.for(function(el) {
-                if (el[NAME_OPTIONS]) { // <select> element
+                if (isSelectInput(el)) {
                     $for(el[NAME_OPTIONS], function(option) {
                         if (option[NAME_VALUE] === value) {
                             option[NAME_SELECTED] = TRUE;
                         }
                     });
-                } else if (el.type == 'radio' || el.type == 'checkbox') {
+                } else if (isCheckInput(el)) {
                     setAttr(el, NAME_CHECKED, (el[NAME_VALUE] === value), TRUE);
                 } else {
                     setAttr(el, NAME_VALUE, (el[NAME_VALUE] = value), FALSE);
@@ -2125,12 +2129,19 @@
          * @return {String|undefined}
          */
         getValue: function() {
-            var el = this[0];
+            var el = this[0], value;
 
             if (el) {
-                return el[NAME_OPTIONS] ? getAttr(el[NAME_OPTIONS][el.selectedIndex], NAME_VALUE) // <select> element
-                    : el[NAME_VALUE];
+                if (isSelectInput(el)) {
+                    value = getAttr(el[NAME_OPTIONS][el.selectedIndex], NAME_VALUE);
+                } else if (isCheckInput(el)) {
+                    value = el[NAME_CHECKED] ? (el[NAME_VALUE] || 'on') : UNDEFINED;
+                } else {
+                    value = el[NAME_VALUE];
+                }
             }
+
+            return value;
         }
     });
 
@@ -2378,37 +2389,22 @@
         /**
          * Serialize.
          * @param  {Bool} opt_plus?
-         * @return {String}
+         * @return {String|undefined}
          */
         serialize: function(opt_plus) {
-            var el = this[0], elTag = getTag(el);
-            var name, value, type;
+            var el = this[0];
+            var name, value;
             var ret, data = [];
 
-            if (elTag == 'form') {
+            if (getTag(el) == 'form') { // forms only
                 $for(el, function(el) {
                     name = $trim(el[NAME_NAME]);
                     if (!name || el[NAME_DISABLED]) {
                         return;
                     }
 
-                    type = el[NAME_OPTIONS] ? 'select' : (el.type || getTag(el));
-                    switch (type) {
-                        case 'select':
-                            value = getAttr(el[NAME_OPTIONS][el.selectedIndex], NAME_VALUE);
-                            break;
-                        case 'radio':
-                        case 'checkbox':
-                            value = el[NAME_CHECKED] ? (el[NAME_VALUE] || 'on') : UNDEFINED;
-                            break;
-                        case 'submit':
-                            value = el[NAME_VALUE] ? el[NAME_VALUE] : type;
-                            break;
-                        default:
-                            value = el[NAME_VALUE];
-                    }
-
-                    if (!$isVoid(value)) {
+                    value = initDom(el).getValue();
+                    if (value != NULL) {
                         data.push(encode(name) +'='+ encode(value));
                     }
                 });
@@ -2632,10 +2628,11 @@
              * Has event.
              * @param  {String}   type
              * @param  {Function} fn
+             * @param  {Bool}     opt_typeOnly?
              * @return {Bool}
              */
-            hasEvent: function(type, fn) {
-                return event.has(this[0], type, fn);
+            hasEvent: function(type, fn, opt_typeOnly) {
+                return event.has(this[0], type, fn, opt_typeOnly);
             }
         });
     }

@@ -477,7 +477,7 @@
                     target['on'+ event.type] = NULL;
                 }
             } else {
-                $logWarn('No '+ event.type +' to remove.');
+                $logWarn('No "'+ event.type +'" event to remove.');
             }
         },
 
@@ -504,7 +504,7 @@
             } else if ($isFunction(target[event.type])) { // natives
                 target[event.type](event.event);
             } else {
-                $logWarn('No '+ event.type +' to fire.');
+                $logWarn('No "'+ event.type +'" event to fire.');
             }
         }
     });
@@ -559,14 +559,16 @@
             event.fire(type, args.options.data);
         });
     }
-    function has(target, type, fn) {
+    function has(target, type, fn, opt_typeOnly) {
         var ret = FALSE;
         var events = target && target.$events;
         if (!events) {
             return ret;
         }
 
-        if (events[type]) {
+        if (opt_typeOnly) {
+            ret = !!(events[type]); // just check type
+        } else if (events[type]) {
             $for(events[type], function(event) {
                 if (fn && event.fno && fn == event.fno) {
                     ret = TRUE; return _break;
