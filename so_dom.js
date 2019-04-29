@@ -2130,11 +2130,13 @@
          * @return {String|undefined}
          */
         getValue: function() {
-            var el = this[0], value;
+            var el = this[0], value, option;
 
             if (el) {
                 if (isSelectInput(el)) {
-                    value = el[NAME_OPTIONS][el[NAME_SELECTED_INDEX]][NAME_VALUE];
+                    option = el[NAME_OPTIONS][el[NAME_SELECTED_INDEX]];
+                    // prevent no value'd options
+                    value = option && hasAttr(option, NAME_VALUE) ? option[NAME_VALUE] : UNDEFINED;
                 } else if (isCheckInput(el)) {
                     value = el[NAME_CHECKED] ? el[NAME_VALUE] || 'on' : UNDEFINED;
                 } else {
