@@ -2426,7 +2426,7 @@
 
             if (getTag(el) == 'form') { // forms only
                 $for(el, function(el) {
-                    name = $trim(el[NAME_NAME]);
+                    name = $trim(el && el[NAME_NAME]);
                     if (!name || el[NAME_DISABLED]) {
                         return;
                     }
