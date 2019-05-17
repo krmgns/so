@@ -1010,6 +1010,9 @@
             if ($isString(selector)) {
                 // eg: $.dom("p").not(".red")
                 ret = intersect(_this.all(), _this.parent().findAll(toAllSelector(selector)).all());
+            } else if (isDom(selector)) {
+                // $.dom("p").not($element)
+                ret = intersect(_this.all(), selector.all());
             } else if (isENode(selector)) {
                 // $.dom("p").not(element)
                 ret = noIntersect(selector, _this);
