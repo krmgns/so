@@ -55,17 +55,17 @@
     function querySelectorAll(root, selector) {
         return root.querySelectorAll(selector);
     }
+
     function getTag(el) {
-        return (el && el[NAME_NODE_NAME]) ? el[NAME_NODE_NAME].lower() : $isWindow(el) ? TAG_WINDOW : NULL;
+        return (el && el[NAME_NODE_NAME]) ? el[NAME_NODE_NAME].lower()
+            : $isWindow(el) ? TAG_WINDOW : NULL;
     }
-    function isDom(input) {
-        return (input instanceof Dom);
+
+    function isRoot(el, _tag) {
+        return (_tag = getTag(el)), _tag == TAG_WINDOW || _tag == TAG_DOCUMENT;
     }
-    function isRoot(el, _var) {
-        return (_var = getTag(el)), _var == TAG_WINDOW || _var == TAG_DOCUMENT;
-    }
-    function isRootElement(el, _var) {
-        return (_var = getTag(el)), _var == TAG_HTML || _var == TAG_BODY;
+    function isRootElement(el, _tag) {
+        return (_tag = getTag(el)), _tag == TAG_HTML || _tag == TAG_BODY;
     }
     function isNode(el) {
         return $bool(el && (el[NAME_NODE_TYPE] === 1 || el[NAME_NODE_TYPE] === 9 || el[NAME_NODE_TYPE] === 11));
@@ -73,14 +73,23 @@
     function isENode(el) {
         return $bool(el && (el[NAME_NODE_TYPE] === 1));
     }
-    function toKeyValueObject(key, value) {
-        var ret = key || {}; if ($isString(ret)) ret = {}, ret[key] = value; return ret;
+
+    function isDom(input) {
+        return (input instanceof Dom);
     }
-    function initDom(selector, root, one) {
+    function toDom(selector, root, one) {
         return isDom(selector) ? selector : new Dom(selector, root, one);
     }
-    function extendDomPrototype(Dom, prototype) {
+    function toDomPrototype(Dom, prototype) {
         $extend(Dom[NAME_PROTOTYPE], prototype);
+    }
+
+    function toKeyValue(key, value) {
+        var ret = key || {};
+        if ($isString(ret)) {
+            ret = {}, ret[key] = value;
+        }
+        return ret;
     }
 
     var soPrefix = 'so:';
@@ -197,7 +206,7 @@
     }
 
     // dom: base
-    extendDomPrototype(Dom, {
+    toDomPrototype(Dom, {
         /**
          * Len.
          * @return {Int}
@@ -212,7 +221,7 @@
          * @return {self}
          */
         find: function(selector) {
-            return this[0] ? initDom(selector, this[0], TRUE) : this;
+            return this[0] ? toDom(selector, this[0], TRUE) : this;
         },
 
         /**
@@ -221,7 +230,7 @@
          * @return {self}
          */
         findAll: function(selector) {
-            return this[0] ? initDom(selector, this[0]) : this;
+            return this[0] ? toDom(selector, this[0]) : this;
         },
 
         /**
@@ -269,7 +278,7 @@
             if (init) {
                 // shortcut for: ...each(function(el) { $el = $.dom(el) ...
                 all = all.map(function(el) {
-                    return initDom(el, NULL, TRUE);
+                    return toDom(el, NULL, TRUE);
                 });
             }
 
@@ -299,7 +308,7 @@
          * @return {self}
          */
         copy: function() {
-            return initDom(this.all());
+            return toDom(this.all());
         },
 
         /**
@@ -308,7 +317,7 @@
          * @return {self}
          */
         map: function(fn) {
-            return initDom(this.all().map(fn));
+            return toDom(this.all().map(fn));
         },
 
         /**
@@ -320,11 +329,11 @@
             var all = this.all(), alls;
 
             if ($isFunction(fn)) {
-                return initDom(all.filter(fn));
+                return toDom(all.filter(fn));
             }
 
-            alls = initDom(fn); // selector given
-            return initDom(all.filter(function(el) {
+            alls = toDom(fn); // selector given
+            return toDom(all.filter(function(el) {
                 return alls.has(el);
             }));
         },
@@ -334,7 +343,7 @@
          * @return {self}
          */
         reverse: function() {
-            return initDom(this.all().reverse());
+            return toDom(this.all().reverse());
         },
 
         /**
@@ -374,7 +383,7 @@
          * @return {self}
          */
         item: function(i) {
-            return initDom(this[i - 1]);
+            return toDom(this[i - 1]);
         },
 
         /**
@@ -382,7 +391,7 @@
          * @return {self}
          */
         items: function() {
-            return initDom(this.getAll.apply(this, arguments));
+            return toDom(this.getAll.apply(this, arguments));
         },
 
         /**
@@ -412,7 +421,7 @@
             }
 
             i = $int(i);
-            return initDom(this.filter(function(node, _i) {
+            return toDom(this.filter(function(node, _i) {
                 return !((_i + 1) % i) && i;
             }));
         },
@@ -568,7 +577,7 @@
     }
 
     // dom: modifiers
-    extendDomPrototype(Dom, {
+    toDomPrototype(Dom, {
         /**
          * Colne.
          * @param  {Bool} opt_deep?
@@ -581,7 +590,7 @@
                 clones[i] = cloneElement(el, opt_deep);
             });
 
-            return initDom(clones);
+            return toDom(clones);
         },
 
         /**
@@ -660,7 +669,7 @@
          */
         appendTo: function(selector, opt_cloning) {
             if (!isDom(selector)) {
-                selector = initDom(selector);
+                selector = toDom(selector);
             }
 
             return this.for(function(el) {
@@ -693,7 +702,7 @@
          */
         prependTo: function(selector, opt_cloning) {
             if (!isDom(selector)) {
-                selector = initDom(selector);
+                selector = toDom(selector);
             }
 
             return this.for(function(el) {
@@ -725,7 +734,7 @@
          */
         insertBefore: function(selector, opt_cloning) {
             if (!isDom(selector)) {
-                selector = initDom(selector);
+                selector = toDom(selector);
             }
 
             return this.for(function(el) {
@@ -743,7 +752,7 @@
          */
         insertAfter: function(selector, opt_cloning) {
             if (!isDom(selector)) {
-                selector = initDom(selector);
+                selector = toDom(selector);
             }
 
             return this.for(function(el) {
@@ -761,7 +770,7 @@
          */
         replaceWith: function(selector, opt_cloning) {
             if (!isDom(selector)) {
-                selector = initDom(selector);
+                selector = toDom(selector);
             }
 
             return this.for(function(el) {
@@ -795,7 +804,7 @@
                 replaceChild(elParent, wrapper, replace);
             }
 
-            return initDom(clones);
+            return toDom(clones);
         },
 
         /**
@@ -804,7 +813,8 @@
          * @return {self}
          */
         unwrap: function(opt_remove) {
-            var el = this[0], elParent = el && el[NAME_PARENT_NODE], elParentParent = elParent && elParent[NAME_PARENT_NODE];
+            var el = this[0], elParent = el && el[NAME_PARENT_NODE],
+                elParentParent = elParent && elParent[NAME_PARENT_NODE];
             var clone, clones = [];
 
             if (elParentParent) {
@@ -821,7 +831,7 @@
                 }
             }
 
-            return initDom(clones);
+            return toDom(clones);
         }
     });
 
@@ -834,7 +844,7 @@
     }
 
     // dom: property
-    extendDomPrototype(Dom, {
+    toDomPrototype(Dom, {
         /**
          * Property.
          * @param  {String} name
@@ -861,7 +871,7 @@
          * @return {self}
          */
         setProperty: function(name, value) {
-            var properties = toKeyValueObject(name, value);
+            var properties = toKeyValue(name, value);
 
             return this.for(function(el) {
                 for (name in properties) {
@@ -881,7 +891,7 @@
     });
 
     // dom: contents
-    extendDomPrototype(Dom, {
+    toDomPrototype(Dom, {
         /**
          * Text.
          * @param  {String} input?
@@ -998,18 +1008,22 @@
     }
 
     // dom: walkers
-    extendDomPrototype(Dom, {
+    toDomPrototype(Dom, {
         /**
          * Not.
          * @param  {String|HTMLElement|Int ...arguments} selector
+         * @param  {Bool} opt_useParent?
          * @return {self}
          */
-        not: function(selector) {
+        not: function(selector, opt_useParent) {
             var _this = this, ret = [], args;
 
             if ($isString(selector)) {
                 // eg: $.dom("p").not(".red")
-                ret = intersect(_this.all(), _this.parent().findAll(toAllSelector(selector)).all());
+                ret = intersect(_this.all(),
+                    $isFalse(opt_useParent) ? toDom(selector).all()
+                        : _this.parent().findAll(toAllSelector(selector)).all()
+                );
             } else if (isDom(selector)) {
                 // $.dom("p").not($element)
                 ret = intersect(_this.all(), selector.all());
@@ -1025,7 +1039,7 @@
                 });
             }
 
-            return initDom(ret);
+            return toDom(ret);
         },
 
         /**
@@ -1033,7 +1047,7 @@
          * @return {self}
          */
         odd: function() {
-            return initDom(this.filter(function(el, i) {
+            return toDom(this.filter(function(el, i) {
                 return (i & 1);
             }));
         },
@@ -1043,7 +1057,7 @@
          * @return {self}
          */
         even: function() {
-            return initDom(this.filter(function(el, i) {
+            return toDom(this.filter(function(el, i) {
                 return !(i & 1);
             }));
         },
@@ -1053,7 +1067,7 @@
          * @return {self}
          */
         parent: function() {
-            return initDom(__(this, NAME_PARENT_NODE));
+            return toDom(__(this, NAME_PARENT_NODE));
         },
 
         /**
@@ -1061,7 +1075,7 @@
          * @return {self}
          */
         parents: function() {
-            return initDom(walk(this[0], NAME_PARENT_NODE));
+            return toDom(walk(this[0], NAME_PARENT_NODE));
         },
 
         /**
@@ -1075,11 +1089,11 @@
             if (el) {
                 ret = noIntersect(el, walk(el[NAME_PARENT_NODE], NAME_CHILDREN));
                 if (ret.len() && (selector = toAllSelector(selector))) {
-                    ret = intersect(ret, noIntersect(el, initDom(el[NAME_PARENT_NODE]).findAll(selector).all()), TRUE);
+                    ret = intersect(ret, noIntersect(el, toDom(el[NAME_PARENT_NODE]).findAll(selector).all()), TRUE);
                 }
             }
 
-            return initDom(ret);
+            return toDom(ret);
         },
 
         /**
@@ -1087,7 +1101,7 @@
          * @return {self}
          */
         children: function() {
-            return initDom($array(__(this, NAME_CHILDREN)));
+            return toDom($array(__(this, NAME_CHILDREN)));
         },
 
         /**
@@ -1128,7 +1142,7 @@
                     }
                 }
             }
-            return initDom(nodes);
+            return toDom(nodes);
         },
 
         /**
@@ -1136,7 +1150,7 @@
          * @return {self}
          */
         prev: function() {
-            return initDom(__(this, NAME_PREVIOUS_ELEMENT_SIBLING));
+            return toDom(__(this, NAME_PREVIOUS_ELEMENT_SIBLING));
         },
 
         /**
@@ -1150,11 +1164,11 @@
             if (el) {
                 ret = walk(el, NAME_PREVIOUS_ELEMENT_SIBLING).reverse();
                 if (ret.len() && (selector = toAllSelector(selector))) {
-                    ret = intersect(ret, initDom(el[NAME_PARENT_NODE]).findAll(selector).all(), TRUE);
+                    ret = intersect(ret, toDom(el[NAME_PARENT_NODE]).findAll(selector).all(), TRUE);
                 }
             }
 
-            return initDom(ret);
+            return toDom(ret);
         },
 
         /**
@@ -1162,7 +1176,7 @@
          * @return {self}
          */
         next: function() {
-            return initDom(__(this, NAME_NEXT_ELEMENT_SIBLING));
+            return toDom(__(this, NAME_NEXT_ELEMENT_SIBLING));
         },
 
         /**
@@ -1176,11 +1190,11 @@
             if (el) {
                 ret = walk(el, NAME_NEXT_ELEMENT_SIBLING);
                 if (ret.len() && (selector = toAllSelector(selector))) {
-                    ret = intersect(ret, initDom(el[NAME_PARENT_NODE]).findAll(selector).all(), TRUE);
+                    ret = intersect(ret, toDom(el[NAME_PARENT_NODE]).findAll(selector).all(), TRUE);
                 }
             }
 
-            return initDom(ret);
+            return toDom(ret);
         },
 
         /**
@@ -1189,7 +1203,7 @@
          * @return {Bool}
          */
         matches: function(selector) {
-            return $bool(this[0] && initDom(selector).has(this[0]));
+            return $bool(this[0] && toDom(selector).has(this[0]));
         },
 
         /**
@@ -1198,7 +1212,7 @@
          * @return {Bool}
          */
         contains: function(selector) {
-            return $bool(this[0] && initDom(selector, this[0]).len());
+            return $bool(this[0] && toDom(selector, this[0]).len());
         },
 
         /**
@@ -1208,7 +1222,7 @@
          */
         has: function(selector) {
             if ($isString(selector)) {
-                selector = initDom(selector)[0];
+                selector = toDom(selector)[0];
             }
 
             return $bool(selector && this.all().has(selector));
@@ -1256,7 +1270,7 @@
     });
 
     // dom: window,document
-    extendDomPrototype(Dom, {
+    toDomPrototype(Dom, {
         /**
          * Get window.
          * @param  {Bool} opt_content?
@@ -1265,7 +1279,7 @@
         getWindow: function(opt_content) {
             var el = this[0];
 
-            return initDom(el && (opt_content ? el.contentWindow : $getWindow(el)));
+            return toDom(el && (opt_content ? el.contentWindow : $getWindow(el)));
         },
 
         /**
@@ -1276,7 +1290,7 @@
         getDocument: function(opt_content) {
             var el = this[0];
 
-            return initDom(el && (opt_content ? el.contentDocument : $getDocument(el)));
+            return toDom(el && (opt_content ? el.contentDocument : $getDocument(el)));
         }
     });
 
@@ -1318,7 +1332,7 @@
     }
 
     // dom: paths
-    extendDomPrototype(Dom, {
+    toDomPrototype(Dom, {
         /**
          * Path.
          * @param  {Bool} opt_string?
@@ -1451,7 +1465,7 @@
     }
 
     // dom: styles
-    extendDomPrototype(Dom, {
+    toDomPrototype(Dom, {
         /**
          * Style.
          * @param  {String}      name
@@ -1486,7 +1500,7 @@
             var styles = name;
 
             if ($isString(styles)) {
-                styles = $isVoid(value) ? parseStyleText(name) : toKeyValueObject(name, value);
+                styles = $isVoid(value) ? parseStyleText(name) : toKeyValue(name, value);
             }
 
             return this.for(function(el) {
@@ -1538,7 +1552,7 @@
             var el = this[0], styles = {};
             if (el) {
                 if (names) {
-                    el = initDom(el);
+                    el = toDom(el);
                     split(names, re_comma).each(function(name) {
                         styles[name] = el.getStyle(name, opt_convert, opt_raw);
                     });
@@ -1764,7 +1778,7 @@
     }
 
     // dom: dimensions
-    extendDomPrototype(Dom, {
+    toDomPrototype(Dom, {
         /**
          * Dimensions.
          * @return {Object}
@@ -1825,7 +1839,7 @@
     });
 
     // dom: offset, scroll, box, isVisible
-    extendDomPrototype(Dom, {
+    toDomPrototype(Dom, {
         /**
          * Offset.
          * @param  {Bool} opt_relative?
@@ -1935,7 +1949,7 @@
     }
 
     // dom: attributes
-    extendDomPrototype(Dom, {
+    toDomPrototype(Dom, {
         /**
          * Attr.
          * @param  {String|Object} name
@@ -1995,7 +2009,7 @@
          * @return {self}
          */
         setAttr: function(name, value) {
-            var attributes = toKeyValueObject(name, value);
+            var attributes = toKeyValue(name, value);
 
             return this.for(function(el) {
                 for (name in attributes) {
@@ -2095,7 +2109,7 @@
     });
 
     // dom: values, options
-    extendDomPrototype(Dom, {
+    toDomPrototype(Dom, {
         /**
          * Value.
          * @param  {String} value?
@@ -2177,7 +2191,7 @@
     });
 
     // dom: id
-    extendDomPrototype(Dom, {
+    toDomPrototype(Dom, {
         /**
          * Id.
          * @param  {String} id?
@@ -2229,7 +2243,7 @@
     }
 
     // dom: class
-    extendDomPrototype(Dom, {
+    toDomPrototype(Dom, {
         /**
          * Class.
          * @param  {String}      name?
@@ -2325,7 +2339,7 @@
                 key = $trim(key);
                 el.$data.set(key, value);
             } else {
-                var data = toKeyValueObject(key, value);
+                var data = toKeyValue(key, value);
                 for (key in data) {
                     el.$data.set(key, data[key]);
                 }
@@ -2349,7 +2363,7 @@
     }
 
     // dom: data
-    extendDomPrototype(Dom, {
+    toDomPrototype(Dom, {
         /**
          * Data.
          * @param  {String|Object} key
@@ -2416,7 +2430,7 @@
     var encode = $.util.urlEncode, decode = $.util.urlDecode;
 
     // dom: form
-    extendDomPrototype(Dom, {
+    toDomPrototype(Dom, {
         /**
          * Serialize.
          * @param  {Bool} opt_plus?
@@ -2434,7 +2448,7 @@
                         return;
                     }
 
-                    value = initDom(el).getValue();
+                    value = toDom(el).getValue();
                     if (value != NULL) {
                         data.push(encode(name) +'='+ encode(value));
                     }
@@ -2503,7 +2517,7 @@
     }
 
     // dom: form elements states
-    extendDomPrototype(Dom, {
+    toDomPrototype(Dom, {
         /**
          * Checked.
          * @param  {Bool} option?
@@ -2550,7 +2564,7 @@
     });
 
     // dom: checkers
-    extendDomPrototype(Dom, {
+    toDomPrototype(Dom, {
         /**
          * Is window.
          * @return {Bool}
@@ -2603,7 +2617,7 @@
     // dom: events
     var event = $.event;
     if (event) {
-        extendDomPrototype(Dom, {
+        toDomPrototype(Dom, {
             /**
              * On.
              * @param  {String}   type
@@ -2671,7 +2685,7 @@
     // dom: animations
     var animate = $.animation && $.animation.animate;
     if (animate) {
-        extendDomPrototype(Dom, {
+        toDomPrototype(Dom, {
             /**
              * Animate.
              * @param  {Object|String} properties
@@ -2850,7 +2864,7 @@
     }
 
     // xpath helper
-    function initXDom(selector, root, one) {
+    function toXDom(selector, root, one) {
         var doc = root || $document;
         var docEl = doc && doc[NAME_DOCUMENT_ELEMENT];
         var nodes = [], node, iter, ret;
@@ -2873,7 +2887,7 @@
             }
         }
 
-        ret = initDom(nodes);
+        ret = toDom(nodes);
         ret._selector = selector;
 
         return ret;
@@ -2886,29 +2900,29 @@
      * @return {self}
      */
     var $dom = function(selector, root) {
-        return initDom(selector, root);
+        return toDom(selector, root);
     };
 
     // add static methods to dom
     $extend($dom, {
         // find by selector
         find: function(selector, root) {
-            return initDom(selector, root, TRUE);
+            return toDom(selector, root, TRUE);
         },
         findAll: function(selector, root) {
-            return initDom(selector, root);
+            return toDom(selector, root);
         },
         // find by xpath
         xfind: function(selector, root) {
-            return initXDom(selector, root, TRUE);
+            return toXDom(selector, root, TRUE);
         },
         xfindAll: function(selector, root) {
-            return initXDom(selector, root);
+            return toXDom(selector, root);
         },
         // (name, value) or ({name: value})
         define: function(name, value) {
             var names = Object.keys(Dom[NAME_PROTOTYPE]);
-            $forEach(toKeyValueObject(name, value), function(name, value) {
+            $forEach(toKeyValue(name, value), function(name, value) {
                 if (names.has(name)) {
                     throw ('Cannot overwrite on Dom.'+ name +'!');
                 }
@@ -2926,7 +2940,7 @@
                 setAttr(el, name, value);
             });
 
-            appendChild(initDom(root || $document[TAG_HEAD])[0], el);
+            appendChild(toDom(root || $document[TAG_HEAD])[0], el);
         },
         loadScript: function(src, root, onload, attributes) {
             var el = createElement(NULL, 'script');
@@ -2936,7 +2950,7 @@
                 setAttr(el, name, value);
             });
 
-            appendChild(initDom(root || $document[TAG_HEAD])[0], el);
+            appendChild(toDom(root || $document[TAG_HEAD])[0], el);
         },
         isNode: function(el) {
             return isNode(el);
