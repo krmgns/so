@@ -2802,14 +2802,14 @@
             },
 
             /**
-             * Toggle display.
+             * Toggle by.
              * @param  {Bool}            option
              * @param  {Int|String}      speed?
              * @param  {String|Function} easing?
              * @param  {Function}        callback?
              * @return {self}
              */
-            toggleDisplay: function(option, speed, easing, callback) {
+            toggleBy: function(option, speed, easing, callback) {
                 return option ? this.show(speed, easing, callback) : this.hide(speed, easing, callback);
             },
 
