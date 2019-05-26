@@ -34,7 +34,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.66.1';
+    window.so.VERSION = '5.67.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -1203,6 +1203,16 @@
         float: function(input) { return toFloat(input); },
         string: function(input) { return toString(input); },
         bool: function(input) { return toBool(input); },
+
+        /**
+         * In.
+         * @param  {Any}          search
+         * @param  {Array|String} input
+         * @return {Bool}
+         */
+        in: function(search, input) {
+            return input.indexOf(search) > -1;
+        },
 
         /**
          * Has.

@@ -33,10 +33,13 @@ body {height: 3000px}
 <script>
 // so.ready(function($, $$) {
 so(function($, $$) {
+    log($.in("null", "nulls"))
+    log($.in("null", "nulsl"))
+    log($.in("null", [65, 67, 83, 85, "null"]))
 
-    $.fire(1000, () => {
-        log($('body').scrollTo(150))
-    })
+    // $.fire(1000, () => {
+    //     log($('body').scrollTo(150))
+    // })
 
     // $('html').setAttr('async')
     // // $('html').toggleAttr('async')
