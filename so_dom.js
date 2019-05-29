@@ -1363,7 +1363,6 @@
     });
 
     var re_rgb = /rgb/i;
-    var re_color = /color/i;
     var re_unit = /(?:px|em|%)/i; // short & quick
     var re_unitOther = /(?:ex|in|[cm]m|p[tc]|v[hw]?min)/i;
     var re_nonUnitStyles = /(?:(?:fill-?)?opacity|z(?:oom|index)|(?:font-?w|line-?h)eight|column(?:-?count|s))/i;
@@ -1416,13 +1415,8 @@
     function setStyle(el, name, value) {
         name = $toStyleName(name), value = $string(value);
 
-        var valueLen = value.len();
-        if (valueLen) {
-            if (valueLen < 9 && value[0] != '#' && re_color.test(name)) { // fix hexes
-                value = '#'+ value;
-            } else if ($isNumeric(value) && !re_nonUnitStyles.test(name)) { // fix pixsels
-                value += 'px';
-            }
+        if (value && $isNumeric(value) && !re_nonUnitStyles.test(name)) { // fix pixsels
+            value += 'px';
         }
 
         el[NAME_STYLE][name] = value;
