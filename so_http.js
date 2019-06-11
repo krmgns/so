@@ -329,33 +329,31 @@
          * @return {self}
          */
         send: function() {
-            var _this = this, data;
+            var _this = this, data,
+                request = _this.request,
+                timeout = _this.options.timeout;
 
             if (!_this.sent && !_this.aborted) {
-
                 _this.fire('beforeSend');
 
-                $forEach(_this.request.headers, function(name, value) {
+                $forEach(request.headers, function(name, value) {
                     _this.api.setRequestHeader(name, value);
                 });
 
                 // check data
-                if (re_post.test(_this.request.method)) {
-                    data = $http.serialize(_this.request.data);
+                if (re_post.test(request.method)) {
+                    data = $http.serialize(request.data);
                 }
 
                 _this.api.send(data);
-
                 _this.fire('afterSend');
+                _this.sent = TRUE;
 
-                if (_this.options.timeout) {
-                    $.fire(_this.options.timeout, function(){
-                        _this.cancel();
-                        _this.fire('timeout');
+                if (timeout) {
+                    $.fire(timeout, function() {
+                        _this.cancel(TRUE);
                     });
                 }
-
-                _this.sent = TRUE;
             }
 
             return _this;
@@ -364,7 +362,7 @@
         /**
          * Fire.
          * @param  {String|Function} fn
-         * @param  {Array}           fnArgs
+         * @param  {Array}           fnArgs?
          * @return {void}
          */
         fire: function(fn, fnArgs) {
@@ -374,8 +372,8 @@
             if (_this.options.ons[fn]) {
                 fn = _this.options.ons[fn];
             } else if (!$isFunction(fn)) {
-                fn = $isNumeric(fn) // status code functions
-                    ? fn : 'on'+ fn.toCapitalCase();
+                fn = $isNumeric(fn) ? fn // status code functions (eg: 200)
+                   : 'on'+ fn.toCapitalCase();
                 if (_this.options[fn]) {
                     fn = _this.options[fn];
                 }
@@ -383,9 +381,8 @@
 
             if ($isFunction(fn)) {
                 var args = [_this];
-                // prepend
                 if ($isDefined(fnArgs)) {
-                    args = [fnArgs].concat(args);
+                    args = [fnArgs].concat(args); // prepend
                 }
                 fn.apply(_this, args);
             }
@@ -393,13 +390,19 @@
 
         /**
          * Cancel
+         * @param  {Bool} opt_timeout?
          * @return {void}
          */
-        cancel: function(_this /* @internal */) {
-            _this = this;
+        cancel: function(opt_timeout) {
+            var _this = this;
+
             _this.api.abort();
             _this.fire('abort');
             _this.aborted = TRUE;
+
+            if (opt_timeout) {
+                _this.fire('timeout');
+            }
         },
 
         /**
@@ -416,27 +419,25 @@
          * @return {Bool}
          */
         ok: function() {
-            return this.response.statusCode === 200;
+            return (200 === this.response.statusCode);
         },
 
         /**
          * Is success.
          * @return {Bool}
          */
-        isSuccess: function() {
-            var code = this.response.statusCode;
-
-            return code >= 200 && code <= 299;
+        isSuccess: function(code /* @internal */) {
+            return (code = this.response.statusCode)
+                && (code >= 200 && code <= 299);
         },
 
         /**
          * Is failure.
          * @return {Bool}
          */
-        isFailure: function() {
-            var code = this.response.statusCode;
-
-            return code >= 400 && code <= 599;
+        isFailure: function(code /* @internal */) {
+            return (code = this.response.statusCode)
+                && (code >= 400 && code <= 599);
         },
 
         /**
@@ -446,7 +447,8 @@
          * @return {self}
          */
         on: function(name, callback) {
-            return this.options.ons[name] = callback, this;
+            this.options.ons[name] = callback;
+            return this;
         }
     });
 
