@@ -16,7 +16,7 @@
     var re_mobs = [
         /(android) *([\d.]+)/,
         /(ip(?:hone|ad|od))(?:; cpu)? *os ([\d_]+)/,
-        /(windows phone) *(?:os)? *([\d.]+)/
+        /(windows *phone) *(?:os)? *([\d.]+)/
     ];
 
     var navigator = window.navigator,
@@ -63,7 +63,7 @@
                         if (re[1].sub(0, 2) == 'ip') {
                             re = [, 'ios', re[2].replace(/_/g, '.')];
                         }
-                        _.os.name = re[1];
+                        _.os.name = re[1].remove(/ +/g);
                         _.os.version = re[2];
                         return 0; // break
                     }

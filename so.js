@@ -33,7 +33,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.68.0';
+    window.so.VERSION = '5.68.1';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -690,7 +690,7 @@
          * @return {String}
          */
         toCapitalCase: function(opt_all, opt_lower) {
-            var s = this, i;
+            var s = this, i, il;
 
             if (s) { // prevent empty string craps
                 opt_lower && (s = lower(s));
