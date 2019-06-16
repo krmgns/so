@@ -1,10 +1,10 @@
 <?php
 $files = array(
     'so.js',
+    'so_ua.js',
     'so_util.js',
     'so_class.js',
     'so_list.js',
-    'so_browser.js',
     'so_http.js',
     'so_event.js',
     'so_animation.js',

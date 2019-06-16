@@ -13,15 +13,14 @@
 
     /**
      * So.
-     * @param  {String|Object|Function} selector
-     * @param  {Object}                 root?
+     * @param  {String|Object|Function} a
+     * @param  {Object}                 b?
      * @return {Object}
      */
-    function $(selector, root) {
-        if (!isFunction(selector)) {
-            return $.dom(selector, root);
-        }
-        $.ready(selector, root); // (callback, document?)
+    function $(a, b) {
+        return !isFunction(a)
+            ? $.dom(a, b) // (selector, root?)
+            : $.ready(a, b) // (callback, document?)
     }
 
     // minify candies
@@ -34,7 +33,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.67.2';
+    window.so.VERSION = '5.68.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
