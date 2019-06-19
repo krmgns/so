@@ -2810,7 +2810,7 @@
              * @return {self}
              */
             toggleBy: function(option, speed, easing, callback) {
-                return option ? this.show(speed, easing, callback) : this.hide(speed, easing, callback);
+                return this[option ? 'show' : 'hide'](speed, easing, callback);
             },
 
             /**
