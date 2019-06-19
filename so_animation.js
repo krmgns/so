@@ -22,23 +22,25 @@
 
     /**
      * Animation.
-     * @param {Element}  target
+     * @param {Element}  el
      * @param {Object}   properties
      * @param {Int}      speed?
      * @param {String}   easing?
      * @param {Function} callback?
      */
-    function Animation(target, properties, speed, easing, callback) {
+    function Animation(el, properties, speed, easing, callback) {
         var _this = this; // just as minify candy
-        _this.$target = $.dom(target);
+        _this.$el = $.dom(el);
         _this.properties = properties;
-        _this.speed = $isNumber(speed) ? speed : opt_speeds[speed] || opt_speeds.default;
 
         // swap arguments
-        if ($isFunction(easing)) {
+        if ($isFunction(speed)) {
+            callback = speed, speed = NULL;
+        } else if ($isFunction(easing)) {
             callback = easing, easing = NULL;
         }
 
+        _this.speed = $isNumber(speed) ? speed : opt_speeds[speed] || opt_speeds.default;
         _this.easing = $easing[easing] || fn_easing;
         _this.callback = callback;
 
@@ -47,9 +49,9 @@
 
         _this.tasks = [];
 
-        if (_this.$target.len()) {
+        if (_this.$el.len()) {
             // for stop tool
-            _this.$target.setProperty('$animation', _this);
+            _this.$el.setProperty('$animation', _this);
 
             // assign animation tasks
             $forEach(properties, function(name, value) {
@@ -60,8 +62,8 @@
 
                 if (!scroll) {
                     style = $isString(value)
-                        ? _this.$target.getCssStyle(name) // get original style to catch unit sign
-                        : _this.$target.getComputedStyle(name);
+                        ? _this.$el.getCssStyle(name) // get original style to catch unit sign
+                        : _this.$el.getComputedStyle(name);
 
                     startValue = $float(style);
                     endValue = $float(value);
@@ -70,7 +72,7 @@
                         unit = style.replace(re_digit, '');
                     }
                 } else {
-                    startValue = _this.$target.scroll()[name.slice(6).lower()];
+                    startValue = _this.$el.scroll()[name.slice(6).lower()];
                     endValue = value;
                 }
 
@@ -105,7 +107,7 @@
             _this.startTime = $now();
 
             !function run() {
-                if (!_this.$target.len()) {
+                if (!_this.$el.len()) {
                     return (_this.running = FALSE, _this.stopped = _this.ended = TRUE),
                         $.logWarn('No element(s) to animate.');
                 }
@@ -129,7 +131,7 @@
          * @return {self}
          */
         start: function() {
-            var _this = this, target = _this.$target, scroll, value;
+            var _this = this, el = _this.$el, scroll, value;
 
             _this.elapsedTime = $now() - _this.startTime;
 
@@ -137,10 +139,10 @@
                 value = fn_easing(_this.elapsedTime, 0.00, task.diff, _this.speed);
                 value = task.reverse ? task.startValue - value : task.startValue + value;
                 if (!task.scroll) {
-                    target.setStyle(task.name, value.toFixed(9) /* use 'toFixed' for a good percent */
+                    el.setStyle(task.name, value.toFixed(9) /* use 'toFixed' for a good percent */
                         + task.unit);
                 } else {
-                    target.setProperty(task.name, value.toFixed(0));
+                    el.setProperty(task.name, value.toFixed(0));
                 }
             });
 
@@ -152,13 +154,13 @@
          * @return {self}
          */
         end: function() {
-            var _this = this, target = _this.$target;
+            var _this = this, el = _this.$el;
 
             $for(_this.tasks, function(task) {
                 if (!task.scroll) {
-                    target.setStyle(task.name, task.endValue + task.unit);
+                    el.setStyle(task.name, task.endValue + task.unit);
                 } else {
-                    target.setProperty(task.name, task.endValue);
+                    el.setProperty(task.name, task.endValue);
                 }
             });
 
@@ -176,29 +178,29 @@
          * @return {self}
          */
         stop: function() {
-            var _this = this, target = _this.$target;
+            var _this = this, el = _this.$el;
 
             if (_this.running) {
                 _this.running = FALSE, _this.stopped = TRUE;
             }
 
             // set as null (for isAnimated() etc.)
-            target.setProperty('$animation', NULL);
+            el.setProperty('$animation', NULL);
 
             return _this;
         }
     });
 
     // shortcut
-    function initAnimation(target, properties, speed, easing, callback) {
-        return new Animation(target, properties, speed, easing, callback);
+    function initAnimation(el, properties, speed, easing, callback) {
+        return new Animation(el, properties, speed, easing, callback);
     }
 
     // add animation to so
     $.animation = {
         Animation: initAnimation,
-        animate: function(target, properties, speed, easing, callback) {
-            return initAnimation(target, properties, speed, easing, callback).run();
+        animate: function(el, properties, speed, easing, callback) {
+            return initAnimation(el, properties, speed, easing, callback).run();
         }
     };
 

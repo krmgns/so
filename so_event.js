@@ -148,16 +148,16 @@
             $extend(e, {
                 event: event,
                 eventTarget: event.eventTarget,
-                stop: function(all) {
+                stop: function(immediate) {
                     e.stopDefault();
-                    e.stopPropagation(all);
+                    e.stopBubble(immediate);
                 },
                 stopDefault: function() {
                     e.preventDefault();
                 },
-                stopPropagation: function(all) {
+                stopBubble: function(immediate) {
                     e.stopPropagation();
-                    if (all) {
+                    if (immediate) {
                         e.stopImmediatePropagation();
                     }
                 }

@@ -2737,7 +2737,7 @@
             fadeOut: function(speed, callback) {
                 if ($isTrue(callback)) { // remove element after fading out
                     callback = function(animation) {
-                        animation.$target.remove();
+                        animation.$el.remove();
                     };
                 }
 
