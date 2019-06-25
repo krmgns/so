@@ -971,7 +971,7 @@
                     content = this.html();
             }
 
-            return !$isNulls(opt_trim ? $trim(content) : content);
+            return $isNulls(opt_trim ? $trim(content) : content);
         },
     });
 
