@@ -23,7 +23,8 @@
     var NAME_OFFSET_TOP = 'offsetTop', NAME_OFFSET_LEFT = 'offsetLeft';
     var NAME_SCROLL_TOP = 'scrollTop', NAME_SCROLL_LEFT = 'scrollLeft';
     var NAME_INNER_HTML = 'innerHTML', NAME_TEXT_CONTENT = 'textContent';
-    var NAME_NAME = 'name', NAME_VALUE = 'value', NAME_TYPE = 'type', NAME_OPTIONS = 'options', NAME_TEXT = 'text', NAME_SELECTED_INDEX = 'selectedIndex';
+    var NAME_NAME = 'name', NAME_VALUE = 'value', NAME_TYPE = 'type', NAME_OPTIONS = 'options', NAME_TEXT = 'text',
+        NAME_SELECTED_INDEX = 'selectedIndex', NAME_HIDDEN = 'hidden';
     var NAME_STYLE = 'style', NAME_CLASS_NAME = 'className', NAME_TAG_NAME = 'tagName';
     var NAME_CHECKED = 'checked', NAME_SELECTED = 'selected', NAME_DISABLED = 'disabled', NAME_READONLY = 'readOnly';
     var NAME_DISPLAY = 'display', NAME_VISIBILITY = 'visibility', NAME_NONE = 'none', NAME_CSS_TEXT = 'cssText';
@@ -70,7 +71,7 @@
     function isNode(el) {
         return $bool(el && (el[NAME_NODE_TYPE] === 1 || el[NAME_NODE_TYPE] === 9 || el[NAME_NODE_TYPE] === 11));
     }
-    function isENode(el) {
+    function isElNode(el) {
         return $bool(el && (el[NAME_NODE_TYPE] === 1));
     }
 
@@ -162,7 +163,7 @@
                         // root could be document or attributes
                         els = create(selector, root, root, re[1]);
                     } else if (selector[0] == '>') {
-                        root = isENode(root) ? root : $document[NAME_DOCUMENT_ELEMENT];
+                        root = isElNode(root) ? root : $document[NAME_DOCUMENT_ELEMENT];
                         // buggy :scope selector
                         idv = getAttr(root, (idn = soPrefix +'buggy-scope-selector')) || $rid();
                         setAttr(root, idn, idv, FALSE);
@@ -496,7 +497,7 @@
 
         if (attributes && $isObject(attributes)) {
             $for(fragment[NAME_CHILD_NODES], function(node) {
-                if (isENode(node)) {
+                if (isElNode(node)) {
                     $forEach(attributes, function(name, value) {
                         setAttr(node, name, value);
                     });
@@ -554,7 +555,7 @@
 
         var child;
         while (child = el[NAME_FIRST_CHILD]) {
-            if (isENode(child)) {
+            if (isElNode(child)) {
                 cleanElement(child);
             }
             removeChild(el, child);
@@ -861,7 +862,7 @@
          * @return {Bool}
          */
         hasProperty: function(name) {
-            return $bool(this[0] && name in this[0]);
+            return $bool(this[0] && (name in this[0]));
         },
 
         /**
@@ -1027,7 +1028,7 @@
             } else if (isDom(selector)) {
                 // $.dom("p").not($element)
                 ret = intersect(_this.all(), selector.all());
-            } else if (isENode(selector)) {
+            } else if (isElNode(selector)) {
                 // $.dom("p").not(element)
                 ret = noIntersect(selector, _this);
             } else {
@@ -1341,7 +1342,7 @@
         path: function(opt_string) {
             var el = this[0], ret = [];
 
-            if (isENode(el)) {
+            if (isElNode(el)) {
                 return (ret = getPath(el).reverse()),
                     opt_string ? ret.slice(1).join(' > ') : ret;
             }
@@ -1355,7 +1356,7 @@
         xpath: function(opt_string) {
             var el = this[0], ret = [];
 
-            if (isENode(el)) {
+            if (isElNode(el)) {
                 return (ret = getXPath(el)),
                     opt_string ? '/'+ ret.join('/') : ret;
             }
@@ -1680,7 +1681,7 @@
         var ret = {width: 0, height: 0};
         var properties, win;
 
-        if (isENode(el)) {
+        if (isElNode(el)) {
             if (!isVisible(el) || !isVisibleParent(el)) {
                 properties = getInvisibleElementProperties(el, [NAME_OFFSET_WIDTH, NAME_OFFSET_HEIGHT]);
                 ret.width = properties[0], ret.height = properties[1];
@@ -1703,7 +1704,7 @@
         });
         var style;
 
-        if (isENode(el)) {
+        if (isElNode(el)) {
             style = getStyle(el);
             if ((!by || by == NAME_WIDTH) && dim.width) {
                 ret.width -= sumStyleValue(NULL, style, NAME_PADDING_LEFT, NAME_PADDING_RIGHT)
@@ -1744,7 +1745,7 @@
         var ret = {top: 0, left: 0};
         var properties, body, parentOffset;
 
-        if (isENode(el)) {
+        if (isElNode(el)) {
             if (!isVisible(el) || !isVisibleParent(el)) {
                 properties = getInvisibleElementProperties(el, [NAME_OFFSET_TOP, NAME_OFFSET_LEFT]);
                 ret.top = properties[0], ret.left = properties[1];
@@ -1767,7 +1768,7 @@
         var ret = {top: 0, left: 0};
         var win;
 
-        if (isENode(el)) {
+        if (isElNode(el)) {
             ret.top = el[NAME_SCROLL_TOP], ret.left = el[NAME_SCROLL_LEFT];
         } else if (isRoot(el) || isRootElement(el)) {
             win = $getWindow(el);
@@ -1777,7 +1778,7 @@
         return ret;
     }
 
-    // dom: dimensions
+    // dom: dimensions & width & height
     toDomPrototype(Dom, {
         /**
          * Dimensions.
@@ -1838,7 +1839,7 @@
         }
     });
 
-    // dom: offset, scroll, box, isVisible
+    // dom: offset, scroll, box, visibility
     toDomPrototype(Dom, {
         /**
          * Offset.
@@ -1891,6 +1892,19 @@
         },
 
         /**
+         * Hidden.
+         * @param  {Bool} opt_value?
+         * @return {Bool|self}
+         */
+        hidden: function(opt_value) {
+            return $isUndefined(opt_value)
+                ? hasAttr(this[0], NAME_HIDDEN)
+                : setAttr(this[0], NAME_HIDDEN,
+                    $isTrue(opt_value) ? '' /* set */ : NULL /* remove */
+                );
+        },
+
+        /**
          * Is visible.
          * @return {Bool}
          */
@@ -1907,7 +1921,7 @@
         return $bool(el && el[fn_hasAttr] && el[fn_hasAttr](name));
     }
     function setAttr(el, name, value, opt_state /* @internal */) {
-        if (isENode(el)) {
+        if (isElNode(el)) {
             if ($isNull(value)) {
                 removeAttr(el, name);
             } else if (name == NAME_VALUE) {
@@ -1933,7 +1947,7 @@
         return ret;
     }
     function removeAttr(el, name) {
-        if (isENode(el)) el.removeAttribute(name);
+        if (isElNode(el)) el.removeAttribute(name);
     }
 
     function toDataAttrName(name) {
@@ -1957,9 +1971,8 @@
          * @return {Any}
          */
         attr: function(name, value) {
-            return $isNull(value) ? this.removeAttr(name)
-                 : $isObject(name) || $isDefined(value) ? this.setAttr(name, value)
-                 : this.getAttr(name);
+            return $isObject(name) || $isDefined(value) || $isNull(value)
+                ? this.setAttr(name, value) : this.getAttr(name);
         },
 
         /**
@@ -2108,7 +2121,7 @@
         }
     });
 
-    // dom: values, options
+    // dom: values & options
     toDomPrototype(Dom, {
         /**
          * Value.
@@ -2195,27 +2208,10 @@
         /**
          * Id.
          * @param  {String} id?
-         * @return {String|self}
+         * @return {String|undefined|self}
          */
         id: function(id) {
-            return $isDefined(id) ? this.setId(id) : this.getId();
-        },
-
-        /**
-         * Set id.
-         * @param  {String} id
-         * @return {self}
-         */
-        setId: function(id) {
-            return setAttr(this[0], 'id', id, FALSE), this;
-        },
-
-        /**
-         * Get id.
-         * @return {String|undefined}
-         */
-        getId: function() {
-            return getAttr(this[0], 'id');
+            return $isDefined(id) ? this.setAttr('id', id) : this.getAttr('id');
         }
     });
 
@@ -2516,7 +2512,7 @@
         return $bool(el && el[name]);
     }
 
-    // dom: form elements states
+    // dom: form element states
     toDomPrototype(Dom, {
         /**
          * Checked.
@@ -2563,7 +2559,7 @@
         }
     });
 
-    // dom: checkers
+    // dom: win & doc checkers
     toDomPrototype(Dom, {
         /**
          * Is window.
@@ -2579,38 +2575,6 @@
          */
         isDocument: function() {
             return $isDocument(this[0]);
-        },
-
-        /**
-         * Is node.
-         * @return {Bool}
-         */
-        isNode: function() {
-            return isNode(this[0]);
-        },
-
-        /**
-         * Is e(lement) node.
-         * @return {Bool}
-         */
-        isENode: function() {
-            return isENode(this[0]);
-        },
-
-        /**
-         * Is root.
-         * @return {Bool}
-         */
-        isRoot: function() {
-            return isRoot(this[0]);
-        },
-
-        /**
-         * Is root element.
-         * @return {Bool}
-         */
-        isRootElement: function() {
-            return isRootElement(this[0]);
         }
     });
 
@@ -2952,11 +2916,8 @@
 
             appendChild(toDom(root || $document[TAG_HEAD])[0], el);
         },
-        isNode: function(el) {
-            return isNode(el);
-        },
-        isENode: function(el) {
-            return isENode(el);
+        isNode: function(el, opt_el) {
+            return olp_el ? isElNode(el) : isNode(el);
         }
     });
 

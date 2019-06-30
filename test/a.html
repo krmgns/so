@@ -10,7 +10,7 @@ body {height: 3000px}
 .outer {height: 100px; font-size: 100px; background-color: green}
 </style>
 
-<div id="div">
+<div id="div" class="div">
     <p class="p p0">#div > p.p0</p>
     <p class="p p1">#div > p.p1</p>
     <p class="p p2 x">#div > p.p2.x</p>
@@ -33,9 +33,15 @@ body {height: 3000px}
 <script>
 // so.ready(function($, $$) {
 so(function($, $$) {
-    log($.in("null", "nulls"))
-    log($.in("null", "nulsl"))
-    log($.in("null", [65, 67, 83, 85, "null"]))
+    var el = $(".div")
+    log(el.id())
+
+    $.fire(1000, () => {
+        el.id("ok")
+    })
+    $.fire(2500, () => {
+        el.id(null)
+    })
 
     // $.fire(1000, () => {
     //     log($('body').scrollTo(150))
