@@ -219,7 +219,7 @@
         /**
          * Find.
          * @param  {String|Object} selector
-         * @return {self}
+         * @return {Dom}
          */
         find: function(selector) {
             return this[0] ? toDom(selector, this[0], TRUE) : this;
@@ -228,7 +228,7 @@
         /**
          * Find all.
          * @param  {String|Object} selector
-         * @return {self}
+         * @return {Dom}
          */
         findAll: function(selector) {
             return this[0] ? toDom(selector, this[0]) : this;
@@ -271,7 +271,7 @@
          * Each.
          * @param  {Function} fn
          * @param  {Bool}     init
-         * @return {self}
+         * @return {Dom}
          */
         each: function(fn, init) {
             var all = this.all();
@@ -289,7 +289,7 @@
         /**
          * For.
          * @param  {Function} fn
-         * @return {self}
+         * @return {Dom}
          */
         for: function(fn) {
             return $for(this.all(), fn, this);
@@ -298,7 +298,7 @@
         /**
          * For each.
          * @param  {Function} fn
-         * @return {self}
+         * @return {Dom}
          */
         forEach: function(fn) {
             return $forEach(this.all(), fn, this);
@@ -306,7 +306,7 @@
 
         /**
          * Copy.
-         * @return {self}
+         * @return {Dom}
          */
         copy: function() {
             return toDom(this.all());
@@ -315,7 +315,7 @@
         /**
          * Map.
          * @param  {Function} fn
-         * @return {self}
+         * @return {Dom}
          */
         map: function(fn) {
             return toDom(this.all().map(fn));
@@ -324,7 +324,7 @@
         /**
          * Filter.
          * @param  {Function|String} fn
-         * @return {self}
+         * @return {Dom}
          */
         filter: function(fn) {
             var all = this.all(), alls;
@@ -341,7 +341,7 @@
 
         /**
          * Reverse.
-         * @return {self}
+         * @return {Dom}
          */
         reverse: function() {
             return toDom(this.all().reverse());
@@ -381,7 +381,7 @@
         /**
          * Item.
          * @param  {Int} i
-         * @return {self}
+         * @return {Dom}
          */
         item: function(i) {
             return toDom(this[i - 1]);
@@ -389,7 +389,7 @@
 
         /**
          * Items.
-         * @return {self}
+         * @return {Dom}
          */
         items: function() {
             return toDom(this.getAll.apply(this, arguments));
@@ -397,7 +397,7 @@
 
         /**
          * First.
-         * @return {self}
+         * @return {Dom}
          */
         first: function() {
             return this.item(1);
@@ -405,7 +405,7 @@
 
         /**
          * Last.
-         * @return {self}
+         * @return {Dom}
          */
         last: function() {
             return this.item(this._len);
@@ -414,7 +414,7 @@
         /**
          * Nth.
          * @param  {Int|String} i
-         * @return {self}
+         * @return {Dom}
          */
         nth: function(i) {
             if ($isNumber(i)) {
@@ -548,8 +548,8 @@
         return clone;
     }
 
-    function cleanElement(el, self) {
-        if (!$isFalse(self)) {
+    function cleanElement(el, opt_self) {
+        if (!$isFalse(opt_self)) {
             el.$data = el.$events = el.$animation = NULL;
         }
 
@@ -582,7 +582,7 @@
         /**
          * Colne.
          * @param  {Bool} opt_deep?
-         * @return {self}
+         * @return {Dom}
          */
         clone: function(opt_deep) {
             var clones = [];
@@ -596,7 +596,7 @@
 
         /**
          * clean.
-         * @return {self}
+         * @return {Dom}
          */
         clean: function() {
             return this.for(function(el) {
@@ -606,7 +606,7 @@
 
         /**
          * Empty.
-         * @return {self}
+         * @return {Dom}
          */
         empty: function() {
             return this.for(function(el) {
@@ -616,7 +616,7 @@
 
         /**
          * Remove.
-         * @return {self}
+         * @return {Dom}
          */
         remove: function() {
             return this.for(function(el) {
@@ -630,7 +630,7 @@
         /**
          * Remove all.
          * @param  {String} selector
-         * @return {self}
+         * @return {Dom}
          */
         removeAll: function(selector) {
             var parent = this[0], _parent;
@@ -652,7 +652,7 @@
          * @param  {String|Object|Dom} content
          * @param  {Bool}              opt_cloning?
          * @param  {Object}            attributes?
-         * @return {self}
+         * @return {Dom}
          */
         append: function(content, opt_cloning, attributes) {
             return this.for(function(el) {
@@ -666,7 +666,7 @@
          * Append to.
          * @param  {String} selector
          * @param  {Bool}   opt_cloning?
-         * @return {self}
+         * @return {Dom}
          */
         appendTo: function(selector, opt_cloning) {
             if (!isDom(selector)) {
@@ -685,7 +685,7 @@
          * @param  {String|Object|Dom} content
          * @param  {Bool}              opt_cloning?
          * @param  {Object}            attributes?
-         * @return {self}
+         * @return {Dom}
          */
         prepend: function(content, opt_cloning, attributes) {
             return this.for(function(el) {
@@ -699,7 +699,7 @@
          * Prepend to.
          * @param  {String} selector
          * @param  {Bool}   opt_cloning?
-         * @return {self}
+         * @return {Dom}
          */
         prependTo: function(selector, opt_cloning) {
             if (!isDom(selector)) {
@@ -731,7 +731,7 @@
          * Insert before.
          * @param  {String} selector
          * @param  {Bool}   opt_cloning?
-         * @return {self}
+         * @return {Dom}
          */
         insertBefore: function(selector, opt_cloning) {
             if (!isDom(selector)) {
@@ -749,7 +749,7 @@
          * Insert before.
          * @param  {String} selector
          * @param  {Bool}   opt_cloning?
-         * @return {self}
+         * @return {Dom}
          */
         insertAfter: function(selector, opt_cloning) {
             if (!isDom(selector)) {
@@ -767,7 +767,7 @@
          * Replace with.
          * @param  {String} selector
          * @param  {Bool}   opt_cloning?
-         * @return {self}
+         * @return {Dom}
          */
         replaceWith: function(selector, opt_cloning) {
             if (!isDom(selector)) {
@@ -785,7 +785,7 @@
          * Wrap.
          * @param  {String|Object|Dom} content
          * @param  {Object}            attributes?
-         * @return {self}
+         * @return {Dom}
          */
         wrap: function(content, attributes) {
             var el = this[0], elParent = el && el[NAME_PARENT_NODE];
@@ -811,7 +811,7 @@
         /**
          * Unwrap
          * @param  {Bool} opt_remove?
-         * @return {self}
+         * @return {Dom}
          */
         unwrap: function(opt_remove) {
             var el = this[0], elParent = el && el[NAME_PARENT_NODE],
@@ -850,7 +850,7 @@
          * Property.
          * @param  {String} name
          * @param  {Any}    value?
-         * @return {Any|self}
+         * @return {Any|Dom}
          */
         property: function(name, value) {
             return $isDefined(value) ? this.setProperty(name, value) : this.getProperty(name);
@@ -869,7 +869,7 @@
          * Set property.
          * @param  {String} name
          * @param  {Any}    value
-         * @return {self}
+         * @return {Dom}
          */
         setProperty: function(name, value) {
             var properties = toKeyValue(name, value);
@@ -896,7 +896,7 @@
         /**
          * Text.
          * @param  {String} input?
-         * @return {String|self}
+         * @return {String|Dom}
          */
         text: function(input) {
             return $isDefined(input) ? this.setText(input) : this.getText();
@@ -905,7 +905,7 @@
         /**
          * Set text.
          * @param  {String} input
-         * @return {self}
+         * @return {Dom}
          */
         setText: function(input) {
             return this.for(function(el) {
@@ -933,7 +933,7 @@
         /**
          * Set html
          * @param  {String} input
-         * @return {self}
+         * @return {Dom}
          */
         setHtml: function(input) {
             return this.for(function(el) {
@@ -1014,7 +1014,7 @@
          * Not.
          * @param  {String|HTMLElement|Int ...arguments} selector
          * @param  {Bool} opt_useParent?
-         * @return {self}
+         * @return {Dom}
          */
         not: function(selector, opt_useParent) {
             var _this = this, ret = [], args;
@@ -1045,7 +1045,7 @@
 
         /**
          * Odd.
-         * @return {self}
+         * @return {Dom}
          */
         odd: function() {
             return toDom(this.filter(function(el, i) {
@@ -1055,7 +1055,7 @@
 
         /**
          * Even.
-         * @return {self}
+         * @return {Dom}
          */
         even: function() {
             return toDom(this.filter(function(el, i) {
@@ -1065,7 +1065,7 @@
 
         /**
          * Parent.
-         * @return {self}
+         * @return {Dom}
          */
         parent: function() {
             return toDom(__(this, NAME_PARENT_NODE));
@@ -1073,7 +1073,7 @@
 
         /**
          * Parents.
-         * @return {self}
+         * @return {Dom}
          */
         parents: function() {
             return toDom(walk(this[0], NAME_PARENT_NODE));
@@ -1082,7 +1082,7 @@
         /**
          * Siblings.
          * @param  {Int|String} selector?
-         * @return {self}
+         * @return {Dom}
          */
         siblings: function(selector) {
             var el = this[0], ret;
@@ -1099,7 +1099,7 @@
 
         /**
          * Children.
-         * @return {self}
+         * @return {Dom}
          */
         children: function() {
             return toDom($array(__(this, NAME_CHILDREN)));
@@ -1107,7 +1107,7 @@
 
         /**
          * First child.
-         * @return {self}
+         * @return {Dom}
          */
         firstChild: function() {
             return this.find('> :first');
@@ -1115,7 +1115,7 @@
 
         /**
          * Last child.
-         * @return {self}
+         * @return {Dom}
          */
         lastChild: function() {
             return this.find('> :last');
@@ -1124,7 +1124,7 @@
         /**
          * Nth child.
          * @param  {Int} i
-         * @return {self}
+         * @return {Dom}
          */
         nthChild: function(i) {
             return this.find('> :nth('+ i +')');
@@ -1132,7 +1132,7 @@
 
         /**
          * Comments.
-         * @return {self}
+         * @return {Dom}
          */
         comments: function() {
             var el = this[0], node, nodes = [], i = 0;
@@ -1148,7 +1148,7 @@
 
         /**
          * Prev.
-         * @return {self}
+         * @return {Dom}
          */
         prev: function() {
             return toDom(__(this, NAME_PREVIOUS_ELEMENT_SIBLING));
@@ -1157,7 +1157,7 @@
         /**
          * Prev all.
          * @param  {String} selector?
-         * @return {self}
+         * @return {Dom}
          */
         prevAll: function(selector) {
             var el = this[0], ret = [];
@@ -1174,7 +1174,7 @@
 
         /**
          * Next.
-         * @return {self}
+         * @return {Dom}
          */
         next: function() {
             return toDom(__(this, NAME_NEXT_ELEMENT_SIBLING));
@@ -1183,7 +1183,7 @@
         /**
          * Next all.
          * @param  {String} selector?
-         * @return {self}
+         * @return {Dom}
          */
         nextAll: function(selector) {
             var el = this[0], ret = [];
@@ -1275,7 +1275,7 @@
         /**
          * Get window.
          * @param  {Bool} opt_content?
-         * @return {self}
+         * @return {Dom}
          */
         getWindow: function(opt_content) {
             var el = this[0];
@@ -1286,7 +1286,7 @@
         /**
          * Get document.
          * @param  {Bool} opt_content?
-         * @return {self}
+         * @return {Dom}
          */
         getDocument: function(opt_content) {
             var el = this[0];
@@ -1495,7 +1495,7 @@
          * Set style.
          * @param  {String|Object} name
          * @param  {String}        value?
-         * @return {self}
+         * @return {Dom}
          */
         setStyle: function(name, value) {
             var styles = name;
@@ -1594,7 +1594,7 @@
         /**
          * Remove style.
          * @param  {String} name
-         * @return {self}
+         * @return {Dom}
          */
         removeStyle: function(name) {
             return (name == '*') ? this.attr('style', '') :
@@ -1894,7 +1894,7 @@
         /**
          * Hidden.
          * @param  {Bool} opt_value?
-         * @return {Bool|self}
+         * @return {Bool|Dom}
          */
         hidden: function(opt_value) {
             return $isUndefined(opt_value)
@@ -2019,7 +2019,7 @@
          * Set attr.
          * @param  {String} name
          * @param  {String} value?
-         * @return {self}
+         * @return {Dom}
          */
         setAttr: function(name, value) {
             var attributes = toKeyValue(name, value);
@@ -2043,7 +2043,7 @@
         /**
          * Remve attr.
          * @param  {String} name
-         * @return {self}
+         * @return {Dom}
          */
         removeAttr: function(name) {
             name = split(name, re_comma);
@@ -2059,7 +2059,7 @@
          * Toggle attr.
          * @param  {String} name
          * @param  {String} value?
-         * @return {self}
+         * @return {Dom}
          */
         toggleAttr: function(name, value) {
             name = split(name, re_comma);
@@ -2089,7 +2089,7 @@
         /**
          * Remove data attr.
          * @param  {String} name
-         * @return {self}
+         * @return {Dom}
          */
         removeDataAttr: function(name) {
             name = split(name, re_comma);
@@ -2112,7 +2112,7 @@
          * So attr (so:* attributes).
          * @param  {String} name
          * @param  {String} value?
-         * @return {String?|self}
+         * @return {String?|Dom}
          */
         soAttr: function(name, value) {
             return (name = soPrefix + name),
@@ -2126,7 +2126,7 @@
         /**
          * Value.
          * @param  {String} value?
-         * @return {String|self|undefined}
+         * @return {String|Dom|undefined}
          */
         value: function(value) {
             return $isDefined(value) ? this.setValue(value) : this.getValue();
@@ -2135,7 +2135,7 @@
         /**
          * Set value.
          * @param  {String} value?
-         * @return {self}
+         * @return {Dom}
          */
         setValue: function(value) {
             value = $isNull(value) ? '' : (''+ value); // @important
@@ -2208,7 +2208,7 @@
         /**
          * Id.
          * @param  {String} id?
-         * @return {String|undefined|self}
+         * @return {String|undefined|Dom}
          */
         id: function(id) {
             return $isDefined(id) ? this.setAttr('id', id) : this.getAttr('id');
@@ -2244,7 +2244,7 @@
          * Class.
          * @param  {String}      name?
          * @param  {String|Bool} option?
-         * @return {Bool|self}
+         * @return {Bool|Dom}
          */
         class: function(name, option) {
             return $isUndefined(option) ? this.addClass(name)
@@ -2264,7 +2264,7 @@
         /**
          * Add class.
          * @param  {String} name
-         * @return {self}
+         * @return {Dom}
          */
         addClass: function(name) {
             return this.for(function(el) { addClass(el, name); });
@@ -2273,7 +2273,7 @@
         /**
          * Remove class.
          * @param  {String} name
-         * @return {self}
+         * @return {Dom}
          */
         removeClass: function(name) {
             return (name == '*') ? this.attr('class', '')
@@ -2284,7 +2284,7 @@
          * Replace class.
          * @param  {String} oldName
          * @param  {String} newName
-         * @return {self}
+         * @return {Dom}
          */
         replaceClass: function(oldName, newName) {
             return this.for(function(el) {
@@ -2296,7 +2296,7 @@
         /**
          * Toggle.
          * @param  {String} name
-         * @return {self}
+         * @return {Dom}
          */
         toggleClass: function(name) {
             return this.for(function(el) {
@@ -2307,7 +2307,7 @@
         /**
          * Set class.
          * @param  {String} name
-         * @return {self}
+         * @return {Dom}
          */
         setClass: function(name) {
             return this.for(function(el) { el[NAME_CLASS_NAME] = name; });
@@ -2386,7 +2386,7 @@
          * Set data.
          * @param  {String|Object} key
          * @param  {Any}           value
-         * @return {self}
+         * @return {Dom}
          */
         setData: function(key, value) {
             return this.for(function(el) { setData(el, key, value); });
@@ -2404,7 +2404,7 @@
         /**
          * Remove data.
          * @param  {String} key
-         * @return {self}
+         * @return {Dom}
          */
         removeData: function(key) {
             key = split(key, re_comma);
@@ -2517,7 +2517,7 @@
         /**
          * Checked.
          * @param  {Bool} option?
-         * @return {Bool|self}
+         * @return {Bool|Dom}
          */
         checked: function(option) {
             return $isVoid(option) ? getState(this[0], NAME_CHECKED) : this.for(function(el) {
@@ -2528,7 +2528,7 @@
         /**
          * Selected.
          * @param  {Bool} option?
-         * @return {Bool|self}
+         * @return {Bool|Dom}
          */
         selected: function(option) {
             return $isVoid(option) ? getState(this[0], NAME_SELECTED) : this.for(function(el) {
@@ -2539,7 +2539,7 @@
         /**
          * Disabled.
          * @param  {Bool} option?
-         * @return {Bool|self}
+         * @return {Bool|Dom}
          */
         disabled: function(option) {
             return $isVoid(option) ? getState(this[0], NAME_DISABLED) : this.for(function(el) {
@@ -2550,7 +2550,7 @@
         /**
          * Readonly.
          * @param  {Bool} option?
-         * @return {Bool|self}
+         * @return {Bool|Dom}
          */
         readonly: function(option) {
             return $isVoid(option) ? getState(this[0], NAME_READONLY) : this.for(function(el) {
@@ -2587,7 +2587,7 @@
              * @param  {String}   type
              * @param  {Function} fn
              * @param  {Object}   options?
-             * @return {self}
+             * @return {Dom}
              */
             on: function(type, fn, options) {
                 return this.for(function(el) { event.on(el, type, fn, options); });
@@ -2598,7 +2598,7 @@
              * @param  {String}   type
              * @param  {Function} fn
              * @param  {Object}   options?
-             * @return {self}
+             * @return {Dom}
              */
             one: function(type, fn, options) {
                 return this.for(function(el) { event.one(el, type, fn, options); });
@@ -2609,7 +2609,7 @@
              * @param  {String}   type
              * @param  {Function} fn
              * @param  {Object}   options?
-             * @return {self}
+             * @return {Dom}
              */
             off: function(type, fn, options) {
                 return this.for(function(el) { event.off(el, type, fn, options); });
@@ -2620,7 +2620,7 @@
              * @param  {String}   type
              * @param  {Function} fn
              * @param  {Object}   options?
-             * @return {self}
+             * @return {Dom}
              */
             fire: function(type, fn, options) {
                 return this.for(function(el) { event.fire(el, type, fn, options); });
@@ -2656,7 +2656,7 @@
              * @param  {Int|String}    speed?
              * @param  {String}        easing?
              * @param  {Function}      callback?
-             * @return {self}
+             * @return {Dom}
              */
             animate: function(properties, speed, easing, callback) {
                 return (properties === 'stop') // stop previous animation
@@ -2676,7 +2676,7 @@
              * @param  {Float}      to
              * @param  {Int|String} speed?
              * @param  {Function}   callback?
-             * @return {self}
+             * @return {Dom}
              */
             fade: function(to, speed, callback) {
                 return this.animate({opacity: to}, speed, callback);
@@ -2686,7 +2686,7 @@
              * Fade in.
              * @param  {Int|String} speed?
              * @param  {Function}   callback?
-             * @return {self}
+             * @return {Dom}
              */
             fadeIn: function(speed, callback) {
                 return this.fade(1, speed, callback);
@@ -2696,7 +2696,7 @@
              * Fade out.
              * @param  {Int|String}    speed?
              * @param  {Function|Bool} callback?
-             * @return {self}
+             * @return {Dom}
              */
             fadeOut: function(speed, callback) {
                 if ($isTrue(callback)) { // remove element after fading out
@@ -2713,7 +2713,7 @@
              * @param  {Int|String} speed?
              * @param  {String}     easing?
              * @param  {Function}   callback?
-             * @return {self}
+             * @return {Dom}
              */
             show: function(speed, easing, callback) {
                 return this.for(function(el) {
@@ -2727,7 +2727,7 @@
              * @param  {Int|String}      speed?
              * @param  {String|Function} easing?
              * @param  {Function}        callback?
-             * @return {self}
+             * @return {Dom}
              */
             hide: function(speed, easing, callback) {
                 if ($isFunction(easing)) {
@@ -2746,7 +2746,7 @@
              * @param  {Int|String}      speed?
              * @param  {String|Function} easing?
              * @param  {Function}        callback?
-             * @return {self}
+             * @return {Dom}
              */
             toggle: function(speed, easing, callback) {
                 if ($isFunction(easing)) {
@@ -2771,7 +2771,7 @@
              * @param  {Int|String}      speed?
              * @param  {String|Function} easing?
              * @param  {Function}        callback?
-             * @return {self}
+             * @return {Dom}
              */
             toggleBy: function(option, speed, easing, callback) {
                 return this[option ? 'show' : 'hide'](speed, easing, callback);
@@ -2781,7 +2781,7 @@
              * Blip.
              * @param  {Int}        times?
              * @param  {Int|String} speed?
-             * @return {self}
+             * @return {Dom}
              */
             blip: function(times, speed) {
                 times = times || Infinity;
@@ -2808,7 +2808,7 @@
              * @param  {Int|String} speed?
              * @param  {String}     easing?
              * @param  {Function}   callback?
-             * @return {self}
+             * @return {Dom}
              */
             scrollTo: function(top, left, speed, easing, callback) {
                 return this.for(function(el) {
@@ -2861,7 +2861,7 @@
      * Dom.
      * @param  {String|Object} selector
      * @param  {Object}        root?
-     * @return {self}
+     * @return {Dom}
      */
     var $dom = function(selector, root) {
         return toDom(selector, root);

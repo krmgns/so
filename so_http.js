@@ -326,7 +326,7 @@
     $extend(Client.prototype, {
         /**
          * Send.
-         * @return {self}
+         * @return {Client}
          */
         send: function() {
             var _this = this, data,
@@ -408,7 +408,7 @@
         /**
          * End.
          * @param  {Function} fn
-         * @return {self}
+         * @return {Client}
          */
         end: function(fn) {
             return this.on('done', fn);
@@ -444,7 +444,7 @@
          * On.
          * @param  {String}   name
          * @param  {Function} callback
-         * @return {self}
+         * @return {Client}
          */
         on: function(name, callback) {
             this.options.ons[name] = callback;

@@ -49,7 +49,7 @@
          * Init.
          * @param  {Iterable} data
          * @param  {Object}   options
-         * @return {self}
+         * @return {List}
          */
         init: function(data, options) {
             if (!$.isIterable(data)) {
@@ -80,7 +80,7 @@
         /**
          * For.
          * @param  {Function} fn
-         * @return {self}
+         * @return {List}
          */
         for: function(fn) {
             return $for(this.data, fn, this);
@@ -89,7 +89,7 @@
         /**
          * For each.
          * @param  {Function} fn
-         * @return {self}
+         * @return {List}
          */
         forEach: function(fn) {
             return $forEach(this.data, fn, this);
@@ -99,7 +99,7 @@
          * Set.
          * @param  {Int|String} key?
          * @param  {Any}        value
-         * @return {self}
+         * @return {List}
          */
         set: function(key, value) {
             var _this = this, key = (key != NULL) ? key : _this._len;
@@ -125,7 +125,7 @@
         /**
          * Append (alias of append()).
          * @param  {Any} value
-         * @return {self}
+         * @return {List}
          */
         add: function(value) {
             return this.append(value);
@@ -134,7 +134,7 @@
         /**
          * Remove.
          * @param  {Any} value
-         * @return {self}
+         * @return {List}
          */
         remove: function(value) {
             return this.pull(this.findIndex(value)), this;
@@ -143,7 +143,7 @@
         /**
          * Remove at.
          * @param  {Int|String} key
-         * @return {self}
+         * @return {List}
          */
         removeAt: function(key) {
             return this.pull(key), this;
@@ -153,7 +153,7 @@
          * Replace.
          * @param  {Any} searchValue
          * @param  {Any} replaceValue
-         * @return {self}
+         * @return {List}
          */
         replace: function(searchValue, replaceValue) {
             return this.forEach(function(key, value) {
@@ -167,7 +167,7 @@
          * Replace at.
          * @param  {Int|String} key
          * @param  {Any}        replaceValue
-         * @return {self}
+         * @return {List}
          */
         replaceAt: function(key, replaceValue) {
             return (this.data[key] = replaceValue), this;
@@ -175,7 +175,7 @@
 
         /**
          * Empty.
-         * @return {self}
+         * @return {List}
          */
         empty: function() {
             return (this.data = {}, this._len = 0), this;
@@ -219,7 +219,7 @@
         /**
          * Append.
          * @param  {Any} value
-         * @return {self}
+         * @return {List}
          */
         append: function(value) {
             return this.set(NULL, value);
@@ -228,7 +228,7 @@
         /**
          * Prepend.
          * @param  {Any} value
-         * @return {self}
+         * @return {List}
          */
         prepend: function(value) {
             var data = {0: value};
@@ -295,7 +295,7 @@
         /**
          * Push (alias of append()).
          * @param  {Any} value
-         * @return {self}
+         * @return {List}
          */
         push: function(value) {
             return this.append(value);
@@ -304,7 +304,7 @@
         /**
          * Push all.
          * @param  {Any} ...arguments
-         * @return {self}
+         * @return {List}
          */
         pushAll: function() {
             return $for(arguments, function(value) {
@@ -502,7 +502,7 @@
         /**
          * Sort.
          * @param  {Function} fn?
-         * @return {self}
+         * @return {List}
          */
         sort: function(fn) {
             var _this = this, data = {}, flippedData;

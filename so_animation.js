@@ -97,7 +97,7 @@
     $extend(Animation.prototype, {
         /**
          * Run.
-         * @return {self}
+         * @return {Animation}
          */
         run: function() {
             var _this = this;
@@ -128,7 +128,7 @@
 
         /**
          * Start.
-         * @return {self}
+         * @return {Animation}
          */
         start: function() {
             var _this = this, el = _this.$el, scroll, value;
@@ -151,7 +151,7 @@
 
         /**
          * End.
-         * @return {self}
+         * @return {Animation}
          */
         end: function() {
             var _this = this, el = _this.$el;
@@ -175,7 +175,7 @@
 
         /**
          * Stop.
-         * @return {self}
+         * @return {Animation}
          */
         stop: function() {
             var _this = this, el = _this.$el;
