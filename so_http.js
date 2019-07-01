@@ -186,10 +186,6 @@
             return offReadyStateChange(client);
         }
 
-        // hold trigger object (element)
-        var trigger = client.options.trigger;
-        if (trigger) trigger.disabled = TRUE;
-
         // handle states
         client.state = client.api.readyState;
         switch (client.state) {
@@ -203,6 +199,12 @@
                 var headers = $http.parseHeaders(client.api.getAllResponseHeaders());
                 var data = client.api.responseText;
                 var dataType = client.options.dataType || (re_dataType.exec(headers.contentType) || [, NULL])[1];
+                var trigger = client.options.trigger;
+
+                // release trigger object (element)
+                if (trigger) {
+                    trigger.disabled = FALSE;
+                }
 
                 if (status) {
                     client.response.status = headers[0] = status;
@@ -228,9 +230,6 @@
 
                 // end!
                 client.fire('done', data);
-
-                // release trigger
-                if (trigger) trigger.disabled = FALSE;
 
                 offReadyStateChange(client);
                 break;
@@ -331,7 +330,8 @@
         send: function() {
             var _this = this, data,
                 request = _this.request,
-                timeout = _this.options.timeout;
+                timeout = _this.options.timeout,
+                trigger = _this.options.trigger;
 
             if (!_this.sent && !_this.aborted) {
                 _this.fire('beforeSend');
@@ -348,6 +348,11 @@
                 _this.api.send(data);
                 _this.fire('afterSend');
                 _this.sent = TRUE;
+
+                // hold trigger object (element)
+                if (trigger) {
+                    trigger.disabled = TRUE;
+                }
 
                 if (timeout) {
                     $.fire(timeout, function() {
