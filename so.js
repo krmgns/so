@@ -18,9 +18,7 @@
      * @return {Object}
      */
     function $(a, b) {
-        return !isFunction(a)
-            ? $.dom(a, b) // (selector, root?)
-            : $.ready(a, b) // (callback, document?)
+        return isFunction(a) ? $.ready(a, b) /* (callback, document?) */ : $.dom(a, b) /* (selector, root?) */
     }
 
     // minify candies
