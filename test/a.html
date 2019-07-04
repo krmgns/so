@@ -33,14 +33,14 @@ body {height: 3000px}
 <script>
 // so.ready(function($, $$) {
 so(function($, $$) {
-    var el = $(".div")
-    log(el.id())
+    var $el = $("#div")
+    log($el.soAttr("ok"))
 
     $.fire(1000, () => {
-        el.id("ok")
+        $el.soAttr("ok", true)
     })
     $.fire(2500, () => {
-        el.id(null)
+        $el.soAttr("ok", null)
     })
 
     // $.fire(1000, () => {

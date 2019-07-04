@@ -2115,9 +2115,8 @@
          * @return {String?|Dom}
          */
         soAttr: function(name, value) {
-            return (name = soPrefix + name),
-                $isDefined(value) || $isNull($value)
-                    ? this.attr(name, value) /* set or remove (if null) */ : this.attr(name); /* get */
+            return $isUndefined(value) ? this.attr(soPrefix + name) // get
+                : this.attr(soPrefix + name, value); // set or remove if null
         }
     });
 
