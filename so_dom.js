@@ -23,8 +23,8 @@
     var NAME_OFFSET_TOP = 'offsetTop', NAME_OFFSET_LEFT = 'offsetLeft';
     var NAME_SCROLL_TOP = 'scrollTop', NAME_SCROLL_LEFT = 'scrollLeft';
     var NAME_INNER_HTML = 'innerHTML', NAME_TEXT_CONTENT = 'textContent';
-    var NAME_NAME = 'name', NAME_VALUE = 'value', NAME_TYPE = 'type', NAME_OPTIONS = 'options', NAME_TEXT = 'text',
-        NAME_SELECTED_INDEX = 'selectedIndex', NAME_HIDDEN = 'hidden';
+    var NAME_ID = 'id', NAME_NAME = 'name', NAME_VALUE = 'value', NAME_TEXT = 'text';
+    var NAME_TYPE = 'type', NAME_OPTIONS = 'options', NAME_SELECTED_INDEX = 'selectedIndex', NAME_HIDDEN = 'hidden';
     var NAME_STYLE = 'style', NAME_CLASS_NAME = 'className', NAME_TAG_NAME = 'tagName';
     var NAME_CHECKED = 'checked', NAME_SELECTED = 'selected', NAME_DISABLED = 'disabled', NAME_READONLY = 'readOnly';
     var NAME_DISPLAY = 'display', NAME_VISIBILITY = 'visibility', NAME_NONE = 'none', NAME_CSS_TEXT = 'cssText';
@@ -2203,7 +2203,7 @@
         // }
     });
 
-    // dom: id
+    // dom: id & name
     toDomPrototype(Dom, {
         /**
          * Id.
@@ -2211,7 +2211,16 @@
          * @return {String|undefined|Dom}
          */
         id: function(id) {
-            return $isDefined(id) ? this.setAttr('id', id) : this.getAttr('id');
+            return $isDefined(id) ? this.setAttr(NAME_ID, id) : this.getAttr(NAME_ID);
+        },
+
+        /**
+         * Name.
+         * @param  {String} name?
+         * @return {String|undefined|Dom}
+         */
+        name: function(name) {
+            return $isDefined(name) ? this.setAttr(NAME_NAME, name) : this.getAttr(NAME_NAME);
         }
     });
 
