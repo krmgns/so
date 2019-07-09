@@ -25,13 +25,14 @@
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
     var NAME_NODE_TYPE = 'nodeType', NAME_PROTOTYPE = 'prototype';
     var NAME_DEFAULT_VIEW = 'defaultView', NAME_OWNER_DOCUMENT = 'ownerDocument';
+    var NAME_LENGTH = 'length';
     var Array = window.Array, Object = window.Object;
     var String = window.String, Number = window.Number;
     var Date = window.Date, RegExp = window.RegExp, Math = window.Math;
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.71.1';
+    window.so.VERSION = '5.72.0';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -142,7 +143,7 @@
 
     // safer length getter
     function len(input) {
-        return input && input.length;
+        return input && input[NAME_LENGTH];
     }
 
     /**
@@ -369,7 +370,7 @@
         /** Is iterable. @param {Any} input @return {Bool} */
         isIterable: function(input) {
             return isArray(input) || isObject(input) || toBool(input && (
-                input.length != NULL && !input[NAME_NODE_TYPE] // dom, nodelist, string etc.
+                input[NAME_LENGTH] != NULL && !input[NAME_NODE_TYPE] // dom, nodelist, string etc.
             ));
         },
 
@@ -745,6 +746,52 @@
         },
 
         /**
+         * Test.
+         * @param  {RegExp|String} re
+         * @return {Bool}
+         */
+        test: function(re) {
+            if (!isRegExp(re)) {
+                re = toRegExp(re);
+            }
+
+            return re.test(this);
+        },
+
+        /**
+         * Grep.
+         * @param  {RegExp} re
+         * @param  {Int}    i?
+         * @return {String|null}
+         */
+        grep: function(re, i) {
+            var ret = this.grepAll(re);
+
+            return ret ? ret[i | 0] : NULL;
+        },
+
+        /**
+         * Grep all.
+         * @param  {RegExp} re
+         * @return {Array|null}
+         */
+        grepAll: function(re) {
+            var r = this.matchAll(re), ret = NULL;
+
+            if (r) {
+                ret = [];
+                while (len(r)) {
+                    ret.push(r.shift().filter(function(value, i) {
+                        // skip 0 index & or (|) ops' undefined
+                        return (i && value != NULL);
+                    })[0]);
+                }
+            }
+
+            return ret;
+        },
+
+        /**
          * Match all.
          * @param  {RegExp} pattern
          * @return {Array|null}
@@ -756,7 +803,7 @@
 
             if (!flags) { // hellö ie.. ?}/=%&'|#)"^*1...!
                 slashPos = (pattern = toString(pattern)).pos('/', TRUE);
-                source = pattern.sub(1, slashPos - 1);
+                source = pattern.sub(1, slashPos);
                 flags = pattern.sub(slashPos + 1);
             }
 
@@ -771,19 +818,6 @@
             }
 
             return len(ret) ? ret : NULL;
-        },
-
-        /**
-         * Test.
-         * @param  {RegExp|String} re
-         * @return {Bool}
-         */
-        test: function(re) {
-            if (!isRegExp(re)) {
-                re = toRegExp(re);
-            }
-
-            return re.test(this);
         },
 
         /**
@@ -995,7 +1029,7 @@
         var ret = [], inputType = $.type(input);
 
         if (!input || inputType == 'string' || inputType == 'window'
-            || input[NAME_NODE_TYPE] || isVoid(input.length)) {
+            || input[NAME_NODE_TYPE] || isVoid(input[NAME_LENGTH])) {
             ret = [input];
         } else {
             ret = fn_slice.call(input, begin, end);
@@ -1239,7 +1273,7 @@
          */
         isEmpty: function(input) {
             return toBool(!input // '', null, undefined, false, 0, -0, NaN
-                || (isNumber(input.length) && !len(input))
+                || (isNumber(input[NAME_LENGTH]) && !len(input))
                 || (isObject(input) && !len(Object.keys(input)))
             );
         },
