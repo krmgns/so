@@ -1597,10 +1597,20 @@
          * @return {Dom}
          */
         removeStyle: function(name) {
-            return (name == '*') ? this.attr('style', '') :
-                   (name = split(name, re_comma)), this.for(function(el) {
-                       name.each(function(name) { setStyle(el, name, ''); });
-                   });
+            var _this = this;
+
+            if (name == '*') {
+                _this.attr('style', '');
+            } else {
+                name = split(name, re_comma);
+                _this.for(function(el) {
+                    name.each(function(name) {
+                        setStyle(el, name, '');
+                    });
+                });
+            }
+
+            return _this;
         }
     });
 
