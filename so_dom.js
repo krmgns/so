@@ -111,15 +111,6 @@
     function select(selector, root, one) {
         if (!selector) return;
 
-        // selector given as root
-        if ($isString(root)) {
-            root = querySelector($document, root);
-        }
-
-        if (!isNode(root)) {
-            root = $document;
-        }
-
         selector = selector.replace(re_space, ' ');
 
         // eg: p:first => p:first-child
@@ -134,6 +125,17 @@
             (selector.matchAll(re_attrMatch) || []).each(function(match) {
                 selector = selector.replace(match[0], match[0].replace(re_attrFix, '\\$1'));
             });
+        }
+
+        if (root) {
+            // both Dom & String accepted as "root"
+            if (isDom(root)) {
+                root = root[0];
+            } else if ($isString(root)) {
+                root = querySelector($document, root);
+            } // else any element
+        } else {
+            root = $document;
         }
 
         return $array(
