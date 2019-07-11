@@ -2914,6 +2914,9 @@
         create: function(content, attributes, doc) {
             return create(content, doc, attributes);
         },
+        createDom: function(content, attributes, doc) {
+            return toDom(create(content, doc, attributes));
+        },
         loadStyle: function(src, root, onload, attributes) {
             var el = createElement(NULL, 'link');
             el.href = src, el.onload = onload, el.rel = 'stylesheet';
