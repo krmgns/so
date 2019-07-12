@@ -1471,15 +1471,17 @@
     toDomPrototype(Dom, {
         /**
          * Style.
-         * @param  {String}      name
-         * @param  {String|Bool} value? (or opt_convert)
-         * @param  {Bool}        opt_raw?
+         * @param  {String}                    name
+         * @param  {String|Number|Object|Bool} value? (true=opt_convert?)
+         * @param  {Bool}                      opt_raw?
          * @return {String}
          */
         style: function(name, value, opt_raw) {
             return $isNull(value) || $isNulls(value) ? this.removeStyle(name)
-                : $isObject(name) || $isString(value) || (name && name.has(':')) ? this.setStyle(name, value)
-                : this.getStyle(name, value /* opt_convert */, opt_raw);
+                : $isString(value) || $isNumber(value) || $isObject(name)
+                    || (name && name.has(':')) /* eg: 'color:red' */
+                ? this.setStyle(name, value)
+                : this.getStyle(name, value /* or opt_convert */, opt_raw);
         },
 
         /**
