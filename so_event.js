@@ -165,43 +165,44 @@
 
             // workaround for key,keyCode for (on)input events
             if (e.type == 'input') {
-                var char = !$isObject(e.data) ? e.data : NULL;
+                var char = $isObject(e.data) ? NULL : e.data;
                 if (char != NULL) {
                     e.key = char;
                     e.keyCode = char.upper().charCodeAt();
                 }
             }
 
-            if ($isDefined(e.keyCode)) {
-                var eKeyCode = e.keyCode;
-                // key sugars..
-                $extend(e, {
-                    isKey: function(keyCode) { return eKeyCode == keyCode; },
-                    isBackspaceKey: function() { return eKeyCode == KEY_BACKSPACE; },
-                    isTabKey: function() { return eKeyCode == KEY_TAB; },
-                    isEnterKey: function() { return eKeyCode == KEY_ENTER; },
-                    isEscKey: function() { return eKeyCode == KEY_ESC; },
-                    isLeftKey: function() { return eKeyCode == KEY_LEFT; },
-                    isUpKey: function() { return eKeyCode == KEY_UP; },
-                    isRightKey: function() { return eKeyCode == KEY_RIGHT; },
-                    isDownKey: function() { return eKeyCode == KEY_DOWN; },
-                    isDeleteKey: function() { return eKeyCode == KEY_DELETE; },
-                    isHomeKey: function() { return eKeyCode == KEY_HOME; },
-                    isEndKey: function() { return eKeyCode == KEY_END; },
-                    isPageUpKey: function() { return eKeyCode == KEY_PAGE_UP; },
-                    isPageDownKey: function() { return eKeyCode == KEY_PAGE_DOWN; },
-                    isInsertKey: function() { return eKeyCode == KEY_INSERT; },
-                    isCapsLockKey: function() { return eKeyCode == KEY_CAPS_LOCK; },
-                    isArrowLeftKey: function() { return eKeyCode == KEY_ARROW_LEFT; },
-                    isArrowUpKey: function() { return eKeyCode == KEY_ARROW_UP; },
-                    isArrowRightKey: function() { return eKeyCode == KEY_ARROW_RIGHT; },
-                    isArrowDownKey: function() { return eKeyCode == KEY_ARROW_DOWN; },
-                    isShiftKey: function() { return eKeyCode == KEY_SHIFT; },
-                    isControlKey: function() { return eKeyCode == KEY_CONTROL; },
-                    isAltKey: function() { return eKeyCode == KEY_ALT; },
-                    isAltGraphKey: function() { return eKeyCode == KEY_ALT_GRAPH; }
-                });
-            }
+            var isKey = function(keyCode) {
+                return (keyCode == e.keyCode);
+            };
+
+            // key sugars..
+            $extend(e, {
+                isKey: isKey,
+                isBackspaceKey:  function() { return isKey(KEY_BACKSPACE) },
+                isTabKey:        function() { return isKey(KEY_TAB) },
+                isEnterKey:      function() { return isKey(KEY_ENTER) },
+                isEscKey:        function() { return isKey(KEY_ESC) },
+                isLeftKey:       function() { return isKey(KEY_LEFT) },
+                isUpKey:         function() { return isKey(KEY_UP) },
+                isRightKey:      function() { return isKey(KEY_RIGHT) },
+                isDownKey:       function() { return isKey(KEY_DOWN) },
+                isDeleteKey:     function() { return isKey(KEY_DELETE) },
+                isHomeKey:       function() { return isKey(KEY_HOME) },
+                isEndKey:        function() { return isKey(KEY_END) },
+                isPageUpKey:     function() { return isKey(KEY_PAGE_UP) },
+                isPageDownKey:   function() { return isKey(KEY_PAGE_DOWN) },
+                isInsertKey:     function() { return isKey(KEY_INSERT) },
+                isCapsLockKey:   function() { return isKey(KEY_CAPS_LOCK) },
+                isArrowLeftKey:  function() { return isKey(KEY_ARROW_LEFT) },
+                isArrowUpKey:    function() { return isKey(KEY_ARROW_UP) },
+                isArrowRightKey: function() { return isKey(KEY_ARROW_RIGHT) },
+                isArrowDownKey:  function() { return isKey(KEY_ARROW_DOWN) },
+                isShiftKey:      function() { return isKey(KEY_SHIFT) },
+                isControlKey:    function() { return isKey(KEY_CONTROL) },
+                isAltKey:        function() { return isKey(KEY_ALT) },
+                isAltGraphKey:   function() { return isKey(KEY_ALT_GRAPH) }
+            });
 
             return fn.call(event.target, e, event.target);
         };
