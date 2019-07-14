@@ -2310,8 +2310,9 @@
          */
         replaceClass: function(oldName, newName) {
             return this.for(function(el) {
-                el[NAME_CLASS_NAME] = $trim(el[NAME_CLASS_NAME].replace(toClassRegExp(oldName),
-                    ' '+ $trim(newName) +' '));
+                !hasClass(el, oldName) ? addClass(el, newName)
+                    : el[NAME_CLASS_NAME] = $trim(el[NAME_CLASS_NAME]
+                        .replace(toClassRegExp(oldName), ' '+ $trim(newName) +' '));
             });
         },
 
