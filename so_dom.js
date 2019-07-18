@@ -94,7 +94,7 @@
     }
 
     var soPrefix = 'so:';
-    var re_child = /(?:first|last|nth)(?!-)/;
+    var re_child = /(?::first|last|nth)(?!-)/;
     var re_childFix = /([\w-]+|):(first|last|nth([^-].+))/g;
     var re_attr = /\[.+\]/;
     var re_attrFix = /([.:])/g;
@@ -111,13 +111,20 @@
     function select(selector, root, one) {
         if (!selector) return;
 
+        var ret, parent;
         selector = selector.replace(re_space, ' ');
 
-        // eg: p:first => p:first-child
+        // @note: should not be mixed in a complex selector (eg: 'a.foo:first, body')
         if (re_child.test(selector)) {
+            // eg: p:first => p:first-child
             selector = selector.replace(re_childFix, function(_, _1, _2, _3) {
                 return _1 +':'+ (_3 ? 'nth-child'+ _3 : _2 +'-child');
             });
+        }
+        // @note: should not be mixed in a complex selector (eg: 'a.foo:parent, body')
+        else if (selector.has(':parent')) {
+            // eg: p:parent => p->parentNode
+            selector = selector.removeAll(':parent'), parent = TRUE;
         }
 
         // grammar: https://www.w3.org/TR/css3-selectors/#grammar
@@ -138,10 +145,18 @@
             root = $document;
         }
 
-        return $array(
-            one ? querySelector(root, selector) // speed issue
+        ret = $array(
+            one ? querySelector(root, selector) // speed..
                 : querySelectorAll(root, selector)
         );
+
+        if (parent) {
+            ret = ret.each(function(el, i) {
+                ret[i] = el[NAME_PARENT_NODE];
+            })
+        }
+
+        return ret;
     }
 
     /**
