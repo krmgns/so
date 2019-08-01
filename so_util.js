@@ -7,6 +7,7 @@
  */
 ;(function(window, $) { 'use strict';
 
+    // minify candies
     var JSON = window.JSON, Math = window.Math;
     // var MAX_INT = Number.MAX_SAFE_INTEGER || Math.pow(2, 53) - 1, MAX_FLOAT = Number.MAX_VALUE;
     var re_rgb = /.*rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(.*))?\)/i;
