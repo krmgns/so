@@ -471,6 +471,20 @@
          */
         all: function() {
             return this.toArray();
+        },
+
+        /**
+         * $$ (alias of findAll()).
+         */
+        $: function(selector) {
+            return this.find(selector);
+        },
+
+        /**
+         * $$ (alias of findAll()).
+         */
+        $$: function(selector) {
+            return this.findAll(selector);
         }
     });
 
