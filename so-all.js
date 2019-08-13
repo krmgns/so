@@ -9,6 +9,7 @@
  *                    so_dom.js, so_event.js, so_http.js, so_list.js, so_util.js.
  * External Modules : -
  * Compress Tool    : <http://jscompress.com>
+ * Orig./GZip Sizes : 54753/19128 bytes (±)
  */
 
 // so.js
