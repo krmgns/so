@@ -479,7 +479,7 @@
      * @return {Client}
      */
     function init(uri, options, onDone, onSuccess, onFailure, method) {
-        if ($isFunction($options)) {
+        if ($isFunction(options)) {
             onDone = options, options = NULL;
         }
 
