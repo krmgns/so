@@ -471,7 +471,7 @@
     /**
      * Init.
      * @param  {String}          uri
-     * @param  {Object|Function} options
+     * @param  {Object|Function} options?
      * @param  {Function}        onDone?
      * @param  {Function}        onSuccess?
      * @param  {Function}        onFailure?
@@ -479,20 +479,24 @@
      * @return {Client}
      */
     function init(uri, options, onDone, onSuccess, onFailure, method) {
+        if ($isFunction($options)) {
+            onDone = options, options = NULL;
+        }
+
         options = options || {};
         if (!$isString(uri)) throw ('URI must be a string!');
         if (!$isObject(options)) throw ('Options must be an object!');
 
         uri = $trim(uri);
         if (uri.has(' ')) {
-            // <method> <uri> @<dataType>, ie: '/foo', '/foo @json', 'GET /foo', 'GET /foo @json'
+            // <method> <uri> @<dataType>, (eg: '/foo', '/foo @json', 'GET /foo', 'GET /foo @json')
             var re = re_request.exec(uri);
             if (re) {
                 options.method = re[1] || method;
                 options.uri = uri = re[2];
                 options.dataType = re[3];
             }
-        } else if (method) { // for get/post shortcut methods
+        } else if (method) { // for get/post/put/delete shortcut methods
             options.method = method;
             options.uri = uri;
         }
