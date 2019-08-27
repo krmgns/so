@@ -527,6 +527,9 @@
         },
         request: function(uri, options, onDone, onSuccess, onFailure) {
             return init(uri, options, onDone, onSuccess, onFailure);
+        },
+        load: function(uri, options, onDone, onSuccess, onFailure) {
+            return init(uri, options, onDone, onSuccess, onFailure, 'get');
         }
     });
 
