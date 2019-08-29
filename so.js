@@ -223,6 +223,7 @@
         for: function(input, fn, _this, opt_useLen) {
             return loop(input, fn, _this, FALSE, opt_useLen);
         },
+
         /**
          * For each: (key => value, i)
          * @see loop()
