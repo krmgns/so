@@ -225,7 +225,7 @@
         },
 
         /**
-         * For each: (key => value, i)
+         * For each: (key, value, i)
          * @see loop()
          */
         forEach: function(input, fn, _this, opt_useLen) {
