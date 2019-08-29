@@ -32,7 +32,7 @@
 
     // globals
     window.so = $;
-    window.so.VERSION = '5.76.0';
+    window.so.VERSION = '5.76.1';
     window.so[NAME_WINDOW] = window;
     window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
@@ -428,7 +428,7 @@
             if (len(a) !== len(b)) return FALSE;
             if (opt_sort) {
                 // make copies (do not modify original inputs)
-                a = makeArray(a).sort(), makeArray(b).sort();
+                a = makeArray(a).sort(), b = makeArray(b).sort();
             }
             for (var i = 0, il = len(a); i < il; i++) {
                 if (a[i] !== b[i]) return FALSE;
@@ -717,10 +717,10 @@
             var s = this.split(separator);
 
             if (limit) {
-                var sRest = s.slice(limit - 1);
+                var slice = s.slice(limit - 1); // rest
                 s = s.slice(0, limit - 1);
-                if (len(sRest)) {
-                    s = s.concat(sRest.join(separator));
+                if (len(slice)) {
+                    s = s.concat(slice.join(separator));
                 }
             }
 
@@ -819,15 +819,6 @@
             }
 
             return len(ret) ? ret : NULL;
-        },
-
-        /**
-         * Wrap.
-         * @param  {String|Array} input
-         * @return {String}
-         */
-        wrap: function(input, s /* @internal */) {
-            return (s = this), isString(input) ? input + s + input : input[0] + s + input[1];
         },
 
         /**
@@ -977,9 +968,9 @@
          * @return {Bool}
          */
         containsAny: function(chars, offset, opt_noCase) {
-            return this.sub(offset).test(prepareSearchRegExp((
+            return this.sub(offset).test(prepareSearchRegExp('('+ (
                 isString(chars) ? chars.split('') : chars // array
-            ).uniq().map(toRegExpEsc).join('|').wrap(['(', ')']), opt_noCase));
+            ).uniq().map(toRegExpEsc).join('|') +')', opt_noCase));
         },
 
         /**
