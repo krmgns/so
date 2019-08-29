@@ -206,7 +206,7 @@
     }
 
 
-    // so: for, forEach
+    // so: each, for, forEach
     extend($, {
         /**
          * Each: (value, i), (key, value, i)
