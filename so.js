@@ -21,6 +21,10 @@
         return isFunction(a) ? $.ready(a, b) /* (callback, document?) */ : $.dom(a, b) /* (selector, root?) */
     }
 
+    // globalize
+    window.so = $;
+    window.so.VERSION = '5.77.0';
+
     // minify candies
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
     var NAME_NODE_TYPE = 'nodeType', NAME_PROTOTYPE = 'prototype';
@@ -29,12 +33,6 @@
     var Array = window.Array, Object = window.Object;
     var String = window.String, Number = window.Number;
     var Date = window.Date, RegExp = window.RegExp, Math = window.Math;
-
-    // globals
-    window.so = $;
-    window.so.VERSION = '5.76.1';
-    window.so[NAME_WINDOW] = window;
-    window.so[NAME_DOCUMENT] = window[NAME_DOCUMENT];
 
     // safe bind for ie9 (yes, still ie..)
     function consoleBind(fn, args) {
@@ -565,7 +563,7 @@
     // string helpers
     function prepareTrimRegExp(chars, opt_noCase, opt_side) {
         return toRegExp((opt_side == 1 ? '^%s+' : '%s+$').format(
-            chars.split('').uniq().map(toRegExpEsc).join('|').wrap(['(', ')'])
+            '('+ chars.split('').uniq().map(toRegExpEsc).join('|') +')'
         ), opt_noCase ? 'i' : '');
     }
     function prepareSearchRegExp(search, opt_noCase, opt_side, opt_esc) {
