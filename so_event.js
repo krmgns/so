@@ -218,7 +218,7 @@
     function initEventTarget(target) {
         return new EventTarget(target);
     }
-    function checkTarget(target, eventType) {
+    function prepareEventTarget(target, eventType) {
         if (!target) throw ('No target given.');
 
         if (!target.$events) {
@@ -385,7 +385,7 @@
      * @param {Object} target
      */
     function EventTarget(target) {
-        this.target = checkTarget(target);
+        this.target = prepareEventTarget(target);
     }
 
     $extend(EventTarget.prototype, {
@@ -395,7 +395,7 @@
          * @return {void}
          */
         addEvent: function(event) {
-            var target = checkTarget(this.target, event.type);
+            var target = prepareEventTarget(this.target, event.type);
             var targetEvents = target.$events;
 
             event.id = (event.id || ++_id);
@@ -418,7 +418,7 @@
          * @return {void}
          */
         removeEvent: function(event) {
-            var target = checkTarget(this.target);
+            var target = prepareEventTarget(this.target);
             var targetEvents;
             var removeStack = [];
 
@@ -489,7 +489,7 @@
          * @return {void}
          */
         dispatch: function(event, data) {
-            var target = checkTarget(this.target);
+            var target = prepareEventTarget(this.target);
 
             if (target.$events[event.type]) {
                 $for(target.$events[event.type], function(event) {
@@ -511,7 +511,7 @@
     });
 
     // on, one, off, fire helper
-    function prepareArgs(fn, options, target) {
+    function prepareArguments(fn, options, target) {
         options = options || {};
 
         if ($isObject(fn)) {
@@ -530,7 +530,7 @@
      * @return {Event}
      */
     function on(target, type, fn, options) {
-        var args = prepareArgs(fn, options, target), event, eventTarget;
+        var args = prepareArguments(fn, options, target), event, eventTarget;
         split(type, re_comma).each(function(type) {
             event = initEvent(type, args.fn, args.options);
             eventTarget = initEventTarget(target);
@@ -538,7 +538,7 @@
         });
     }
     function one(target, type, fn, options) {
-        var args = prepareArgs(fn, $options(options, {once: TRUE}), target), event, eventTarget;
+        var args = prepareArguments(fn, $options(options, {once: TRUE}), target), event, eventTarget;
         split(type, re_comma).each(function(type) {
             event = initEvent(type, args.fn, args.options);
             eventTarget = initEventTarget(target);
@@ -546,7 +546,7 @@
         });
     }
     function off(target, type, fn, options) {
-        var args = prepareArgs(fn, options, target), event, eventTarget;
+        var args = prepareArguments(fn, options, target), event, eventTarget;
         split(type, re_comma).each(function(type) {
             event = initEvent(type, args.fn, args.options);
             eventTarget = initEventTarget(target);
@@ -554,7 +554,7 @@
         });
     }
     function fire(target, type, fn, options) {
-        var args = prepareArgs(fn, options, target), event;
+        var args = prepareArguments(fn, options, target), event;
         split(type, re_comma).each(function(type) {
             event = initEvent(type, args.fn, args.options);
             event.fire(type, args.options.data);
