@@ -35,7 +35,7 @@
     var re_space = /\s+/g;
     var re_comma = /\s*,\s*/;
     var re_tag = /^<([\w-]+)[^>]*>/i;
-    var $document = $.document;
+    var $doc = $.getDocument();
     var $toStyleName = $.util.toStyleName, $jsonEncode = $.util.jsonEncode;
     var $re = $.re, $rid = $.rid, $array = $.array, $each = $.each, $for = $.for, $forEach = $.forEach;
     var $trim = $.trim, $extend = $.extend, $int = $.int, $float = $.float, $string = $.string, $bool = $.bool,
@@ -139,10 +139,10 @@
             if (isDom(root)) {
                 root = root[0];
             } else if ($isString(root)) {
-                root = querySelector($document, root);
+                root = querySelector($doc, root);
             } // else any element
         } else {
-            root = $document;
+            root = $doc;
         }
 
         ret = $array(
@@ -174,13 +174,13 @@
                 if (selector) {
                     // id & class check (speed issue)
                     if (re = selector.match(re_idOrClass)) {
-                        els = ((root = $document) && re[1])
+                        els = ((root = $doc) && re[1])
                             ? [root.getElementById(re[1])] : root.getElementsByClassName(re[2]);
                     } else if (re = selector.match(re_tag)) {
                         // root could be document or attributes
                         els = create(selector, root, root, re[1]);
                     } else if (selector[0] == '>') {
-                        root = isElNode(root) ? root : $document[NAME_DOCUMENT_ELEMENT];
+                        root = isElNode(root) ? root : $doc[NAME_DOCUMENT_ELEMENT];
                         // buggy :scope selector
                         idv = getAttr(root, (idn = soPrefix +'buggy-scope-selector')) || $rid();
                         setAttr(root, idn, idv, FALSE);
@@ -271,23 +271,9 @@
         },
 
         /**
-         * To html (alias of getHtml()).
-         */
-        toHtml: function(opt_outer) {
-            return this.getHtml(opt_outer);
-        },
-
-        /**
-         * To text (alias of getText()).
-         */
-        toText: function() {
-            return this.getText();
-        },
-
-        /**
          * Each.
          * @param  {Function} fn
-         * @param  {Bool}     init
+         * @param  {Bool}     init?
          * @return {Dom}
          */
         each: function(fn, init) {
@@ -350,7 +336,8 @@
                 return toDom(all.filter(fn));
             }
 
-            alls = toDom(fn); // selector given
+            // selector given
+            alls = toDom(fn);
             return toDom(all.filter(function(el) {
                 return alls.has(el);
             }));
@@ -519,7 +506,7 @@
             }
         }
 
-        doc = doc && $isDocument(doc) ? doc : $document;
+        doc = doc && $isDocument(doc) ? doc : $doc;
         tmp = createElement(doc, tmpTag, {innerHTML: content});
         fragment = doc.createDocumentFragment();
         while (tmp[NAME_FIRST_CHILD]) {
@@ -540,7 +527,7 @@
     }
 
     function createElement(doc, tag, properties) {
-        var el = (doc || $document).createElement(tag);
+        var el = (doc || $doc).createElement(tag);
 
         if (properties) {
             $forEach(properties, function(name, value) {
@@ -1400,7 +1387,7 @@
     var re_nonUnitStyles = /(?:(?:fill-?)?opacity|z(?:oom|index)|(?:font-?w|line-?h)eight|column(?:-?count|s))/i;
     var re_colon = /\s*:\s*/;
     var re_scolon = /\s*;\s*/;
-    var matchesSelector = $document[NAME_DOCUMENT_ELEMENT].matches || function(selector) {
+    var matchesSelector = $doc[NAME_DOCUMENT_ELEMENT].matches || function(selector) {
         var i = 0, all = $array(querySelectorAll(this[NAME_OWNER_DOCUMENT], selector));
         while (i < all.len()) {
             if (all[i++] == this) {
@@ -2881,7 +2868,7 @@
 
     // xpath helper
     function toXDom(selector, root, one) {
-        var doc = root || $document;
+        var doc = root || $doc;
         var docEl = doc && doc[NAME_DOCUMENT_ELEMENT];
         var nodes = [], node, iter, ret;
         if (!docEl) {
@@ -2911,12 +2898,14 @@
 
     /**
      * Dom.
-     * @param  {String|Object} selector
-     * @param  {Object}        root?
+     * @param  {String|Object}   selector
+     * @param  {Object|Function} root?
      * @return {Dom}
      */
     var $dom = function(selector, root) {
-        return toDom(selector, root);
+        return !$isFunction(root)
+            ? toDom(selector, root)
+            : toDom(selector).each(root);
     };
 
     // add static methods to dom
@@ -2959,7 +2948,7 @@
                 setAttr(el, name, value);
             });
 
-            appendChild(toDom(root || $document[TAG_HEAD])[0], el);
+            appendChild(toDom(root || $doc[TAG_HEAD])[0], el);
         },
         loadScript: function(src, root, onload, attributes) {
             var el = createElement(NULL, 'script');
@@ -2969,7 +2958,7 @@
                 setAttr(el, name, value);
             });
 
-            appendChild(toDom(root || $document[TAG_HEAD])[0], el);
+            appendChild(toDom(root || $doc[TAG_HEAD])[0], el);
         },
         isNode: function(el, opt_el) {
             return olp_el ? isElNode(el) : isNode(el);

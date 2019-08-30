@@ -33,6 +33,11 @@ body {height: 3000px}
 <script>
 // so.ready(function($, $$) {
 so(function($, $$) {
+    $("button", el => log(el))
+    $("button").each(el => log(el))
+
+    return;;;
+
     var $el = $("#div")
     log($el.soAttr("ok"))
 

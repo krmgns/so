@@ -7,8 +7,7 @@
  */
 ;(function(window, $, NULL, TRUE, FALSE) { 'use strict';
 
-    var document = $.document;
-    var objectValues = Object.values, objectDefineProperty = Object.defineProperty;
+    var Object = window.Object, objectValues = Object.values, objectDefineProperty = Object.defineProperty;
     var re_types = {
         UIEvent: 'resize|scroll|select|(un)?load|DOMActivate',
         MouseEvent: '(dbl)?click|mouse(up|down|enter|leave|in|out|over|move|wheel)|show|contextmenu|DOMMouseScroll',
@@ -30,7 +29,8 @@
     var re_typesFix = /^(UI|Mouse|Mutation|HTML)Event$/i;
     var re_typesStandard = $.re('('+ objectValues(re_types).join('|') +')', 'i');
     var re_comma = /\s*,\s*/;
-    var domLevel = document.adoptNode ? 3 : 2;
+    var $doc = $.getDocument();
+    var domLevel = $doc.adoptNode ? 3 : 2;
     var optionsDefault = {
         bubbles: TRUE, cancelable: TRUE, scoped: FALSE, composed: FALSE, // all
         view: window, detail: NULL, // ui, mouse, custom
@@ -91,7 +91,7 @@
                 eventClass += 's';
             }
 
-            event = document.createEvent(eventClass);
+            event = $doc.createEvent(eventClass);
             switch (eventClassOrig) {
                 case 'UIEvent':
                     event.initUIEvent(eventType, options.bubbles, options.cancelable, options.view, options.detail);

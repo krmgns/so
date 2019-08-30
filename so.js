@@ -18,12 +18,14 @@
      * @return {Object}
      */
     function $(a, b) {
-        return isFunction(a) ? $.ready(a, b) /* (callback, document?) */ : $.dom(a, b) /* (selector, root?) */
+        return !isFunction(a)
+            ? $.dom(a, b)   // (selector, root?)
+            : $.ready(a, b) // (callback, document?)
     }
 
     // globalize
     window.so = $;
-    window.so.VERSION = '5.77.0';
+    window.so.VERSION = '5.78.0';
 
     // minify candies
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
