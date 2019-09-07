@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.79.0';
+    $win.so.VERSION = '5.79.1';
 
     // minify candies
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
@@ -772,7 +772,7 @@
         grep: function(re, i) {
             var ret = this.grepAll(re);
 
-            return ret ? ret[i | 0] : NULL;
+            return ret ? ret[0][0 | i] : NULL;
         },
 
         /**
