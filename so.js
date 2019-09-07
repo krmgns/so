@@ -4,7 +4,7 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function(window, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
+;(function($win, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
 
     // simply support check
     if (!''.trim) {
@@ -24,26 +24,26 @@
     }
 
     // globalize
-    window.so = $;
-    window.so.VERSION = '5.78.0';
+    $win.so = $;
+    $win.so.VERSION = '5.79.0';
 
     // minify candies
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
     var NAME_NODE_TYPE = 'nodeType', NAME_PROTOTYPE = 'prototype';
     var NAME_DEFAULT_VIEW = 'defaultView', NAME_OWNER_DOCUMENT = 'ownerDocument';
     var NAME_LENGTH = 'length';
-    var Array = window.Array, Object = window.Object;
-    var String = window.String, Number = window.Number;
-    var Date = window.Date, RegExp = window.RegExp, Math = window.Math;
+    var Array = $win.Array, Object = $win.Object;
+    var String = $win.String, Number = $win.Number;
+    var Date = $win.Date, RegExp = $win.RegExp, Math = $win.Math;
 
     // safe bind for ie9 (yes, still ie..)
     function consoleBind(fn, args) {
-        return Function[NAME_PROTOTYPE].bind.call(window.console[fn], window.console)
-            .apply(window.console, args);
+        return Function[NAME_PROTOTYPE].bind.call($win.console[fn], $win.console)
+            .apply($win.console, args);
     }
 
     // shortcut for 'console.log'
-    window.log = function() {
+    $win.log = function() {
         consoleBind('log', arguments);
     };
 
@@ -404,12 +404,16 @@
     };
 
     // shortcuts
+    function index(input, search, opt_last) {
+        return !opt_last ? input.indexOf(search) : input.lastIndexOf(search);
+    }
+
     function has(input, search, opt_strict) {
         var ret;
 
         if (isString(input)) {
             ret = isNulls(search) ? -1 // fix empty search issue
-                : isRegExp(search) ? input.search(search) : input.indexOf(search); // simply
+                : isRegExp(search) ? input.search(search) : index(input, search); // simply
         } else if (isArray(input) || isObject(input)) {
             $.for(input, function(value, i) {
                 if (opt_strict ? value === search : value == search) {
@@ -441,8 +445,8 @@
 
     function toUniqUnuniq(array, opt_ununiq) {
         return opt_ununiq
-            ? array.filter(function(el, i, _array) { return _array.indexOf(el) != i; })
-            : array.filter(function(el, i, _array) { return _array.indexOf(el) == i; });
+            ? array.filter(function(el, i, _array) { return index(_array, el) != i; })
+            : array.filter(function(el, i, _array) { return index(_array, el) == i; });
     }
 
     /**
@@ -777,15 +781,15 @@
          * @return {Array|null}
          */
         grepAll: function(re) {
-            var r = this.matchAll(re), ret = NULL;
+            var re = this.matchAll(re), ret = NULL;
 
-            if (r) {
+            if (re) {
                 ret = [];
-                while (len(r)) {
-                    ret.push(r.shift().filter(function(value, i) {
-                        // skip 0 index & or (|) ops' undefined
-                        return (i && value != NULL);
-                    })[0]);
+                while (len(re)) {
+                    ret.push(re.shift().filter(function(value, i) {
+                        // skip 0 index & nones
+                        return (i && !isVoid(value));
+                    }));
                 }
             }
 
@@ -926,7 +930,7 @@
             var s = this, ret = -1;
 
             if (!isNulls(search)) { // fix empty search issue
-                ret = !opt_last ? s.indexOf(search) : s.lastIndexOf(search);
+                ret = index(s, search, opt_last);
             }
 
             return ret;
@@ -1136,7 +1140,7 @@
          * @return {Window}
          */
         getWindow: function(object) {
-            if (!object)                     return window;
+            if (!object)                     return $win;
             if (object[NAME_OWNER_DOCUMENT]) return object[NAME_OWNER_DOCUMENT][NAME_DEFAULT_VIEW];
             if (isWindow(object))            return object;
             if (isDocument(object))          return object[NAME_DEFAULT_VIEW];
@@ -1148,7 +1152,7 @@
          * @return {Document}
          */
         getDocument: function(object) {
-            if (!object)                     return window[NAME_DOCUMENT];
+            if (!object)                     return $win[NAME_DOCUMENT];
             if (object[NAME_OWNER_DOCUMENT]) return object[NAME_OWNER_DOCUMENT]; // node
             if (isDocument(object))          return object;
             if (isWindow(object))            return object[NAME_DOCUMENT];
@@ -1229,12 +1233,12 @@
 
         /**
          * In.
-         * @param  {Any}          search
          * @param  {Array|String} input
+         * @param  {Any}          search
          * @return {Bool}
          */
-        in: function(search, input) {
-            return input.indexOf(search) > -1;
+        in: function(input, search) {
+            return index(index, search) > -1;
         },
 
         /**
@@ -1249,21 +1253,11 @@
         },
 
         /**
-         * Is set.
-         * @param  {Any}    input
-         * @param  {String} key?
-         * @return {Bool}
-         */
-        isSet: function(input, key) {
-            return !isVoid(!isVoid(key) ? $.dig(input, key) : input);
-        },
-
-        /**
-         * Is empty.
+         * Empty.
          * @param  {Any} input
          * @return {Bool}
          */
-        isEmpty: function(input) {
+        empty: function(input) {
             return toBool(!input // '', null, undefined, false, 0, -0, NaN
                 || (isNumber(input[NAME_LENGTH]) && !len(input))
                 || (isObject(input) && !len(Object.keys(input)))
@@ -1337,7 +1331,7 @@
         }
 
         // iframe support
-        document = document || window[NAME_DOCUMENT];
+        document = document || $win[NAME_DOCUMENT];
 
         var type = 'DOMContentLoaded';
         document.addEventListener(type, function _() {

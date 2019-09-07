@@ -5,20 +5,24 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function(window, $, NULL, TRUE, FALSE) { 'use strict';
+;(function($, NULL, TRUE, FALSE) { 'use strict';
 
-    var re_digit = /^[\d.]+/;
-    var re_scroll = /scroll(?:Top|Left)/;
-    var re_nonUnitStyles = /(?:(?:fill-?)?opacity|z(?:oom|index)|(?:font-?w|line-?h)eight|column(?:-?count|s))/i;
-    var opt_fps = 1000 / 60;
-    var opt_speeds = {fast: 50, slow: 650, normal: 150, default: 325};
-    // thanks: http://easings.net/ (easeOutQuad)
-    var fn_easing = function(t,b,c,d) { return -c*(t/=d)*(t-2)+b; };
-    var fn_runner = window.requestAnimationFrame || function(fn) { setTimeout(fn, opt_fps); };
+    var $win = $.getWindow();
     var $toStyleName = $.util.toStyleName;
     var $easing = ($.ext && $.ext.easing) || {};
     var $extend = $.extend, $for = $.for, $forEach = $.forEach, $float = $.float, $now = $.now,
         $isNumber = $.isNumber, $isString = $.isString, $isFunction = $.isFunction;
+
+    var re_digit = /^[\d.]+/;
+    var re_scroll = /scroll(?:Top|Left)/;
+    var re_nonUnitStyles = /(?:(?:fill-?)?opacity|z(?:oom|index)|(?:font-?w|line-?h)eight|column(?:-?count|s))/i;
+
+    var opt_fps = 1000 / 60;
+    var opt_speeds = {fast: 50, slow: 650, normal: 150, default: 325};
+
+    // thanks: http://easings.net/ (easeOutQuad)
+    var fn_easing = function(t,b,c,d) { return -c*(t/=d)*(t-2)+b; };
+    var fn_runner = $win.requestAnimationFrame || function(fn) { setTimeout(fn, opt_fps); };
 
     /**
      * Animation.
@@ -69,7 +73,7 @@
                     endValue = $float(value);
 
                     if (!re_nonUnitStyles.test(name)) {
-                        unit = style.replace(re_digit, '');
+                        unit = style.remove(re_digit);
                     }
                 } else {
                     startValue = _this.$el.scroll()[name.slice(6).lower()];
@@ -204,4 +208,4 @@
         }
     };
 
-})(window, window.so, null, true, false);
+})(window.so, null, true, false);

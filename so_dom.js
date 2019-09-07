@@ -4,7 +4,7 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function(window, $, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
+;(function($, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
 
     // minify candies
     var NAME_NODE_NAME = 'nodeName', NAME_NODE_TYPE = 'nodeType';
@@ -32,9 +32,6 @@
     var NAME_PROTOTYPE = 'prototype';
     var TAG_WINDOW = '#window', TAG_DOCUMENT = '#document', TAG_HTML = 'html', TAG_HEAD = 'head', TAG_BODY = 'body';
 
-    var re_space = /\s+/g;
-    var re_comma = /\s*,\s*/;
-    var re_tag = /^<([\w-]+)[^>]*>/i;
     var $doc = $.getDocument();
     var $toStyleName = $.util.toStyleName, $jsonEncode = $.util.jsonEncode;
     var $re = $.re, $rid = $.rid, $array = $.array, $each = $.each, $for = $.for, $forEach = $.forEach;
@@ -44,6 +41,11 @@
         $isNumber = $.isNumber, $isArray = $.isArray, $isObject = $.isObject, $isFunction = $.isFunction,
         $isTrue = $.isTrue, $isFalse = $.isFalse, $isWindow = $.isWindow, $isDocument = $.isDocument,
         $getWindow = $.getWindow, $getDocument = $.getDocument;
+
+    var re_space = /\s+/g;
+    var re_comma = /\s*,\s*/;
+    var re_tag = /^<([\w-]+)[^>]*>/i;
+
     var _id = 0;
 
     // general helpers
@@ -68,15 +70,16 @@
     function isRootElement(el, _tag) {
         return (_tag = getTag(el)), _tag == TAG_HTML || _tag == TAG_BODY;
     }
-    function isNode(el) {
-        return $bool(el && (el[NAME_NODE_TYPE] === 1 || el[NAME_NODE_TYPE] === 9 || el[NAME_NODE_TYPE] === 11));
+
+    function isNode(x) {
+        return $bool(x && (x[NAME_NODE_TYPE] === 1 || x[NAME_NODE_TYPE] === 9 || x[NAME_NODE_TYPE] === 11));
     }
-    function isElNode(el) {
-        return $bool(el && (el[NAME_NODE_TYPE] === 1));
+    function isENode(x) {
+        return $bool(x && (x[NAME_NODE_TYPE] === 1));
     }
 
-    function isDom(input) {
-        return (input instanceof Dom);
+    function isDom(x) {
+        return (x instanceof Dom);
     }
     function toDom(selector, root, one) {
         return isDom(selector) ? selector : new Dom(selector, root, one);
@@ -180,7 +183,7 @@
                         // root could be document or attributes
                         els = create(selector, root, root, re[1]);
                     } else if (selector[0] == '>') {
-                        root = isElNode(root) ? root : $doc[NAME_DOCUMENT_ELEMENT];
+                        root = isENode(root) ? root : $doc[NAME_DOCUMENT_ELEMENT];
                         // buggy :scope selector
                         idv = getAttr(root, (idn = soPrefix +'buggy-scope-selector')) || $rid();
                         setAttr(root, idn, idv, FALSE);
@@ -515,7 +518,7 @@
 
         if (attributes && $isObject(attributes)) {
             $for(fragment[NAME_CHILD_NODES], function(node) {
-                if (isElNode(node)) {
+                if (isENode(node)) {
                     $forEach(attributes, function(name, value) {
                         setAttr(node, name, value);
                     });
@@ -573,7 +576,7 @@
 
         var child;
         while (child = el[NAME_FIRST_CHILD]) {
-            if (isElNode(child)) {
+            if (isENode(child)) {
                 cleanElement(child);
             }
             removeChild(el, child);
@@ -1046,7 +1049,7 @@
             } else if (isDom(selector)) {
                 // $.dom("p").not($element)
                 ret = intersect(_this.all(), selector.all());
-            } else if (isElNode(selector)) {
+            } else if (isENode(selector)) {
                 // $.dom("p").not(element)
                 ret = noIntersect(selector, _this);
             } else {
@@ -1360,7 +1363,7 @@
         path: function(opt_string) {
             var el = this[0], ret = [];
 
-            if (isElNode(el)) {
+            if (isENode(el)) {
                 return (ret = getPath(el).reverse()),
                     opt_string ? ret.slice(1).join(' > ') : ret;
             }
@@ -1374,7 +1377,7 @@
         xpath: function(opt_string) {
             var el = this[0], ret = [];
 
-            if (isElNode(el)) {
+            if (isENode(el)) {
                 return (ret = getXPath(el)),
                     opt_string ? '/'+ ret.join('/') : ret;
             }
@@ -1551,7 +1554,7 @@
                     value = NULL;
                 } else {
                     value = $isFalse(opt_convert) ? value : (
-                        re_rgb.test(value) ? $.util.parseRgbAsHex(value) // make rgb - hex
+                        re_rgb.test(value) ? $.util.parseRgb(value, TRUE) // make rgb - hex
                             : re_unit.test(value) || re_unitOther.test(value) // make px etc. - float
                                 // || re_nonUnitStyles.test(name) // make opacity etc. - float
                             ? $float(value) : value
@@ -1711,7 +1714,7 @@
         var ret = {width: 0, height: 0};
         var properties, win;
 
-        if (isElNode(el)) {
+        if (isENode(el)) {
             if (!isVisible(el) || !isVisibleParent(el)) {
                 properties = getInvisibleElementProperties(el, [NAME_OFFSET_WIDTH, NAME_OFFSET_HEIGHT]);
                 ret.width = properties[0], ret.height = properties[1];
@@ -1734,7 +1737,7 @@
         });
         var style;
 
-        if (isElNode(el)) {
+        if (isENode(el)) {
             style = getStyle(el);
             if ((!by || by == NAME_WIDTH) && dim.width) {
                 ret.width -= sumStyleValue(NULL, style, NAME_PADDING_LEFT, NAME_PADDING_RIGHT)
@@ -1775,7 +1778,7 @@
         var ret = {top: 0, left: 0};
         var properties, body, parentOffset;
 
-        if (isElNode(el)) {
+        if (isENode(el)) {
             if (!isVisible(el) || !isVisibleParent(el)) {
                 properties = getInvisibleElementProperties(el, [NAME_OFFSET_TOP, NAME_OFFSET_LEFT]);
                 ret.top = properties[0], ret.left = properties[1];
@@ -1798,7 +1801,7 @@
         var ret = {top: 0, left: 0};
         var win;
 
-        if (isElNode(el)) {
+        if (isENode(el)) {
             ret.top = el[NAME_SCROLL_TOP], ret.left = el[NAME_SCROLL_LEFT];
         } else if (isRoot(el) || isRootElement(el)) {
             win = $getWindow(el);
@@ -1951,7 +1954,7 @@
         return $bool(el && el[fn_hasAttr] && el[fn_hasAttr](name));
     }
     function setAttr(el, name, value, opt_state /* @internal */) {
-        if (isElNode(el)) {
+        if (isENode(el)) {
             if ($isNull(value)) {
                 removeAttr(el, name);
             } else if (name == NAME_VALUE) {
@@ -1977,7 +1980,7 @@
         return ret;
     }
     function removeAttr(el, name) {
-        if (isElNode(el)) el.removeAttribute(name);
+        if (isENode(el)) el.removeAttribute(name);
     }
 
     function toDataAttrName(name) {
@@ -2960,12 +2963,11 @@
 
             appendChild(toDom(root || $doc[TAG_HEAD])[0], el);
         },
-        isNode: function(el, opt_el) {
-            return olp_el ? isElNode(el) : isNode(el);
-        }
+        isNode: function(x) { return isNode(x); },
+        isENode: function(x) { return isENode(x); }
     });
 
     // export dom
     $.dom = $dom;
 
-})(window, window.so, null, true, false);
+})(window.so, null, true, false);

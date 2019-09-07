@@ -5,7 +5,7 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function($, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
+;(function($) { 'use strict';
 
     var $for = $.for, $forEach = $.forEach, $bool = $.bool;
     var fn_slice = [].slice;
@@ -102,7 +102,7 @@
          * @return {List}
          */
         set: function(key, value) {
-            var _this = this, key = (key != NULL) ? key : _this._len;
+            var _this = this, key = (key != null) ? key : _this._len;
 
             if (!(key in _this.data)) { // increase size
                 _this._len++;
@@ -222,7 +222,7 @@
          * @return {List}
          */
         append: function(value) {
-            return this.set(NULL, value);
+            return this.set(null, value);
         },
 
         /**
@@ -289,7 +289,7 @@
          * @return {String|undefined}
          */
         findIndex: function(searchValue) {
-            return this.find(searchValue, TRUE);
+            return this.find(searchValue, true);
         },
 
         /**
@@ -346,7 +346,7 @@
             var _this = this, data = {}, ret = {}, i = 0;
 
             $for(arguments, function(key) {
-                ret[i] = UNDEFINED;
+                ret[i] = undefined;
                 if (key in _this.data) {
                     ret[i] = _this.data[key];
                     // delete key and decrease size
@@ -355,7 +355,7 @@
             });
 
             // reset data with indexes
-            if (_this.type != 'object' && !$.isEmpty(ret)) {
+            if (_this.type != 'object' && !$.empty(ret)) {
                 $for(_this.values(), function(value, i) {
                     data[i] = value;
                 });
@@ -507,7 +507,7 @@
         sort: function(fn) {
             var _this = this, data = {}, flippedData;
 
-            if (_this.type == "object") {
+            if (_this.type == 'object') {
                 flippedData = flip(_this.data);
                 $forEach(_this.values().sort(fn), function(key, value) {
                     data[flippedData[value]] = value;
@@ -527,11 +527,11 @@
          * @return {Bool}
          */
         test: function(fn) {
-            var ret = FALSE;
+            var ret = false;
 
             this.forEach(function(key, value, i) {
                 if (fn(value, key, i)) {
-                    return (ret = TRUE), _break;
+                    return (ret = true), _break;
                 }
             });
 
@@ -544,11 +544,11 @@
          * @return {Bool}
          */
         testAll: function(fn) {
-            var ret = TRUE;
+            var ret = true;
 
             this.forEach(function(key, value, i) {
                 if (!fn(value, key, i)) {
-                    return (ret = FALSE), _break;
+                    return (ret = false), _break;
                 }
             });
 
@@ -616,4 +616,4 @@
         return $bool(input && input instanceof List);
     };
 
-})(window.so, null, true, false);
+})(window.so);

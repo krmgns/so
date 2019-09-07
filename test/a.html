@@ -24,7 +24,7 @@ body {height: 3000px}
 <button show>Button [show]</button>
 <button hide>Button [hide]</button>
 <button toggle>Button [toggle]</button>
-<button toggleDisplay>Button [toggleDisplay]</button>
+<button toggleBy>Button [toggleBy]</button>
 <br>
 <s class="outer">Outer s.outer</s>
 
@@ -33,20 +33,24 @@ body {height: 3000px}
 <script>
 // so.ready(function($, $$) {
 so(function($, $$) {
-    $("button", el => log(el))
-    $("button").each(el => log(el))
+    var url = $.util.url("https://dom.com/i/crop/a.php?x=1&y=22#ooo")
+    log(url)
 
-    return;;;
 
-    var $el = $("#div")
-    log($el.soAttr("ok"))
+    // $("button", el => log(el))
+    // $("button").each(el => log(el))
 
-    $.fire(1000, () => {
-        $el.soAttr("ok", true)
-    })
-    $.fire(2500, () => {
-        $el.soAttr("ok", null)
-    })
+    // return;;;
+
+    // var $el = $("#div")
+    // log($el.soAttr("ok"))
+
+    // $.fire(1000, () => {
+    //     $el.soAttr("ok", true)
+    // })
+    // $.fire(2500, () => {
+    //     $el.soAttr("ok", null)
+    // })
 
     // $.fire(1000, () => {
     //     log($('body').scrollTo(150))
@@ -74,7 +78,7 @@ so(function($, $$) {
             log(a)
         })
     })
-    $("[toggleDisplay]").on("click", () => $(".outer").toggleDisplay(true, "normal"))
+    $("[toggleBy]").on("click", () => $(".outer").toggleBy(true, "normal"))
 
     // var els = $.dom(".p", "#div")
     // var els = $.dom("#div").findAll("> p")

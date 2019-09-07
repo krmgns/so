@@ -14,10 +14,13 @@
          * @return {Function}
          */
         extends: function(supClass) {
-
-            // @note super() always must be called in subClass constructor
-            var prototype = $.extend({}, supClass.prototype, subClass.prototype,
-                {constructor: subClass, super: supClass});
+            // @note: super() always must be called in subClass constructor
+            var prototype = $.extend(
+                {},
+                supClass.prototype,
+                subClass.prototype,
+                {constructor: subClass, super: supClass}
+            );
 
             subClass.prototype = Object.create(prototype);
 

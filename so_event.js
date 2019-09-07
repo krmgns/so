@@ -5,10 +5,16 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function(window, $, NULL, TRUE, FALSE) { 'use strict';
+;(function($, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
 
-    var Object = window.Object, objectValues = Object.values, objectDefineProperty = Object.defineProperty;
-    var re_types = {
+    var $win = $.getWindow(), $doc = $.getDocument();
+    var $trim = $.trim, $extend = $.extend, $for = $.for, $forEach = $.forEach,
+        $options = $.options, $isObject = $.isObject, $isFunction = $.isFunction,
+        $logWarn = $.logWarn;
+
+    var Object = $win.Object, objectDefineProperty = Object.defineProperty;
+
+    var types = {
         UIEvent: 'resize|scroll|select|(un)?load|DOMActivate',
         MouseEvent: '(dbl)?click|mouse(up|down|enter|leave|in|out|over|move|wheel)|show|contextmenu|DOMMouseScroll',
         FocusEvent: 'blur|focus(in|out)?|DOMFocus(In|Out)',
@@ -27,26 +33,25 @@
         DeviceMotionEvent: 'devicemotion', DeviceOrientationEvent: 'deviceorientation'
     };
     var re_typesFix = /^(UI|Mouse|Mutation|HTML)Event$/i;
-    var re_typesStandard = $.re('('+ objectValues(re_types).join('|') +')', 'i');
+    var re_typesStandard = $.re('('+ Object.values(types).join('|') +')', 'i');
     var re_comma = /\s*,\s*/;
-    var $doc = $.getDocument();
+
     var domLevel = $doc.adoptNode ? 3 : 2;
     var optionsDefault = {
         bubbles: TRUE, cancelable: TRUE, scoped: FALSE, composed: FALSE, // all
-        view: window, detail: NULL, // ui, mouse, custom
+        view: $win, detail: NULL, // ui, mouse, custom
         relatedNode: NULL, prevValue: '', newValue: '', attrName: '', attrChange: 0, // mutation
         screenX: 0, screenY: 0, clientX: 0, clientY: 0, ctrlKey: FALSE, altKey: FALSE, shiftKey: FALSE,
             metaKey: FALSE, button: 1, relatedTarget: NULL, // mouse
         useCapture: FALSE, once: FALSE, passive: FALSE, data: {}
     };
-    var $trim = $.trim, $extend = $.extend, $for = $.for, $forEach = $.forEach,  $options = $.options,
-        $isObject = $.isObject, $isFunction = $.isFunction, $isDefined = $.isDefined, $isEmpty = $.isEmpty,
-        $re = $.re, $logWarn = $.logWarn;
+
     var KEY_BACKSPACE =  8,  KEY_TAB =       9, KEY_ENTER =       13, KEY_ESC =        27,  KEY_LEFT =      37,
         KEY_UP =         38, KEY_RIGHT =    39, KEY_DOWN =        40, KEY_DELETE =     46,  KEY_HOME =      36,
         KEY_END =        35, KEY_PAGE_UP =  33, KEY_PAGE_DOWN =   34, KEY_INSERT =     45,  KEY_CAPS_LOCK = 20,
         KEY_ARROW_LEFT = 37, KEY_ARROW_UP = 38, KEY_ARROW_RIGHT = 39, KEY_ARROW_DOWN = 40,
         KEY_SHIFT =      16, KEY_CONTROL =  17, KEY_ALT =         18, KEY_ALT_GRAPH =  225;
+
     var _id = 0;
     var _break = 0;
 
@@ -71,10 +76,10 @@
 
         var event, eventClassOrig;
         if (!eventClass) { // autodetect
-            $forEach(re_types, function(_eventClass, re) {
-                re = $re('^('+ re +')$', 'i');
+            $forEach(types, function(name, re) {
+                re = $.re('^('+ re +')$', 'i');
                 if (re.test(eventType)) {
-                    eventClass = eventClassOrig = _eventClass;
+                    eventClass = eventClassOrig = name;
                     return _break;
                 }
             });
@@ -82,7 +87,7 @@
 
         eventClass = eventClassOrig = eventClass || 'Event'; // @default
         try { // wrong parameters causes error (opera/12)
-            event = (eventClass != 'MutationEvent' && new window[eventClass](eventType, options));
+            event = (eventClass != 'MutationEvent' && new $win[eventClass](eventType, options));
         } catch(e) {}
 
         if (!event) {
@@ -117,7 +122,7 @@
             }
         }
 
-        return {event: event, eventClass: (eventClass in re_types) ? eventClass : 'CustomEvent'};
+        return {event: event, eventClass: (eventClass in types) ? eventClass : 'CustomEvent'};
     }
 
     /**
@@ -472,7 +477,7 @@
 
                     // think memory!
                     $forEach(targetEvents, function(type, events) {
-                        targetEvents[type] = !$isEmpty(events) ? events : NULL;
+                        targetEvents[type] = !$.empty(events) ? events : NULL;
                     });
                 } else if ($isFunction(target['on'+ event.type])) { // natives
                     target['on'+ event.type] = NULL;
@@ -603,4 +608,4 @@
         }
     };
 
-})(window, window.so, null, true, false);
+})(window.so, null, true, false);

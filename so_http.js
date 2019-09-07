@@ -5,7 +5,14 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function(window, $, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
+;(function($, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
+
+    var $win = $.getWindow();
+    var $trim = $.trim, $extend = $.extend, $options = $.options, $for = $.for, $forEach = $.forEach,
+        $isFunction = $.isFunction, $isString = $.isString, $isArray = $.isArray,
+        $isObject = $.isObject, $isIterable = $.isIterable, $isDocument = $.isDocument,
+        $isNumeric = $.isNumeric, $isDefined = $.isDefined, $class = $.class,
+        $logWarn = $.logWarn;
 
     var re_space = /%20/g;
     var re_httpHost = /^(?:https?:)?\/\/([^:/]+)/i;
@@ -13,6 +20,7 @@
     var re_json = /^(?:\{.*\}|\[.*\]|".*"|-?\d+(?:\.\d+)?|true|false|null)$/;
     var re_request = /^([A-Z]+)?\s*(.*?)\s*(?:@(json|xml|html|plain))?$/;
     var re_dataType = /\/(json|xml|html|plain)(?:[; ])?/i;
+
     var xhr = 'XMLHttpRequest'; // what an ugly name..
     var optionsDefault = {
         method: 'GET',
@@ -26,12 +34,8 @@
         // onAbort: NULL, onTimeout: NULL, onBeforeSend: NULL, onAfterSend: NULL,
         ons: {} // all other on.. stuff
     };
+
     var STATE_OPENED = 1, STATE_HEADERS_RECEIVED = 2, STATE_LOADING = 3, STATE_DONE = 4;
-    var $trim = $.trim, $extend = $.extend, $options = $.options, $for = $.for, $forEach = $.forEach,
-        $isFunction = $.isFunction, $isString = $.isString, $isArray = $.isArray,
-        $isObject = $.isObject, $isIterable = $.isIterable, $isDocument = $.isDocument,
-        $isNumeric = $.isNumeric, $isDefined = $.isDefined, $class = $.class,
-        $logWarn = $.logWarn;
 
     // add base methods
     var $http = {
@@ -178,7 +182,7 @@
 
     // shortcut helpers
     function addUriParams(uri, uriParams) {
-        return $.isEmpty(uriParams) ? uri : (uri += (!uri.has('?') ? '?' : '&') + $http.serialize(uriParams));
+        return $.empty(uriParams) ? uri : (uri += (!uri.has('?') ? '?' : '&') + $http.serialize(uriParams));
     }
 
     function onReadyStateChange(client) {
@@ -260,7 +264,7 @@
 
         // cross domain?
         var match = uri.match(re_httpHost);
-        if (match && match[1] != window.location.host) {
+        if (match && match[1] != $win.location.host) {
             delete options.headers['X-Requested-With'];
         }
 
@@ -302,7 +306,7 @@
         _this.request.dataType = options.dataType;
         _this.request.headers = options.headers;
 
-        _this.api = new window[xhr];
+        _this.api = new $win[xhr];
         _this.api.open(_this.request.method, _this.request.uri, !!options.async);
         _this.api.onerror = function(e) {
             _this.fire('error', e);
@@ -536,4 +540,4 @@
     // export http
     $.http = $http;
 
-})(window, window.so, null, true, false);
+})(window.so, null, true, false);

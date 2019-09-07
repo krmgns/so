@@ -20,7 +20,7 @@
     ];
 
     var navigator = window.navigator,
-        ua = navigator.userAgent.lower().sub(0, 250),
+        ua = navigator.userAgent.lower().sub(0, 250), // safe..
         uap = navigator.platform.lower();
 
     $.ua = (function() {
