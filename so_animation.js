@@ -7,7 +7,7 @@
  */
 ;(function($, NULL, TRUE, FALSE) { 'use strict';
 
-    var $win = $.getWindow();
+    var $win = $.win();
     var $toStyleName = $.util.toStyleName;
     var $easing = ($.ext && $.ext.easing) || {};
     var $extend = $.extend, $for = $.for, $forEach = $.forEach, $float = $.float, $now = $.now,

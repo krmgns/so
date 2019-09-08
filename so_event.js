@@ -7,7 +7,7 @@
  */
 ;(function($, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
 
-    var $win = $.getWindow(), $doc = $.getDocument();
+    var $win = $.win(), $doc = $.doc();
     var $trim = $.trim, $extend = $.extend, $for = $.for, $forEach = $.forEach,
         $options = $.options, $isObject = $.isObject, $isFunction = $.isFunction,
         $logWarn = $.logWarn;

@@ -32,7 +32,7 @@
     var NAME_PROTOTYPE = 'prototype';
     var TAG_WINDOW = '#window', TAG_DOCUMENT = '#document', TAG_HTML = 'html', TAG_HEAD = 'head', TAG_BODY = 'body';
 
-    var $doc = $.getDocument();
+    var $doc = $.doc();
     var $toStyleName = $.util.toStyleName, $jsonEncode = $.util.jsonEncode;
     var $re = $.re, $rid = $.rid, $array = $.array, $each = $.each, $for = $.for, $forEach = $.forEach;
     var $trim = $.trim, $extend = $.extend, $int = $.int, $float = $.float, $string = $.string, $bool = $.bool,
@@ -40,7 +40,7 @@
         $isUndefined = $.isUndefined, $isString = $.isString, $isNumeric = $.isNumeric,
         $isNumber = $.isNumber, $isArray = $.isArray, $isObject = $.isObject, $isFunction = $.isFunction,
         $isTrue = $.isTrue, $isFalse = $.isFalse, $isWindow = $.isWindow, $isDocument = $.isDocument,
-        $getWindow = $.getWindow, $getDocument = $.getDocument;
+        $getWindow = $.win, $getDocument = $.doc;
 
     var re_space = /\s+/g;
     var re_comma = /\s*,\s*/;
@@ -221,7 +221,7 @@
         // define all read-only, but selector
         Object.defineProperties(_this, {
                  '_len': {value: len},
-                '_root': {value: root},
+                '_root': {value: root || $doc},
             '_selector': {value: selector, writable: TRUE}
         });
     }
@@ -234,6 +234,14 @@
          */
         len: function() {
             return this._len;
+        },
+
+        /**
+         * Root.
+         * @return {Object}
+         */
+        root: function() {
+            return this._root;
         },
 
         /**
@@ -1313,6 +1321,22 @@
             var el = this[0];
 
             return toDom(el && (opt_content ? el.contentDocument : $getDocument(el)));
+        },
+
+        /**
+         * Is window.
+         * @return {Bool}
+         */
+        isWindow: function() {
+            return $isWindow(this[0]);
+        },
+
+        /**
+         * Is document.
+         * @return {Bool}
+         */
+        isDocument: function() {
+            return $isDocument(this[0]);
         }
     });
 
@@ -1946,12 +1970,11 @@
         }
     });
 
-    var fn_hasAttr = 'hasAttribute', fn_setAttr = 'setAttribute';
     var re_attrState = /^(?:(?:check|select|disabl)ed|readonly)$/i;
 
     // attr helpers
     function hasAttr(el, name) {
-        return $bool(el && el[fn_hasAttr] && el[fn_hasAttr](name));
+        return $bool(el && el.hasAttribute && el.hasAttribute(name));
     }
     function setAttr(el, name, value, opt_state /* @internal */) {
         if (isENode(el)) {
@@ -1962,10 +1985,11 @@
             } else if (name == NAME_TEXT && getTag(el) == 'option') {
                 el[NAME_TEXT] = value;
             } else if (!$isFalse(opt_state) /* speed */ && (opt_state || re_attrState.test(name))) {
-                (value || $isUndefined(value)) ? (el[fn_setAttr](name, ''), el[name] = !!value)
+                (value || $isUndefined(value))
+                    ? (el.setAttribute(name, ''), el[name] = !!value)
                     : (removeAttr(el, name), el[name] = FALSE);
             } else {
-                el[fn_setAttr](name, value);
+                el.setAttribute(name, value);
             }
         }
     }
@@ -2598,25 +2622,6 @@
             return $isVoid(option) ? getState(this[0], NAME_READONLY) : this.for(function(el) {
                 setState(el, NAME_READONLY, option);
             });
-        }
-    });
-
-    // dom: win & doc checkers
-    toDomPrototype(Dom, {
-        /**
-         * Is window.
-         * @return {Bool}
-         */
-        isWindow: function() {
-            return $isWindow(this[0]);
-        },
-
-        /**
-         * Is document.
-         * @return {Bool}
-         */
-        isDocument: function() {
-            return $isDocument(this[0]);
         }
     });
 

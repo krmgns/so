@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.79.2';
+    $win.so.VERSION = '5.80.0';
 
     // minify candies
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
@@ -1135,30 +1135,6 @@
         },
 
         /**
-         * Get window.
-         * @param  {Any} object
-         * @return {Window}
-         */
-        getWindow: function(object) {
-            if (!object)                     return $win;
-            if (object[NAME_OWNER_DOCUMENT]) return object[NAME_OWNER_DOCUMENT][NAME_DEFAULT_VIEW];
-            if (isWindow(object))            return object;
-            if (isDocument(object))          return object[NAME_DEFAULT_VIEW];
-        },
-
-        /**
-         * Get document.
-         * @param  {Any} object
-         * @return {Document}
-         */
-        getDocument: function(object) {
-            if (!object)                     return $win[NAME_DOCUMENT];
-            if (object[NAME_OWNER_DOCUMENT]) return object[NAME_OWNER_DOCUMENT]; // node
-            if (isDocument(object))          return object;
-            if (isWindow(object))            return object[NAME_DOCUMENT];
-        },
-
-        /**
          * Trim.
          * @param  {String} input
          * @param  {String} chars?
@@ -1210,15 +1186,15 @@
 
         /**
          * Type of.
-         * @param  {Any} input
+         * @param  {Any} x
          * @return {String}
          */
-        type: function(input) {
-            return isNull(input) ? 'null'
-                : isUndefined(input) ? 'undefined'
-                : isWindow(input) ? NAME_WINDOW
-                : isDocument(input) ? NAME_DOCUMENT
-                : lower(fn_toString.call(input).slice(8, -1));
+        type: function(x) {
+            return isNull(x)      ? 'null'
+                 : isUndefined(x) ? 'undefined'
+                 : isWindow(x)    ? NAME_WINDOW
+                 : isDocument(x)  ? NAME_DOCUMENT
+                 : lower(fn_toString.call(x).slice(8, -1));
         },
 
         /**
@@ -1309,6 +1285,40 @@
             }
 
             return ret;
+        },
+
+        /**
+         * Win,Doc (alias of getWindow(),getDocument())
+         */
+        win: function(x) {
+            return $.getWindow(x);
+        },
+        doc: function(x) {
+            return $.getDocument(x);
+        },
+
+        /**
+         * Get window.
+         * @param  {Any} x
+         * @return {Window}
+         */
+        getWindow: function(x) {
+            if (!x)                     return $win;
+            if (x[NAME_OWNER_DOCUMENT]) return x[NAME_OWNER_DOCUMENT][NAME_DEFAULT_VIEW];
+            if (isWindow(x))            return x;
+            if (isDocument(x))          return x[NAME_DEFAULT_VIEW];
+        },
+
+        /**
+         * Get document.
+         * @param  {Any} x
+         * @return {Document}
+         */
+        getDocument: function(x) {
+            if (!x)                     return $win[NAME_DOCUMENT];
+            if (x[NAME_OWNER_DOCUMENT]) return x[NAME_OWNER_DOCUMENT]; // node
+            if (isDocument(x))          return x;
+            if (isWindow(x))            return x[NAME_DOCUMENT];
         }
     });
 

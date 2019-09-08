@@ -7,7 +7,7 @@
  */
 ;(function($) { 'use strict';
 
-    var $win = $.getWindow();
+    var $win = $.win();
 
     // minify candies
     var JSON = $win.JSON, Math = $win.Math;
