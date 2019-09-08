@@ -2198,9 +2198,9 @@
                 if (isSelectInput(el)) {
                     option = el[NAME_OPTIONS][el[NAME_SELECTED_INDEX]];
                     // prevent no value'd options
-                    value = option && hasAttr(option, NAME_VALUE) ? option[NAME_VALUE] : UNDEFINED;
+                    value = option && hasAttr(option, NAME_VALUE) ? option[NAME_VALUE] : '';
                 } else if (isCheckInput(el)) {
-                    value = el[NAME_CHECKED] ? el[NAME_VALUE] || 'on' : UNDEFINED;
+                    value = el[NAME_CHECKED] ? (el[NAME_VALUE] || 'on') : '';
                 } else {
                     value = el[NAME_VALUE];
                 }
