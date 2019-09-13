@@ -25,15 +25,14 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.80.1';
+    $win.so.VERSION = '5.81.0';
 
     // minify candies
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
     var NAME_NODE_TYPE = 'nodeType', NAME_PROTOTYPE = 'prototype';
     var NAME_DEFAULT_VIEW = 'defaultView', NAME_OWNER_DOCUMENT = 'ownerDocument';
     var NAME_LENGTH = 'length';
-    var Array = $win.Array, Object = $win.Object;
-    var String = $win.String, Number = $win.Number;
+    var Array = $win.Array, Object = $win.Object, String = $win.String
     var Date = $win.Date, RegExp = $win.RegExp, Math = $win.Math;
 
     // safe bind for ie9 (yes, still ie..)
@@ -1002,19 +1001,36 @@
         }
     });
 
-    /**
-     * Number extends.
-     */
-    extend(Number[NAME_PROTOTYPE], {
-        /**
-         * Equals.
-         * @param  {Number} input
-         * @return {Bool}
-         */
-        equals: function(input) {
-            return equals(this, input);
-        }
-    });
+    // /**
+    //  * Number extends.
+    //  */
+    // extend(Number[NAME_PROTOTYPE], {
+    //     /**
+    //      * Equals.
+    //      * @param  {Number} input
+    //      * @return {Bool}
+    //      */
+    //     equals: function(input) {
+    //         return equals(this, input);
+    //     }
+    // });
+
+    // /**
+    //  * Boolean extends.
+    //  */
+    // extend(Boolean[NAME_PROTOTYPE], {
+    //     /**
+    //      * To int.
+    //      * @return {Int}
+    //      */
+    //     toInt = function() { return this | 0; }
+    //
+    //     /**
+    //      * To value.
+    //      * @return {String}
+    //      */
+    //     toValue = function() { return this ? '1' : ''; }
+    // });
 
     var _id = 0;
     var fn_slice = [].slice;
