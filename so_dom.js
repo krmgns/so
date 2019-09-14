@@ -102,6 +102,7 @@
     var re_attr = /\[.+\]/;
     var re_attrFix = /([.:])/g;
     var re_attrFixMatch = /\[([^=]+)(=[^\]]+)?\]/g;
+    var re_data = /(data-[^\^$*]+)([\^$*])/;
     var re_idOrClass = /^(?:(?:#([^ ]+))|(?:\.([\w-]+)))$/;
 
     /**
@@ -114,32 +115,6 @@
     function select(selector, root, one) {
         if (!selector) return;
 
-        var ret, parent;
-        selector = selector.replace(re_space, ' ');
-
-        // @note: should not be mixed in a complex selector (eg: 'a.foo:first, body')
-        if (re_child.test(selector)) {
-            // eg: p:first => p:first-child
-            selector = selector.replace(re_childFix, function(_, _1, _2, _3) {
-                return _1 +':'+ (_3 ? 'nth-child'+ _3 : _2 +'-child');
-            });
-        }
-        // @note: should not be mixed in a complex selector (eg: 'a.foo:parent, body')
-        else if (selector.has(':parent')) {
-            // eg: p:parent => p->parentNode
-            selector = selector.removeAll(':parent'), parent = TRUE;
-        }
-
-        // grammar: https://www.w3.org/TR/css3-selectors/#grammar
-        if (re_attr.test(selector)) {
-            // eg: 'a.b' => 'a\.b' or 'a.b="c"' => 'a\.b="c"'
-            selector = selector.replace(re_attrFixMatch, function(_, _1, _2) {
-                _1 = _1.replace(re_attrFix, '\\$1'); // name
-                _2 = _2 ? _2.sub(1) : '';            // value
-                return '['+ _1 + (_2 ? $isNumeric(_2) ? '="'+ _2 +'"' : '='+ _2 : '') +']';
-            })
-        }
-
         if (root) {
             // both Dom & String accepted as "root"
             if (isDom(root)) {
@@ -151,12 +126,57 @@
             root = $doc;
         }
 
+        var r, re, ret, isAttr, isParent, els = [];
+        selector = selector.replace(re_space, ' ');
+
+        // @note: seems, it isn't that kinda cheap.. (eg: "[data-*]")
+        isAttr = re_attr.test(selector);
+        if (isAttr) {
+            re = selector.grepAll(re_data) || [];
+            if (re) {
+                $array(querySelectorAll(root, '*')).each(function(el, i) {
+                    i = 0;
+                    while (r = re[i++]) {
+                        getAttrs(el, TRUE).each(function(name) {
+                            if (name.startsWith(r[0])) {
+                                els.push(el);
+                            }
+                        })
+                    }
+                });
+            }
+            return els;
+        }
+
+        // @note: should not be mixed in a complex selector (eg: 'a.foo:first, body')
+        if (re_child.test(selector)) {
+            // eg: p:first => p:first-child
+            selector = selector.replace(re_childFix, function(_, _1, _2, _3) {
+                return _1 +':'+ (_3 ? 'nth-child'+ _3 : _2 +'-child');
+            });
+        }
+        // @note: should not be mixed in a complex selector (eg: 'a.foo:parent, body')
+        else if (selector.has(':parent')) {
+            // eg: p:parent => p->parentNode
+            selector = selector.removeAll(':parent'), isParent = TRUE;
+        }
+
+        // grammar: https://www.w3.org/TR/css3-selectors/#grammar
+        if (isAttr) {
+            // eg: 'a.b' => 'a\.b' or 'a.b="c"' => 'a\.b="c"'
+            selector = selector.replace(re_attrFixMatch, function(_, _1, _2) {
+                _1 = _1.replace(re_attrFix, '\\$1'); // name
+                _2 = _2 ? _2.sub(1) : '';            // value
+                return '['+ _1 + (_2 ? $isNumeric(_2) ? '="'+ _2 +'"' : '='+ _2 : '') +']';
+            })
+        }
+
         ret = $array(
             one ? querySelector(root, selector) // speed..
                 : querySelectorAll(root, selector)
         );
 
-        if (parent) {
+        if (isParent) {
             ret = ret.each(function(el, i) {
                 ret[i] = el[NAME_PARENT_NODE];
             })
