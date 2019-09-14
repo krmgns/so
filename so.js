@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.81.0';
+    $win.so.VERSION = '5.81.1';
 
     // minify candies
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
@@ -527,7 +527,7 @@
          * @override
          */
         filter: function(fn) {
-            // prevent: undefined is not a function
+            // prevent: "undefined isn't a function" error
             fn = fn || function(el) { return trim(el) };
 
             var _this = this, ret = [];

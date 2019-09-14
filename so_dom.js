@@ -101,7 +101,7 @@
     var re_childFix = /([\w-]+|):(first|last|nth([^-].+))/g;
     var re_attr = /\[.+\]/;
     var re_attrFix = /([.:])/g;
-    var re_attrMatch = /(\[[^=\]]+)[.:]/g;
+    var re_attrFixMatch = /\[([^=]+)(=[^\]]+)?\]/g;
     var re_idOrClass = /^(?:(?:#([^ ]+))|(?:\.([\w-]+)))$/;
 
     /**
@@ -132,9 +132,12 @@
 
         // grammar: https://www.w3.org/TR/css3-selectors/#grammar
         if (re_attr.test(selector)) {
-            (selector.matchAll(re_attrMatch) || []).each(function(match) {
-                selector = selector.replace(match[0], match[0].replace(re_attrFix, '\\$1'));
-            });
+            // eg: 'a.b' => 'a\.b' or 'a.b="c"' => 'a\.b="c"'
+            selector = selector.replace(re_attrFixMatch, function(_, _1, _2) {
+                _1 = _1.replace(re_attrFix, '\\$1'); // name
+                _2 = _2 ? _2.sub(1) : '';            // value
+                return '['+ _1 + (_2 ? $isNumeric(_2) ? '="'+ _2 +'"' : '='+ _2 : '') +']';
+            })
         }
 
         if (root) {
@@ -2880,7 +2883,7 @@
         var docEl = doc && doc[NAME_DOCUMENT_ELEMENT];
         var nodes = [], node, iter, ret;
         if (!docEl) {
-            throw ('XPath is not supported by root object!');
+            throw ('XPath isn\'t supported by root object!');
         }
 
         if (doc.evaluate) {
