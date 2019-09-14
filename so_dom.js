@@ -132,7 +132,7 @@
         // @note: seems, it isn't that kinda cheap.. (eg: "[data-*]")
         isAttr = re_attr.test(selector);
         if (isAttr) {
-            re = selector.grepAll(re_data) || [];
+            re = selector.grepAll(re_data);
             if (re) {
                 $array(querySelectorAll(root, '*')).each(function(el, i) {
                     i = 0;
@@ -144,8 +144,8 @@
                         })
                     }
                 });
+                return els;
             }
-            return els;
         }
 
         // @note: should not be mixed in a complex selector (eg: 'a.foo:first, body')
