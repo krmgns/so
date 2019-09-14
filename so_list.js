@@ -200,11 +200,11 @@
         /**
          * Has.
          * @param  {Any}  search
-         * @param  {Bool} strict
+         * @param  {Bool} opt_strict
          * @return {Bool}
          */
-        has: function(search, strict) {
-            return $.has(this.data, search, strict);
+        has: function(search, opt_strict) {
+            return $.has(search, this.data, opt_strict);
         },
 
         /**

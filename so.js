@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.82.1';
+    $win.so.VERSION = '5.82.2';
 
     // minify candies
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
@@ -403,25 +403,27 @@
     };
 
     // shortcuts
-    function index(input, search, opt_last) {
-        return !opt_last ? input.indexOf(search) : input.lastIndexOf(search);
+    function index(search, stack, opt_last) {
+        return stack && (!opt_last ? stack.indexOf(search) : stack.lastIndexOf(search));
     }
 
-    function has(input, search, opt_strict) {
+    function has(search, stack, opt_strict) {
         var ret;
 
-        if (isString(input)) {
+        if (isString(stack)) {
             ret = isNulls(search) ? -1 // fix empty search issue
-                : isRegExp(search) ? input.search(search) : index(input, search); // simply
-        } else if (isArray(input) || isObject(input)) {
-            $.for(input, function(value, i) {
+                : isRegExp(search) ? stack.search(search) : index(search, stack); // simply
+        } else if (isArray(stack)) {
+            ret = index(search, stack);
+        } else if (isObject(stack)) {
+            $.for(stack, function(value, i) {
                 if (opt_strict ? value === search : value == search) {
                     return (ret = i), _break;
                 }
             });
         }
 
-        return ret > -1;
+        return (ret > -1);
     }
 
     function equals(a, b, opt_sort, opt_deep /* @todo */) {
@@ -444,8 +446,8 @@
 
     function toUniqUnuniq(array, opt_ununiq) {
         return opt_ununiq
-            ? array.filter(function(el, i, _array) { return index(_array, el) != i; })
-            : array.filter(function(el, i, _array) { return index(_array, el) == i; });
+            ? array.filter(function(el, i, _array) { return index(el, _array) != i; })
+            : array.filter(function(el, i, _array) { return index(el, _array) == i; });
     }
 
     /**
@@ -467,7 +469,7 @@
          * @return {Bool}
          */
         has: function(search, opt_strict) {
-            return has(this, search, opt_strict);
+            return has(search, this, opt_strict);
         },
 
         /**
@@ -596,7 +598,7 @@
          * @return {Bool}
          */
         has: function(search, opt_strict) {
-            return has(this, search, opt_strict);
+            return has(search, this, opt_strict);
         },
 
         /**
@@ -929,7 +931,7 @@
             var s = this, ret = -1;
 
             if (!isNulls(search)) { // fix empty search issue
-                ret = index(s, search, opt_last);
+                ret = index(search, s, opt_last);
             }
 
             return ret;
@@ -943,6 +945,7 @@
          */
         sub: function(start, end) {
             var s = this;
+
             if (start < 0) {
                 start = len(s) + start; // eg: 'Kerem'.(-3) => 'rem', not 'Kerem'
             } else {
@@ -1225,23 +1228,23 @@
 
         /**
          * In.
-         * @param  {Array|String} input
          * @param  {Any}          search
+         * @param  {Array|String} stack
          * @return {Bool}
          */
-        in: function(input, search) {
-            return index(index, search) > -1;
+        in: function(search, stack) {
+            return index(search, stack) > -1;
         },
 
         /**
          * Has.
-         * @param  {Any}  input
          * @param  {Any}  search
+         * @param  {Any}  stack
          * @param  {Bool} opt_strict?
          * @return {Bool}
          */
-        has: function(input, search, opt_strict) {
-            return has(input, search, opt_strict);
+        has: function(search, stack, opt_strict) {
+            return has(search, stack, opt_strict);
         },
 
         /**
