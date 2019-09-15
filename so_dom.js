@@ -102,8 +102,8 @@
     var re_attr = /\[.+\]/;
     var re_attrFix = /([.:])/g;
     var re_attrFixMatch = /\[([^=]+)(=[^\]]+)?\]/g;
-    var re_data = /(data-[\w-]+)\*/;
-    var re_idOrClass = /^(?:(?:#([^ ]+))|(?:\.([\w-]+)))$/;
+    var re_data = /([\w-]+)?\[(data-[\w-]+)\*/;
+    var re_idOrClass = /^([#.])([\w-]+)$/;
 
     /**
      * Select.
@@ -126,25 +126,31 @@
             root = $doc;
         }
 
-        var r, re, ret, isAttr, isParent, els = [];
+        var r, re, ret = [], isAttr, isParent, i, s;
         selector = selector.replace(re_space, ' ');
 
-        // @note: seems, it isn't that kinda cheap.. (eg: "[data-*]")
+        // @note: seems, it isn't that kinda cheap.. (eg: "[data-*]" or "a[data-*]")
         isAttr = re_attr.test(selector);
         if (isAttr) {
-            re = selector.grepAll(re_data);
+            re = selector.matchAll(re_data);
             if (re) {
-                $array(querySelectorAll(root, '*')).each(function(el, i) {
+                i = 0, s = [];
+                while (r = re[i++]) {
+                    s.push(r[1] || ''); // collect tags
+                }
+                s = s.filter().len() ? s.join(',') : '*'; // query all selector
+
+                $array(querySelectorAll(root, s)).each(function(el) {
                     i = 0;
                     while (r = re[i++]) {
                         getAttrs(el, TRUE).each(function(name) {
-                            if (name.startsWith(r[0])) {
-                                els.push(el);
+                            if (name.startsWith(r[2])) {
+                                ret.push(el);
                             }
                         })
                     }
                 });
-                return els;
+                return ret;
             }
         }
 
@@ -198,17 +204,17 @@
             if ($isString(selector)) {
                 selector = $trim(selector);
                 if (selector) {
-                    // id & class check (speed issue)
+                    // id & class check (some speed..)
                     if (re = selector.match(re_idOrClass)) {
-                        els = ((root = $doc) && re[1])
-                            ? [root.getElementById(re[1])] : root.getElementsByClassName(re[2]);
+                        els = (root = $doc, re[1] == '#')
+                            ? [root.getElementById(re[2])] : root.getElementsByClassName(re[2]);
                     } else if (re = selector.match(re_tag)) {
                         // root could be document or attributes
                         els = create(selector, root, root, re[1]);
                     } else if (selector[0] == '>') {
                         root = isENode(root) ? root : $doc[NAME_DOCUMENT_ELEMENT];
                         // buggy :scope selector
-                        idv = getAttr(root, (idn = soPrefix +'buggy-scope-selector')) || $rid();
+                        idv = getAttr(root, (idn = soPrefix +'_')) || $rid();
                         setAttr(root, idn, idv, FALSE);
                         // fix '>' only selector
                         if (selector.len() == 1) {
@@ -1690,7 +1696,7 @@
     }
 
     function isVisibleParent(el) {
-        var parent = el && el[NAME_PARENT_ELEMENT];
+        var parent = (el && el[NAME_PARENT_ELEMENT]);
 
         while (parent) {
             if (isVisible(parent)) {
