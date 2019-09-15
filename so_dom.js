@@ -102,7 +102,7 @@
     var re_attr = /\[.+\]/;
     var re_attrFix = /([.:])/g;
     var re_attrFixMatch = /\[([^=]+)(=[^\]]+)?\]/g;
-    var re_data = /(data-[^\^$*]+)([\^$*])/;
+    var re_data = /(data-[\w-]+)\*/;
     var re_idOrClass = /^(?:(?:#([^ ]+))|(?:\.([\w-]+)))$/;
 
     /**

@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.82.2';
+    $win.so.VERSION = '5.82.3';
 
     // minify candies
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
@@ -410,9 +410,10 @@
     function has(search, stack, opt_strict) {
         var ret;
 
-        if (isString(stack)) {
-            ret = isNulls(search) ? -1 // fix empty search issue
-                : isRegExp(search) ? stack.search(search) : index(search, stack); // simply
+        if (isNulls(search) || isNulls(stack)) { // fix empty stuff issue
+            ret = -1;
+        } else if (isString(stack)) {
+            ret = isRegExp(search) ? stack.search(search) : index(search, stack); // simply
         } else if (isArray(stack)) {
             ret = index(search, stack);
         } else if (isObject(stack)) {
@@ -807,7 +808,7 @@
             var flags = pattern.flags;
             var r, re, ret = [], slashPos;
 
-            if (!flags) { // hellö ie.. ?}/=%&'|#)"^*1...!
+            if (isVoid(flags)) { // hellö ie.. ?}/=%&'|#)"^*1...!
                 slashPos = (pattern = toString(pattern)).pos('/', TRUE);
                 source = pattern.sub(1, slashPos);
                 flags = pattern.sub(slashPos + 1);
@@ -930,7 +931,7 @@
         pos: function(search, opt_last) {
             var s = this, ret = -1;
 
-            if (!isNulls(search)) { // fix empty search issue
+            if (!isNulls(s) && !isNulls(search)) { // fix empty stuff issue
                 ret = index(search, s, opt_last);
             }
 
