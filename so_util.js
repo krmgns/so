@@ -152,6 +152,7 @@
                 })
             }
 
+            // give filtered return
             return $.forEach(ret, function(name, value) {
                 if (!value) ret[name] = null;
             })

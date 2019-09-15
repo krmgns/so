@@ -142,7 +142,7 @@
 
     // safer length getter
     function len(input) {
-        return input && input[NAME_LENGTH];
+        return (input && input[NAME_LENGTH]);
     }
 
     /**
