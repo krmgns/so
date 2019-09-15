@@ -172,7 +172,7 @@
             // eg: 'a.b' => 'a\.b' or 'a.b="c"' => 'a\.b="c"'
             selector = selector.replace(re_attrFixMatch, function(_, _1, _2) {
                 _1 = _1.replace(re_attrFix, '\\$1'); // name
-                _2 = _2 ? _2.sub(1) : '';            // value
+                _2 = _2 ? _2.slice(1) : '';          // value
                 return '['+ _1 + (_2 ? $isNumeric(_2) ? '="'+ _2 +'"' : '='+ _2 : '') +']';
             })
         }

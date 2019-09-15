@@ -69,7 +69,7 @@
                 ret += rand(0, base);
             }
 
-            return ret.sub(0, len);
+            return ret.slice(0, len);
         },
 
         /**

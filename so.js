@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.82.4';
+    $win.so.VERSION = '5.83.0';
 
     // minify candies
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
@@ -806,12 +806,12 @@
         matchAll: function(pattern) {
             var source = pattern.source;
             var flags = pattern.flags;
-            var r, re, ret = [], slashPos;
+            var r, re, ret = [], slashIndex;
 
             if (isVoid(flags)) { // hellö ie.. ?}/=%&'|#)"^*1...!
-                slashPos = (pattern = toString(pattern)).pos('/', TRUE);
-                source = pattern.sub(1, slashPos);
-                flags = pattern.sub(slashPos + 1);
+                slashIndex = index('/', (pattern = toString(pattern)), TRUE)
+                source = pattern.slice(1, slashIndex);
+                flags = pattern.slice(slashIndex + 1);
             }
 
             // never forget or lost in infinite loops..
@@ -923,40 +923,6 @@
         },
 
         /**
-         * Pos.
-         * @param  {String} search
-         * @param  {Bool}   opt_last?
-         * @return {Int}
-         */
-        pos: function(search, opt_last) {
-            var s = this, ret = -1;
-
-            if (!isNulls(s) && !isNulls(search)) { // fix empty stuff issue
-                ret = index(search, s, opt_last);
-            }
-
-            return ret;
-        },
-
-        /**
-         * Sub.
-         * @param  {Int} start?
-         * @param  {Int} end?
-         * @return {String}
-         */
-        sub: function(start, end) {
-            var s = this;
-
-            if (start < 0) {
-                start = len(s) + start; // eg: 'Kerem'.(-3) => 'rem', not 'Kerem'
-            } else {
-                end = end > 0 ? end : len(s) + (end | 0); // eg: 'Kerem'.(1, -2) => 'er', not 'K'
-            }
-
-            return s.substring(start, end);
-        },
-
-        /**
          * Contains.
          * @param  {String} search
          * @param  {Int}    offset?
@@ -964,7 +930,7 @@
          * @return {Bool}
          */
         contains: function(search, offset, opt_noCase) {
-            return this.sub(offset).test(prepareSearchRegExp(search, opt_noCase, NULL, TRUE));
+            return this.slice(offset).test(prepareSearchRegExp(search, opt_noCase, NULL, TRUE));
         },
 
         /**
@@ -975,7 +941,7 @@
          * @return {Bool}
          */
         containsAny: function(chars, offset, opt_noCase) {
-            return this.sub(offset).test(prepareSearchRegExp('('+ (
+            return this.slice(offset).test(prepareSearchRegExp('('+ (
                 isString(chars) ? chars.split('') : chars // array
             ).uniq().map(toRegExpEsc).join('|') +')', opt_noCase));
         },
@@ -989,7 +955,7 @@
          * @override For no-case option.
          */
         startsWith: function(search, offset, opt_noCase) {
-            return this.sub(offset).test(prepareSearchRegExp(search, opt_noCase, 1, TRUE));
+            return this.slice(offset).test(prepareSearchRegExp(search, opt_noCase, 1, TRUE));
         },
 
         /**
@@ -1001,7 +967,7 @@
          * @override For no-case option.
          */
         endsWith: function(search, offset, opt_noCase) {
-            return this.sub(offset).test(prepareSearchRegExp(search, opt_noCase, 2, TRUE));
+            return this.slice(offset).test(prepareSearchRegExp(search, opt_noCase, 2, TRUE));
         }
     });
 

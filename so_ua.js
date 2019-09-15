@@ -20,7 +20,7 @@
     ];
 
     var navigator = window.navigator,
-        ua = navigator.userAgent.lower().sub(0, 250), // safe..
+        ua = navigator.userAgent.lower().slice(0, 250), // safe..
         uap = navigator.platform.lower();
 
     $.ua = (function() {
@@ -60,7 +60,7 @@
             if (_.isMobile()) {
                 re_mobs.each(function(re) {
                     if (re = re.exec(ua)) {
-                        if (re[1].sub(0, 2) == 'ip') {
+                        if (re[1].slice(0, 2) == 'ip') {
                             re = [, 'ios', re[2].replace(/_/g, '.')];
                         }
                         _.os.name = re[1].remove(/ +/g);
