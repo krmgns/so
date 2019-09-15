@@ -694,7 +694,7 @@
             var parent = this[0], _parent;
 
             if (parent) {
-                this.findAll(selector).for(function(el) {
+                this.$$(selector).for(function(el) {
                     _parent = el[NAME_PARENT_NODE];
                     if (_parent && _parent == parent) {
                         removeChild(parent, cleanElement(el));
@@ -1081,7 +1081,7 @@
                 // eg: $.dom("p").not(".red")
                 ret = intersect(_this.all(),
                     $isFalse(opt_useParent) ? toDom(selector).all()
-                        : _this.parent().findAll(toAllSelector(selector)).all()
+                        : _this.parent().$$(toAllSelector(selector)).all()
                 );
             } else if (isDom(selector)) {
                 // $.dom("p").not($element)
@@ -1148,7 +1148,7 @@
             if (el) {
                 ret = noIntersect(el, walk(el[NAME_PARENT_NODE], NAME_CHILDREN));
                 if (ret.len() && (selector = toAllSelector(selector))) {
-                    ret = intersect(ret, noIntersect(el, toDom(el[NAME_PARENT_NODE]).findAll(selector).all()), TRUE);
+                    ret = intersect(ret, noIntersect(el, toDom(el[NAME_PARENT_NODE]).$$(selector).all()), TRUE);
                 }
             }
 
@@ -1168,7 +1168,7 @@
          * @return {Dom}
          */
         firstChild: function() {
-            return this.find('> :first');
+            return this.$('> :first');
         },
 
         /**
@@ -1176,7 +1176,7 @@
          * @return {Dom}
          */
         lastChild: function() {
-            return this.find('> :last');
+            return this.$('> :last');
         },
 
         /**
@@ -1185,7 +1185,7 @@
          * @return {Dom}
          */
         nthChild: function(i) {
-            return this.find('> :nth('+ i +')');
+            return this.$('> :nth('+ i +')');
         },
 
         /**
@@ -1223,7 +1223,7 @@
             if (el) {
                 ret = walk(el, NAME_PREVIOUS_ELEMENT_SIBLING).reverse();
                 if (ret.len() && (selector = toAllSelector(selector))) {
-                    ret = intersect(ret, toDom(el[NAME_PARENT_NODE]).findAll(selector).all(), TRUE);
+                    ret = intersect(ret, toDom(el[NAME_PARENT_NODE]).$$(selector).all(), TRUE);
                 }
             }
 
@@ -1249,7 +1249,7 @@
             if (el) {
                 ret = walk(el, NAME_NEXT_ELEMENT_SIBLING);
                 if (ret.len() && (selector = toAllSelector(selector))) {
-                    ret = intersect(ret, toDom(el[NAME_PARENT_NODE]).findAll(selector).all(), TRUE);
+                    ret = intersect(ret, toDom(el[NAME_PARENT_NODE]).$$(selector).all(), TRUE);
                 }
             }
 

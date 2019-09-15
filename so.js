@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.83.0';
+    $win.so.VERSION = '5.83.1';
 
     // minify candies
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
@@ -136,7 +136,7 @@
     }
 
     function toRegExpEsc(input) {
-        // @note slash (/) is escaped already
+        // @note slash (/) is escaped already by RegExp
         return toString(input).replace(/[.*+?^$|{}()\[\]\\]/g, '\\$&');
     }
 
