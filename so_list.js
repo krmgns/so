@@ -7,7 +7,7 @@
  */
 ;(function($) { 'use strict';
 
-    var $for = $.for, $forEach = $.forEach, $bool = $.bool;
+    var $for = $.for, $forEach = $.forEach;
     var fn_slice = [].slice;
     var _break = 0;
 
@@ -49,7 +49,7 @@
          * Init.
          * @param  {Iterable} data
          * @param  {Object}   options
-         * @return {List}
+         * @return {this}
          */
         init: function(data, options) {
             if (!$.isIterable(data)) {
@@ -80,7 +80,7 @@
         /**
          * For.
          * @param  {Function} fn
-         * @return {List}
+         * @return {this}
          */
         for: function(fn) {
             return $for(this.data, fn, this);
@@ -89,7 +89,7 @@
         /**
          * For each.
          * @param  {Function} fn
-         * @return {List}
+         * @return {this}
          */
         forEach: function(fn) {
             return $forEach(this.data, fn, this);
@@ -99,7 +99,7 @@
          * Set.
          * @param  {Int|String} key?
          * @param  {Any}        value
-         * @return {List}
+         * @return {this}
          */
         set: function(key, value) {
             var _this = this, key = (key != null) ? key : _this._len;
@@ -125,7 +125,7 @@
         /**
          * Append (alias of append()).
          * @param  {Any} value
-         * @return {List}
+         * @return {this}
          */
         add: function(value) {
             return this.append(value);
@@ -134,7 +134,7 @@
         /**
          * Remove.
          * @param  {Any} value
-         * @return {List}
+         * @return {this}
          */
         remove: function(value) {
             return this.pull(this.findIndex(value)), this;
@@ -143,7 +143,7 @@
         /**
          * Remove at.
          * @param  {Int|String} key
-         * @return {List}
+         * @return {this}
          */
         removeAt: function(key) {
             return this.pull(key), this;
@@ -153,7 +153,7 @@
          * Replace.
          * @param  {Any} searchValue
          * @param  {Any} replaceValue
-         * @return {List}
+         * @return {this}
          */
         replace: function(searchValue, replaceValue) {
             return this.forEach(function(key, value) {
@@ -167,7 +167,7 @@
          * Replace at.
          * @param  {Int|String} key
          * @param  {Any}        replaceValue
-         * @return {List}
+         * @return {this}
          */
         replaceAt: function(key, replaceValue) {
             return (this.data[key] = replaceValue), this;
@@ -175,7 +175,7 @@
 
         /**
          * Empty.
-         * @return {List}
+         * @return {this}
          */
         empty: function() {
             return (this.data = {}, this._len = 0), this;
@@ -219,7 +219,7 @@
         /**
          * Append.
          * @param  {Any} value
-         * @return {List}
+         * @return {this}
          */
         append: function(value) {
             return this.set(null, value);
@@ -228,7 +228,7 @@
         /**
          * Prepend.
          * @param  {Any} value
-         * @return {List}
+         * @return {this}
          */
         prepend: function(value) {
             var data = {0: value};
@@ -295,7 +295,7 @@
         /**
          * Push (alias of append()).
          * @param  {Any} value
-         * @return {List}
+         * @return {this}
          */
         push: function(value) {
             return this.append(value);
@@ -304,7 +304,7 @@
         /**
          * Push all.
          * @param  {Any} ...arguments
-         * @return {List}
+         * @return {this}
          */
         pushAll: function() {
             return $for(arguments, function(value) {
@@ -371,7 +371,7 @@
          * @return {List}
          */
         copy: function(options) {
-            return $.list(this, options);
+            return initList(this, options);
         },
 
         /**
@@ -396,7 +396,7 @@
                 data[key] = fn(value, key, i);
             });
 
-            return $.list(data, {type: this.type});
+            return initList(data, {type: this.type});
         },
 
         /**
@@ -420,7 +420,7 @@
          */
         filter: function(fn) {
             var data = {};
-            fn = fn || function(value) { return $bool(value); }; // set default tester
+            fn = fn || function(value) { return $.trim(value); }; // set default tester
 
             this.forEach(function(key, value, i) {
                 if (fn(value, key, i)) {
@@ -428,7 +428,7 @@
                 }
             });
 
-            return $.list(data, {type: this.type});
+            return initList(data, {type: this.type});
         },
 
         /**
@@ -436,7 +436,7 @@
          * @return {List}
          */
         uniq: function() {
-            return $.list(this.values().uniq(), {type: this.type});
+            return initList(this.values().uniq(), {type: this.type});
         },
 
         /**
@@ -444,12 +444,12 @@
          * @return {List}
          */
         ununiq: function() {
-            return $.list(this.values().ununiq(), {type: this.type});
+            return initList(this.values().ununiq(), {type: this.type});
         },
 
         /**
          * Reverse.
-         * @return {List}
+         * @return {this}
          */
         reverse: function() {
             var _this = this, data = {};
@@ -477,12 +477,12 @@
                 ret[i] = values[i];
             }
 
-            return size == 1 ? ret[0] : ret;
+            return (size == 1) ? ret[0] : ret;
         },
 
         /**
          * Shuffle.
-         * @return {List}
+         * @return {this}
          */
         shuffle: function() {
             var _this = this, data = {}, keys, shuffledKeys, i;
@@ -496,13 +496,13 @@
                 data = shuffle(_this.values());
             }
 
-            return $.list(data, {type: _this.type});
+            return (_this.data = data), _this;
         },
 
         /**
          * Sort.
          * @param  {Function} fn?
-         * @return {List}
+         * @return {this}
          */
         sort: function(fn) {
             var _this = this, data = {}, flippedData;
@@ -597,6 +597,11 @@
         }
     };
 
+    // helper (minify candy)
+    function initList(data, options) {
+        return new List(data, options);
+    }
+
     /**
      * List.
      * @param  {Iterable} data
@@ -604,7 +609,7 @@
      * @return {List}
      */
     $.list = function(data, options) {
-        return new List(data, options);
+        return initList(data, options);
     };
 
     /**
@@ -613,7 +618,7 @@
      * @return {Bool}
      */
     $.isList = function(input) {
-        return $bool(input && input instanceof List);
+        return (input instanceof List);
     };
 
 })(window.so);

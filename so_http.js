@@ -329,7 +329,7 @@
     $extend(Client.prototype, {
         /**
          * Send.
-         * @return {Client}
+         * @return {this}
          */
         send: function() {
             var _this = this, data,
@@ -417,7 +417,7 @@
         /**
          * End.
          * @param  {Function} fn
-         * @return {Client}
+         * @return {this}
          */
         end: function(fn) {
             return this.on('done', fn);
@@ -428,7 +428,7 @@
          * @return {Bool}
          */
         ok: function() {
-            return (200 === this.response.statusCode);
+            return (this.response.statusCode === 200);
         },
 
         /**
@@ -453,7 +453,7 @@
          * On.
          * @param  {String}   name
          * @param  {Function} callback
-         * @return {Client}
+         * @return {this}
          */
         on: function(name, callback) {
             this.options.ons[name] = callback;
@@ -461,7 +461,7 @@
         }
     });
 
-    // shortcut helpers
+    // helpers
     function initClient(uri, options) {
         return new Client(uri, options);
     }

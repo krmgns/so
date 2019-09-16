@@ -33,14 +33,13 @@ body {height: 3000px}
 <script>
 // so.ready(function($, $$) {
 so(function($, $$) {
-    var url = $.util.url("https://dom.com/i/crop/a.php?x=1&y=22#ooo")
-    log(url)
-
+    var x;
+    log(x instanceof String)
+    // var url = $.util.url("https://dom.com/i/crop/a.php?x=1&y=22#ooo")
+    // log(url)
 
     // $("button", el => log(el))
     // $("button").each(el => log(el))
-
-    // return;;;
 
     // var $el = $("#div")
     // log($el.soAttr("ok"))
@@ -75,7 +74,7 @@ so(function($, $$) {
     $("[hide]").on("click", () => $(".outer").hide("normal"))
     $("[toggle]").on("click", () => {
         $(".outer").toggle("normal", "", (a) => {
-            log(a)
+            log(a.$el.animated())
         })
     })
     $("[toggleBy]").on("click", () => $(".outer").toggleBy(true, "normal"))

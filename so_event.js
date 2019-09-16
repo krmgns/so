@@ -127,7 +127,7 @@
 
     /**
      * Extend fn.
-     * @param  {Event}    event
+     * @param  {this}    event
      * @param  {Function} fn
      * @return {Function}
      */
@@ -284,7 +284,7 @@
     $extend(Event.prototype, {
         /**
          * Copy.
-         * @return {Event}
+         * @return {this}
          */
         copy: function() {
             var event = this;
@@ -296,7 +296,7 @@
         /**
          * Bind.
          * @param  {String} type?
-         * @return {Event}
+         * @return {this}
          */
         bind: function(type) {
             var event = this.copy();
@@ -317,7 +317,7 @@
         /**
          * Bind to.
          * @param  {Object} target
-         * @return {Event}
+         * @return {this}
          */
         bindTo: function(target) {
             var event = this.copy(), fn;
@@ -337,7 +337,7 @@
         /**
          * Unbind.
          * @param  {String} type?
-         * @return {Event}
+         * @return {this}
          */
         unbind: function(type) {
             var event = this.copy();
@@ -359,7 +359,7 @@
          * Fire.
          * @param  {String} type?
          * @param  {Object} data
-         * @return {Event}
+         * @return {this}
          */
         fire: function(type, data) {
             var event = this.copy();
@@ -396,7 +396,7 @@
     $extend(EventTarget.prototype, {
         /**
          * Add event.
-         * @param  {Event} event
+         * @param  {this} event
          * @return {void}
          */
         addEvent: function(event) {
@@ -419,7 +419,7 @@
 
         /**
          * Remove event.
-         * @param  {Event} event
+         * @param  {this} event
          * @return {void}
          */
         removeEvent: function(event) {
@@ -489,7 +489,7 @@
 
         /**
          * Dispatch.
-         * @param  {Event}  event
+         * @param  {this}  event
          * @param  {Object} data
          * @return {void}
          */
@@ -527,12 +527,12 @@
     }
 
     /**
-     * On, one, off, fire, has.
+     * On, one, off, fire.
      * @param  {Object}   target
      * @param  {String}   type
      * @param  {Function} fn
      * @param  {Object}   options
-     * @return {Event}
+     * @return {this}
      */
     function on(target, type, fn, options) {
         var args = prepareArguments(fn, options, target), event, eventTarget;
@@ -565,6 +565,15 @@
             event.fire(type, args.options.data);
         });
     }
+
+    /**
+     * Has.
+     * @param  {Object}   target
+     * @param  {String}   type
+     * @param  {Function} fn
+     * @param  {Object}   opt_typeOnly?
+     * @return {Bool}
+     */
     function has(target, type, fn, opt_typeOnly) {
         var ret = FALSE;
         var events = target && target.$events;

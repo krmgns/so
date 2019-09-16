@@ -34,7 +34,7 @@
      */
     function Animation(el, properties, speed, easing, callback) {
         var _this = this; // just as minify candy
-        _this.$el = $.dom(el);
+        _this.$el = $(el);
         _this.properties = properties;
 
         // swap arguments
@@ -101,7 +101,7 @@
     $extend(Animation.prototype, {
         /**
          * Run.
-         * @return {Animation}
+         * @return {this}
          */
         run: function() {
             var _this = this;
@@ -132,7 +132,7 @@
 
         /**
          * Start.
-         * @return {Animation}
+         * @return {this}
          */
         start: function() {
             var _this = this, el = _this.$el, scroll, value;
@@ -155,7 +155,7 @@
 
         /**
          * End.
-         * @return {Animation}
+         * @return {this}
          */
         end: function() {
             var _this = this, el = _this.$el;
@@ -179,7 +179,7 @@
 
         /**
          * Stop.
-         * @return {Animation}
+         * @return {this}
          */
         stop: function() {
             var _this = this, el = _this.$el;

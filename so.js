@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.83.1';
+    $win.so.VERSION = '5.84.0';
 
     // minify candies
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
@@ -531,12 +531,14 @@
          */
         filter: function(fn) {
             // prevent: "undefined isn't a function" error
-            fn = fn || function(el) { return trim(el) };
+            fn = fn || function(value) { return trim(value) };
 
             var _this = this, ret = [];
 
-            _this.each(function(el, i) {
-                fn(el, i, _this) && ret.push(el);
+            _this.each(function(value, i) {
+                if (fn(value, i, _this)) {
+                    ret.push(value);
+                }
             });
 
             return ret;
