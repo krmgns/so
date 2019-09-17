@@ -106,7 +106,9 @@
                 return data;
             }
 
-            var ret = [], encode = $.util.urlEncode;
+            var ret = [], encode = function(input) {
+                return $isDefined(input) ? $.util.urlEncode(input) : '';
+            };
 
             // check if comes from $.dom.serializeArray()
             if (opt_array) {

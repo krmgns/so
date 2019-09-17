@@ -188,7 +188,7 @@
                 _this.running = FALSE, _this.stopped = TRUE;
             }
 
-            // set as null (for isAnimated() etc.)
+            // set as null (for stop, animated() etc.)
             el.setProperty('$animation', NULL);
 
             return _this;

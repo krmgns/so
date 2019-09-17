@@ -5,21 +5,25 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function(window, $) { 'use strict';
+;(function($) { 'use strict';
+
+    var $win = $.win();
 
     // all re's enough for general purpose
     var re_ua1 = /(opr|edge)\/([\d.]+)/;
     var re_ua2 = /(chrome|safari|firefox|opera|msie|trident(?=\/))(?:.*version)?\/? *([\d.]+)/;
-    var re_mobile = /mobile|android|ip(hone|ad|od)|opera *mini|webos|blackberry|bb\d+|windows *phone/;
+    var re_mobile = /mobile|android|ip(?:hone|ad|od)|opera *mini|webos|blackberry|bb\d+|windows *phone/;
     var re_tablet = /tablet|ipad/; // no more clue :/
-    var re_os = /(linux|unix|mac|windows)/;
-    var re_mobs = [
+    var re_os = /(linux|mac|windows)/;
+    var re_osm = [
         /(android) *([\d.]+)/,
         /(ip(?:hone|ad|od))(?:; cpu)? *os ([\d_]+)/,
         /(windows *phone) *(?:os)? *([\d.]+)/
     ];
+    var re_bit = /(64|32)/;
+    var re_platform = /(linux|mac(ppc|int(el|osh))?|win(dows|ce|\d+)?)/ // @link: https://stackoverflow.com/q/19877924/362780
 
-    var navigator = window.navigator,
+    var navigator = $win.navigator,
         ua = navigator.userAgent.lower().slice(0, 250), // safe..
         uap = navigator.platform.lower();
 
@@ -29,20 +33,17 @@
             isMobile: function() { return re_mobile.test(ua); },
             isTablet: function() { return re_tablet.test(ua); },
             isTouchable: function() {
-                return (navigator.maxTouchPoints > 0 || 'ontouchend' in window);
+                return (navigator.maxTouchPoints > 0 || 'ontouchend' in $win);
             }
         }, re;
 
-        // name & version stuff
+        // device
+        _.device = _.isTablet() ? 'tablet' : _.isMobile() ? 'mobile' : 'desktop';
+
+        // name & version
         if (re = (re_ua1.exec(ua) || re_ua2.exec(ua))) {
             if (re[1]) {
-                var name = re[1];
-                if (name == 'msie') {
-                    name = 'ie';
-                } else if (name == 'opr') {
-                    name = 'opera';
-                }
-                _.name = name;
+                _.name = (re[1] == 'msie') ? 'ie' : (re[1] == 'opr') ? 'opera' : re[1];
             }
             if (re[2]) {
                 _.version = re[2];
@@ -50,36 +51,27 @@
            }
         }
 
-        // os stuff
+        // os
         if (re = re_os.exec(ua)) {
             _.os.name = re[1];
-        }
 
-        if (_.os.name) {
-            // details for mobile
+            // mobile details
             if (_.isMobile()) {
-                re_mobs.each(function(re) {
+                re_osm.each(function(re) {
                     if (re = re.exec(ua)) {
-                        if (re[1].slice(0, 2) == 'ip') {
+                        if (re[1].slice(0, 2) == 'ip') { // ip(hone|ad|od)
                             re = [, 'ios', re[2].replace(/_/g, '.')];
                         }
-                        _.os.name = re[1].remove(/ +/g);
+                        _.os.name = re[1].remove(' ');
                         _.os.version = re[2];
                         return 0; // break
                     }
                 });
             }
 
-            /* x86_64 x86-64 x64; amd64 amd64 wow64 x64_64 ia64 sparc64 ppc64 irix64
-                linux i386 linux i686 linux x86_64 win32 win64 */
-            var test = (_.name == 'opera') ? ua : uap;
-            if (/64/.test(test)) {
-                _.os.bit = 64;
-            } else if (/32|86/.test(test)) {
-                _.os.bit = 32;
-            }
-
-            _.os.platform = (re_os.exec(uap) || [,])[1];
+            // bit & platform
+            _.os.bit = uap.grep(re_bit) || ua.grep(re_bit);
+            _.os.platform = uap.grep(re_platform);
         }
 
         // geoposition
@@ -110,4 +102,4 @@
         return _;
     })();
 
-})(window, window.so);
+})(window.so);
