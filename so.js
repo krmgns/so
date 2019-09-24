@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.85.0';
+    $win.so.VERSION = '5.85.1';
 
     // minify candies
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';

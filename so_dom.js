@@ -101,7 +101,7 @@
     var re_childFix = /([\w-]+|):(first|last|nth([^-].+))/g;
     var re_attr = /\[.+\]/;
     var re_attrFix = /([.:])/g;
-    var re_attrFixMatch = /\[([^=]+)(=[^\]]+)?\]/g;
+    var re_attrFixMatch = /\[([\w.:]+)(=[^\]]+)?\]/g;
     var re_data = /([\w-]+)?\[(data-[\w-]+)\*/;
     var re_idOrClass = /^([#.])([\w-]+)$/;
 
@@ -174,7 +174,7 @@
                 _1 = _1.replace(re_attrFix, '\\$1'); // name
                 _2 = _2 ? _2.slice(1) : '';          // value
                 return '['+ _1 + (_2 ? $isNumeric(_2) ? '="'+ _2 +'"' : '='+ _2 : '') +']';
-            })
+            });
         }
 
         ret = $array(
