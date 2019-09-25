@@ -22,7 +22,8 @@
     ];
     var re_osx = /(os(?: x))? ([\d_]+)/;
     var re_bit = /(64|32)/;
-    var re_platform = /(linux|mac(ppc|int(el|osh))?|win(dows|ce|\d+)?)/ // @link: https://stackoverflow.com/q/19877924/362780
+    // @link https://stackoverflow.com/q/19877924/362780
+    var re_platform = /(linux|mac(ppc|int(el|osh)|68k)?|win(dows|ce|\d+)?|(free|open)bsd|symbian|blackberry|(sun|web|palm)os)/;
 
     var nav = $win.navigator,
         ua = nav.userAgent.lower().slice(0, 250), // slice safe..
@@ -77,7 +78,6 @@
                 re = re_osx.exec(ua);
                 name = (re[1] || '').replace(/ /g, '');
                 version = (re[2] || '').replace(/_/g, '.');
-                platform = 'mac';
             }
 
             // bit & platform
