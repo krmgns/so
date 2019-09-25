@@ -97,43 +97,38 @@
 
         /**
          * Serialize.
-         * @param  {Any}  data
-         * @param  {Bool} opt_array?
+         * @param  {Object} data
          * @return {String}
          */
-        serialize: function(data, opt_array) {
+        serialize: function(data) {
             if ($isString(data) || !$isIterable(data)) {
                 return data;
             }
 
-            var ret = [], encode = function(input) {
+            var ret = [];
+            var encode = function(input) {
                 return $isDefined(input) ? $.util.urlEncode(input) : '';
             };
-
-            // check if comes from $.dom.serializeArray()
-            if (opt_array) {
-                $for(data, function(item) {
-                    ret.push('%s=%s'.format(item.key, encode(item.value)));
-                });
-            } else {
-                // only two-dimensionals prosessed
-                $forEach(data, function(key, value) {
-                    key = encode(key);
-                    if ($isArray(value)) {
-                        if (value.len()) {
-                            while (value.len()) {
-                                ret.push('%s[]=%s'.format(key, encode(value.shift())));
-                            }
-                        } else ret.push('%s[]='.format(key));
-                    } else if ($isObject(value)) {
-                        $forEach(value, function(_key, _value) {
-                            ret.push('%s[%s]=%s'.format(key, _key, encode(_value)));
-                        });
-                    } else {
-                        ret.push('%s=%s'.format(key, encode(value)));
+            var serialize = function(input, prefix) {
+                var ret = [], p, k, v, useKey = $isObject(input);
+                for (p in input) {
+                    if (input.hasOwnProperty(p)) {
+                        k = prefix ? prefix +'['+ (useKey ? encode(p) : '') +']' : encode(p), v = input[p];
+                        ret.push($isObject(v) ? serialize(v, k) : k +'='+ encode(v));
                     }
-                });
+                }
+                return ret.join('&');
             }
+
+            $forEach(data, function(key, value) {
+                if ($isArray(value)) {
+                    ret.push(serialize(value, key));
+                } else if ($isObject(value)) {
+                    ret.push(serialize(value, key));
+                } else {
+                    ret.push('%s=%s'.format(encode(key), encode(value)));
+                }
+            });
 
             return ret.join('&').replace(re_space, '+');
         }

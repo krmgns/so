@@ -20,20 +20,25 @@
         /(ip(?:hone|ad|od))(?:; cpu)? *os ([\d_]+)/,
         /(windows *phone) *(?:os)? *([\d.]+)/
     ];
+    var re_osx = /(os(?: x))? ([\d_]+)/;
     var re_bit = /(64|32)/;
     var re_platform = /(linux|mac(ppc|int(el|osh))?|win(dows|ce|\d+)?)/ // @link: https://stackoverflow.com/q/19877924/362780
 
-    var navigator = $win.navigator,
-        ua = navigator.userAgent.lower().slice(0, 250), // safe..
-        uap = navigator.platform.lower();
+    var nav = $win.navigator,
+        ua = nav.userAgent.lower().slice(0, 250), // slice safe..
+        uap = nav.platform.lower();
+    var screen = $win.screen,
+        screenAngle = $win.orientation // happy old days..
+            || (screen.orientation && screen.orientation.angle);
 
     $.ua = (function() {
         var _ = {
             os: {},
+            screen: [screen.width, screen.height, screenAngle],
             isMobile: function() { return re_mobile.test(ua); },
             isTablet: function() { return re_tablet.test(ua); },
             isTouchable: function() {
-                return (navigator.maxTouchPoints > 0 || 'ontouchend' in $win);
+                return (nav.maxTouchPoints > 0 || 'ontouchend' in $win);
             }
         }, re;
 
@@ -53,25 +58,33 @@
 
         // os
         if (re = re_os.exec(ua)) {
-            _.os.name = re[1];
+            var os = _.os, name = re[1], version, platform, bit;
 
             // mobile details
             if (_.isMobile()) {
-                re_osm.each(function(re) {
+                while (re = re_osm.shift()) {
                     if (re = re.exec(ua)) {
                         if (re[1].slice(0, 2) == 'ip') { // ip(hone|ad|od)
+                            platform = re[1];
                             re = [, 'ios', re[2].replace(/_/g, '.')];
                         }
-                        _.os.name = re[1].remove(' ');
-                        _.os.version = re[2];
-                        return 0; // break
+                        name = re[1].remove(' ');
+                        version = re[2];
+                        break;
                     }
-                });
+                };
+            } else if (name == 'mac') {
+                re = re_osx.exec(ua);
+                name = (re[1] || '').replace(/ /g, '');
+                version = (re[2] || '').replace(/_/g, '.');
+                platform = 'mac';
             }
 
             // bit & platform
-            _.os.bit = uap.grep(re_bit) || ua.grep(re_bit);
-            _.os.platform = uap.grep(re_platform);
+            bit = uap.grep(re_bit) || ua.grep(re_bit);
+            platform = platform || uap.grep(re_platform);
+
+            os.name = name, os.version = version, os.platform = platform, os.bit = bit;
         }
 
         // geoposition
@@ -82,15 +95,15 @@
                 enableHighAccuracy: true
             }, options);
 
-            navigator.geolocation.getCurrentPosition(function(position) {
+            nav.geolocation.getCurrentPosition(function(position) {
                 onDone(position, position.coords.latitude, position.coords.longitude);
             }, onError, options);
         };
 
-        // beacon (navigator.sendBeacon() not supported by all)
+        // beacon (sendBeacon() not supported by all)
         _.sendBeacon = function(url, data) {
-            if (navigator.sendBeacon) {
-                navigator.sendBeacon(url, data);
+            if (nav.sendBeacon) {
+                nav.sendBeacon(url, data);
             } else {
                 var request = new XMLHttpRequest();
                 request.open('POST', url, false);
