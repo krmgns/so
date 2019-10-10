@@ -1101,7 +1101,7 @@
          * @param  {Int|String} delay (ms)
          * @param  {Function}   fn
          * @param  {Array}      fnArgs?
-         * @return {void}
+         * @return {Int}
          */
         fire: function(delay, fn, fnArgs) {
             if (isString(delay)) {
