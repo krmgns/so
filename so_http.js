@@ -425,7 +425,16 @@
          * @return {Bool}
          */
         ok: function() {
-            return (this.response.statusCode === 200);
+            return this.code(200);
+        },
+
+        /**
+         * Code.
+         * @param  {Int} code
+         * @return {Bool}
+         */
+        code: function(code) {
+            return (code).equals(this.response.statusCode);
         },
 
         /**

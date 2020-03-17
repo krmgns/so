@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.86.1';
+    $win.so.VERSION = '5.87.0';
 
     // minify candies
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
@@ -402,6 +402,39 @@
         return (ret = []), $.forEach(object, function(_, value) { ret.push(value) }), ret;
     };
 
+    // equal comparator
+    function equals(a, b, opt_sort, opt_deep /* @todo? */) {
+        if (a === b) return TRUE;
+
+        if (isArray(a) && isArray(b)) {
+            if (len(a) !== len(b)) return FALSE;
+            if (opt_sort) {
+                // make copies (do not modify original inputs)
+                a = makeArray(a).sort(), b = makeArray(b).sort();
+            }
+            for (var i = 0, il = len(a); i < il; i++) {
+                if (a[i] !== b[i]) return FALSE;
+            }
+            return TRUE;
+        }
+
+        return FALSE;
+    }
+
+    /**
+     * Object extends.
+     */
+    extend(Object[NAME_PROTOTYPE], {
+        /**
+         * Equals.
+         * @param  {Any} ...arguments
+         * @return {Bool}
+         */
+        equals: function() {
+            return equals.apply(NULL, $.array(this, arguments));
+        }
+    });
+
     // shortcuts
     function index(search, stack, opt_last) {
         return stack && (!opt_last ? stack.indexOf(search) : stack.lastIndexOf(search));
@@ -425,24 +458,6 @@
         }
 
         return (ret > -1);
-    }
-
-    function equals(a, b, opt_sort, opt_deep /* @todo */) {
-        if (a === b) return TRUE;
-
-        if (isArray(a) && isArray(b)) {
-            if (len(a) !== len(b)) return FALSE;
-            if (opt_sort) {
-                // make copies (do not modify original inputs)
-                a = makeArray(a).sort(), b = makeArray(b).sort();
-            }
-            for (var i = 0, il = len(a); i < il; i++) {
-                if (a[i] !== b[i]) return FALSE;
-            }
-            return TRUE;
-        }
-
-        return FALSE;
     }
 
     function toUniqUnuniq(array, opt_ununiq) {
@@ -478,9 +493,9 @@
          * @param  {Array} input
          * @return {Bool}
          */
-        equals: function(input, opt_sort) {
-            return equals(this, input, opt_sort);
-        },
+        // equals: function(input, opt_sort) {
+        //     return equals(this, input, opt_sort);
+        // },
 
         /**
          * Each.
@@ -609,9 +624,9 @@
          * @param  {String} input
          * @return {Bool}
          */
-        equals: function(input) {
-            return equals(this, input);
-        },
+        // equals: function(input) {
+        //     return equals(this, input);
+        // },
 
         /**
          * Is numeric.
