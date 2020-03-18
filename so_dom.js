@@ -2530,12 +2530,15 @@
         serialize: function(opt_plus) {
             var el = this[0];
             var name, value;
-            var ret, data = [];
+            var data = [], ret;
 
             if (getTag(el) == 'form') { // forms only
                 $for(el, function(el) {
-                    name = $trim(el && el[NAME_NAME]);
+                    name = $trim(el[NAME_NAME]);
                     if (!name || el[NAME_DISABLED]) {
+                        return;
+                    }
+                    if (isCheckInput(el) && !el[NAME_CHECKED]) {
                         return;
                     }
 
