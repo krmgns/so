@@ -25,14 +25,14 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.88.1';
+    $win.so.VERSION = '5.89.0';
 
     // minify candies
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
     var NAME_NODE_TYPE = 'nodeType', NAME_PROTOTYPE = 'prototype';
     var NAME_DEFAULT_VIEW = 'defaultView', NAME_OWNER_DOCUMENT = 'ownerDocument';
     var NAME_LENGTH = 'length';
-    var Array = $win.Array, Object = $win.Object, String = $win.String
+    var Array = $win.Array, Object = $win.Object, String = $win.String, Number = $win.Number;
     var Date = $win.Date, RegExp = $win.RegExp, Math = $win.Math;
 
     // safe bind for ie9 (yes, still ie..)
@@ -45,6 +45,10 @@
     $win.log = function() {
         consoleBind('log', arguments);
     };
+
+    // global Int & Float objects
+    $win.Int = function(num) { return toInt(num, 10) };
+    $win.Float = function(num) { return toFloat(num) };
 
     var _reCache = {};
     var re_dot = /^[-+]?\./;
