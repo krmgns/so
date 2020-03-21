@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.88.0';
+    $win.so.VERSION = '5.88.1';
 
     // minify candies
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
@@ -766,7 +766,7 @@
          * @param  {Int}           limit?
          * @return {String}
          */
-        sliceFrom: function(search) {
+        sliceFrom: function(search, limit) {
             return (this.splits(search, 2)[1] || '').slice(0, limit);
         },
 
