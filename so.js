@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.89.0';
+    $win.so.VERSION = '5.90.0';
 
     // minify candies
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
@@ -35,20 +35,19 @@
     var Array = $win.Array, Object = $win.Object, String = $win.String, Number = $win.Number;
     var Date = $win.Date, RegExp = $win.RegExp, Math = $win.Math;
 
-    // safe bind for ie9 (yes, still ie..)
-    function consoleBind(fn, args) {
-        return Function[NAME_PROTOTYPE].bind.call($win.console[fn], $win.console)
-            .apply($win.console, args);
-    }
-
-    // shortcut for 'console.log'
-    $win.log = function() {
-        consoleBind('log', arguments);
-    };
-
     // global Int & Float objects
     $win.Int = function(num) { return toInt(num, 10) };
     $win.Float = function(num) { return toFloat(num) };
+
+    // safe bind for ie9 (yes, still ie..)
+    function consoleBind(fn, args) {
+        return Function[NAME_PROTOTYPE].bind
+            .call($win.console[fn], $win.console)
+                .apply($win.console, args);
+    }
+
+    // shortcut for 'console.log'
+    $win.log = function() { consoleBind('log', arguments); };
 
     var _reCache = {};
     var re_dot = /^[-+]?\./;
@@ -426,17 +425,13 @@
     }
 
     /**
-     * Object extends.
+     * Object.equals() for String, Number, Array etc. objects.
      */
-    extend(Object[NAME_PROTOTYPE], {
-        /**
-         * Equals.
-         * @param  {Any} ...arguments
-         * @return {Bool}
-         */
-        equals: function() {
+    Object.defineProperty(Object[NAME_PROTOTYPE], 'equals', {
+        value: function() {
             return equals.apply(NULL, $.array(this, arguments));
-        }
+        },
+        writable: TRUE // allow override if needed
     });
 
     // shortcuts

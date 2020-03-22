@@ -2663,35 +2663,59 @@
         toDomPrototype(Dom, {
             /**
              * On.
-             * @param  {String}   type
-             * @param  {Function} fn
-             * @param  {Object}   options?
+             * @param  {String|Object} type
+             * @param  {Function}      fn
+             * @param  {Object}        options?
              * @return {this}
              */
             on: function(type, fn, options) {
-                return this.for(function(el) { event.on(el, type, fn, options); });
+                return this.for(function(el) {
+                    if ($isString(type)) {
+                        event.on(el, type, fn, options);
+                    } else if ($isObject(type)) {
+                        $forEach(type, function(type, fn) {
+                            event.on(el, type, fn);
+                        })
+                    }
+                });
             },
 
             /**
              * One.
-             * @param  {String}   type
-             * @param  {Function} fn
-             * @param  {Object}   options?
+             * @param  {String|Object} type
+             * @param  {Function}      fn
+             * @param  {Object}        options?
              * @return {this}
              */
             one: function(type, fn, options) {
-                return this.for(function(el) { event.one(el, type, fn, options); });
+                return this.for(function(el) {
+                    if ($isString(type)) {
+                        event.one(el, type, fn, options);
+                    } else if ($isObject(type)) {
+                        $forEach(type, function(type, fn) {
+                            event.one(el, type, fn);
+                        })
+                    }
+                });
             },
 
             /**
              * Off.
-             * @param  {String}   type
-             * @param  {Function} fn
-             * @param  {Object}   options?
+             * @param  {String|Object} type
+             * @param  {Function}      fn
+             * @param  {Object}        options?
              * @return {this}
              */
             off: function(type, fn, options) {
-                return this.for(function(el) { event.off(el, type, fn, options); });
+                return this.for(function(el) {
+                    if ($isString(type)) {
+                        event.off(el, type, fn, options);
+                    } else if ($isObject(type)) {
+                        $forEach(type, function(type, fn) {
+                            event.off(el, type, fn);
+                        })
+                    }
+                });
             },
 
             /**
@@ -2702,7 +2726,9 @@
              * @return {this}
              */
             fire: function(type, fn, options) {
-                return this.for(function(el) { event.fire(el, type, fn, options); });
+                return this.for(function(el) {
+                    event.fire(el, type, fn, options);
+                });
             },
 
             /**

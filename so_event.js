@@ -142,8 +142,9 @@
             event.event = e; // overwrite on initial
             event.fired++;
 
+            // If "e.foo = event.foo", cannot assign to read only property 'foo'..
             if (!e.data) {
-                e = objectDefineProperty(e, 'data', {value: event.data});
+                e = objectDefineProperty(e, 'data', {value: event.data, writable: TRUE});
             }
             if (!e.target) {
                 e = objectDefineProperty(e, 'target', {value: event.target});
@@ -245,7 +246,7 @@
     function Event(type, fn, options) {
         type = $trim(type);
         options = options || {};
-        if ($isObject(fn)) { // ..('click', {fn: function(){...}})
+        if ($isObject(fn)) { // ..('click', {fn: function(){..}})
             options = fn, fn = options.fn;
         }
 
@@ -378,7 +379,7 @@
         },
 
         /**
-         * Off (alias of unbind(), for chaining, eg: el.on(...).fire().off())
+         * Off (alias of unbind(), for chaining, eg: el.on(..).fire().off())
          */
         off: function(type) {
             return this.unbind(type);
@@ -403,14 +404,12 @@
             var target = prepareEventTarget(this.target, event.type);
             var targetEvents = target.$events;
 
-            event.id = (event.id || ++_id);
+            event.id = event.id || ++_id;
             event.target = target;
             event.eventTarget = this;
             targetEvents[event.type][event.id] = event;
             targetEvents.$count = (function(count) {
-                $for(targetEvents, function(e) {
-                    count++;
-                });
+                $for(targetEvents, function() { count++ });
                 return (count > 1) ? count - 1 : count;
             })(0);
 
@@ -498,8 +497,7 @@
 
             if (target.$events[event.type]) {
                 $for(target.$events[event.type], function(event) {
-                    // call-time data
-                    if (data) {
+                    if (data) { // call-time data (eg: fire("foo", {data: {a: 1, b: ..}}))
                         event.event.data = event.event.data || {};
                         for (var key in data) {
                             event.data[key] = event.event.data[key] = data[key];
@@ -582,11 +580,12 @@
         }
 
         if (opt_typeOnly) {
-            ret = !!(events[type]); // just check type
-        } else if (events[type]) {
+            ret = !!events[type]; // just check type
+        } else if (events[type] && fn) {
             $for(events[type], function(event) {
-                if (fn && event.fno && fn == event.fno) {
-                    ret = TRUE; return _break;
+                if (event.fno && event.fno == fn) {
+                    ret = TRUE;
+                    return _break;
                 }
             });
         } else if ($isFunction(target[type])) { // natives
