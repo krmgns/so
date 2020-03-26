@@ -320,7 +320,7 @@
             var all = this.all();
 
             if (init) {
-                // shortcut for: ...each(function(el) { $el = $.dom(el) ...
+                // shortcut for: ... each(function(el) { var $el = $.dom(el) ...
                 all = all.map(function(el) {
                     return toDom(el, NULL, TRUE);
                 });
@@ -673,36 +673,32 @@
         },
 
         /**
-         * Remove.
-         * @return {this}
-         */
-        remove: function() {
-            return this.for(function(el) {
-                cleanElement(el);
-                if (el[NAME_PARENT_NODE]) {
-                    el[NAME_PARENT_NODE].removeChild(el);
-                }
-            });
-        },
-
-        /**
          * Remove all.
-         * @param  {String} selector
+         * @param  {String} selector?
          * @return {this}
          */
-        removeAll: function(selector) {
-            var parent = this[0], _parent;
+        remove: function(selector) {
+            var _this = this;
 
-            if (parent) {
-                this.$$(selector).for(function(el) {
-                    _parent = el[NAME_PARENT_NODE];
-                    if (_parent && _parent == parent) {
-                        removeChild(parent, cleanElement(el));
+            if (!selector) { // self remove
+                return _this.for(function(el) {
+                    cleanElement(el);
+                    if (el[NAME_PARENT_NODE]) {
+                        removeChild(el[NAME_PARENT_NODE], el);
                     }
                 });
             }
 
-            return this;
+            if (_this[0]) {
+                _this.$$(selector).for(function(el, parent) {
+                    parent = el[NAME_PARENT_NODE];
+                    if (parent && parent == _this[0]) {
+                        removeChild(_this[0], cleanElement(el));
+                    }
+                });
+            }
+
+            return _this;
         },
 
         /**
