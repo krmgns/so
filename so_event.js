@@ -88,7 +88,7 @@
         eventClass = eventClassOrig = eventClass || 'Event'; // @default
         try { // wrong parameters causes error (opera/12)
             event = (eventClass != 'MutationEvent' && new $win[eventClass](eventType, options));
-        } catch(e) {}
+        } catch (_) {}
 
         if (!event) {
             // add 's' if needed

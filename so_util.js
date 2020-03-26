@@ -176,7 +176,7 @@
         jsonEncode: function(input, replacer, space) {
             try {
                 return JSON.stringify(input, replacer, space);
-            } catch(e) {}
+            } catch (_) {}
         },
 
         /**
@@ -188,7 +188,7 @@
         jsonDecode: function(input, reviver) {
             try {
                 return JSON.parse(input, reviver);
-            } catch(e) {}
+            } catch (_) {}
         },
 
         /**

@@ -17,7 +17,6 @@
     var re_space = /%20/g;
     var re_httpHost = /^(?:https?:)?\/\/([^:/]+)/i;
     var re_post = /^P(?:OST|UT|ATCH)$/i;
-    var re_json = /^(?:\{.*\}|\[.*\]|".*"|-?\d+(?:\.\d+)?|true|false|null)$/;
     var re_request = /^([A-Z]+)?\s*(.*?)\s*(?:@(json|xml|html|plain))?$/;
     var re_dataType = /\/(json|xml|html|plain)(?:[; ])?/i;
 
@@ -54,7 +53,7 @@
                 return $logWarn('No valid XML.'), NULL;
             }
 
-            return new DOMParser.parseFromString(input, inputType || 'text/xml');
+            return (new DOMParser).parseFromString(input, inputType || 'text/xml');
         },
 
         /**
@@ -63,13 +62,13 @@
          * @return {Any}
          */
         parseJson: function(input) {
-            input = $trim(input);
+            input = $.util.jsonDecode(input);
 
-            if (!re_json.test(input)) {
+            if (!$isDefined(input)) {
                 return $logWarn('No valid JSON.'), NULL;
             }
 
-            return $.util.jsonDecode(input);
+            return input;
         },
 
         /**
