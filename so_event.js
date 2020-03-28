@@ -150,9 +150,6 @@
                 e = objectDefineProperty(e, 'target', {value: event.target});
             }
 
-            e.$ = $(e.target); // dom shortcut for target
-            e.targetTag = e.$.tag(); // tag shortcut for target (lower-cased)
-
             // sugars..
             $extend(e, {
                 $: $(e.target),
