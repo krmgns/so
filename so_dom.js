@@ -33,9 +33,10 @@
     var TAG_WINDOW = '#window', TAG_DOCUMENT = '#document', TAG_HTML = 'html', TAG_HEAD = 'head', TAG_BODY = 'body';
 
     var $doc = $.doc();
-    var $toStyleName = $.util.toStyleName, $jsonEncode = $.util.jsonEncode;
+    var $event = $.event, $toStyleName = $.util.toStyleName, $jsonEncode = $.util.jsonEncode;
     var $re = $.re, $rid = $.rid, $array = $.array, $each = $.each, $for = $.for, $forEach = $.forEach;
-    var $trim = $.trim, $extend = $.extend, $int = $.int, $float = $.float, $string = $.string, $bool = $.bool,
+    var $trim = $.trim, $mix = $.mix, $extend = $.extend,
+        $int = $.int, $float = $.float, $string = $.string, $bool = $.bool,
         $isVoid = $.isVoid, $isNull = $.isNull, $isNulls = $.isNulls, $isDefined = $.isDefined,
         $isUndefined = $.isUndefined, $isString = $.isString, $isNumeric = $.isNumeric,
         $isNumber = $.isNumber, $isArray = $.isArray, $isObject = $.isObject, $isFunction = $.isFunction,
@@ -45,10 +46,14 @@
     var re_space = /\s+/g;
     var re_comma = /\s*,\s*/;
     var re_tag = /^<([\w-]+)[^>]*>/i;
+    var re_tagVoid = /^area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr$/i;
 
     var _id = 0;
 
     // general helpers
+    function test(s, re) {
+        return re.test(s);
+    }
     function split(s, re) {
         return $trim(s).split(re);
     }
@@ -96,7 +101,7 @@
         return ret;
     }
 
-    var soPrefix = 'so:';
+    var soAttrPrefix = 'so:', soTempTag = '<so-temp>';
     var re_child = /(?::first|last|nth)(?!-)/;
     var re_childFix = /([\w-]+|):(first|last|nth([^-].+))/g;
     var re_attr = /\[.+\]/;
@@ -130,7 +135,7 @@
         selector = selector.replace(re_space, ' ');
 
         // @note: seems, it isn't that kinda cheap.. (eg: "[data-*]" or "a[data-*]")
-        isAttr = re_attr.test(selector);
+        isAttr = test(selector, re_attr);
         if (isAttr) {
             re = selector.matchAll(re_data);
             if (re) {
@@ -155,7 +160,7 @@
         }
 
         // @note: should not be mixed in a complex selector (eg: 'a.foo:first, body')
-        if (re_child.test(selector)) {
+        if (test(selector, re_child)) {
             // eg: p:first => p:first-child
             selector = selector.replace(re_childFix, function(_, _1, _2, _3) {
                 return _1 +':'+ (_3 ? 'nth-child'+ _3 : _2 +'-child');
@@ -209,12 +214,13 @@
                         els = (root = $doc, re[1] == '#')
                             ? [root.getElementById(re[2])] : root.getElementsByClassName(re[2]);
                     } else if (re = selector.match(re_tag)) {
-                        // root could be document or attributes
+                        // root may be document or attributes
                         els = create(selector, root, root, re[1]);
+                        root = NULL;
                     } else if (selector[0] == '>') {
                         root = isENode(root) ? root : $doc[NAME_DOCUMENT_ELEMENT];
                         // buggy :scope selector
-                        idv = getAttr(root, (idn = soPrefix +'_')) || $rid();
+                        idv = getAttr(root, (idn = soAttrPrefix +'_')) || $rid();
                         setAttr(root, idn, idv, FALSE);
                         // fix '>' only selector
                         if (selector.len() == 1) {
@@ -222,6 +228,9 @@
                         }
                         selector = '[%s="%s"] %s'.format(idn, idv, selector);
                         els = select(selector, NULL, one);
+                    } else if (root && $isObject(root)) {
+                        els = create({'$tag': selector}, NULL, root /* attributes */);
+                        root = NULL;
                     } else {
                         els = select(selector, root, one);
                     }
@@ -238,6 +247,8 @@
                 els = [], selector.each(function(el) {
                     isDom(el) ? els = els.concat(el.all()) : els.push(el);
                 });
+            } else if ($isObject(selector)) {
+                els = create(selector);
             } else {
                 els = selector;
             }
@@ -529,35 +540,91 @@
         node.insertBefore(childNode, childNodeBefore);
     }
 
+    function pick(key, object, value) {
+        if (key in object) {
+            value = $string(object[key]);
+            delete object[key];
+        }
+        return value;
+    }
+
     function create(content, doc, attributes, tag) {
-        if (isDom(content)) return content.all();
-        if (isNode(content)) return [content];
+        // all possible, attributes can be mixed width content and event listeners
+        // ("<a/>", ...attributes) or ("<a>Click!</a>", ...attributes)
+        // ("a", "Click!", ...attributes) or ("<a>", "Click!", ...attributes)
+        // ("<a id='x'>Click!</a>", ...attributes) or ("<a id='x'>", {$content: "Click!", ...attributes})
+        // ("a", {$content: "Click!", ...attributes}) or ({$tag: "a", $content: "Click!", ...attributes})
+
+        if (isDom(content))    return content.all();
+        if (isNode(content))   return [content];
         if ($isArray(content)) return content;
 
-        var fragment, tmp, tmpTag = 'so-tmp';
+        if ($isObject(content) || $isObject(doc)) {
+            var mix = $mix(content, doc, attributes);
+            mix['$tag'] = mix['$tag'] || tag;
+
+            var _tag = pick('$tag', mix, '').trim(),
+                _content = pick('$content', mix, ''),
+                s = '', ss, sse, grep = [];
+
+            if (!_tag) {
+                throw ('Empty $tag in content!');
+            }
+
+            if (_tag[0] == '<') {
+                // grep: tag, attribute string, content string
+                grep = _tag.grepAll(/^<([\w-]+)([^>]*)>(.*)/i, 0);
+                _tag = grep[0];
+            }
+
+            ss = '<'+ _tag.trim().trimLeft('<');
+            if (grep[1] != '/') {
+                ss += grep[1] || s;
+            }
+
+            ss += '>'+ (grep[2] || s) + _content;
+            if (!test(_tag, re_tagVoid)) {
+                sse = '</'+ _tag +'>';
+                if (grep[1] == '/' || !(grep[2] || s).endsWith(sse)) {
+                    ss += sse;
+                }
+            }
+            _content = ss;
+
+            content = _content, tag = _tag, attributes = mix, doc = NULL;
+        }
+
+        var fragment, temp, tempTag = soTempTag.strip('<>');
 
         // fix table stuff
-        tag = tag || ((content && content.match(re_tag)) || [,])[1];
+        tag = tag || (content && content.grep(re_tag));
         if (tag) {
             switch (tag.lower()) {
-                case 'tr': tmpTag = 'tbody'; break;
-                case 'th': case 'td': tmpTag = 'tr'; break;
-                case 'thead': case 'tbody': case 'tfoot': tmpTag = 'table'; break;
+                case 'tr': tempTag = 'tbody'; break;
+                case 'th': case 'td': tempTag = 'tr'; break;
+                case 'thead': case 'tbody': case 'tfoot': tempTag = 'table'; break;
             }
         }
 
         doc = doc && $isDocument(doc) ? doc : $doc;
-        tmp = createElement(doc, tmpTag, {innerHTML: content});
+        temp = createElement(doc, tempTag, {innerHTML: content});
         fragment = doc.createDocumentFragment();
-        while (tmp[NAME_FIRST_CHILD]) {
-            appendChild(fragment, tmp[NAME_FIRST_CHILD]);
+        while (temp[NAME_FIRST_CHILD]) {
+            appendChild(fragment, temp[NAME_FIRST_CHILD]);
         }
 
         if (attributes && $isObject(attributes)) {
-            $for(fragment[NAME_CHILD_NODES], function(node) {
+            $for(fragment[NAME_CHILD_NODES], function (node) {
                 if (isENode(node)) {
-                    $forEach(attributes, function(name, value) {
-                        setAttr(node, name, value);
+                    $forEach(attributes, function (name, value) {
+                        if ($isFunction(value)) {
+                            if (name.startsWith('on')) {
+                                name = name.slice(2);
+                            }
+                            $event && $event.on(node, name, value);
+                        } else {
+                            setAttr(node, name, value);
+                        }
                     });
                 }
             });
@@ -581,8 +648,8 @@
     function cloneElement(el, opt_deep) {
         var clone = el.cloneNode();
 
-        // clone.cloneOf = el; // @debug
-        setAttr(clone, soPrefix +'clone', ++_id, FALSE);
+        // clone.$cloneOf = el; // @debug
+        setAttr(clone, soAttrPrefix +'clone', ++_id, FALSE);
         if (!$isFalse(opt_deep)) {
             if (el.$data) {
                 clone.$data = el.$data;
@@ -626,10 +693,10 @@
         return create(content, $getDocument(el), attributes);
     }
 
-    function cloneIf(opt_cloning, node) { // inserts only once without 'clone'
-        if ($isFalse(opt_cloning)) {
+    function cloneIf(opt_clone, node) { // note: inserts only once without 'clone'
+        if ($isFalse(opt_clone)) {
             // pass
-        } else if ($isTrue(opt_cloning) && !hasAttr(node, soPrefix +'clone')) {
+        } else if ($isTrue(opt_clone) && !hasAttr(node, soAttrPrefix +'clone')) {
             node = cloneElement(node);
         }
         return node;
@@ -653,12 +720,13 @@
         },
 
         /**
-         * clean.
+         * Clean.
+         * @param  {Bool} opt_self?
          * @return {this}
          */
-        clean: function() {
+        clean: function(opt_self) {
             return this.for(function(el) {
-                cleanElement(el);
+                cleanElement(el, opt_self);
             });
         },
 
@@ -667,9 +735,7 @@
          * @return {this}
          */
         empty: function() {
-            return this.for(function(el) {
-                cleanElement(el, FALSE);
-            });
+            return this.clean(FALSE);
         },
 
         /**
@@ -704,14 +770,22 @@
         /**
          * Append.
          * @param  {String|Object|this} content
-         * @param  {Bool}              opt_cloning?
-         * @param  {Object}            attributes?
+         * @param  {String|Object}      opt_content?
+         * @param  {Object}             opt_attributes?
+         * @param  {Bool}               opt_clone?
          * @return {this}
          */
-        append: function(content, opt_cloning, attributes) {
+        append: function(content, opt_content, opt_attributes, opt_clone) {
+            // eg: ("a", "Click!", {...attributes}) or ("<a>Click!</a>", {...attributes})
+            if ($isString(opt_content) || $isObject(opt_content)) {
+                content = $isString(opt_content)
+                    ? $mix({'$tag': content, '$content': opt_content}, opt_attributes)
+                    : $mix({'$tag': content}, opt_content)
+            }
+
             return this.for(function(el) {
-                createFor(el, content, attributes).each(function(_el) {
-                    appendChild(el, cloneIf(opt_cloning, _el));
+                createFor(el, content, opt_attributes).each(function(_el) {
+                    appendChild(el, cloneIf(opt_clone, _el));
                 });
             });
         },
@@ -719,17 +793,17 @@
         /**
          * Append to.
          * @param  {String} selector
-         * @param  {Bool}   opt_cloning?
+         * @param  {Bool}   opt_clone?
          * @return {this}
          */
-        appendTo: function(selector, opt_cloning) {
+        appendTo: function(selector, opt_clone) {
             if (!isDom(selector)) {
                 selector = toDom(selector);
             }
 
             return this.for(function(el) {
                 selector.for(function(_el) {
-                    appendChild(_el, cloneIf(opt_cloning, el));
+                    appendChild(_el, cloneIf(opt_clone, el));
                 });
             });
         },
@@ -737,14 +811,21 @@
         /**
          * Prepend.
          * @param  {String|Object|this} content
-         * @param  {Bool}              opt_cloning?
-         * @param  {Object}            attributes?
+         * @param  {String|Object}      opt_content?
+         * @param  {Object}             opt_attributes?
+         * @param  {Bool}               opt_clone?
          * @return {this}
          */
-        prepend: function(content, opt_cloning, attributes) {
+        prepend: function(content, opt_content, opt_attributes, opt_clone) {
+            if ($isString(opt_content) || $isObject(opt_content)) {
+                content = $isString(opt_content)
+                    ? $mix({'$tag': content, '$content': opt_content}, opt_attributes)
+                    : $mix({'$tag': content}, opt_content)
+            }
+
             return this.for(function(el) {
-                createFor(el, content, attributes).each(function(_el) {
-                    insertBefore(el, cloneIf(opt_cloning, _el), el[NAME_FIRST_CHILD]);
+                createFor(el, content, opt_attributes).each(function(_el) {
+                    insertBefore(el, cloneIf(opt_clone, _el), el[NAME_FIRST_CHILD]);
                 });
             });
         },
@@ -752,17 +833,17 @@
         /**
          * Prepend to.
          * @param  {String} selector
-         * @param  {Bool}   opt_cloning?
+         * @param  {Bool}   opt_clone?
          * @return {this}
          */
-        prependTo: function(selector, opt_cloning) {
+        prependTo: function(selector, opt_clone) {
             if (!isDom(selector)) {
                 selector = toDom(selector);
             }
 
             return this.for(function(el) {
                 selector.for(function(_el) {
-                    insertBefore(_el, cloneIf(opt_cloning, el), _el[NAME_FIRST_CHILD]);
+                    insertBefore(_el, cloneIf(opt_clone, el), _el[NAME_FIRST_CHILD]);
                 });
             });
         },
@@ -770,31 +851,31 @@
         /**
          * Insert (alias of append()).
          */
-        insert: function(content, opt_cloning, attributes) {
-            return this.append(content, opt_cloning, attributes);
+        insert: function() {
+            return this.append.apply(this, arguments);
         },
 
         /**
          * Insert to (alias of appendTo()).
          */
-        insertTo: function(selector, opt_cloning) {
-            return this.appendTo(selector, opt_cloning);
+        insertTo: function() {
+            return this.appendTo.apply(this, arguments);
         },
 
         /**
-         * Insert before.
+         * Insert after.
          * @param  {String} selector
-         * @param  {Bool}   opt_cloning?
+         * @param  {Bool}   opt_clone?
          * @return {this}
          */
-        insertBefore: function(selector, opt_cloning) {
+        insertAfter: function(selector, opt_clone) {
             if (!isDom(selector)) {
                 selector = toDom(selector);
             }
 
             return this.for(function(el) {
                 selector.for(function(_el) {
-                    insertBefore(_el[NAME_PARENT_NODE], cloneIf(opt_cloning, el), _el);
+                    insertBefore(_el[NAME_PARENT_NODE], cloneIf(opt_clone, el), _el.nextSibling)
                 });
             });
         },
@@ -802,35 +883,61 @@
         /**
          * Insert before.
          * @param  {String} selector
-         * @param  {Bool}   opt_cloning?
+         * @param  {Bool}   opt_clone?
          * @return {this}
          */
-        insertAfter: function(selector, opt_cloning) {
+        insertBefore: function(selector, opt_clone) {
             if (!isDom(selector)) {
                 selector = toDom(selector);
             }
 
             return this.for(function(el) {
                 selector.for(function(_el) {
-                    insertBefore(_el[NAME_PARENT_NODE], cloneIf(opt_cloning, el), _el.nextSibling)
+                    insertBefore(_el[NAME_PARENT_NODE], cloneIf(opt_clone, el), _el);
                 });
             });
+        },
+
+        /**
+         * Replace.
+         * @param  {String|Object|this} content
+         * @param  {String|Object}      opt_content?
+         * @param  {Object}             opt_attributes?
+         * @param  {Bool}               opt_clone?
+         * @return {this}
+         */
+        replace: function(content, opt_content, opt_attributes, opt_clone) {
+            return this.clean().replaceWith(
+                $(soTempTag).append(content, opt_content, opt_attributes, opt_clone).children()
+            );
+        },
+
+        /**
+         * Replace content.
+         * @param  {String|Object|this} content
+         * @param  {String|Object}      opt_content?
+         * @param  {Object}             opt_attributes?
+         * @param  {Bool}               opt_clone?
+         * @return {this}
+         */
+        replaceContent: function(content, opt_content, opt_attributes, opt_clone) {
+            return this.clean().append(content, opt_content, opt_attributes, opt_clone);
         },
 
         /**
          * Replace with.
          * @param  {String} selector
-         * @param  {Bool}   opt_cloning?
+         * @param  {Bool}   opt_clone?
          * @return {this}
          */
-        replaceWith: function(selector, opt_cloning) {
+        replaceWith: function(selector, opt_clone) {
             if (!isDom(selector)) {
                 selector = toDom(selector);
             }
 
             return this.for(function(el) {
                 selector.for(function(_el) {
-                    replaceChild(el[NAME_PARENT_NODE], cloneIf(opt_cloning, _el), el);
+                    replaceChild(el[NAME_PARENT_NODE], cloneIf(opt_clone, _el), el);
                 });
             });
         },
@@ -838,17 +945,17 @@
         /**
          * Wrap.
          * @param  {String|Object|this} content
-         * @param  {Object}            attributes?
+         * @param  {Object}             opt_attributes?
          * @return {this}
          */
-        wrap: function(content, attributes) {
+        wrap: function(content, opt_attributes) {
             var el = this[0], elParent = el && el[NAME_PARENT_NODE];
             var clone, clones = [];
             var wrapper, replace;
 
             if (elParent) {
-                wrapper = createFor(el, content, attributes)[0];
-                replace = createFor(elParent, '<so-tmp>', {style: 'display:none'})[0];
+                wrapper = createFor(el, content, opt_attributes)[0];
+                replace = createFor(elParent, soTempTag, {style: 'display:none'})[0];
                 insertBefore(elParent, replace, el);
                 this.for(function(el) {
                     clone = cloneElement(el);
@@ -1080,10 +1187,10 @@
                         : _this.parent().$$(toAllSelector(selector)).all()
                 );
             } else if (isDom(selector)) {
-                // $.dom("p").not($element)
+                // eg: $.dom("p").not($element)
                 ret = intersect(_this.all(), selector.all());
             } else if (isENode(selector)) {
-                // $.dom("p").not(element)
+                // eg: $.dom("p").not(element)
                 ret = noIntersect(selector, _this);
             } else {
                 // eg: $.dom("p").not(1) or $.dom("p").not(1,2,3)
@@ -1328,24 +1435,24 @@
     toDomPrototype(Dom, {
         /**
          * Get window.
-         * @param  {Bool} opt_content?
+         * @param  {Bool} opt_contentOf?
          * @return {this}
          */
-        getWindow: function(opt_content) {
+        getWindow: function(opt_contentOf) {
             var el = this[0];
 
-            return toDom(el && (opt_content ? el.contentWindow : $getWindow(el)));
+            return toDom(el && (opt_contentOf ? el.contentWindow : $getWindow(el)));
         },
 
         /**
          * Get document.
-         * @param  {Bool} opt_content?
+         * @param  {Bool} opt_contentOf?
          * @return {this}
          */
-        getDocument: function(opt_content) {
+        getDocument: function(opt_contentOf) {
             var el = this[0];
 
-            return toDom(el && (opt_content ? el.contentDocument : $getDocument(el)));
+            return toDom(el && (opt_contentOf ? el.contentDocument : $getDocument(el)));
         },
 
         /**
@@ -1371,7 +1478,7 @@
         if (el.id) {
             s += '#'+ el.id; // id is enough
         } else if (el[NAME_CLASS_NAME]) {
-            s += '.'+ el[NAME_CLASS_NAME].split(re_space).join('.');
+            s += '.'+ split(el[NAME_CLASS_NAME], re_space).join('.');
         }
         path.push(s);
 
@@ -1486,7 +1593,7 @@
     function setStyle(el, name, value) {
         name = $toStyleName(name), value = $string(value);
 
-        if (value && $isNumeric(value) && !re_nonUnitStyles.test(name)) { // fix pixsels
+        if (value && $isNumeric(value) && !test(name, re_nonUnitStyles)) { // fix pixsels
             value += 'px';
         }
 
@@ -1603,9 +1710,9 @@
                     value = NULL;
                 } else {
                     value = $isFalse(opt_convert) ? value : (
-                        re_rgb.test(value) ? $.util.parseRgb(value, TRUE) // make rgb - hex
-                            : re_unit.test(value) || re_unitOther.test(value) // make px etc. - float
-                                // || re_nonUnitStyles.test(name) // make opacity etc. - float
+                        test(value, re_rgb) ? $.util.parseRgb(value, TRUE) // make rgb - hex
+                            : test(value, re_unit) || test(value, re_unitOther) // make px etc. - float
+                                // || test(name, re_nonUnitStyles) // make opacity etc. - float
                             ? $float(value) : value
                     );
                 }
@@ -1722,7 +1829,7 @@
             parent = parent[NAME_PARENT_ELEMENT];
         }
 
-        // tmp style element
+        // temporary style element
         style = createElement(doc, 'style', {
             textContent: '.'+ rid +'{display:block!important;visibility:hidden!important}'
         });
@@ -2009,7 +2116,7 @@
                 el[NAME_VALUE] = value;
             } else if (name == NAME_TEXT && getTag(el) == 'option') {
                 el[NAME_TEXT] = value;
-            } else if (!$isFalse(opt_state) /* speed */ && (opt_state || re_attrState.test(name))) {
+            } else if (!$isFalse(opt_state) /* speed.. */ && (opt_state || test(name, re_attrState))) {
                 (value || $isUndefined(value))
                     ? (el.setAttribute(name, ''), el[name] = !!value)
                     : (removeAttr(el, name), el[name] = FALSE);
@@ -2066,7 +2173,7 @@
 
             if (el) {
                 getAttrs(el).each(function(attr) {
-                    ret[attr[NAME_NAME]] = re_attrState.test(attr[NAME_NAME])
+                    ret[attr[NAME_NAME]] = test(attr[NAME_NAME], re_attrState)
                         ? attr[NAME_NAME] : attr[NAME_VALUE];
                 });
             }
@@ -2197,8 +2304,8 @@
          * @return {String?|this}
          */
         soAttr: function(name, value) {
-            return $isUndefined(value) ? this.attr(soPrefix + name) // get
-                : this.attr(soPrefix + name, value); // set or remove if null
+            return $isUndefined(value) ? this.attr(soAttrPrefix + name) // get
+                : this.attr(soAttrPrefix + name, value); // set or remove if null
         }
     });
 
@@ -2311,7 +2418,7 @@
     }
 
     function hasClass(el, name) {
-        return $bool(el && el[NAME_CLASS_NAME] && toClassRegExp(name).test(el[NAME_CLASS_NAME]));
+        return $bool(el && el[NAME_CLASS_NAME] && test(el[NAME_CLASS_NAME], toClassRegExp(name)));
     }
 
     function addClass(el, name) {
@@ -2654,8 +2761,7 @@
     });
 
     // dom: events
-    var event = $.event;
-    if (event) {
+    if ($event) {
         toDomPrototype(Dom, {
             /**
              * On.
@@ -2667,10 +2773,10 @@
             on: function(type, fn, options) {
                 return this.for(function(el) {
                     if ($isString(type)) {
-                        event.on(el, type, fn, options);
+                        $event.on(el, type, fn, options);
                     } else if ($isObject(type)) {
                         $forEach(type, function(type, fn) {
-                            event.on(el, type, fn);
+                            $event.on(el, type, fn);
                         })
                     }
                 });
@@ -2686,10 +2792,10 @@
             one: function(type, fn, options) {
                 return this.for(function(el) {
                     if ($isString(type)) {
-                        event.one(el, type, fn, options);
+                        $event.one(el, type, fn, options);
                     } else if ($isObject(type)) {
                         $forEach(type, function(type, fn) {
-                            event.one(el, type, fn);
+                            $event.one(el, type, fn);
                         })
                     }
                 });
@@ -2705,10 +2811,10 @@
             off: function(type, fn, options) {
                 return this.for(function(el) {
                     if ($isString(type)) {
-                        event.off(el, type, fn, options);
+                        $event.off(el, type, fn, options);
                     } else if ($isObject(type)) {
                         $forEach(type, function(type, fn) {
-                            event.off(el, type, fn);
+                            $event.off(el, type, fn);
                         })
                     }
                 });
@@ -2723,7 +2829,7 @@
              */
             fire: function(type, fn, options) {
                 return this.for(function(el) {
-                    event.fire(el, type, fn, options);
+                    $event.fire(el, type, fn, options);
                 });
             },
 
@@ -2742,7 +2848,7 @@
              * @return {Bool}
              */
             hasEvent: function(type, fn, opt_typeOnly) {
-                return event.has(this[0], type, fn, opt_typeOnly);
+                return $event.has(this[0], type, fn, opt_typeOnly);
             }
         });
     }

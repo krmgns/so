@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.91.0';
+    $win.so.VERSION = '5.92.0';
 
     // minify candies
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
@@ -148,28 +148,42 @@
         return (input && input[NAME_LENGTH]);
     }
 
-    /**
-     * Extend.
-     * @param  {Object} ...arguments
-     * @return {Object}
-     * @private
-     */
-    function extend() {
-        var name, source, args = arguments, target = args[0] || {}, i = 1;
+    var _id = 0;
+    var _break = 0; // loop breaker (for, forEach, each)
+    var fn_slice = [].slice;
+    var fn_toString = {}.toString;
 
-        while (source = args[i++]) {
-            for (name in source) {
-                if (source.hasOwnProperty(name)) {
-                    target[name] = source[name];
+    // array maker
+    function makeArray(input, begin, end) {
+        var ret = [];
+
+        if (!input || isString(input) || isWindow(input)
+                   || input[NAME_NODE_TYPE] || input[NAME_LENGTH] == NULL) {
+            ret = [input];
+        } else {
+            ret = fn_slice.call(input, begin, end);
+        }
+
+        return ret;
+    }
+
+    // object mix/extend
+    function extend() {
+        var args = makeArray(arguments), source, target = args.shift() || {}, k;
+
+        while (len(args)) {
+            source = args.shift();
+            if (isObject(source)) {
+                for (k in source) {
+                    if (source.hasOwnProperty(k)) {
+                        target[k] = source[k];
+                    }
                 }
             }
         }
 
         return target;
     }
-
-    // loop breaker (for, forEach)
-    var _break = 0;
 
     /**
      * Loop.
@@ -273,7 +287,7 @@
         return Array.isArray(input);
     }
     function isObject(input) {
-        return toBool(input && (input.constructor == Object));
+        return toBool(input && input.constructor == Object);
     }
     function isWindow(input) {
         return toBool(input && input == input[NAME_WINDOW]
@@ -435,22 +449,25 @@
     });
 
     // shortcuts
-    function index(search, stack, opt_last) {
-        return stack && (!opt_last ? stack.indexOf(search) : stack.lastIndexOf(search));
+    function index(s, stack, opt_last) {
+        return stack && (
+            isRegExp(s) ? stack.search(s)
+                : (!opt_last ? stack.indexOf(s) : stack.lastIndexOf(s))
+        );
     }
 
-    function has(search, stack, opt_strict) {
+    function has(s, stack, opt_strict) {
         var ret;
 
-        if (isNulls(search) || isNulls(stack)) { // fix empty stuff issue
+        if (isNulls(s) || isNulls(stack)) { // fix empty stuff issue
             ret = -1;
         } else if (isString(stack)) {
-            ret = isRegExp(search) ? stack.search(search) : index(search, stack); // simply
+            ret = index(s, stack);
         } else if (isArray(stack)) {
-            ret = index(search, stack);
+            ret = index(s, stack);
         } else if (isObject(stack)) {
             $.for(stack, function(value, i) {
-                if (opt_strict ? value === search : value == search) {
+                if (opt_strict ? value === s : value == s) {
                     return (ret = i), _break;
                 }
             });
@@ -461,8 +478,8 @@
 
     function toUniqUnuniq(array, opt_ununiq) {
         return opt_ununiq
-            ? array.filter(function(el, i, _array) { return index(el, _array) != i; })
-            : array.filter(function(el, i, _array) { return index(el, _array) == i; });
+            ? array.filter(function(el, i, array) { return index(el, array) !== i; })
+            : array.filter(function(el, i, array) { return index(el, array) === i; });
     }
 
     /**
@@ -479,12 +496,23 @@
 
         /**
          * Has.
-         * @param  {Any}  search
+         * @param  {Any}  src
          * @param  {Bool} opt_strict?
          * @return {Bool}
          */
-        has: function(search, opt_strict) {
-            return has(search, this, opt_strict);
+        has: function(src, opt_strict) {
+            return has(src, this, opt_strict);
+        },
+
+        /**
+         * Index.
+         * @param  {Any} src
+         * @return {Int|null}
+         */
+        index: function(src) {
+            var ret = index(src, this);
+
+            return (ret > -1) ? ret : NULL;
         },
 
         /**
@@ -590,9 +618,9 @@
             '('+ chars.split('').uniq().map(toRegExpEsc).join('|') +')'
         ), opt_noCase ? 'i' : '');
     }
-    function prepareSearchRegExp(search, opt_noCase, opt_side, opt_esc) {
+    function prepareSearchRegExp(src, opt_noCase, opt_side, opt_esc) {
         return toRegExp((!opt_side ? '%s' : opt_side == 1 ? '^%s' : '%s$').format(
-            opt_esc ? toRegExpEsc(search): search
+            opt_esc ? toRegExpEsc(src): src
         ), opt_noCase ? 'i' : '');
     }
 
@@ -610,12 +638,23 @@
 
         /**
          * Has.
-         * @param  {Any}  search
+         * @param  {Any}  src
          * @param  {Bool} opt_strict?
          * @return {Bool}
          */
-        has: function(search, opt_strict) {
-            return has(search, this, opt_strict);
+        has: function(src, opt_strict) {
+            return has(src, this, opt_strict);
+        },
+
+        /**
+         * Index.
+         * @param  {String|RegExp} src
+         * @return {Int|null}
+         */
+        index: function(src) {
+            var ret = index(src, this);
+
+            return (ret > -1) ? ret : NULL;
         },
 
         /**
@@ -730,6 +769,15 @@
         },
 
         /**
+         * Strip (alias of trim() without opt_noCase).
+         * @param  {String} chars?
+         * @return {String}
+         */
+        strip: function(chars) {
+            return this.trim(chars);
+        },
+
+        /**
          * Splits.
          * @param  {String|RegExp} separator
          * @param  {Int}           limit?
@@ -751,22 +799,22 @@
 
         /**
          * Slice at.
-         * @param  {String|RegExp} search
+         * @param  {String|RegExp} src
          * @param  {Int}           limit?
          * @return {String}
          */
-        sliceAt: function(search, limit) {
-            return (this.splits(search, 2)[0] || '').slice(0, limit);
+        sliceAt: function(src, limit) {
+            return (this.splits(src, 2)[0] || '').slice(0, limit);
         },
 
         /**
          * Slice from.
-         * @param  {String|RegExp} search
+         * @param  {String|RegExp} src
          * @param  {Int}           limit?
          * @return {String}
          */
-        sliceFrom: function(search, limit) {
-            return (this.splits(search, 2)[1] || '').slice(0, limit);
+        sliceFrom: function(src, limit) {
+            return (this.splits(src, 2)[1] || '').slice(0, limit);
         },
 
         /**
@@ -810,15 +858,16 @@
         grep: function(re, i) {
             var ret = this.grepAll(re);
 
-            return ret ? ret[0][0 | i] : NULL;
+            return ret ? ret[0][i | 0] : NULL;
         },
 
         /**
          * Grep all.
          * @param  {RegExp} re
+         * @param  {Int}    i?
          * @return {Array|null}
          */
-        grepAll: function(re) {
+        grepAll: function(re, i) {
             var re = this.matchAll(re), ret = NULL;
 
             if (re) {
@@ -828,6 +877,10 @@
                         // skip 0 index & nones
                         return (i && !isVoid(value));
                     }));
+                }
+
+                if (!isVoid(i)) {
+                    return ret[i | 0];
                 }
             }
 
@@ -960,13 +1013,13 @@
 
         /**
          * Contains.
-         * @param  {String} search
+         * @param  {String} src
          * @param  {Int}    offset?
          * @param  {Bool}   opt_noCase?
          * @return {Bool}
          */
-        contains: function(search, offset, opt_noCase) {
-            return this.slice(offset).test(prepareSearchRegExp(search, opt_noCase, NULL, TRUE));
+        contains: function(src, offset, opt_noCase) {
+            return this.slice(offset).test(prepareSearchRegExp(src, opt_noCase, NULL, TRUE));
         },
 
         /**
@@ -984,26 +1037,26 @@
 
         /**
          * Starts with.
-         * @param  {String} search
+         * @param  {String} src
          * @param  {Int}    offset?
          * @param  {Bool}   opt_noCase?
          * @return {Bool}
          * @override For no-case option.
          */
-        startsWith: function(search, offset, opt_noCase) {
-            return this.slice(offset).test(prepareSearchRegExp(search, opt_noCase, 1, TRUE));
+        startsWith: function(src, offset, opt_noCase) {
+            return this.slice(offset).test(prepareSearchRegExp(src, opt_noCase, 1, TRUE));
         },
 
         /**
          * Ends with.
-         * @param  {String} search
+         * @param  {String} src
          * @param  {Int}    offset?
          * @param  {Bool}   opt_noCase?
          * @return {Bool}
          * @override For no-case option.
          */
-        endsWith: function(search, offset, opt_noCase) {
-            return this.slice(offset).test(prepareSearchRegExp(search, opt_noCase, 2, TRUE));
+        endsWith: function(src, offset, opt_noCase) {
+            return this.slice(offset).test(prepareSearchRegExp(src, opt_noCase, 2, TRUE));
         }
     });
 
@@ -1037,24 +1090,6 @@
     //      */
     //     toValue = function() { return this ? '1' : ''; }
     // });
-
-    var _id = 0;
-    var fn_slice = [].slice;
-    var fn_toString = {}.toString;
-
-    // array maker
-    function makeArray(input, begin, end) {
-        var ret = [], inputType = $.type(input);
-
-        if (!input || inputType == 'string' || inputType == 'window'
-            || input[NAME_NODE_TYPE] || isVoid(input[NAME_LENGTH])) {
-            ret = [input];
-        } else {
-            ret = fn_slice.call(input, begin, end);
-        }
-
-        return ret;
-    }
 
     // so: base functions.
     extend($, {
@@ -1124,7 +1159,7 @@
         /**
          * Len.
          * @param  {Any} input
-         * @return {Int|null|undefined}
+         * @return {Int|undefined}
          */
         len: function(input) {
             return len(input);
@@ -1231,23 +1266,23 @@
 
         /**
          * In.
-         * @param  {Any}          search
+         * @param  {Any}          src
          * @param  {Array|String} stack
          * @return {Bool}
          */
-        in: function(search, stack) {
-            return index(search, stack) > -1;
+        in: function(src, stack) {
+            return index(src, stack) > -1;
         },
 
         /**
          * Has.
-         * @param  {Any}  search
+         * @param  {Any}  src
          * @param  {Any}  stack
          * @param  {Bool} opt_strict?
          * @return {Bool}
          */
-        has: function(search, stack, opt_strict) {
-            return has(search, stack, opt_strict);
+        has: function(src, stack, opt_strict) {
+            return has(src, stack, opt_strict);
         },
 
         /**
@@ -1263,6 +1298,15 @@
         },
 
         /**
+         * Mix.
+         * @param  {Object} ...arguments
+         * @return {Object}
+         */
+        mix: function() {
+            return extend.apply(NULL, [{}].concat(makeArray(arguments)));
+        },
+
+        /**
          * Extend.
          * @param  {Object} target
          * @param  {Object} source
@@ -1270,6 +1314,16 @@
          */
         extend: function(target, source) {
             return extend.apply(NULL, [target, source].concat(makeArray(arguments, 2)));
+        },
+
+        /**
+         * Options.
+         * @param  {Object} optionsDefault
+         * @param  {Object} options
+         * @return {Object}
+         */
+        options: function(optionsDefault, options) {
+            return $.extend({}, optionsDefault, options);
         },
 
         /**
@@ -1282,16 +1336,6 @@
          */
         equals: function(a, b, opt_sort, opt_deep) {
             return equals(a, b, opt_sort, opt_deep);
-        },
-
-        /**
-         * Options.
-         * @param  {Object} optionsDefault
-         * @param  {Object} options
-         * @return {Object}
-         */
-        options: function(optionsDefault, options) {
-            return $.extend({}, optionsDefault, options);
         },
 
         /**
