@@ -14,18 +14,18 @@
     /**
      * So.
      * @param  {String|Object|Function} a
-     * @param  {Object}                 b?
-     * @return {Object}
+     * @param  {String|Object|Function} b?
+     * @param  {Bool|Object}            c?
+     * @return {Object|void}
      */
-    function $(a, b) {
-        return !isFunction(a)
-            ? $.dom(a, b)   // (selector, root?)
-            : $.ready(a, b) // (callback, document?)
+    function $(a, b, c) {
+        return !isFunction(a) ? $.dom(a, b, c) // (selector, root?, one?)
+                              : $.ready(a, b)  // (callback, document?)
     }
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.92.0';
+    $win.so.VERSION = '5.93.0';
 
     // minify candies
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
@@ -63,9 +63,9 @@
         return (input == NULL);
     }
 
-    // faster trim for space only
+    // faster trim for space only purposes
     function trim(input, opt_side) {
-        return !isVoid(input) ? (''+ input).replace(
+        return (input != NULL) ? (''+ input).replace(
             opt_side ? (opt_side == 1 ? re_trimLeft : re_trimRight) : re_trim, ''
         ) : '';
     }
@@ -78,7 +78,7 @@
         return parseFloat(input) || 0;
     }
     function toString(input) {
-        return (''+ input);
+        return (''+ (input != NULL ? input : '')); // null/undefined safe
     }
     function toBool(input) {
         return !!input;
@@ -173,7 +173,7 @@
 
         while (len(args)) {
             source = args.shift();
-            if (isObject(source)) {
+            if (isObject(source, TRUE)) {
                 for (k in source) {
                     if (source.hasOwnProperty(k)) {
                         target[k] = source[k];
@@ -286,8 +286,9 @@
     function isArray(input) {
         return Array.isArray(input);
     }
-    function isObject(input) {
-        return toBool(input && input.constructor == Object);
+    function isObject(input, opt_typeOnly) {
+        return toBool(input && !opt_typeOnly ? input.constructor == Object
+                                             : typeof input == 'object');
     }
     function isWindow(input) {
         return toBool(input && input == input[NAME_WINDOW]
@@ -379,9 +380,9 @@
             return isArray(input);
         },
 
-        /** Is object. @param {Any} input @return {Bool} */
-        isObject: function(input) {
-            return isObject(input);
+        /** Is object. @param {Any} input @param {Bool} opt_typeOnly? @return {Bool} */
+        isObject: function(input, opt_typeOnly) {
+            return isObject(input, opt_typeOnly);
         },
 
         /** Is iterable. @param {Any} input @return {Bool} */

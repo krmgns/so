@@ -7,30 +7,30 @@
 ;(function($, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
 
     // minify candies
-    var NAME_NODE_NAME = 'nodeName', NAME_NODE_TYPE = 'nodeType';
-    var NAME_PARENT_NODE = 'parentNode', NAME_PARENT_ELEMENT = 'parentElement';
-    var NAME_CHILDREN = 'children', NAME_CHILD_NODES = 'childNodes', NAME_FIRST_CHILD = 'firstChild';
-    var NAME_NEXT_ELEMENT_SIBLING = 'nextElementSibling', NAME_PREVIOUS_ELEMENT_SIBLING = 'previousElementSibling';
-    var NAME_PADDING_TOP = 'paddingTop', NAME_PADDING_BOTTOM = 'paddingBottom';
-    var NAME_PADDING_LEFT = 'paddingLeft', NAME_PADDING_RIGHT = 'paddingRight';
-    var NAME_MARGIN_TOP = 'marginTop', NAME_MARGIN_BOTTOM = 'marginBottom';
-    var NAME_MARGIN_LEFT = 'marginLeft', NAME_MARGIN_RIGHT = 'marginRight';
-    var NAME_BORDER_TOP_WIDTH = 'borderTopWidth', NAME_BORDER_BOTTOM_WIDTH = 'borderBottomWidth';
-    var NAME_BORDER_LEFT_WIDTH = 'borderLeftWidth', NAME_BORDER_RIGHT_WIDTH = 'borderRightWidth';
-    var NAME_WIDTH = 'width', NAME_INNER_WIDTH = 'innerWidth', NAME_OUTER_WIDTH = 'outerWidth';
-    var NAME_HEIGHT = 'height', NAME_INNER_HEIGHT = 'innerHeight', NAME_OUTER_HEIGHT = 'outerHeight';
-    var NAME_OFFSET_WIDTH = 'offsetWidth', NAME_OFFSET_HEIGHT = 'offsetHeight';
-    var NAME_OFFSET_TOP = 'offsetTop', NAME_OFFSET_LEFT = 'offsetLeft';
-    var NAME_SCROLL_TOP = 'scrollTop', NAME_SCROLL_LEFT = 'scrollLeft';
-    var NAME_INNER_HTML = 'innerHTML', NAME_TEXT_CONTENT = 'textContent';
-    var NAME_ID = 'id', NAME_NAME = 'name', NAME_VALUE = 'value', NAME_TEXT = 'text';
-    var NAME_TYPE = 'type', NAME_OPTIONS = 'options', NAME_SELECTED_INDEX = 'selectedIndex', NAME_HIDDEN = 'hidden';
-    var NAME_STYLE = 'style', NAME_CLASS_NAME = 'className', NAME_TAG_NAME = 'tagName';
-    var NAME_CHECKED = 'checked', NAME_SELECTED = 'selected', NAME_DISABLED = 'disabled', NAME_READONLY = 'readOnly';
-    var NAME_DISPLAY = 'display', NAME_VISIBILITY = 'visibility', NAME_NONE = 'none', NAME_CSS_TEXT = 'cssText';
-    var NAME_OWNER_DOCUMENT = 'ownerDocument', NAME_DOCUMENT_ELEMENT = 'documentElement', NAME_SCROLLING_ELEMENT = 'scrollingElement';
-    var NAME_PROTOTYPE = 'prototype';
-    var TAG_WINDOW = '#window', TAG_DOCUMENT = '#document', TAG_HTML = 'html', TAG_HEAD = 'head', TAG_BODY = 'body';
+    var NAME_NODE_NAME = 'nodeName', NAME_NODE_TYPE = 'nodeType',
+        NAME_PARENT_NODE = 'parentNode', NAME_PARENT_ELEMENT = 'parentElement',
+        NAME_CHILDREN = 'children', NAME_CHILD_NODES = 'childNodes', NAME_FIRST_CHILD = 'firstChild',
+        NAME_NEXT_ELEMENT_SIBLING = 'nextElementSibling', NAME_PREVIOUS_ELEMENT_SIBLING = 'previousElementSibling',
+        NAME_PADDING_TOP = 'paddingTop', NAME_PADDING_BOTTOM = 'paddingBottom',
+        NAME_PADDING_LEFT = 'paddingLeft', NAME_PADDING_RIGHT = 'paddingRight',
+        NAME_MARGIN_TOP = 'marginTop', NAME_MARGIN_BOTTOM = 'marginBottom',
+        NAME_MARGIN_LEFT = 'marginLeft', NAME_MARGIN_RIGHT = 'marginRight',
+        NAME_BORDER_TOP_WIDTH = 'borderTopWidth', NAME_BORDER_BOTTOM_WIDTH = 'borderBottomWidth',
+        NAME_BORDER_LEFT_WIDTH = 'borderLeftWidth', NAME_BORDER_RIGHT_WIDTH = 'borderRightWidth',
+        NAME_WIDTH = 'width', NAME_INNER_WIDTH = 'innerWidth', NAME_OUTER_WIDTH = 'outerWidth',
+        NAME_HEIGHT = 'height', NAME_INNER_HEIGHT = 'innerHeight', NAME_OUTER_HEIGHT = 'outerHeight',
+        NAME_OFFSET_WIDTH = 'offsetWidth', NAME_OFFSET_HEIGHT = 'offsetHeight',
+        NAME_OFFSET_TOP = 'offsetTop', NAME_OFFSET_LEFT = 'offsetLeft',
+        NAME_SCROLL_TOP = 'scrollTop', NAME_SCROLL_LEFT = 'scrollLeft',
+        NAME_INNER_HTML = 'innerHTML', NAME_TEXT_CONTENT = 'textContent',
+        NAME_ID = 'id', NAME_NAME = 'name', NAME_VALUE = 'value', NAME_TEXT = 'text',
+        NAME_TYPE = 'type', NAME_OPTIONS = 'options', NAME_SELECTED_INDEX = 'selectedIndex', NAME_HIDDEN = 'hidden',
+        NAME_STYLE = 'style', NAME_CLASS_NAME = 'className', NAME_TAG_NAME = 'tagName',
+        NAME_CHECKED = 'checked', NAME_SELECTED = 'selected', NAME_DISABLED = 'disabled', NAME_READONLY = 'readOnly',
+        NAME_DISPLAY = 'display', NAME_VISIBILITY = 'visibility', NAME_NONE = 'none', NAME_CSS_TEXT = 'cssText',
+        NAME_OWNER_DOCUMENT = 'ownerDocument', NAME_DOCUMENT_ELEMENT = 'documentElement', NAME_SCROLLING_ELEMENT = 'scrollingElement',
+        NAME_PROTOTYPE = 'prototype',
+        TAG_WINDOW = '#window', TAG_DOCUMENT = '#document', TAG_HTML = 'html', TAG_HEAD = 'head', TAG_BODY = 'body';
 
     var $doc = $.doc();
     var $event = $.event, $toStyleName = $.util.toStyleName, $jsonEncode = $.util.jsonEncode;
@@ -66,7 +66,7 @@
 
     function getTag(el) {
         return (el && el[NAME_NODE_NAME]) ? el[NAME_NODE_NAME].lower()
-            : $isWindow(el) ? TAG_WINDOW : NULL;
+                                          : $isWindow(el) ? TAG_WINDOW : NULL;
     }
 
     function isRoot(el, _tag) {
@@ -99,6 +99,9 @@
             ret = {}, ret[key] = value;
         }
         return ret;
+    }
+    function toTagContent(tag, content) {
+        return {'$tag': tag, '$content': content};
     }
 
     var soAttrPrefix = 'so:', soTempTag = '<so-temp>';
@@ -199,8 +202,8 @@
     /**
      * Dom.
      * @param {String|Object} selector
-     * @param {Object}        root?
-     * @param {Bool}          one?
+     * @param {String|Object} root?
+     * @param {Bool|Object}   one?
      */
     function Dom(selector, root, one) {
         var _this = this, els, len = 0, re, idn, idv;
@@ -209,30 +212,38 @@
             if ($isString(selector)) {
                 selector = $trim(selector);
                 if (selector) {
-                    // id & class check (some speed..)
-                    if (re = selector.match(re_idOrClass)) {
-                        els = (root = $doc, re[1] == '#')
-                            ? [root.getElementById(re[2])] : root.getElementsByClassName(re[2]);
-                    } else if (re = selector.match(re_tag)) {
-                        // root may be document or attributes
-                        els = create(selector, root, root, re[1]);
-                        root = NULL;
-                    } else if (selector[0] == '>') {
-                        root = isENode(root) ? root : $doc[NAME_DOCUMENT_ELEMENT];
-                        // buggy :scope selector
-                        idv = getAttr(root, (idn = soAttrPrefix +'_')) || $rid();
-                        setAttr(root, idn, idv, FALSE);
-                        // fix '>' only selector
-                        if (selector.len() == 1) {
-                            selector = '> *';
-                        }
-                        selector = '[%s="%s"] %s'.format(idn, idv, selector);
-                        els = select(selector, NULL, one);
-                    } else if (root && $isObject(root)) {
-                        els = create({'$tag': selector}, NULL, root /* attributes */);
-                        root = NULL;
+                    // eg: ("a", "Click!", ...attributes)
+                    //     ("a", {$content:"Click!", ...attributes})
+                    if (root && ($isObject(root) || $isObject(one))) {
+                        els = create($isString(root) ? $mix(toTagContent(selector, root), one)
+                                                     : $mix(toTagContent(selector), root));
                     } else {
-                        els = select(selector, root, one);
+                        // id & class check (some speed..)
+                        if (re = selector.match(re_idOrClass)) {
+                            els = (re[1] == '#')
+                                ? [(root = $doc).getElementById(re[2])]
+                                : (root || $doc).getElementsByClassName(re[2]);
+                        } else if (re = selector.match(re_tag)) {
+                            // root may be document or attributes
+                            els = create(selector, root, root, re[1]);
+                            root = NULL;
+                        } else if (selector[0] == '>') {
+                            root = isENode(root) ? root : $doc[NAME_DOCUMENT_ELEMENT];
+                            // buggy :scope selector
+                            idv = getAttr(root, (idn = soAttrPrefix +'_')) || $rid();
+                            setAttr(root, idn, idv, FALSE);
+                            // fix '>' only selector
+                            if (selector.len() == 1) {
+                                selector = '> *';
+                            }
+                            selector = '[%s="%s"] %s'.format(idn, idv, selector);
+                            els = select(selector, NULL, one);
+                        // } else if (root && $isObject(root)) {
+                        //     els = create(toTagContent(selector), NULL, root /* attributes */);
+                        //     root = NULL;
+                        } else {
+                            els = select(selector, root, one);
+                        }
                     }
                 }
             } else if ($isWindow(selector) || $isDocument(selector)) {
@@ -560,7 +571,10 @@
         if ($isArray(content)) return content;
 
         if ($isObject(content) || $isObject(doc)) {
-            var mix = $mix(content, doc, attributes);
+            var mix = $mix({}, content, attributes);
+            if ($isObject(doc)) {
+                mix = $mix(mix, doc);
+            }
             mix['$tag'] = mix['$tag'] || tag;
 
             var _tag = pick('$tag', mix, '').trim(),
@@ -577,7 +591,7 @@
                 _tag = grep[0];
             }
 
-            ss = '<'+ _tag.trim().trimLeft('<');
+            ss = '<'+ _tag.trimLeft('<');
             if (grep[1] != '/') {
                 ss += grep[1] || s;
             }
@@ -649,7 +663,10 @@
         var clone = el.cloneNode();
 
         // clone.$cloneOf = el; // @debug
-        setAttr(clone, soAttrPrefix +'clone', ++_id, FALSE);
+        if (isENode(el)) {
+            setAttr(clone, soAttrPrefix +'clone', ++_id, FALSE);
+        }
+
         if (!$isFalse(opt_deep)) {
             if (el.$data) {
                 clone.$data = el.$data;
@@ -779,8 +796,8 @@
             // eg: ("a", "Click!", {...attributes}) or ("<a>Click!</a>", {...attributes})
             if ($isString(opt_content) || $isObject(opt_content)) {
                 content = $isString(opt_content)
-                    ? $mix({'$tag': content, '$content': opt_content}, opt_attributes)
-                    : $mix({'$tag': content}, opt_content)
+                    ? $mix(toTagContent(content, opt_content), opt_attributes)
+                    : $mix(toTagContent(content), opt_content)
             }
 
             return this.for(function(el) {
@@ -819,8 +836,8 @@
         prepend: function(content, opt_content, opt_attributes, opt_clone) {
             if ($isString(opt_content) || $isObject(opt_content)) {
                 content = $isString(opt_content)
-                    ? $mix({'$tag': content, '$content': opt_content}, opt_attributes)
-                    : $mix({'$tag': content}, opt_content)
+                    ? $mix(toTagContent(content, opt_content), opt_attributes)
+                    : $mix(toTagContent(content), opt_content)
             }
 
             return this.for(function(el) {
@@ -2749,11 +2766,11 @@
         },
 
         /**
-         * Readonly.
+         * Read-only.
          * @param  {Bool} option?
          * @return {Bool|this}
          */
-        readonly: function(option) {
+        readOnly: function(option) {
             return $isVoid(option) ? getState(this[0], NAME_READONLY) : this.for(function(el) {
                 setState(el, NAME_READONLY, option);
             });
@@ -3074,13 +3091,14 @@
 
     /**
      * Dom.
-     * @param  {String|Object}   selector
-     * @param  {Object|Function} root?
-     * @return {this}
+     * @param  {String|Object}          selector
+     * @param  {String|Object|Function} root?
+     * @param  {Bool|Object}            one?
+     * @return {Dom}
      */
-    var $dom = function(selector, root) {
+    var $dom = function(selector, root, one) {
         return !$isFunction(root)
-            ? toDom(selector, root)
+            ? toDom(selector, root, one)
             : toDom(selector).each(root);
     };
 
@@ -3093,6 +3111,7 @@
         findAll: function(selector, root) {
             return toDom(selector, root);
         },
+
         // find by xpath
         xfind: function(selector, root) {
             return toXDom(selector, root, TRUE);
@@ -3100,6 +3119,7 @@
         xfindAll: function(selector, root) {
             return toXDom(selector, root);
         },
+
         // (name, value) or ({name: value})
         define: function(name, value) {
             var names = Object.keys(Dom[NAME_PROTOTYPE]);
@@ -3110,12 +3130,14 @@
                 Dom[NAME_PROTOTYPE][name] = value;
             });
         },
+
         create: function(content, attributes, doc) {
             return create(content, doc, attributes);
         },
         createDom: function(content, attributes, doc) {
             return toDom(create(content, doc, attributes));
         },
+
         loadStyle: function(src, root, onload, attributes) {
             var el = createElement(NULL, 'link');
             el.href = src, el.onload = onload, el.rel = 'stylesheet';
@@ -3136,6 +3158,7 @@
 
             appendChild(toDom(root || $doc[TAG_HEAD])[0], el);
         },
+
         isNode: function(x) { return isNode(x); },
         isENode: function(x) { return isENode(x); }
     });

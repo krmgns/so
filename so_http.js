@@ -15,7 +15,7 @@
         $logWarn = $.logWarn;
 
     var re_space = /%20/g;
-    var re_httpHost = /^(?:https?:)?\/\/([^:/]+)/i;
+    var re_httpHost = /^(?:https?:)?\/\/([^/]+)/i;
     var re_post = /^P(?:OST|UT|ATCH)$/i;
     var re_request = /^([A-Z]+)?\s*(.*?)\s*(?:@(json|xml|html|plain))?$/;
     var re_dataType = /\/(json|xml|html|plain)(?:[; ])?/i;

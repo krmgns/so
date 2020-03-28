@@ -7,6 +7,14 @@
  */
 ;(function($) { 'use strict';
 
+    var p = 'prototype';
+    var $mix = $.mix;
+
+    /**
+     * Class.
+     * @param  {Function} subClass
+     * @return {Object}
+     */
     var $class = function(subClass) { return {
         /**
          * Extends.
@@ -15,14 +23,12 @@
          */
         extends: function(supClass) {
             // @note: super() always must be called in subClass constructor
-            var prototype = $.extend(
-                {},
-                supClass.prototype,
-                subClass.prototype,
+            var prototype = $mix(
+                supClass[p], subClass[p],
                 {constructor: subClass, super: supClass}
             );
 
-            subClass.prototype = Object.create(prototype);
+            subClass[p] = Object.create(prototype);
 
             return subClass;
         }
@@ -35,7 +41,7 @@
      * @return {Function}
      */
     $class.extend = function(target, prototype) {
-        return $.extend(target.prototype, prototype);
+        return $mix(target[p], prototype);
     },
 
     // export
