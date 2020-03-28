@@ -142,7 +142,7 @@
             event.event = e; // overwrite on initial
             event.fired++;
 
-            // If "e.foo = event.foo", cannot assign to read only property 'foo'..
+            // when "e.foo = event.foo", error: cannot assign to read only property 'foo'..
             if (!e.data) {
                 e = objectDefineProperty(e, 'data', {value: event.data, writable: TRUE});
             }
@@ -150,8 +150,12 @@
                 e = objectDefineProperty(e, 'target', {value: event.target});
             }
 
+            e.$ = $(e.target); // dom shortcut for target
+            e.targetTag = e.$.tag(); // tag shortcut for target (lower-cased)
+
             // sugars..
             $extend(e, {
+                $: $(e.target),
                 event: event,
                 eventTarget: event.eventTarget,
                 stop: function(immediate) {
