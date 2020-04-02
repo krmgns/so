@@ -2106,15 +2106,15 @@
             return $isUndefined(opt_value)
                 ? hasAttr(this[0], NAME_HIDDEN)
                 : setAttr(this[0], NAME_HIDDEN,
-                    $isTrue(opt_value) ? '' /* set */ : NULL /* remove */
-                );
+                      $isTrue(opt_value) ? '' /* set */ : NULL /* remove */
+                  );
         },
 
         /**
-         * Is visible.
+         * Visible.
          * @return {Bool}
          */
-        isVisible: function() {
+        visible: function() {
             return isVisible(this[0]);
         }
     });
