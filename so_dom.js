@@ -1,6 +1,6 @@
 /**
  * @object  so.dom
- * @depends so, so.list, so.util
+ * @depends so, so.util
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
@@ -322,14 +322,6 @@
                 ret[i] = el;
             }
             return ret;
-        },
-
-        /**
-         * To list.
-         * @return {List}
-         */
-        toList: function() {
-            return $.list(this.all());
         },
 
         /**
@@ -2539,7 +2531,7 @@
 
     // data helpers
     function checkData(el) {
-        el.$data = el.$data || $.list();
+        el.$data = el.$data || {};
     }
 
     function setData(el, key, value) {
@@ -2547,12 +2539,11 @@
             checkData(el);
 
             if ($isString(key)) {
-                key = $trim(key);
-                el.$data.set(key, value);
+                el.$data[$trim(key)] = value;
             } else {
                 var data = toKeyValue(key, value);
                 for (key in data) {
-                    el.$data.set(key, data[key]);
+                    el.$data[key] = data[key];
                 }
             }
         }
@@ -2561,15 +2552,8 @@
     function getData(el, key) {
         if (el) {
             checkData(el);
-
-            if ($isString(key)) {
-                key = $trim(key);
-                return (key == '*') ? el.$data.data : el.$data.get(key);
-            }
-
-            if ($isTrue(key)) {
-                return el.$data; // get list object
-            }
+            key = $trim(key);
+            return (key == '*') ? el.$data : el.$data[key];
         }
     }
 
@@ -2588,7 +2572,7 @@
 
         /**
          * Has data.
-         * @param  {?String} key
+         * @param  {String} key?
          * @return {Bool}
          */
         hasData: function(key) {
@@ -2627,10 +2611,10 @@
             return this.for(function(el) {
                 checkData(el);
                 if (key[0] == '*') {
-                    el.$data.empty();
+                    el.$data = NULL;
                 } else {
                     key.each(function(key) {
-                        el.$data.removeAt(key);
+                        delete el.$data[key];
                     });
                 }
             });
