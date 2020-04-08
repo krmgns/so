@@ -238,9 +238,6 @@
                             }
                             selector = '[%s="%s"] %s'.format(idn, idv, selector);
                             els = select(selector, NULL, one);
-                        // } else if (root && $isObject(root)) {
-                        //     els = create(toTagContent(selector), NULL, root /* attributes */);
-                        //     root = NULL;
                         } else {
                             els = select(selector, root, one);
                         }
