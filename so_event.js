@@ -127,7 +127,7 @@
 
     /**
      * Extend fn.
-     * @param  {this}    event
+     * @param  {Event}    event
      * @param  {Function} fn
      * @return {Function}
      */
@@ -286,7 +286,7 @@
     $extend(Event.prototype, {
         /**
          * Copy.
-         * @return {this}
+         * @return {Event}
          */
         copy: function() {
             var event = this;
@@ -298,7 +298,7 @@
         /**
          * Bind.
          * @param  {String} type?
-         * @return {this}
+         * @return {Event}
          */
         bind: function(type) {
             var event = this.copy();
@@ -319,7 +319,7 @@
         /**
          * Bind to.
          * @param  {Object} target
-         * @return {this}
+         * @return {Event}
          */
         bindTo: function(target) {
             var event = this.copy(), fn;
@@ -339,7 +339,7 @@
         /**
          * Unbind.
          * @param  {String} type?
-         * @return {this}
+         * @return {Event}
          */
         unbind: function(type) {
             var event = this.copy();
@@ -360,8 +360,8 @@
         /**
          * Fire.
          * @param  {String} type?
-         * @param  {Object} data
-         * @return {this}
+         * @param  {Object} data?
+         * @return {Event}
          */
         fire: function(type, data) {
             var event = this.copy();
@@ -398,7 +398,7 @@
     $extend(EventTarget.prototype, {
         /**
          * Add event.
-         * @param  {this} event
+         * @param  {Event} event
          * @return {void}
          */
         addEvent: function(event) {
@@ -419,7 +419,7 @@
 
         /**
          * Remove event.
-         * @param  {this} event
+         * @param  {Event} event
          * @return {void}
          */
         removeEvent: function(event) {
@@ -489,8 +489,8 @@
 
         /**
          * Dispatch.
-         * @param  {this}  event
-         * @param  {Object} data
+         * @param  {Event}  event
+         * @param  {Object} data?
          * @return {void}
          */
         dispatch: function(event, data) {
@@ -531,7 +531,7 @@
      * @param  {String}   type
      * @param  {Function} fn
      * @param  {Object}   options
-     * @return {this}
+     * @return {void}
      */
     function on(target, type, fn, options) {
         var args = prepareArguments(fn, options, target), event, eventTarget;
