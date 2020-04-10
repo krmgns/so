@@ -105,8 +105,8 @@
     }
 
     var soAttrPrefix = 'so:', soTempTag = '<so-temp>';
-    var re_child = /(?::first|last|nth)(?!-)|(?:[\w-]+)\((?:\d+)\)/;
-    var re_childFix = /([\w-]+|):(first|last|nth([^-]+))|([\w-]+)\((\d+?)\)/g;
+    var re_child = /(?::first|last|nth)(?!-)|(?:[\w-]+):(?:\d+)/;
+    var re_childFix = /([\w-]+|):(first|last|nth([^-]+))|([\w-]+):(\d+)/g;
     var re_attr = /\[.+\]/;
     var re_attrFix = /([.:])/g;
     var re_attrFixMatch = /\[([\w.:]+)(=[^\]]+)?\]/g;
@@ -134,7 +134,7 @@
             root = $doc;
         }
 
-        var r, re, ret = [], isAttr, isParent, i, s;
+        var r, re, ret = [], isAttr, isParent, i, il, s, st;
         selector = selector.replace(re_space, ' ');
 
         // @note: seems, it isn't that kinda cheap.. (eg: "[data-*]" or "a[data-*]")
@@ -163,13 +163,18 @@
         }
 
         // @note: should not be mixed in a complex selector (eg: 'a.foo:first, body')
-        if (test(selector, re_child)) {
-            // eg: p:first => p:first-child or div(1) => div:nth-child(1)
-            selector = selector.replace(re_childFix, function(args) {
-                return args = $array(arguments),
-                    args[4] ? args[4] +':nth-child('+ args[5] +')' // eg: div(1) => div:nth-child(1)
-                            : args[1] +':'+ (args[3] ? 'nth-child'+ args[3] : args[2] +'-child');
-            });
+        if (st = test(selector, re_child)) {
+            i = 0, il = $.len(selector.matchAll(re_child));
+            while ((i++) < il) {
+                // eg: p:first => p:first-child or div:1 => div:nth-child(1)
+                selector = selector.replace(re_childFix, function(args) {
+                    return args = $array(arguments),
+                        args[4] ? args[4] +':nth-child('+ args[5] +')' // eg: div:1 => div:nth-child(1)
+                                : args[1] +':'+ (args[3] ? 'nth-child'+ args[3] : args[2] +'-child');
+                });
+
+                st = test(selector, re_child);
+            }
         }
         // @note: should not be mixed in a complex selector (eg: 'a.foo:parent, body')
         else if (selector.has(':parent')) {
