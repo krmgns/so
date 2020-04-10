@@ -5,12 +5,12 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function($) { 'use strict';
+;(function($, NULL) { 'use strict';
 
     var $win = $.win();
 
     // minify candies
-    var JSON = $win.JSON, Math = $win.Math;
+    var Math = $win.Math, JSON = $win.JSON;
     // var MAX_INT = Number.MAX_SAFE_INTEGER || Math.pow(2, 53) - 1, MAX_FLOAT = Number.MAX_VALUE;
 
     var $int = $.int, $float = $.float, $string = $.string;
@@ -140,7 +140,7 @@
         url: function(url) {
             var re = $string(url).match(re_url) || [], ret = {
                 protocol: re[2], user: re[5], pass: re[7], host: re[8], port: $int(re[10]),
-                path: re[11], query: re[14], queryParams: null, hash: re[16]
+                path: re[11], query: re[14], queryParams: NULL, hash: re[16]
             };
             ret.dir = $string(ret.path).split('/').slice(0, -1).join('/')
             ret.file = $string(ret.path).split('/').pop()
@@ -154,7 +154,7 @@
 
             // give filtered return
             return $.forEach(ret, function(name, value) {
-                if (!value) ret[name] = null;
+                if (!value) ret[name] = NULL;
             })
         },
 
@@ -165,6 +165,13 @@
          */
         urlEncode: function(input) { return encodeURIComponent(input); },
         urlDecode: function(input) { return decodeURIComponent(input); },
+
+        /**
+         * Json (alias of jsonEncode()).
+         */
+        json: function() {
+            return this.jsonEncode.apply(NULL, arguments);
+        },
 
         /**
          * Json encode.
@@ -201,4 +208,4 @@
         }
     };
 
-})(window.so);
+})(window.so, null);
