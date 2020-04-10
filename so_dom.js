@@ -33,7 +33,7 @@
         TAG_WINDOW = '#window', TAG_DOCUMENT = '#document', TAG_HTML = 'html', TAG_HEAD = 'head', TAG_BODY = 'body';
 
     var $doc = $.doc();
-    var $event = $.event, $toStyleName = $.util.toStyleName, $jsonEncode = $.util.jsonEncode;
+    var $event = $.event, $toStyleName = $.util.toStyleName, $json = $.util.json;
     var $re = $.re, $rid = $.rid, $array = $.array, $each = $.each, $for = $.for, $forEach = $.forEach;
     var $trim = $.trim, $mix = $.mix, $extend = $.extend,
         $int = $.int, $float = $.float, $string = $.string, $bool = $.bool,
@@ -2696,7 +2696,7 @@
             var _ret = function(data, ret) {
                 return ret = {}, $for(data, function(item) {
                     if (item.key) ret[item.key] = item.value;
-                }), $jsonEncode(ret);
+                }), $json(ret);
             };
 
             return _ret(this.serializeArray());
