@@ -49,7 +49,8 @@
         // name & version
         if (re = (re_ua1.exec(ua) || re_ua2.exec(ua))) {
             if (re[1]) {
-                _.name = (re[1] == 'msie') ? 'ie' : (re[1] == 'opr') ? 'opera' : re[1];
+                _.name = (re[1] == 'msie') ? 'ie'
+                       : (re[1] == 'opr') ? 'opera' : re[1];
             }
             if (re[2]) {
                 _.version = re[2];
