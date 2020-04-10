@@ -295,7 +295,7 @@
         /**
          * Find.
          * @param  {String|Object} selector
-         * @return {this}
+         * @return {Dom|this}
          */
         find: function(selector) {
             return this[0] ? toDom(selector, this[0], TRUE) : this;
@@ -304,7 +304,7 @@
         /**
          * Find all.
          * @param  {String|Object} selector
-         * @return {this}
+         * @return {Dom|this}
          */
         findAll: function(selector) {
             return this[0] ? toDom(selector, this[0]) : this;
@@ -312,13 +312,13 @@
 
         /**
          * To array.
-         * @return {Array}
+         * @return {Array<Node>}
          */
         toArray: function() {
-            for (var i = 0, ret = [], el; el = this[i]; i++) {
-                ret[i] = el;
+            for (var i = 0, el, els = []; el = this[i]; i++) {
+                els[i] = el;
             }
-            return ret;
+            return els;
         },
 
         /**
@@ -360,7 +360,7 @@
 
         /**
          * Copy.
-         * @return {this}
+         * @return {Dom}
          */
         copy: function() {
             return toDom(this.all());
@@ -369,7 +369,7 @@
         /**
          * Map.
          * @param  {Function} fn
-         * @return {this}
+         * @return {Dom}
          */
         map: function(fn) {
             return toDom(this.all().map(fn));
@@ -378,7 +378,7 @@
         /**
          * Filter.
          * @param  {Function|String} fn
-         * @return {this}
+         * @return {Dom}
          */
         filter: function(fn) {
             var all = this.all(), alls;
@@ -396,7 +396,7 @@
 
         /**
          * Reverse.
-         * @return {this}
+         * @return {Dom}
          */
         reverse: function() {
             return toDom(this.all().reverse());
@@ -405,7 +405,7 @@
         /**
          * Get.
          * @param  {Int} i?
-         * @return {Object}
+         * @return {Node}
          */
         get: function(i) {
             return this[(i || 1) - 1]; // 1 = first, not 0
@@ -414,7 +414,7 @@
         /**
          * Get all.
          * @param  {Int} ...arguments
-         * @return {Array}
+         * @return {Node[]}
          */
         getAll: function() {
             var el, els = [], _this = this, args = $array(arguments);
@@ -436,7 +436,7 @@
         /**
          * Item.
          * @param  {Int} i
-         * @return {this}
+         * @return {Dom}
          */
         item: function(i) {
             return toDom(this[i - 1]);
@@ -444,7 +444,7 @@
 
         /**
          * Items.
-         * @return {this}
+         * @return {Dom}
          */
         items: function() {
             return toDom(this.getAll.apply(this, arguments));
@@ -452,7 +452,7 @@
 
         /**
          * First.
-         * @return {this}
+         * @return {Dom}
          */
         first: function() {
             return this.item(1);
@@ -460,7 +460,7 @@
 
         /**
          * Last.
-         * @return {this}
+         * @return {Dom}
          */
         last: function() {
             return this.item(this._len);
@@ -469,7 +469,7 @@
         /**
          * Nth.
          * @param  {Int|String} i
-         * @return {this}
+         * @return {Dom}
          */
         nth: function(i) {
             if ($isNumber(i)) {
@@ -484,7 +484,7 @@
 
         /**
          * Tag.
-         * @return {String}
+         * @return {String|null}
          */
         tag: function() {
             return getTag(this[0])
@@ -492,7 +492,7 @@
 
         /**
          * Tags.
-         * @return {Array}
+         * @return {String[]}
          */
         tags: function() {
             var ret = [];
