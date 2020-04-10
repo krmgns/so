@@ -111,7 +111,7 @@
     var re_attrFix = /([.:])/g;
     var re_attrFixMatch = /\[([\w.:]+)(=[^\]]+)?\]/g;
     var re_data = /([\w-]+)?\[(data-[\w-]+)\*/;
-    var re_idOrClass = /^([#.])([\w-]+)$/;
+    var re_idOrClass = /^([#.])([^\s]+)$/;
 
     /**
      * Select.
