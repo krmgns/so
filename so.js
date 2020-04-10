@@ -1392,7 +1392,7 @@
     var readyCallbacks = [];
     var readyCallbacksFire = function() {
         while (len(readyCallbacks)) {
-            readyCallbacks.shift()($, $.dom /* will be ready on call */);
+            readyCallbacks.shift()($, $.dom /* will be ready on call time */);
         }
     };
 
