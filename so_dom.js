@@ -31,11 +31,10 @@
         NAME_OWNER_DOCUMENT = 'ownerDocument', NAME_DOCUMENT_ELEMENT = 'documentElement', NAME_SCROLLING_ELEMENT = 'scrollingElement',
         NAME_PROTOTYPE = 'prototype',
         TAG_WINDOW = '#window', TAG_DOCUMENT = '#document', TAG_HTML = 'html', TAG_HEAD = 'head', TAG_BODY = 'body';
-
     var $doc = $.doc();
     var $event = $.event, $toStyleName = $.util.toStyleName, $json = $.util.json;
     var $re = $.re, $rid = $.rid, $array = $.array, $each = $.each, $for = $.for, $forEach = $.forEach;
-    var $trim = $.trim, $mix = $.mix, $extend = $.extend,
+    var $trim = $.trim, $extend = $.extend,
         $int = $.int, $float = $.float, $string = $.string, $bool = $.bool,
         $isVoid = $.isVoid, $isNull = $.isNull, $isNulls = $.isNulls, $isDefined = $.isDefined,
         $isUndefined = $.isUndefined, $isString = $.isString, $isNumeric = $.isNumeric,
@@ -222,8 +221,8 @@
                     // eg: ("a", "Click!", ...attributes)
                     //     ("a", {$content:"Click!", ...attributes})
                     if (root && ($isObject(root) || $isObject(one))) {
-                        els = create($isString(root) ? $mix(toTagContent(selector, root), one)
-                                                     : $mix(toTagContent(selector), root));
+                        els = create($isString(root) ? $extend(toTagContent(selector, root), one)
+                                                     : $extend(toTagContent(selector), root));
                     } else {
                         // id & class check (some speed..)
                         if (re = selector.match(re_idOrClass)) {
@@ -410,27 +409,27 @@
         },
 
         /**
-         * Get.
+         * El.
          * @param  {Int} i?
-         * @return {Node}
+         * @return {Element}
          */
-        get: function(i) {
+        el: function(i) {
             return this[(i || 1) - 1]; // 1 = first, not 0
         },
 
         /**
-         * Get all.
+         * Els.
          * @param  {Int} ...arguments
-         * @return {Node[]}
+         * @return {Element[]}
          */
-        getAll: function() {
+        els: function() {
             var el, els = [], _this = this, args = $array(arguments);
 
             if (!args.len()) {
                 els = _this.all();
             } else {
                 $for(args, function(i) {
-                    el = _this.get(i);
+                    el = _this.el(i);
                     if (el && !els.has(el)) {
                         els.push(el);
                     }
@@ -454,7 +453,7 @@
          * @return {Dom}
          */
         items: function() {
-            return toDom(this.getAll.apply(this, arguments));
+            return toDom(this.els.apply(this, arguments));
         },
 
         /**
@@ -519,14 +518,14 @@
         },
 
         /**
-         * $$ (alias of findAll()).
+         * $$ (shorthand of findAll()).
          */
         $: function(selector) {
             return this.find(selector);
         },
 
         /**
-         * $$ (alias of findAll()).
+         * $$ (shorthand of findAll()).
          */
         $$: function(selector) {
             return this.findAll(selector);
@@ -567,9 +566,9 @@
         if ($isArray(content)) return content;
 
         if ($isObject(content) || $isObject(doc)) {
-            var mix = $mix({}, content, attributes);
+            var mix = $extend({}, content, attributes);
             if ($isObject(doc)) {
-                mix = $mix(mix, doc);
+                mix = $extend(mix, doc);
             }
             mix['$tag'] = mix['$tag'] || tag;
 
@@ -792,8 +791,8 @@
             // eg: ("a", "Click!", {...attributes}) or ("<a>Click!</a>", {...attributes})
             if ($isString(opt_content) || $isObject(opt_content)) {
                 content = $isString(opt_content)
-                    ? $mix(toTagContent(content, opt_content), opt_attributes)
-                    : $mix(toTagContent(content), opt_content)
+                    ? $extend(toTagContent(content, opt_content), opt_attributes)
+                    : $extend(toTagContent(content), opt_content)
             }
 
             return this.for(function(el) {
@@ -832,8 +831,8 @@
         prepend: function(content, opt_content, opt_attributes, opt_clone) {
             if ($isString(opt_content) || $isObject(opt_content)) {
                 content = $isString(opt_content)
-                    ? $mix(toTagContent(content, opt_content), opt_attributes)
-                    : $mix(toTagContent(content), opt_content)
+                    ? $extend(toTagContent(content, opt_content), opt_attributes)
+                    : $extend(toTagContent(content), opt_content)
             }
 
             return this.for(function(el) {
@@ -1062,6 +1061,41 @@
          */
         getProperty: function(name) {
             return __(this, name);
+        },
+
+        /**
+         * Get property.
+         * @param  {String[]} names
+         * @return {Object}
+         */
+        getProperties: function(names) {
+            var el = this[0], ret = {};
+
+            if (el) {
+                names = names || (function(names, name) {
+                    for (name in el) names.push(name); return names;
+                })([]);
+
+                names.each(function(name) {
+                    ret[name] = el[name];
+                });
+            }
+
+            return ret;
+        },
+
+        /**
+         * Set (alias of setProperty()).
+         */
+        set: function(name, value) {
+            return this.setProperty(name, value);
+        },
+
+        /**
+         * Get (alias of getProperty()).
+         */
+        get: function(name) {
+            return this.getProperty(name);
         }
     });
 
@@ -3145,10 +3179,7 @@
             });
 
             appendChild(toDom(root || $doc[TAG_HEAD])[0], el);
-        },
-
-        isNode: function(x) { return isNode(x); },
-        isENode: function(x) { return isENode(x); }
+        }
     });
 
     // export dom

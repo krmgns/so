@@ -33,7 +33,7 @@
             || (screen.orientation && screen.orientation.angle);
 
     $.ua = (function() {
-        var _ = {
+        var $ua = {
             os: {},
             screen: [screen.width, screen.height, screenAngle],
             isMobile: function() { return re_mobile.test(ua); },
@@ -44,26 +44,27 @@
         }, re;
 
         // device
-        _.device = _.isTablet() ? 'tablet' : _.isMobile() ? 'mobile' : 'desktop';
+        $ua.device = $ua.isTablet() ? 'tablet'
+                   : $ua.isMobile() ? 'mobile' : 'desktop';
 
         // name & version
         if (re = (re_ua1.exec(ua) || re_ua2.exec(ua))) {
             if (re[1]) {
-                _.name = (re[1] == 'msie') ? 'ie'
-                       : (re[1] == 'opr') ? 'opera' : re[1];
+                $ua.name = (re[1] == 'msie') ? 'ie'
+                         : (re[1] == 'opr')  ? 'opera' : re[1];
             }
             if (re[2]) {
-                _.version = re[2];
-                _.versionArray = re[2].split('.').map($.float)
+                $ua.version = re[2];
+                $ua.versionArray = re[2].split('.').map(Int)
            }
         }
 
         // os
         if (re = re_os.exec(ua)) {
-            var os = _.os, name = re[1], version, platform, bit;
+            var os = $ua.os, name = re[1], version, platform, bit;
 
             // mobile details
-            if (_.isMobile()) {
+            if ($ua.isMobile()) {
                 while (re = re_osm.shift()) {
                     if (re = re.exec(ua)) {
                         if (re[1].slice(0, 2) == 'ip') { // ip(hone|ad|od)
@@ -89,8 +90,8 @@
         }
 
         // geoposition
-        _.getGeoposition = function(onDone, onError, options) {
-            options = $.extend({}, {
+        $ua.getGeoposition = function(onDone, onError, options) {
+            options = $.extend({
                 timeout: 5000,
                 maximumAge: 0,
                 enableHighAccuracy: true
@@ -102,7 +103,7 @@
         };
 
         // beacon (sendBeacon() not supported by all)
-        _.sendBeacon = function(url, data) {
+        $ua.sendBeacon = function(url, data) {
             if (nav.sendBeacon) {
                 nav.sendBeacon(url, data);
             } else {
@@ -113,7 +114,7 @@
             }
         };
 
-        return _;
+        return $ua;
     })();
 
 })(window.so);

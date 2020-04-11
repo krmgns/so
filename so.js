@@ -19,24 +19,24 @@
      * @return {Object|void}
      */
     function $(a, b, c) {
-        return !isFunction(a) ? $.dom(a, b, c) // (selector, root?, one?)
-                              : $.ready(a, b)  // (callback, document?)
+        return isFunction(a) ? $.ready(a, b)  // (callback, document?)
+                             : $.dom(a, b, c) // (selector, root?, one?)
     }
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.99.1';
+    $win.so.VERSION = '5.100.0';
 
     // minify candies
-    var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document';
-    var NAME_NODE_TYPE = 'nodeType', NAME_PROTOTYPE = 'prototype';
-    var NAME_DEFAULT_VIEW = 'defaultView', NAME_OWNER_DOCUMENT = 'ownerDocument';
-    var NAME_LENGTH = 'length';
+    var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document',
+        NAME_NODE_TYPE = 'nodeType', NAME_PROTOTYPE = 'prototype',
+        NAME_DEFAULT_VIEW = 'defaultView', NAME_OWNER_DOCUMENT = 'ownerDocument',
+        NAME_LENGTH = 'length';
     var Array = $win.Array, Object = $win.Object, String = $win.String, Number = $win.Number;
     var Date = $win.Date, RegExp = $win.RegExp, Math = $win.Math;
 
-    // global Int & Float objects
-    $win.Int = function(num) { return toInt(num, 10) };
+    // global Int & Float objects (while BigInt came to the stage..)
+    $win.Int   = function(num) { return toInt(num) };
     $win.Float = function(num) { return toFloat(num) };
 
     // safe bind for ie9 (yes, still ie..)
@@ -50,7 +50,6 @@
     $win.log = function() { consoleBind('log', arguments); };
 
     var _reCache = {};
-    var re_dot = /^[-+]?\./;
     var re_time = /([\d.]+)(\w+)/;
     var re_numeric = /^[-+]?(?:\.?\d+|\d+\.\d+)$/;
     var re_trim = /^\s+|\s+$/g;
@@ -71,11 +70,11 @@
     }
 
     // convert helpers
-    function toInt(input, base) {
-        return parseInt(trim(input).replace(re_dot, '0.'), base || 10) || 0;
+    function toInt(input) {
+        return Number(input) | 0;
     }
     function toFloat(input) {
-        return parseFloat(input) || 0;
+        return Number(input);
     }
     function toString(input) {
         return (''+ (input != NULL ? input : '')); // null/undefined safe
@@ -167,7 +166,7 @@
         return ret;
     }
 
-    // object mix/extend
+    // object extender
     function extend() {
         var args = makeArray(arguments), source, target = args.shift() || {}, k;
 
@@ -220,7 +219,6 @@
 
         return _this;
     }
-
 
     // so: each, for, forEach
     extend($, {
@@ -275,10 +273,10 @@
         return isNumber(input) && (input !== (input | 0));
     }
     function isString(input) {
-        return (typeof input == 'string' || toBool(input && input.constructor == String));
+        return (typeof input == 'string' || input instanceof String);
     }
     function isRegExp(input) {
-        return toBool(input && input.constructor == RegExp);
+        return (input instanceof RegExp);
     }
     function isFunction(input) {
         return (typeof input == 'function');
@@ -286,9 +284,12 @@
     function isArray(input) {
         return Array.isArray(input);
     }
-    function isObject(input, opt_typeOnly) {
-        return toBool(input && !opt_typeOnly ? input.constructor == Object
-                                             : typeof input == 'object');
+    function isObject(input, opt_type) {
+        return toBool(input && (opt_type ? typeof input == 'object' // type-only check
+                                         : input.constructor == Object)); // plain check
+    }
+    function isPlainObject(input) {
+        return isObject(input, FALSE);
     }
     function isWindow(input) {
         return toBool(input && input == input[NAME_WINDOW]
@@ -380,9 +381,14 @@
             return isArray(input);
         },
 
-        /** Is object. @param {Any} input @param {Bool} opt_typeOnly? @return {Bool} */
-        isObject: function(input, opt_typeOnly) {
-            return isObject(input, opt_typeOnly);
+        /** Is object. @param {Any} input @param {Bool} opt_type? @return {Bool} */
+        isObject: function(input, opt_type) {
+            return isObject(input, opt_type);
+        },
+
+        /** Is object. @param {Any} input @return {Bool} */
+        isPlainObject: function(input) {
+            return isPlainObject(input);
         },
 
         /** Is iterable. @param {Any} input @return {Bool} */
@@ -419,35 +425,6 @@
     Object.values = Object.values || function(object, ret /* @internal */) {
         return (ret = []), $.forEach(object, function(_, value) { ret.push(value) }), ret;
     };
-
-    // equal comparator
-    function equals(a, b, opt_sort, opt_deep /* @todo? */) {
-        if (a === b) return TRUE;
-
-        if (isArray(a) && isArray(b)) {
-            if (len(a) !== len(b)) return FALSE;
-            if (opt_sort) {
-                // make copies (do not modify original inputs)
-                a = makeArray(a).sort(), b = makeArray(b).sort();
-            }
-            for (var i = 0, il = len(a); i < il; i++) {
-                if (a[i] !== b[i]) return FALSE;
-            }
-            return TRUE;
-        }
-
-        return FALSE;
-    }
-
-    /**
-     * Object.equals() for String, Number, Array etc. objects.
-     */
-    Object.defineProperty(Object[NAME_PROTOTYPE], 'equals', {
-        value: function() {
-            return equals.apply(NULL, $.array(this, arguments));
-        },
-        writable: TRUE // allow override if needed
-    });
 
     // shortcuts
     function index(s, stack, opt_last) {
@@ -515,15 +492,6 @@
 
             return (ret > -1) ? ret : NULL;
         },
-
-        /**
-         * Equals.
-         * @param  {Array} input
-         * @return {Bool}
-         */
-        // equals: function(input, opt_sort) {
-        //     return equals(this, input, opt_sort);
-        // },
 
         /**
          * Each.
@@ -663,9 +631,9 @@
          * @param  {String} input
          * @return {Bool}
          */
-        // equals: function(input) {
-        //     return equals(this, input);
-        // },
+        equals: function(input) {
+            return (this === input);
+        },
 
         /**
          * Is numeric.
@@ -677,11 +645,10 @@
 
         /**
          * To int.
-         * @param  {Int} base?
          * @return {Int}
          */
-        toInt: function(base) {
-            return toInt(this, base);
+        toInt: function() {
+            return toInt(this);
         },
 
         /**
@@ -1061,19 +1028,19 @@
         }
     });
 
-    // /**
-    //  * Number extends.
-    //  */
-    // extend(Number[NAME_PROTOTYPE], {
-    //     /**
-    //      * Equals.
-    //      * @param  {Number} input
-    //      * @return {Bool}
-    //      */
-    //     equals: function(input) {
-    //         return equals(this, input);
-    //     }
-    // });
+    /**
+     * Number extends.
+     */
+    extend(Number[NAME_PROTOTYPE], {
+        /**
+         * Equals.
+         * @param  {Number} input
+         * @return {Bool}
+         */
+        equals: function(input) {
+            return (this === input);
+        }
+    });
 
     // /**
     //  * Boolean extends.
@@ -1104,10 +1071,10 @@
         logError: function() { consoleBind('error', arguments); },
 
         /**
-         * Fn.
+         * Fun.
          * @return {Function}
          */
-        fn: function() {
+        fun: function() {
             return function() {};
         },
 
@@ -1256,11 +1223,11 @@
         },
 
         /**
-         * Int, float, string, bool, value.
+         * Int, float, string, bool.
          * @param  {Any} input
          * @return {Any}
          */
-        int: function(input, base) { return toInt(input, base); },
+        int: function(input) { return toInt(input); },
         float: function(input) { return toFloat(input); },
         string: function(input) { return toString(input); },
         bool: function(input) { return toBool(input); },
@@ -1299,44 +1266,22 @@
         },
 
         /**
-         * Mix.
+         * Extend.
          * @param  {Object} ...arguments
          * @return {Object}
          */
-        mix: function() {
-            return extend.apply(NULL, [{}].concat(makeArray(arguments)));
-        },
-
-        /**
-         * Extend.
-         * @param  {Object} target
-         * @param  {Object} source
-         * @return {Object}
-         */
-        extend: function(target, source) {
-            return extend.apply(NULL, [target, source].concat(makeArray(arguments, 2)));
-        },
-
-        /**
-         * Options.
-         * @param  {Object} optionsDefault
-         * @param  {Object} options
-         * @return {Object}
-         */
-        options: function(optionsDefault, options) {
-            return $.extend({}, optionsDefault, options);
+        extend: function() {
+            return extend.apply(NULL, arguments);
         },
 
         /**
          * Equals.
          * @param  {Any} a
          * @param  {Any} b
-         * @param  {Bool} opt_sort?
-         * @param  {Bool} opt_deep?
          * @return {Bool}
          */
-        equals: function(a, b, opt_sort, opt_deep) {
-            return equals(a, b, opt_sort, opt_deep);
+        equals: function(a, b) {
+            return (a === b);
         },
 
         /**
@@ -1392,7 +1337,7 @@
     var readyCallbacks = [];
     var readyCallbacksFire = function() {
         while (len(readyCallbacks)) {
-            readyCallbacks.shift()($, $.dom /* will be ready on call time */);
+            readyCallbacks.shift()($);
         }
     };
 

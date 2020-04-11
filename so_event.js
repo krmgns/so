@@ -7,9 +7,11 @@
  */
 ;(function($, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
 
+    var PROTOTYPE = 'prototype';
+
     var $win = $.win(), $doc = $.doc();
     var $trim = $.trim, $extend = $.extend, $for = $.for, $forEach = $.forEach,
-        $options = $.options, $isObject = $.isObject, $isFunction = $.isFunction,
+        $isObject = $.isObject, $isFunction = $.isFunction,
         $logWarn = $.logWarn;
 
     var Object = $win.Object, objectDefineProperty = Object.defineProperty;
@@ -69,10 +71,10 @@
     function create(eventClass, eventType, options) {
         eventType = $trim(eventType);
         if (!eventType) {
-            throw ('Type required.');
+            throw ('Type required!');
         }
 
-        options = $options(optionsDefault, options);
+        options = $extend({}, optionsDefault, options);
 
         var event, eventClassOrig;
         if (!eventClass) { // autodetect
@@ -220,13 +222,13 @@
         return new Event(type, fn, options);
     }
     function initCustomEvent(type, fn, options) {
-        return new Event(type, fn, $options(options, {custom: TRUE}));
+        return new Event(type, fn, $extend(options, {custom: TRUE}));
     }
     function initEventTarget(target) {
         return new EventTarget(target);
     }
     function prepareEventTarget(target, eventType) {
-        if (!target) throw ('No target given.');
+        if (!target) throw ('No target given!');
 
         if (!target.$events) {
             target.$events = {};
@@ -251,7 +253,7 @@
             options = fn, fn = options.fn;
         }
 
-        options = $options(optionsDefault, options);
+        options = $extend({}, optionsDefault, options);
 
         var _this = this; // just as minify candy
         _this.type = type;
@@ -280,10 +282,10 @@
         _this.id = ++_id;
         _this.fired = 0;
         _this.cancalled = FALSE;
-        _this.custom = event.eventClass == 'CustomEvent' || !re_typesStandard.test(type);
+        _this.custom = (event.eventClass == 'CustomEvent') || !re_typesStandard.test(type);
     }
 
-    $extend(Event.prototype, {
+    $extend(Event[PROTOTYPE], {
         /**
          * Copy.
          * @return {Event}
@@ -395,7 +397,7 @@
         this.target = prepareEventTarget(target);
     }
 
-    $extend(EventTarget.prototype, {
+    $extend(EventTarget[PROTOTYPE], {
         /**
          * Add event.
          * @param  {Event} event
@@ -522,7 +524,7 @@
             options = fn, fn = options.fn;
         }
 
-        return {fn: fn, options: $options(options, {target: target})};
+        return {fn: fn, options: $extend(options, {target: target})};
     }
 
     /**
@@ -542,7 +544,7 @@
         });
     }
     function one(target, type, fn, options) {
-        var args = prepareArguments(fn, $options(options, {once: TRUE}), target), event, eventTarget;
+        var args = prepareArguments(fn, $extend(options, {once: TRUE}), target), event, eventTarget;
         split(type, re_comma).each(function(type) {
             event = initEvent(type, args.fn, args.options);
             eventTarget = initEventTarget(target);

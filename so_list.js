@@ -53,7 +53,7 @@
          */
         init: function(data, options) {
             if (!$.isIterable(data)) {
-                throw ('No iterable object.');
+                throw ('Non-iterable object!');
             }
 
             var type = $.type(data);
@@ -62,7 +62,7 @@
                 data = data.data;
             }
 
-            options = $.options({type: type}, options);
+            options = $.extend({type: type}, options);
 
             var _this = this; // just as minify candy
             _this.type = options.type;

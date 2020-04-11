@@ -7,8 +7,10 @@
  */
 ;(function($, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
 
+    var PROTOTYPE = 'prototype';
+
     var $win = $.win();
-    var $trim = $.trim, $extend = $.extend, $options = $.options, $for = $.for, $forEach = $.forEach,
+    var $trim = $.trim, $extend = $.extend, $for = $.for, $forEach = $.forEach,
         $isFunction = $.isFunction, $isString = $.isString, $isArray = $.isArray,
         $isObject = $.isObject, $isIterable = $.isIterable, $isDocument = $.isDocument,
         $isNumeric = $.isNumeric, $isDefined = $.isDefined, $class = $.class,
@@ -142,8 +144,7 @@
         _this = this;
         _this.client = client;
         _this.headers = {};
-        _this.data = NULL;
-        _this.dataType = NULL;
+        _this.data = _this.dataType = NULL;
     }
 
     /**
@@ -167,9 +168,7 @@
     function Response(client, _this) {
         _this = this;
         _this.super(client);
-        _this.status = NULL;
-        _this.statusCode = NULL;
-        _this.statusText = NULL;
+        _this.status = _this.statusCode = _this.statusText = NULL;
     }
 
     // extend request & response
@@ -253,10 +252,10 @@
             throw ('URI required!');
         }
 
-        options = $options(optionsDefault, options);
+        options = $extend({}, optionsDefault, options);
         options.method = (options.method || optionsDefault.method).upper();
         options.uri = uri;
-        options.headers = $options(optionsDefault.headers, options.headers);
+        options.headers = $extend({}, optionsDefault.headers, options.headers);
 
         // cross domain?
         var match = uri.match(re_httpHost);
@@ -322,7 +321,7 @@
         }
     }
 
-    $extend(Client.prototype, {
+    $extend(Client[PROTOTYPE], {
         /**
          * Send.
          * @return {this}
@@ -510,8 +509,8 @@
             options.uri = uri;
         }
 
-        return initClient(uri, $options(options, {
-            onDone: options.onDone || onDone,
+        return initClient(uri, $extend(options, {
+               onDone: options.onDone    || onDone,
             onSuccess: options.onSuccess || onSuccess,
             onFailure: options.onFailure || onFailure
         }));
