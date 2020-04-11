@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.100.0';
+    $win.so.VERSION = '5.101.0';
 
     // minify candies
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document',
@@ -427,26 +427,27 @@
     };
 
     // shortcuts
-    function index(s, stack, opt_last) {
+    function index(src, stack, opt_last) {
         return stack && (
-            isRegExp(s) ? stack.search(s)
-                : (!opt_last ? stack.indexOf(s) : stack.lastIndexOf(s))
+            isRegExp(src) ? stack.search(src) : (
+                !opt_last ? stack.indexOf(src) : stack.lastIndexOf(src)
+            )
         );
     }
 
-    function has(s, stack, opt_strict) {
+    function has(src, stack) {
         var ret;
 
-        if (isNulls(s) || isNulls(stack)) { // fix empty stuff issue
+        if (isNulls(src) || isNulls(stack)) { // fix empty stuff issue
             ret = -1;
         } else if (isString(stack)) {
-            ret = index(s, stack);
+            ret = index(src, stack);
         } else if (isArray(stack)) {
-            ret = index(s, stack);
+            ret = index(src, stack);
         } else if (isObject(stack)) {
             $.for(stack, function(value, i) {
-                if (opt_strict ? value === s : value == s) {
-                    return (ret = i), _break;
+                if (value === src) { // all strict comparison
+                    ret = i; return _break;
                 }
             });
         }
@@ -456,8 +457,8 @@
 
     function toUniqUnuniq(array, opt_ununiq) {
         return opt_ununiq
-            ? array.filter(function(el, i, array) { return index(el, array) !== i; })
-            : array.filter(function(el, i, array) { return index(el, array) === i; });
+            ? array.filter(function(src, i, stack) { return index(src, stack) !== i; })
+            : array.filter(function(src, i, stack) { return index(src, stack) === i; });
     }
 
     /**
@@ -475,11 +476,10 @@
         /**
          * Has.
          * @param  {Any}  src
-         * @param  {Bool} opt_strict?
          * @return {Bool}
          */
-        has: function(src, opt_strict) {
-            return has(src, this, opt_strict);
+        has: function(src) {
+            return has(src, this);
         },
 
         /**
@@ -608,11 +608,10 @@
         /**
          * Has.
          * @param  {Any}  src
-         * @param  {Bool} opt_strict?
          * @return {Bool}
          */
-        has: function(src, opt_strict) {
-            return has(src, this, opt_strict);
+        has: function(src) {
+            return has(src, this);
         },
 
         /**
@@ -1246,11 +1245,10 @@
          * Has.
          * @param  {Any}  src
          * @param  {Any}  stack
-         * @param  {Bool} opt_strict?
          * @return {Bool}
          */
-        has: function(src, stack, opt_strict) {
-            return has(src, stack, opt_strict);
+        has: function(src, stack) {
+            return has(src, stack);
         },
 
         /**
