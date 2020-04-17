@@ -112,8 +112,8 @@
 
             !function run() {
                 if (!_this.$el.len()) {
-                    return (_this.running = FALSE, _this.stopped = _this.ended = TRUE),
-                        $.logWarn('No element(s) to animate.');
+                    // no element(s) to animate
+                    return (_this.running = FALSE, _this.stopped = _this.ended = TRUE);
                 }
 
                 if (!_this.stopped && !_this.ended) {

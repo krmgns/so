@@ -11,10 +11,10 @@
 
     var $win = $.win(), $doc = $.doc();
     var $trim = $.trim, $extend = $.extend, $for = $.for, $forEach = $.forEach,
-        $isObject = $.isObject, $isFunction = $.isFunction,
-        $logWarn = $.logWarn;
+        $isObject = $.isObject, $isFunction = $.isFunction
 
-    var Object = $win.Object, objectDefineProperty = Object.defineProperty;
+    var Object = $win.Object, objectDefineProperty = Object.defineProperty,
+        warn = console.warn;
 
     var types = {
         UIEvent: 'resize|scroll|select|(un)?load|DOMActivate',
@@ -485,7 +485,7 @@
                     target['on'+ event.type] = NULL;
                 }
             } else {
-                $logWarn('No "'+ event.type +'" event to remove.');
+                warn('No "'+ event.type +'" to remove.');
             }
         },
 
@@ -511,7 +511,7 @@
             } else if ($isFunction(target[event.type])) { // natives
                 target[event.type](event.event);
             } else {
-                $logWarn('No "'+ event.type +'" event to fire.');
+                warn('No "'+ event.type +'" to fire.');
             }
         }
     });

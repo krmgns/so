@@ -12,9 +12,9 @@
     var $win = $.win();
     var $trim = $.trim, $extend = $.extend, $for = $.for, $forEach = $.forEach,
         $isFunction = $.isFunction, $isString = $.isString, $isArray = $.isArray,
-        $isObject = $.isObject, $isIterable = $.isIterable, $isDocument = $.isDocument,
-        $isNumeric = $.isNumeric, $isDefined = $.isDefined, $class = $.class,
-        $logWarn = $.logWarn;
+        $isObject = $.isObject, $isNumeric = $.isNumeric, $isDocument = $.isDocument,
+        $isDefined = $.isDefined, $class = $.class,
+        warn = console.warn;
 
     var re_space = /%20/g;
     var re_httpHost = /^(?:https?:)?\/\/([^/]+)/i;
@@ -38,39 +38,61 @@
 
     var STATE_OPENED = 1, STATE_HEADERS_RECEIVED = 2, STATE_LOADING = 3, STATE_DONE = 4;
 
+    function encode(input) {
+        return $isDefined(input) ? $.util.urlEncode(input) : '';
+    }
+    function serialize(input, prefix) {
+        var ret = [], p, k, v, useKey = $isObject(input);
+
+        for (p in input) {
+            if (input.hasOwnProperty(p)) {
+                k = prefix ? prefix +'['+ (useKey ? encode(p) : '') +']'
+                           : encode(p), v = input[p];
+
+                ret.push(
+                    $isObject(v) ? serialize(v, k)
+                                 : k +'='+ encode(v)
+                );
+            }
+        }
+
+        return ret.join('&');
+    }
+
     // add base methods
     var $http = {
         /**
          * Parse XML.
          * @param  {Any}    input
          * @param  {String} inputType?
-         * @return {Document}
+         * @return {Document|null}
          */
         parseXml: function(input, inputType) {
             if ($isDocument(input)) {
                 return input;
             }
 
-            if (!$isString(input)) {
-                return $logWarn('No valid XML.'), NULL;
+            if ($isString(input)) {
+                return (new DOMParser)
+                    .parseFromString(input, inputType || 'text/xml')
             }
 
-            return (new DOMParser).parseFromString(input, inputType || 'text/xml');
+            return warn('No valid XML.'), NULL;
         },
 
         /**
          * Parse JSON.
          * @param  {String} input
-         * @return {Any}
+         * @return {Any|null}
          */
         parseJson: function(input) {
             input = $.util.jsonDecode(input);
 
-            if (!$isDefined(input)) {
-                return $logWarn('No valid JSON.'), NULL;
+            if ($isDefined(input)) {
+                return input;
             }
 
-            return input;
+            return warn('No valid JSON.'), NULL;
         },
 
         /**
@@ -79,16 +101,23 @@
          * @return {Object}
          */
         parseHeaders: function(headers) {
-            var i = 0, ret = {};
+            var i = 0, ret = {}, name, value;
 
             headers = $trim(headers);
             if (headers) {
-                headers.split('\r\n').each(function(header) {
+                headers.split(/\r?\n/).each(function(header) {
                     header = header.splits(':', 2);
                     if (header[1] == NULL) { // status line etc.
                         ret[i++] = $trim(header[0]);
                     } else {
-                        ret[$trim(header[0]).toCamelCase('-')] = $trim(header[1]);
+                        name = $trim(header[0]).toCamelCase('-');
+                        value = $trim(header[1]);
+                        if (name in ret) { // multiple headers like Link, Set-Cookie etc.
+                            ret[name] = $isArray(ret[name]) ? ret[name] : [ret[name]];
+                            ret[name].push(value);
+                        } else {
+                            ret[name] = value;
+                        }
                     }
                 });
             }
@@ -102,29 +131,14 @@
          * @return {String}
          */
         serialize: function(data) {
-            if ($isString(data) || !$isIterable(data)) {
+            if ($isString(data) || (!$isArray(data) && !$isObject(data))) {
                 return data;
             }
 
             var ret = [];
-            var encode = function(input) {
-                return $isDefined(input) ? $.util.urlEncode(input) : '';
-            };
-            var serialize = function(input, prefix) {
-                var ret = [], p, k, v, useKey = $isObject(input);
-                for (p in input) {
-                    if (input.hasOwnProperty(p)) {
-                        k = prefix ? prefix +'['+ (useKey ? encode(p) : '') +']' : encode(p), v = input[p];
-                        ret.push($isObject(v) ? serialize(v, k) : k +'='+ encode(v));
-                    }
-                }
-                return ret.join('&');
-            }
 
             $forEach(data, function(key, value) {
-                if ($isArray(value)) {
-                    ret.push(serialize(value, key));
-                } else if ($isObject(value)) {
+                if ($isArray(value) || $isObject(value)) {
                     ret.push(serialize(value, key));
                 } else {
                     ret.push('%s=%s'.format(encode(key), encode(value)));

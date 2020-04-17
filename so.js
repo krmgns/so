@@ -25,37 +25,35 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.101.0';
+    $win.so.VERSION = '5.102.0';
 
     // minify candies
     var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document',
         NAME_NODE_TYPE = 'nodeType', NAME_PROTOTYPE = 'prototype',
         NAME_DEFAULT_VIEW = 'defaultView', NAME_OWNER_DOCUMENT = 'ownerDocument',
         NAME_LENGTH = 'length';
-    var Array = $win.Array, Object = $win.Object, String = $win.String, Number = $win.Number;
-    var Date = $win.Date, RegExp = $win.RegExp, Math = $win.Math;
+    var Array = $win.Array, Object = $win.Object, String = $win.String, Number = $win.Number,
+        Date = $win.Date, RegExp = $win.RegExp, Math = $win.Math;
+    var console = $win.console;
+    var apply = function(fn, _this, _arguments) {
+        return fn.apply(_this, _arguments);
+    };
 
     // global Int & Float objects (while BigInt came to the stage..)
     $win.Int   = function(num) { return toInt(num) };
     $win.Float = function(num) { return toFloat(num) };
 
-    // safe bind for ie9 (yes, still ie..)
-    function consoleBind(fn, args) {
-        return Function[NAME_PROTOTYPE].bind
-            .call($win.console[fn], $win.console)
-                .apply($win.console, args);
-    }
-
     // shortcut for 'console.log'
-    $win.log = function() { consoleBind('log', arguments); };
+    $win.log = function() {
+        apply(console.log, NULL, arguments);
+    };
 
-    var _reCache = {};
     var re_time = /([\d.]+)(\w+)/;
     var re_numeric = /^[-+]?(?:\.?\d+|\d+\.\d+)$/;
     var re_trim = /^\s+|\s+$/g;
     var re_trimLeft = /^\s+/g;
     var re_trimRight = /\s+$/g;
-    var re_primitive = /^(string|number|boolean)$/;
+    var reCache = {};
 
     // null/undefined checker
     function isVoid(input) {
@@ -129,10 +127,10 @@
         ttl = (ttl >= 0) ? ttl : 60000; // 1min
 
         var i = pattern + flags;
-        var ret = _reCache[i] || new RegExp(pattern, flags);
+        var ret = reCache[i] || new RegExp(pattern, flags);
 
         // simple gc
-        $.fire(ttl, function(){ delete _reCache[i] });
+        $.fire(ttl, function(){ delete reCache[i] });
 
         return ret;
     }
@@ -200,7 +198,7 @@
         if (inputLen && opt_useLen) {
             while (i < inputLen) {
                 value = input[i];
-                if (_break === fn.apply(_this, !opt_useKey ?
+                if (_break === apply(fn, _this, !opt_useKey ?
                         [value, i++] /* for */ : [i, value, i++] /* forEach */)) {
                     break;
                 }
@@ -209,7 +207,7 @@
             for (key in input) {
                 if (input.hasOwnProperty(key)) {
                     value = input[key];
-                    if (_break === fn.apply(_this, !opt_useKey ?
+                    if (_break === apply(fn, _this, !opt_useKey ?
                             [value, i++] /* for */ : [key, value, i++] /* forEach */)) {
                         break;
                     }
@@ -400,7 +398,7 @@
 
         /** Is primitive. @param {Any} input @return {Bool} */
         isPrimitive: function(input) {
-            return isVoid(input) || re_primitive.test(typeof input);
+            return (input !== Object(input));
         },
 
         /** Is window. @param {Any} input @return {Bool} */
@@ -790,10 +788,12 @@
          * @return {String}
          */
         format: function() {
-            var s = this, args = arguments, i = 0, match = s.match(/(%s)/g) || [];
+            var s = this, i = 0,
+                args = arguments,
+                match = s.match(/(%s)/g) || [];
 
             if (len(args) < len(match)) {
-                $.logWarn('No enough arguments for format().');
+                console.warn('No enough arguments for format().');
             }
 
             while (match.shift()) {
@@ -1061,15 +1061,6 @@
     // so: base functions.
     extend($, {
         /**
-         * Debug tools.
-         * @return {void}
-         */
-        log: function() { consoleBind('log', arguments); },
-        logInfo: function() { consoleBind('info', arguments); },
-        logWarn: function() { consoleBind('warn', arguments); },
-        logError: function() { consoleBind('error', arguments); },
-
-        /**
          * Fun.
          * @return {Function}
          */
@@ -1099,7 +1090,7 @@
          * @return {String}
          */
         rid: function() {
-            return $.now() + Math.random().toFixed(7).slice(2);
+            return $.now() + toString(Math.random()).slice(-7);
         },
 
         /**
@@ -1145,7 +1136,7 @@
             }
 
             return setTimeout(function() {
-                fn.apply(NULL, fnArgs || []);
+                apply(fn, NULL, fnArgs || []);
             }, delay || 1);
         },
         ifire: function(delay, fn, fnArgs) {
@@ -1154,7 +1145,7 @@
             }
 
             return setInterval(function() {
-                fn.apply(NULL, fnArgs || []);
+                apply(fn, NULL, fnArgs || []);
             }, delay || 1);
         },
 
@@ -1269,7 +1260,7 @@
          * @return {Object}
          */
         extend: function() {
-            return extend.apply(NULL, arguments);
+            return apply(extend, NULL, arguments);
         },
 
         /**
