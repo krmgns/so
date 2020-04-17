@@ -110,12 +110,12 @@
     var re_attrFix = /([.:])/g;
     var re_attrFixMatch = /\[([\w.:]+)(=[^\]]+)?\]/g;
     var re_data = /([\w-]+)?\[(data-[\w-]+)\*/;
-    var re_idOrClass = /^([#.])([^\s]+)$/;
+    var re_idOrClass = /^([#.])([\w-]+)$/;
 
     /**
      * Select.
      * @param  {String|Object} selector
-     * @param  {Object|String} root?
+     * @param  {String|Object} root?
      * @param  {Bool}          one?
      * @return {Array}
      */
@@ -133,7 +133,7 @@
             root = $doc;
         }
 
-        var r, re, ret = [], isAttr, isParent, i, il, s, st;
+        var r, re, ret = [], isAttr, isParent, s, i, il;
         selector = selector.replace(re_space, ' ');
 
         // @note: seems, it isn't that kinda cheap.. (eg: "[data-*]" or "a[data-*]")
@@ -162,7 +162,7 @@
         }
 
         // @note: should not be mixed in a complex selector (eg: 'a.foo:first, body')
-        if (st = test(selector, re_child)) {
+        if (test(selector, re_child)) {
             i = 0, il = $.len(selector.matchAll(re_child));
             while ((i++) < il) {
                 // eg: p:first => p:first-child or div:1 => div:nth-child(1)
@@ -171,8 +171,6 @@
                         args[4] ? args[4] +':nth-child('+ args[5] +')' // eg: div:1 => div:nth-child(1)
                                 : args[1] +':'+ (args[3] ? 'nth-child'+ args[3] : args[2] +'-child');
                 });
-
-                st = test(selector, re_child);
             }
         }
         // @note: should not be mixed in a complex selector (eg: 'a.foo:parent, body')
@@ -226,9 +224,8 @@
                     } else {
                         // id & class check (some speed..)
                         if (re = selector.match(re_idOrClass)) {
-                            els = (re[1] == '#')
-                                ? [(root = $doc).getElementById(re[2])]
-                                : (root || $doc).getElementsByClassName(re[2]);
+                            els = (re[1] == '#') ? [(root = $doc).getElementById(re[2])]
+                                                 : (root || $doc).getElementsByClassName(re[2]);
                         } else if (re = selector.match(re_tag)) {
                             // root may be document or attributes
                             els = create(selector, root, root, re[1]);
