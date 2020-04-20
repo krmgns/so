@@ -25,15 +25,17 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.102.1';
+    $win.so.VERSION = '5.102.2';
 
     // minify candies
-    var NAME_WINDOW = 'window', NAME_DOCUMENT = 'document',
-        NAME_NODE_TYPE = 'nodeType', NAME_PROTOTYPE = 'prototype',
-        NAME_DEFAULT_VIEW = 'defaultView', NAME_OWNER_DOCUMENT = 'ownerDocument',
-        NAME_LENGTH = 'length';
+    var PROTOTYPE = 'prototype',
+        NAME_WINDOW = 'window', NAME_DOCUMENT = 'document',
+        NAME_NODE_TYPE = 'nodeType', NAME_LENGTH = 'length',
+        NAME_DEFAULT_VIEW = 'defaultView', NAME_OWNER_DOCUMENT = 'ownerDocument';
+
     var Array = $win.Array, Object = $win.Object, String = $win.String, Number = $win.Number,
         Date = $win.Date, RegExp = $win.RegExp, Math = $win.Math;
+
     var console = $win.console;
     var apply = function(fn, _this, _arguments) {
         return fn.apply(_this, _arguments);
@@ -72,7 +74,7 @@
         return Number(input) | 0;
     }
     function toFloat(input) {
-        return Number(input);
+        return Number(input) || 0.0;
     }
     function toString(input) {
         return (''+ (input != NULL ? input : '')); // null/undefined safe
@@ -126,17 +128,19 @@
         }
         ttl = (ttl >= 0) ? ttl : 60000; // 1min
 
-        var i = pattern + flags;
-        var ret = reCache[i] || new RegExp(pattern, flags);
+        var id = pattern + flags;
 
-        // simple gc
-        $.fire(ttl, function(){ delete reCache[i] });
+        reCache[id] = reCache[id] || new RegExp(pattern, flags);
 
-        return ret;
+        $.fire(ttl, function() { // simple gc
+            delete reCache[id]
+        });
+
+        return reCache[id];
     }
 
     function toRegExpEsc(input) {
-        // @note slash (/) is escaped already by RegExp
+        // @note: slashes (/) are escaped already by RegExp
         return toString(input).replace(/[.*+?^$|{}()\[\]\\]/g, '\\$&');
     }
 
@@ -462,7 +466,7 @@
     /**
      * Array extends.
      */
-    extend(Array[NAME_PROTOTYPE], {
+    extend(Array[PROTOTYPE], {
         /**
          * Len.
          * @return {Int}
@@ -594,7 +598,7 @@
     /**
      * String extends.
      */
-    extend(String[NAME_PROTOTYPE], {
+    extend(String[PROTOTYPE], {
         /**
          * Len.
          * @return {Int}
@@ -1030,7 +1034,7 @@
     /**
      * Number extends.
      */
-    extend(Number[NAME_PROTOTYPE], {
+    extend(Number[PROTOTYPE], {
         /**
          * Equals.
          * @param  {Number} input
@@ -1044,7 +1048,7 @@
     // /**
     //  * Boolean extends.
     //  */
-    // extend(Boolean[NAME_PROTOTYPE], {
+    // extend(Boolean[PROTOTYPE], {
     //     /**
     //      * To int.
     //      * @return {Int}
