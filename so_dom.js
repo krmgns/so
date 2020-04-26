@@ -29,8 +29,8 @@
         NAME_CHECKED = 'checked', NAME_SELECTED = 'selected', NAME_DISABLED = 'disabled', NAME_READONLY = 'readOnly',
         NAME_DISPLAY = 'display', NAME_VISIBILITY = 'visibility', NAME_NONE = 'none', NAME_CSS_TEXT = 'cssText',
         NAME_OWNER_DOCUMENT = 'ownerDocument', NAME_DOCUMENT_ELEMENT = 'documentElement', NAME_SCROLLING_ELEMENT = 'scrollingElement',
-        NAME_PROTOTYPE = 'prototype',
-        TAG_WINDOW = '#window', TAG_DOCUMENT = '#document', TAG_HTML = 'html', TAG_HEAD = 'head', TAG_BODY = 'body';
+        TAG_WINDOW = '#window', TAG_DOCUMENT = '#document', TAG_HTML = 'html', TAG_HEAD = 'head', TAG_BODY = 'body',
+        PROTOTYPE = 'prototype';
     var $doc = $.doc();
     var $event = $.event, $toStyleName = $.util.toStyleName, $json = $.util.json;
     var $re = $.re, $rid = $.rid, $array = $.array, $each = $.each, $for = $.for, $forEach = $.forEach;
@@ -89,7 +89,7 @@
         return isDom(selector) ? selector : new Dom(selector, root, one);
     }
     function toDomPrototype(Dom, prototype) {
-        $extend(Dom[NAME_PROTOTYPE], prototype);
+        $extend(Dom[PROTOTYPE], prototype);
     }
 
     function toKeyValue(key, value) {
@@ -3141,12 +3141,12 @@
 
         // (name, value) or ({name: value})
         define: function(name, value) {
-            var names = Object.keys(Dom[NAME_PROTOTYPE]);
+            var names = Object.keys(Dom[PROTOTYPE]);
             $forEach(toKeyValue(name, value), function(name, value) {
                 if (names.has(name)) {
                     throw ('Cannot override Dom.'+ name +'!');
                 }
-                Dom[NAME_PROTOTYPE][name] = value;
+                Dom[PROTOTYPE][name] = value;
             });
         },
 
