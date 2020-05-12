@@ -78,7 +78,7 @@
     function isNode(x) {
         return $bool(x && (x[NAME_NODE_TYPE] === 1 || x[NAME_NODE_TYPE] === 9 || x[NAME_NODE_TYPE] === 11));
     }
-    function isENode(x) {
+    function isElementNode(x) {
         return $bool(x && (x[NAME_NODE_TYPE] === 1));
     }
 
@@ -231,7 +231,7 @@
                             els = create(selector, root, root, re[1]);
                             root = NULL;
                         } else if (selector[0] == '>') {
-                            root = isENode(root) ? root : $doc[NAME_DOCUMENT_ELEMENT];
+                            root = isElementNode(root) ? root : $doc[NAME_DOCUMENT_ELEMENT];
                             // buggy :scope selector
                             idv = getAttr(root, (idn = soAttrPrefix +'_')) || $rid();
                             setAttr(root, idn, idv, FALSE);
@@ -515,7 +515,7 @@
         },
 
         /**
-         * $$ (shorthand of findAll()).
+         * $ (shorthand of find()).
          */
         $: function(selector) {
             return this.find(selector);
@@ -621,7 +621,7 @@
 
         if (attributes && $isObject(attributes)) {
             $for(fragment[NAME_CHILD_NODES], function (node) {
-                if (isENode(node)) {
+                if (isElementNode(node)) {
                     $forEach(attributes, function (name, value) {
                         if ($isFunction(value)) {
                             if (name.startsWith('on')) {
@@ -655,7 +655,7 @@
         var clone = el.cloneNode();
 
         // clone.$cloneOf = el; // @debug
-        if (isENode(el)) {
+        if (isElementNode(el)) {
             setAttr(clone, soAttrPrefix +'clone', ++_id, FALSE);
         }
 
@@ -689,7 +689,7 @@
 
         var child;
         while (child = el[NAME_FIRST_CHILD]) {
-            if (isENode(child)) {
+            if (isElementNode(child)) {
                 cleanElement(child);
             }
             removeChild(el, child);
@@ -1187,7 +1187,7 @@
         tmp = (b.len() > a.len()) ? (tmp = b, b = a, a = tmp) : NULL; // loop over shortest
 
         return a.filter(function(search) {
-            return (i = b.indexOf(search)), opt_found ? i > -1 : i < 0;
+            return (i = b.index(search)), opt_found ? i > -1 : i < 0;
         });
     }
     function noIntersect(el, els) {
@@ -1210,7 +1210,8 @@
     }
 
     function toAllSelector(selector) {
-        return ((selector = $trim(selector)) && selector[0] != '>') ? '>'+ selector : selector;
+        return ((selector = $trim(selector)) && (selector[0] != '>'))
+            ? '>'+ selector : selector;
     }
 
     // dom: walkers
@@ -1233,7 +1234,7 @@
             } else if (isDom(selector)) {
                 // eg: $.dom("p").not($element)
                 ret = intersect(_this.all(), selector.all());
-            } else if (isENode(selector)) {
+            } else if (isElementNode(selector)) {
                 // eg: $.dom("p").not(element)
                 ret = noIntersect(selector, _this);
             } else {
@@ -1404,12 +1405,21 @@
         },
 
         /**
+         * Equals.
+         * @param  {String|Node} selector
+         * @return {Bool}
+         */
+        equals: function(selector, el /* @internal */) {
+            return $bool((el = this[0]) && (el == selector || el == toDom(selector)[0]));
+        },
+
+        /**
          * Matches.
          * @param  {String|Node} selector
          * @return {Bool}
          */
-        matches: function(selector) {
-            return $bool(this[0] && toDom(selector).has(this[0]));
+        matches: function(selector, el /* @internal */) {
+            return $bool((el = this[0]) && toDom(selector).has(el));
         },
 
         /**
@@ -1417,8 +1427,8 @@
          * @param  {String|Node} selector
          * @return {Bool}
          */
-        contains: function(selector) {
-            return $bool(this[0] && toDom(selector, this[0]).len());
+        contains: function(selector, el /* @internal */) {
+            return $bool((el = this[0]) && toDom(selector, el).len());
         },
 
         /**
@@ -1475,17 +1485,15 @@
         }
     });
 
-    // dom: window,document
+    // dom: window & document
     toDomPrototype(Dom, {
         /**
          * Get window.
          * @param  {Bool} opt_contentOf?
          * @return {this}
          */
-        getWindow: function(opt_contentOf) {
-            var el = this[0];
-
-            return toDom(el && (opt_contentOf ? el.contentWindow : $getWindow(el)));
+        getWindow: function(opt_contentOf, el /* @internal */) {
+            return toDom((el = this[0]) && (opt_contentOf ? el.contentWindow : $getWindow(el)));
         },
 
         /**
@@ -1493,10 +1501,8 @@
          * @param  {Bool} opt_contentOf?
          * @return {this}
          */
-        getDocument: function(opt_contentOf) {
-            var el = this[0];
-
-            return toDom(el && (opt_contentOf ? el.contentDocument : $getDocument(el)));
+        getDocument: function(opt_contentOf, el /* @internal */) {
+            return toDom((el = this[0]) && (opt_contentOf ? el.contentDocument : $getDocument(el)));
         },
 
         /**
@@ -1516,77 +1522,72 @@
         }
     });
 
-    // path helpers
-    function getPath(el) {
-        var s = getTag(el), path = [];
-        if (el.id) {
-            s += '#'+ el.id; // id is enough
-        } else if (el[NAME_CLASS_NAME]) {
-            s += '.'+ split(el[NAME_CLASS_NAME], re_space).join('.');
-        }
-        path.push(s);
-
-        if (el[NAME_PARENT_NODE]) {
-            path = path.concat(getPath(el[NAME_PARENT_NODE]));
-        }
-
-        return path;
-    }
-
-    function getXPath(el) {
-        var tag = getTag(el);
-
-        if (tag == TAG_HTML) return [TAG_HTML];
-        if (tag == TAG_BODY) return [TAG_HTML, TAG_BODY];
-
-        var i = 0, ii = 0, node, nodes = el[NAME_PARENT_NODE][NAME_CHILDREN], path = [];
-
-        while (node = nodes[i++]) {
-            if (node == el) {
-                return path.concat(getXPath(el[NAME_PARENT_NODE]), tag +'['+ (ii + 1) +']');
-            }
-            if (node[NAME_TAG_NAME] == el[NAME_TAG_NAME]) {
-                ii++;
-            }
-        }
-
-        return path;
+    function getSimilarElements(el, tag) {
+        return walk(el[NAME_PARENT_ELEMENT], NAME_CHILDREN)
+                .filter(function(el) { return tag == getTag(el); });
     }
 
     // dom: paths
     toDomPrototype(Dom, {
         /**
          * Path.
-         * @param  {Bool} opt_string?
+         * @param  {Bool} opt_join?
          * @return {Array|String|undefined}
          */
-        path: function(opt_string) {
-            var el = this[0], ret = [];
+        path: function(opt_join) {
+            var el = this[0], tag, sims, ret = [], s;
 
-            if (isENode(el)) {
-                return (ret = getPath(el).reverse()),
-                    opt_string ? ret.slice(1).join(' > ') : ret;
+            if (isElementNode(el)) {
+                while (el) {
+                    s = tag = getTag(el), sims = getSimilarElements(el, tag);
+
+                    if (el[NAME_ID])         s += '#'+ el[NAME_ID];
+                    if (el[NAME_CLASS_NAME]) s += '.'+ el[NAME_CLASS_NAME].replace(re_space, '.');
+
+                    ret.push(
+                        (sims.len() > 1 && !s.test(/[#.]/)) // if no id or class
+                            ? s +':nth-child('+ (sims.index(el) + 1) +')' : s
+                    );
+
+                    el = el[NAME_PARENT_ELEMENT]; // next up.
+                }
+
+                ret.pop(); // drop "html" tag
+
+                return (ret = ret.reverse()),
+                    !opt_join ? ret : ret.join(' > ');
             }
         },
 
         /**
          * Xpath.
-         * @param  {Bool} opt_string?
+         * @param  {Bool} opt_join?
          * @return {Array|String|undefined}
          */
-        xpath: function(opt_string) {
-            var el = this[0], ret = [];
+        xpath: function(opt_join) {
+            var el = this[0], tag, sims, ret = [];
 
-            if (isENode(el)) {
-                return (ret = getXPath(el)),
-                    opt_string ? '/'+ ret.join('/') : ret;
+            if (isElementNode(el)) {
+                while (el) {
+                    tag = getTag(el), sims = getSimilarElements(el, tag);
+
+                    ret.push(
+                        (sims.len() > 1)
+                            ? tag +'['+ (sims.index(el) + 1) +']' : tag
+                    );
+
+                    el = el[NAME_PARENT_ELEMENT]; // next up.
+                }
+
+                return (ret = ret.reverse()),
+                    !opt_join ? ret : '/'+ ret.join('/');
             }
         }
     });
 
     var re_rgb = /rgb/i;
     var re_unit = /(?:px|em|%)/i; // short & quick
-    var re_unitOther = /(?:ex|in|[cm]m|p[tc]|v[hw]?min)/i;
+    var re_unitMore = /(?:ex|in|[cm]m|p[tc]|v[hw]?min)/i;
     var re_nonUnitStyles = /(?:(?:fill-?)?opacity|z(?:oom|index)|(?:font-?w|line-?h)eight|column(?:-?count|s))/i;
     var re_colon = /\s*:\s*/;
     var re_scolon = /\s*;\s*/;
@@ -1755,7 +1756,7 @@
                 } else {
                     value = $isFalse(opt_convert) ? value : (
                         test(value, re_rgb) ? $.util.parseRgb(value, TRUE) // make rgb - hex
-                            : test(value, re_unit) || test(value, re_unitOther) // make px etc. - float
+                            : test(value, re_unit) || test(value, re_unitMore) // make px etc. - float
                                 // || test(name, re_nonUnitStyles) // make opacity etc. - float
                             ? $float(value) : value
                     );
@@ -1914,7 +1915,7 @@
         var ret = {width: 0, height: 0};
         var properties, win;
 
-        if (isENode(el)) {
+        if (isElementNode(el)) {
             if (!isVisible(el) || !isVisibleParent(el)) {
                 properties = getInvisibleElementProperties(el, [NAME_OFFSET_WIDTH, NAME_OFFSET_HEIGHT]);
                 ret.width = properties[0], ret.height = properties[1];
@@ -1937,7 +1938,7 @@
         });
         var style;
 
-        if (isENode(el)) {
+        if (isElementNode(el)) {
             style = getStyle(el);
             if ((!by || by == NAME_WIDTH) && dim.width) {
                 ret.width -= sumStyleValue(NULL, style, NAME_PADDING_LEFT, NAME_PADDING_RIGHT)
@@ -1978,7 +1979,7 @@
         var ret = {top: 0, left: 0};
         var properties, body, parentOffset;
 
-        if (isENode(el)) {
+        if (isElementNode(el)) {
             if (!isVisible(el) || !isVisibleParent(el)) {
                 properties = getInvisibleElementProperties(el, [NAME_OFFSET_TOP, NAME_OFFSET_LEFT]);
                 ret.top = properties[0], ret.left = properties[1];
@@ -2001,7 +2002,7 @@
         var ret = {top: 0, left: 0};
         var win;
 
-        if (isENode(el)) {
+        if (isElementNode(el)) {
             ret.top = el[NAME_SCROLL_TOP], ret.left = el[NAME_SCROLL_LEFT];
         } else if (isRoot(el) || isRootElement(el)) {
             win = $getWindow(el);
@@ -2072,7 +2073,7 @@
         }
     });
 
-    // dom: offset, scroll, box, visibility
+    // dom: offset & scroll & box & visibility
     toDomPrototype(Dom, {
         /**
          * Offset.
@@ -2153,7 +2154,7 @@
         return $bool(el && el.hasAttribute && el.hasAttribute(name));
     }
     function setAttr(el, name, value, opt_state /* @internal */) {
-        if (isENode(el)) {
+        if (isElementNode(el)) {
             if ($isNull(value)) {
                 removeAttr(el, name);
             } else if (name == NAME_VALUE) {
@@ -2180,7 +2181,7 @@
         return ret;
     }
     function removeAttr(el, name) {
-        if (isENode(el)) el.removeAttribute(name);
+        if (isElementNode(el)) el.removeAttribute(name);
     }
 
     function toDataAttrName(name) {

@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.102.2';
+    $win.so.VERSION = '5.103.0';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -41,8 +41,8 @@
         return fn.apply(_this, _arguments);
     };
 
-    // global Int & Float objects (while BigInt came to the stage..)
-    $win.Int   = function(num) { return toInt(num) };
+    // global Int & Float objects (while BigInt on the stage..)
+    $win.Int = function(num) { return toInt(num) };
     $win.Float = function(num) { return toFloat(num) };
 
     // shortcut for 'console.log'
@@ -52,10 +52,8 @@
 
     var re_time = /([\d.]+)(\w+)/;
     var re_numeric = /^[-+]?(?:\.?\d+|\d+\.\d+)$/;
-    var re_trim = /^\s+|\s+$/g;
-    var re_trimLeft = /^\s+/g;
-    var re_trimRight = /\s+$/g;
-    var reCache = {};
+    var re_trim = /^\s+|\s+$/g, re_trimLeft = /^\s+/g, re_trimRight = /\s+$/g;
+    var _reCache = {};
 
     // null/undefined checker
     function isVoid(input) {
@@ -130,13 +128,13 @@
 
         var id = pattern + flags;
 
-        reCache[id] = reCache[id] || new RegExp(pattern, flags);
+        _reCache[id] = _reCache[id] || new RegExp(pattern, flags);
 
         $.fire(ttl, function() { // simple gc
-            delete reCache[id]
+            delete _reCache[id]
         });
 
-        return reCache[id];
+        return _reCache[id];
     }
 
     function toRegExpEsc(input) {
@@ -518,6 +516,28 @@
          */
         last: function() {
             return this[len(this) - 1];
+        },
+
+        /**
+         * Append.
+         * @param  {Any} ...arguments
+         * @return {Array}
+         */
+        append: function() {
+            var _this = this;
+
+            return apply(_this.push, _this, arguments), _this;
+        },
+
+        /**
+         * Prepend.
+         * @param  {Any} ...arguments
+         * @return {Array}
+         */
+        prepend: function() {
+            var _this = this;
+
+            return apply(_this.unshift, _this, arguments), _this;
         },
 
         /**
