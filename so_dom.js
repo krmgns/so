@@ -1552,8 +1552,6 @@
                     el = el[NAME_PARENT_ELEMENT]; // next up.
                 }
 
-                ret.pop(); // drop "html" tag
-
                 return (ret = ret.reverse()),
                     !opt_join ? ret : ret.join(' > ');
             }
