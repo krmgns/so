@@ -604,15 +604,15 @@
     });
 
     // string helpers
-    function prepareTrimRegExp(chars, opt_noCase, opt_side) {
+    function prepareTrimRegExp(chars, opt_iCase, opt_side) {
         return toRegExp((opt_side == 1 ? '^%s+' : '%s+$').format(
             '('+ chars.split('').uniq().map(toRegExpEsc).join('|') +')'
-        ), opt_noCase ? 'i' : '');
+        ), opt_iCase ? 'i' : '');
     }
-    function prepareSearchRegExp(src, opt_noCase, opt_side, opt_esc) {
+    function prepareSearchRegExp(src, opt_iCase, opt_side, opt_esc) {
         return toRegExp((!opt_side ? '%s' : opt_side == 1 ? '^%s' : '%s$').format(
             opt_esc ? toRegExpEsc(src): src
-        ), opt_noCase ? 'i' : '');
+        ), opt_iCase ? 'i' : '');
     }
 
     /**
@@ -758,7 +758,7 @@
         },
 
         /**
-         * Strip (alias of trim() without opt_noCase).
+         * Strip (alias of trim() without opt_iCase).
          * @param  {String} chars?
          * @return {String}
          */
@@ -955,27 +955,27 @@
         /**
          * Trim.
          * @param  {String} chars?
-         * @param  {Bool}   opt_noCase?
+         * @param  {Bool}   opt_iCase?
          * @return {String}
          * @override For chars option.
          */
-        trim: function(chars, opt_noCase, s /* @internal */) {
+        trim: function(chars, opt_iCase, s /* @internal */) {
             return (s = this), !chars ? trim(s)
-                : s.trimLeft(chars, opt_noCase).trimRight(chars, opt_noCase);
+                : s.trimLeft(chars, opt_iCase).trimRight(chars, opt_iCase);
         },
 
         /**
          * Trim left.
          * @param  {String} chars?
-         * @param  {Bool}   opt_noCase?
+         * @param  {Bool}   opt_iCase?
          * @return {String}
          * @override For chars option.
          */
-        trimLeft: function(chars, opt_noCase) {
+        trimLeft: function(chars, opt_iCase) {
             var s = this, re;
             if (!chars) return trim(s, 1);
 
-            re = prepareTrimRegExp(chars, opt_noCase, 1);
+            re = prepareTrimRegExp(chars, opt_iCase, 1);
             while (re.test(s)) {
                 s = s.replace(re, '');
             }
@@ -986,15 +986,15 @@
         /**
          * Trim right.
          * @param  {String} chars?
-         * @param  {Bool}   opt_noCase?
+         * @param  {Bool}   opt_iCase?
          * @return {String}
          * @override For chars option.
          */
-        trimRight: function(chars, opt_noCase) {
+        trimRight: function(chars, opt_iCase) {
             var s = this, re;
             if (!chars) return trim(s, 2);
 
-            re = prepareTrimRegExp(chars, opt_noCase, 2);
+            re = prepareTrimRegExp(chars, opt_iCase, 2);
             while (re.test(s)) {
                 s = s.replace(re, '');
             }
@@ -1006,48 +1006,48 @@
          * Contains.
          * @param  {String} src
          * @param  {Int}    offset?
-         * @param  {Bool}   opt_noCase?
+         * @param  {Bool}   opt_iCase?
          * @return {Bool}
          */
-        contains: function(src, offset, opt_noCase) {
-            return this.slice(offset).test(prepareSearchRegExp(src, opt_noCase, NULL, TRUE));
+        contains: function(src, offset, opt_iCase) {
+            return this.slice(offset).test(prepareSearchRegExp(src, opt_iCase, NULL, TRUE));
         },
 
         /**
          * Contains any.
          * @param  {String|Array} chars
          * @param  {Int}          offset?
-         * @param  {Bool}         opt_noCase?
+         * @param  {Bool}         opt_iCase?
          * @return {Bool}
          */
-        containsAny: function(chars, offset, opt_noCase) {
+        containsAny: function(chars, offset, opt_iCase) {
             return this.slice(offset).test(prepareSearchRegExp('('+ (
                 isString(chars) ? chars.split('') : chars // array
-            ).uniq().map(toRegExpEsc).join('|') +')', opt_noCase));
+            ).uniq().map(toRegExpEsc).join('|') +')', opt_iCase));
         },
 
         /**
          * Starts with.
          * @param  {String} src
          * @param  {Int}    offset?
-         * @param  {Bool}   opt_noCase?
+         * @param  {Bool}   opt_iCase?
          * @return {Bool}
          * @override For no-case option.
          */
-        startsWith: function(src, offset, opt_noCase) {
-            return this.slice(offset).test(prepareSearchRegExp(src, opt_noCase, 1, TRUE));
+        startsWith: function(src, offset, opt_iCase) {
+            return this.slice(offset).test(prepareSearchRegExp(src, opt_iCase, 1, TRUE));
         },
 
         /**
          * Ends with.
          * @param  {String} src
          * @param  {Int}    offset?
-         * @param  {Bool}   opt_noCase?
+         * @param  {Bool}   opt_iCase?
          * @return {Bool}
          * @override For no-case option.
          */
-        endsWith: function(src, offset, opt_noCase) {
-            return this.slice(offset).test(prepareSearchRegExp(src, opt_noCase, 2, TRUE));
+        endsWith: function(src, offset, opt_iCase) {
+            return this.slice(offset).test(prepareSearchRegExp(src, opt_iCase, 2, TRUE));
         }
     });
 
