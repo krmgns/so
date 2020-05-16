@@ -1187,7 +1187,7 @@
         tmp = (b.len() > a.len()) ? (tmp = b, b = a, a = tmp) : NULL; // loop over shortest
 
         return a.filter(function(search) {
-            return (i = b.index(search)), opt_found ? i > -1 : i < 0;
+            return (i = b.indexOf(search)), opt_found ? i > -1 : i < 0;
         });
     }
     function noIntersect(el, els) {
