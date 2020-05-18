@@ -74,7 +74,7 @@
 
             if ($isString(input)) {
                 return (new DOMParser)
-                    .parseFromString(input, inputType || 'text/xml')
+                    .parseFromString(input, inputType || 'text/xml');
             }
 
             return warn('No valid XML.'), NULL;
@@ -206,9 +206,9 @@
             case STATE_HEADERS_RECEIVED: client.fire('headers');  break;
             case STATE_LOADING:          client.fire('progress'); break;
             case STATE_DONE:             client.done = TRUE;
-                var statusCode = client.api.status;
-                var statusText = client.api.statusText;
-                var status = statusCode ? 'HTTP/1.1 %s %s'.format(statusCode, statusText) : NULL; // HTTP/1.1?
+                var statusCode = client.api.status,
+                    statusText = client.api.statusText,
+                    status = statusCode ? 'HTTP/1.1 %s %s'.format(statusCode, statusText) : NULL; // HTTP/1.1?
                 var headers = $http.parseHeaders(client.api.getAllResponseHeaders());
                 var data = client.api.responseText;
                 var dataType = client.options.dataType || (re_dataType.exec(headers.contentType) || [, NULL])[1];
@@ -239,9 +239,10 @@
                 client.fire(statusCode);
 
                 // success or failure?
-                client.fire(statusCode > 99 && statusCode < 400 ? 'success' : 'failure', data);
+                client.fire((statusCode > 99 && statusCode < 400)
+                    ? 'success' : 'failure', data);
 
-                // end!
+                // end, always done
                 client.fire('done', data);
 
                 offReadyStateChange(client);
@@ -278,7 +279,7 @@
         }
 
         // handle post content type
-        if (re_post.test(options.method)) {
+        if (options.method.test(re_post)) {
             options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
         }
 
@@ -295,10 +296,10 @@
         // update uriParams
         if (options.uri.has('?')) {
             options.uriParams = options.uriParams || {}
-            options.uri.split('?')[1].split('&').each(function(query) {
-                query = query.splits('=', 2);
-                if (query[0]) {
-                    options.uriParams[query[0]] = query[1];
+            options.uri.split('?')[1].split('&').each(function(param) {
+                param = param.splits('=', 2);
+                if (param[0]) {
+                    options.uriParams[param[0]] = param[1];
                 }
             });
         }
@@ -354,7 +355,7 @@
                 });
 
                 // check data
-                if (re_post.test(request.method)) {
+                if (request.method.test(re_post)) {
                     data = $http.serialize(request.data);
                 }
 
@@ -446,7 +447,7 @@
          * @return {Bool}
          */
         code: function(code) {
-            return (code).equals(this.response.statusCode);
+            return (code == this.response.statusCode);
         },
 
         /**
