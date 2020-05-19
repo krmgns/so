@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.103.3';
+    $win.so.VERSION = '5.103.4';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -725,8 +725,8 @@
 
             if (s) { // prevent empty string craps
                 ss = s.split(separator || ' ');
-                s = ss[0].lower() + ss.slice(1).map(function(s) {
-                    return s.lower().toCapitalCase();
+                s = lower(ss[0]) + ss.slice(1).map(function(s) {
+                    return lower(s).toCapitalCase();
                 }).join('');
             }
 
