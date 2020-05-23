@@ -2747,6 +2747,10 @@
     function getState(el, name) {
         return $bool(el && el[name]);
     }
+    function toStateOption(el, option) {
+        return $.isBool(option) || $.isInt(option) ? option // true|false or 1|0
+            : (option && option === el[NAME_VALUE]);        // detect by value equality
+    }
 
     // dom: form element states
     toDomPrototype(Dom, {
@@ -2757,7 +2761,7 @@
          */
         checked: function(option) {
             return $isVoid(option) ? getState(this[0], NAME_CHECKED) : this.for(function(el) {
-                setState(el, NAME_CHECKED, option);
+                setState(el, NAME_CHECKED, toStateOption(el, option));
             });
         },
 
@@ -2768,7 +2772,7 @@
          */
         selected: function(option) {
             return $isVoid(option) ? getState(this[0], NAME_SELECTED) : this.for(function(el) {
-                setState(el, NAME_SELECTED, option);
+                setState(el, NAME_SELECTED, toStateOption(option));
             });
         },
 
