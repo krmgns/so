@@ -45,7 +45,7 @@
         relatedNode: NULL, prevValue: '', newValue: '', attrName: '', attrChange: 0, // mutation
         screenX: 0, screenY: 0, clientX: 0, clientY: 0, ctrlKey: FALSE, altKey: FALSE, shiftKey: FALSE,
             metaKey: FALSE, button: 1, relatedTarget: NULL, // mouse
-        useCapture: FALSE, once: FALSE, passive: FALSE, data: {}
+        once: FALSE, capture: FALSE, passive: FALSE, data: {}
     };
 
     var KEY_BACKSPACE =  8,  KEY_TAB =       9, KEY_ENTER =       13, KEY_ESC =        27,  KEY_LEFT =      37,
@@ -271,7 +271,7 @@
         _this.eventTarget = NULL;
 
         _this.target = options.target;
-        _this.useCapture = options.useCapture;
+        _this.capture = options.capture;
 
         _this.fn = extendFn(_this, fn);
         _this.fno = fn; // original fn
@@ -416,7 +416,7 @@
                 return (count > 1) ? count - 1 : count;
             })(0);
 
-            target.addEventListener(event.type, event.fn, event.useCapture);
+            target.addEventListener(event.type, event.fn, event.capture);
         },
 
         /**
@@ -473,7 +473,7 @@
                     $for(removeStack, function(event) {
                         if (event && event.id in targetEvents[event.type]) {
                             delete targetEvents[event.type][event.id];
-                            target.removeEventListener(event.type, event.fn, event.useCapture);
+                            target.removeEventListener(event.type, event.fn, event.capture);
                         }
                     });
 
