@@ -3068,12 +3068,13 @@
                 return this.for(function(el) {
                     // 'cos window, document or (even body, for chrome & its gangs) won't be animated so..
                     if (isRoot(el) || isRootElement(el)) {
-                        el = $getDocument(el)[NAME_SCROLLING_ELEMENT] || $getDocument(el)[NAME_DOCUMENT_ELEMENT];
+                        el = $getDocument(el)[NAME_SCROLLING_ELEMENT] ||
+                             $getDocument(el)[NAME_DOCUMENT_ELEMENT];
                     }
 
                     var properties = {};
-                    properties[NAME_SCROLL_TOP] = top || el[NAME_SCROLL_TOP];
-                    properties[NAME_SCROLL_LEFT] = left || el[NAME_SCROLL_LEFT];
+                    properties[NAME_SCROLL_TOP] = !$isVoid(top) ? top : el[NAME_SCROLL_TOP];
+                    properties[NAME_SCROLL_LEFT] = !$isVoid(left) ? left : el[NAME_SCROLL_LEFT];
 
                     animate(el, properties, speed, easing, callback);
                 });
