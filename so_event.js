@@ -45,14 +45,14 @@
         relatedNode: NULL, prevValue: '', newValue: '', attrName: '', attrChange: 0, // mutation
         screenX: 0, screenY: 0, clientX: 0, clientY: 0, ctrlKey: FALSE, altKey: FALSE, shiftKey: FALSE,
             metaKey: FALSE, button: 1, relatedTarget: NULL, // mouse
-        once: FALSE, capture: FALSE, passive: FALSE, data: {}
+        once: FALSE, capture: FALSE, passive: FALSE, useCapture: FALSE, data: {}
     };
 
-    var KEY_BACKSPACE =  8,  KEY_TAB =       9, KEY_ENTER =       13, KEY_ESC =        27,  KEY_LEFT =      37,
-        KEY_UP =         38, KEY_RIGHT =    39, KEY_DOWN =        40, KEY_DELETE =     46,  KEY_HOME =      36,
-        KEY_END =        35, KEY_PAGE_UP =  33, KEY_PAGE_DOWN =   34, KEY_INSERT =     45,  KEY_CAPS_LOCK = 20,
+    var KEY_BACKSPACE  = 8,  KEY_TAB      =  9, KEY_ENTER       = 13, KEY_ESC        = 27,  KEY_LEFT      = 37,
+        KEY_UP         = 38, KEY_RIGHT    = 39, KEY_DOWN        = 40, KEY_DELETE     = 46,  KEY_HOME      = 36,
+        KEY_END        = 35, KEY_PAGE_UP  = 33, KEY_PAGE_DOWN   = 34, KEY_INSERT     = 45,  KEY_CAPS_LOCK = 20,
         KEY_ARROW_LEFT = 37, KEY_ARROW_UP = 38, KEY_ARROW_RIGHT = 39, KEY_ARROW_DOWN = 40,
-        KEY_SHIFT =      16, KEY_CONTROL =  17, KEY_ALT =         18, KEY_ALT_GRAPH =  225;
+        KEY_SHIFT      = 16, KEY_CONTROL  = 17, KEY_ALT         = 18, KEY_ALT_GRAPH  = 225;
 
     var _id = 0;
     var _break = 0;
@@ -271,7 +271,7 @@
         _this.eventTarget = NULL;
 
         _this.target = options.target;
-        _this.capture = options.capture;
+        _this.useCapture = options.useCapture;
 
         _this.fn = extendFn(_this, fn);
         _this.fno = fn; // original fn
@@ -416,7 +416,7 @@
                 return (count > 1) ? count - 1 : count;
             })(0);
 
-            target.addEventListener(event.type, event.fn, event.capture);
+            target.addEventListener(event.type, event.fn, event.useCapture);
         },
 
         /**
@@ -473,7 +473,7 @@
                     $for(removeStack, function(event) {
                         if (event && event.id in targetEvents[event.type]) {
                             delete targetEvents[event.type][event.id];
-                            target.removeEventListener(event.type, event.fn, event.capture);
+                            target.removeEventListener(event.type, event.fn, event.useCapture);
                         }
                     });
 
