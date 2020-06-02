@@ -34,7 +34,7 @@
     var $doc = $.doc();
     var $event = $.event, $toStyleName = $.util.toStyleName, $json = $.util.json;
     var $re = $.re, $rid = $.rid, $array = $.array, $each = $.each, $for = $.for, $forEach = $.forEach;
-    var $trim = $.trim, $extend = $.extend,
+    var $len = $.len, $trim = $.trim, $extend = $.extend,
         $int = $.int, $float = $.float, $string = $.string, $bool = $.bool,
         $isVoid = $.isVoid, $isNull = $.isNull, $isNulls = $.isNulls, $isDefined = $.isDefined,
         $isUndefined = $.isUndefined, $isString = $.isString, $isNumeric = $.isNumeric,
@@ -163,7 +163,7 @@
 
         // @note: should not be mixed in a complex selector (eg: 'a.foo:first, body')
         if (test(selector, re_child)) {
-            i = 0, il = $.len(selector.matchAll(re_child));
+            i = 0, il = $len(selector.matchAll(re_child));
             while ((i++) < il) {
                 // eg: p:first => p:first-child or div:1 => div:nth-child(1)
                 selector = selector.replace(re_childFix, function(args) {
@@ -597,26 +597,32 @@
             }
             _content = ss;
 
-            content = _content, tag = _tag, attributes = mix, doc = NULL;
+            tag = _tag, content = _content, attributes = mix, doc = NULL;
         }
 
-        var fragment, temp, tempTag = soTempTag.strip('<>');
+        var fragment, temp, tempTag = soTempTag.strip('<>'), i = 0, il;
 
-        // fix table stuff
+        // fix table & body stuff
         tag = tag || (content && content.grep(re_tag));
         if (tag) {
-            switch (tag.lower()) {
+            switch (tag = tag.lower()) {
                 case 'tr': tempTag = 'tbody'; break;
                 case 'th': case 'td': tempTag = 'tr'; break;
                 case 'thead': case 'tbody': case 'tfoot': tempTag = 'table'; break;
+                case 'body': tempTag = 'html'; break;
             }
         }
 
         doc = doc && $isDocument(doc) ? doc : $doc;
         temp = createElement(doc, tempTag, {innerHTML: content});
         fragment = doc.createDocumentFragment();
-        while (temp[NAME_FIRST_CHILD]) {
-            appendChild(fragment, temp[NAME_FIRST_CHILD]);
+
+        il = $len(temp[NAME_CHILD_NODES]);
+        while (i < il) {
+            if (il == 2 && tag == 'body') {
+                i++; // move next for body (see fix above)
+            }
+            appendChild(fragment, temp[NAME_CHILD_NODES][i++]);
         }
 
         if (attributes && $isObject(attributes)) {
