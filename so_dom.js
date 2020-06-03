@@ -617,19 +617,19 @@
         temp = createElement(doc, tempTag, {innerHTML: content});
         fragment = doc.createDocumentFragment();
 
-        il = $len(temp[NAME_CHILD_NODES]);
+        il = $len(temp = $array(temp[NAME_CHILD_NODES]));
         while (i < il) {
             if (il == 2 && tag == 'body') {
                 i++; // move next for body (see fix above)
             }
-            appendChild(fragment, temp[NAME_CHILD_NODES][i++]);
+            appendChild(fragment, temp[i++]);
         }
 
         if (attributes && $isObject(attributes)) {
             $for(fragment[NAME_CHILD_NODES], function (node) {
                 if (isElementNode(node)) {
                     $forEach(attributes, function (name, value) {
-                        if ($isFunction(value)) {
+                        if ($isFunction(value)) { // events (eg: click or onclick)
                             if (name.startsWith('on')) {
                                 name = name.slice(2);
                             }
