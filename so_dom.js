@@ -2672,12 +2672,12 @@
          * @return {String|undefined}
          */
         serialize: function(opt_plus) {
-            var el = this[0];
+            var form = this[0];
             var name, value;
             var data = [], ret;
 
-            if (getTag(el) == 'form') { // forms only
-                $for(el, function(el) {
+            if (getTag(form) == 'form') { // forms only
+                $each(form.elements, function(el) {
                     name = $trim(el[NAME_NAME]);
                     if (!name || el[NAME_DISABLED]) {
                         return;
