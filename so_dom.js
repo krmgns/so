@@ -1942,37 +1942,48 @@
         });
         var style;
 
+        // performance issue: all "if (by) return .." below mean no more calculation needed.
         if (isElementNode(el)) {
             style = getStyle(el);
-            if ((!by || by == NAME_WIDTH) && dim.width) {
-                ret.width -= sumStyleValue(NULL, style, NAME_PADDING_LEFT, NAME_PADDING_RIGHT)
-                           + sumStyleValue(NULL, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);
-                if (by) return ret.width;
+
+            if (!by || by == NAME_WIDTH) {
+                if (dim.width) {
+                    ret.width -= sumStyleValue(NULL, style, NAME_PADDING_LEFT, NAME_PADDING_RIGHT)
+                               + sumStyleValue(NULL, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);
+                }
+                if (by) return ret[by];
             }
-            if ((!by || by == NAME_INNER_WIDTH) && dim.width) {
-                ret.innerWidth -= sumStyleValue(NULL, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);
-                if (by) return ret.innerWidth;
+            if (!by || by == NAME_INNER_WIDTH) {
+                if (dim.width) {
+                    ret.innerWidth -= sumStyleValue(NULL, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);
+                }
+                if (by) return ret[by];
             }
-            if ((!by || by == NAME_OUTER_WIDTH) && dim.width) {
-                if (margins) {
+            if (!by || by == NAME_OUTER_WIDTH) {
+                if (dim.width && margins) {
                     ret.outerWidth += sumStyleValue(NULL, style, NAME_MARGIN_LEFT, NAME_MARGIN_RIGHT);
                 }
-                if (by) return ret.outerWidth;
+                if (by) return ret[by];
             }
-            if ((!by || by == NAME_HEIGHT) && dim.height) {
-                ret.height -= sumStyleValue(NULL, style, NAME_PADDING_TOP, NAME_PADDING_BOTTOM)
-                            + sumStyleValue(NULL, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
-                if (by) return ret.height;
+
+            if (!by || by == NAME_HEIGHT) {
+                if (dim.height) {
+                    ret.height -= sumStyleValue(NULL, style, NAME_PADDING_TOP, NAME_PADDING_BOTTOM)
+                                + sumStyleValue(NULL, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
+                }
+                if (by) return ret[by];
             }
-            if ((!by || by == NAME_INNER_HEIGHT) && dim.height) {
-                ret.innerHeight -= sumStyleValue(NULL, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
-                if (by) return ret.innerHeight;
+            if (!by || by == NAME_INNER_HEIGHT) {
+                if (dim.height) {
+                    ret.innerHeight -= sumStyleValue(NULL, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
+                }
+                if (by) return ret[by];
             }
-            if ((!by || by == NAME_OUTER_HEIGHT) && dim.height) {
-                if (margins) {
+            if (!by || by == NAME_OUTER_HEIGHT) {
+                if (dim.height && margins) {
                     ret.outerHeight += sumStyleValue(NULL, style, NAME_MARGIN_TOP, NAME_MARGIN_BOTTOM);
                 }
-                if (by) return ret.outerHeight;
+                if (by) return ret[by];
             }
         }
 
