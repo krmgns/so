@@ -18,18 +18,36 @@
     var re_rgb = /.*rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(.*))?\)/i;
     var re_url = /^((\w+):)?(\/\/(([\w-]+)?(:([^@]+))?@)?([^\/\?:]+)(:(\d+))?)?(\/?([^\/\?#][^\?#]*)?)?(\?([^#]+))?(#([\w-]*))?/;
 
-    function rand(size, base) {
-        return Math.random().toString(base || 16).slice(size ? -size : 2);
+    function rand(len, base) {
+        return Math.random().toString(base || 16).slice(len ? -len : 2);
     }
 
     $.util = {
+        /**
+         * Uid.
+         * @param  {Int} len?
+         * @param  {Int} base?
+         * @return {String}
+         */
+        uid: function(len, base) {
+            var ret = rand(0, base), len = len || 16;
+
+            while (ret.len() < len) {
+                ret += rand(0, base);
+            }
+
+            return ret.slice(0, len);
+        },
+
         /**
          * Uuid.
          * @param  {Bool} noDash?
          * @return {String}
          */
         uuid: function(noDash) {
-            var ret = '%s-%s-%s-%s-%s'.format(rand(8), rand(4), rand(4), rand(4), rand(12));
+            var ret = '%s-%s-%s-%s-%s'.format(
+                rand(8), rand(4), rand(4), rand(4), rand(12)
+            );
 
             if (noDash) {
                 ret = ret.removeAll('-');
@@ -57,38 +75,22 @@
         },
 
         /**
-         * Rand.
-         * @param  {Int} len?
-         * @param  {Int} base?
-         * @return {String}
-         */
-        rand: function(len, base) {
-            var ret = rand(0, base), len = len || 16;
-
-            while (ret.len() < len) {
-                ret += rand(0, base);
-            }
-
-            return ret.slice(0, len);
-        },
-
-        /**
          * Rand int.
-         * @param  {Int} min
-         * @param  {Int} max
+         * @param  {Int} min?
+         * @param  {Int} max?
          * @return {Int}
          */
         randInt: function(min, max) {
             min = min || 0;
-            max = max || Math.pow(2, 53) - 1; // max int
+            max = max || Math.pow(2, 53) - 1; // safe max int
 
             return Math.floor(Math.random() * (max - min + 1)) + min;
         },
 
         /**
          * Rand float.
-         * @param  {Float} min
-         * @param  {Float} max
+         * @param  {Float} min?
+         * @param  {Float} max?
          * @return {Float}
          */
         randFloat: function(min, max) {

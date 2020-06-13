@@ -45,7 +45,7 @@
         relatedNode: NULL, prevValue: '', newValue: '', attrName: '', attrChange: 0, // mutation
         screenX: 0, screenY: 0, clientX: 0, clientY: 0, ctrlKey: FALSE, altKey: FALSE, shiftKey: FALSE,
             metaKey: FALSE, button: 1, relatedTarget: NULL, // mouse
-        once: FALSE, capture: FALSE, passive: FALSE, useCapture: FALSE, data: {}
+        once: FALSE, capture: FALSE, passive: FALSE, useCapture: FALSE, data: {}, delay: 0
     };
 
     var KEY_BACKSPACE  = 8,  KEY_TAB      =  9, KEY_ENTER       = 13, KEY_ESC        = 27,  KEY_LEFT      = 37,
@@ -327,8 +327,6 @@
             var event = this.copy(), fn;
             event.target = event.options.target = target;
 
-            // add fn after target set
-            // fn = this.fno.bind(target);
             fn = event.fno;
             event.fn = extendFn(event, fn);
             event.fno = fn;
@@ -363,20 +361,24 @@
          * Fire.
          * @param  {String} type?
          * @param  {Object} data?
+         * @param  {Int}    delay?
          * @return {Event}
          */
-        fire: function(type, data) {
+        fire: function(type, data, delay) {
             var event = this.copy();
             var eventTarget = initEventTarget(event.target);
 
-            if (!type) {
-                eventTarget.dispatch(event, data);
-            } else {
-                split(type, re_comma).each(function(type) {
-                    event.type = type;
+            delay = delay || event.options.delay;
+            $.fire(delay, function() {
+                if (!type) {
                     eventTarget.dispatch(event, data);
-                });
-            }
+                } else {
+                    split(type, re_comma).each(function(type) {
+                        event.type = type;
+                        eventTarget.dispatch(event, data);
+                    });
+                }
+            });
 
             return event;
         },

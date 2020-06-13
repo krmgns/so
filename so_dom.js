@@ -1619,7 +1619,7 @@
             });
         });
 
-        return ret[ret.len() - 1] /* return last rule */ || {};
+        return ret[ret.len() - 1] || {}; // last rule or an empty map
     }
 
     function getComputedStyle(el) {

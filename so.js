@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.105.6';
+    $win.so.VERSION = '5.106.0';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -1110,7 +1110,7 @@
         },
 
         /**
-         * Rid (random id).
+         * Rid (random id, 20-length).
          * @return {String}
          */
         rid: function() {
