@@ -16,7 +16,7 @@
     var $int = $.int, $float = $.float, $string = $.string;
 
     var re_rgb = /.*rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(.*))?\)/i;
-    var re_url = /^((\w+):)?(\/\/(([\w-]+)?(:([^@]+))?@)?([^\/\?:]+)(:(\d+))?)?(\/?([^\/\?#][^\?#]*)?)?(\?([^#]+))?(#([\w-]*))?/;
+    var re_url = /^((\w+):)?(\/\/(([\w-]+)?(:([^@]+))?@)?([^/?:]+)(:(\d+))?)?([/]?([^/?#][^?#]*)?)?(\?([^#]*))?(#(.*)$)?/;
 
     function rand(len, base) {
         return Math.random().toString(base || 16).slice(len ? -len : 2);
@@ -140,21 +140,41 @@
          * @return {Object}
          */
         url: function(url) {
-            var re = $string(url).match(re_url) || [], ret = {
-                protocol: re[2], user: re[5], pass: re[7], host: re[8], port: $int(re[10]),
-                path: re[11], query: re[14], queryParams: NULL, hash: re[16]
-            };
-            ret.dir = $string(ret.path).split('/').slice(0, -1).join('/')
-            ret.file = $string(ret.path).split('/').pop()
+            // url: "/path/to/file.ext?query=param#hash"
+            // or full: "http://user:pass@domain.tld:8080/path/to/file.ext?query=param#hash"
+            var re = $string(url).match(re_url) || [],
+                ret = {
+                    protocol: re[2], user: re[5], pass: re[7], host: re[8], port: $int(re[10]),
+                    path: re[11], query: re[14], queryParams: NULL, hash: re[16],
+                    dir: NULL, file: NULL, fileExt: NULL
+                }, s, ss;
 
-            if (ret.query) {
-                ret.queryParams = {}; ret.query.split('&').each(function(query) {
-                    query = query.splits('=', 2);
-                    ret.queryParams[query[0]] = query[1];
-                })
+            ss = $string(ret.path).split('/'),
+                ret.dir = ss.slice(0, -1).join('/'),
+                ret.file = ss.pop();
+
+            if (s = ret.file) {
+                s = s.split('.');
+                if (s.len() > 1) {
+                    ret.fileExt = s.last();
+                }
             }
 
-            // give filtered return
+            if (s = ret.query) {
+                s = s.split('&'), ss = {};
+                s.each(function(query, key, value) {
+                    query = query.splits('=', 2), key = query[0], value = query[1];
+                    if (key in ss) {
+                        ss[key] = [ss[key]]; // make array with current value
+                        ss[key].push(value);
+                    } else {
+                        ss[key] = value;
+                    }
+                });
+                ret.queryParams = ss;
+            }
+
+            // return a filtered result
             return $.forEach(ret, function(name, value) {
                 if (!value) ret[name] = NULL;
             })
