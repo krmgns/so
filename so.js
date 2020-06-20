@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.107.0';
+    $win.so.VERSION = '5.107.1';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -50,7 +50,7 @@
         apply(console.log, NULL, arguments);
     };
 
-    var re_time = /([\d.]+)(\w+)/;
+    var re_time = /([\d.]+)(\w+)?/;
     var re_numeric = /^[-+]?(?:\.?\d+|\d+\.\d+)$/;
     var re_trim = /^\s+|\s+$/g, re_trimLeft = /^\s+/g, re_trimRight = /\s+$/g;
     var _reCache = {};
@@ -89,17 +89,15 @@
     }
 
     function toMilliseconds(time) {
-        var t = time.split(re_time);
-        var time = toFloat(t[1]);
-        var timeDir = t[2];
+        var t = time.split(re_time), ret = toFloat(t[1]);
 
-        switch (timeDir) {
-            case 's': case 'sec': time *= 1000; break;
-            case 'm': case 'min': time *= 1000 * 60; break;
-            case 'h': case 'hour': time *= 1000 * 60 * 60; break;
+        switch (t[2]) {
+            case 's': case 'sec': ret *= 1000; break;
+            case 'm': case 'min': ret *= 1000 * 60; break;
+            case 'h': case 'hour': ret *= 1000 * 60 * 60; break;
         }
 
-        return time;
+        return ret;
     }
 
     // cacheable regexp stuff with ttl (for gc)
@@ -817,7 +815,7 @@
                 match = s.match(/(%s)/g) || [];
 
             if (len(args) < len(match)) {
-                console.warn('No enough arguments for format().');
+                console.warn('No enough arguments.');
             }
 
             while (match.shift()) {
