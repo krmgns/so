@@ -634,6 +634,10 @@
                                 name = name.slice(2);
                             }
                             $event && $event.on(node, name, value);
+                        } else if (name == NAME_STYLE) {
+                            $forEach(value, function(name, value) {
+                                setStyle(node, name, value);
+                            });
                         } else {
                             setAttr(node, name, value);
                         }
