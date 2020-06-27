@@ -1705,11 +1705,11 @@
          * @return {String}
          */
         style: function(name, value, opt_raw) {
-            return $isNull(value) || $isNulls(value) ? this.removeStyle(name)
-                : $isString(value) || $isNumber(value) || $isObject(name)
+            return $isNull(name) || $isNulls(name)
+                ? this.removeAttr(NAME_STYLE) : $isNull(value) || $isNulls(value)
+                ? this.removeStyle(name) : $isString(value) || $isNumber(value) || $isObject(name)
                     || (name && name.has(':')) /* eg: 'color:red' */
-                ? this.setStyle(name, value)
-                : this.getStyle(name, value /* or opt_convert */, opt_raw);
+                ? this.setStyle(name, value) : this.getStyle(name, value /* or opt_convert */, opt_raw);
         },
 
         /**
