@@ -2930,11 +2930,14 @@
     }
 
     function fadeDisplay(el, none, callback, animation) {
-        if (none) { // store display before hiding
+        if (none) {
+            // store display before hiding
             setData(el, NAME_DISPLAY, getCssStyle(el)[NAME_DISPLAY]);
-        }
 
-        el[NAME_STYLE][NAME_DISPLAY] = none ? NAME_NONE : getData(el, NAME_DISPLAY, TRUE);
+            el[NAME_STYLE][NAME_DISPLAY] = NAME_NONE;
+        } else {
+            el[NAME_STYLE][NAME_DISPLAY] = getData(el, NAME_DISPLAY, TRUE) || ''; // '' for undefined display not removed
+        }
 
         if (callback = fadeCallback(callback)) {
             callback(animation);
