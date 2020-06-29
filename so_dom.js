@@ -2919,13 +2919,17 @@
         toDomPrototype(Dom, {
             /**
              * Animate.
-             * @param  {Object|Bool} properties
-             * @param  {Int|String}  speed?
-             * @param  {String}      easing?
-             * @param  {Function}    callback?
+             * @param  {Object|Bool}     properties
+             * @param  {Int|String}      speed?
+             * @param  {String|Function} easing?
+             * @param  {Function}        callback?
              * @return {this}
              */
             animate: function(properties, speed, easing, callback) {
+                if ($isFunction(easing)) {
+                    callback = easing, easing = NULL;
+                }
+
                 return ($isFalse(properties)) // stop previous animation
                     ? this.for(function(el, animation) {
                         animation = el.$animation;
@@ -2985,12 +2989,16 @@
 
             /**
              * Show.
-             * @param  {Int|String} speed?
-             * @param  {String}     easing?
-             * @param  {Function}   callback?
+             * @param  {Int|String}      speed?
+             * @param  {String|Function} easing?
+             * @param  {Function}        callback?
              * @return {this}
              */
             show: function(speed, easing, callback) {
+                if ($isFunction(easing)) {
+                    callback = easing, easing = NULL;
+                }
+
                 return this.for(function(el) {
                     el[NAME_STYLE][NAME_DISPLAY] = getDefaultStyle(el, NAME_DISPLAY);
                     animate(el, {opacity: 1}, speed || 0, easing, callback);
