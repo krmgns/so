@@ -334,7 +334,7 @@
             var all = this.all();
 
             if (init) {
-                // shortcut for: ... each(function(el) { var $el = $.dom(el) ...
+                // shortcut for: ... each(function(el) { var $el = $(el) ...
                 all = all.map(function(el) {
                     return toDom(el, NULL, TRUE);
                 });
@@ -1491,7 +1491,7 @@
          * @return {Bool}
          */
         hasContent: function() {
-            return !this.isEmpty(true);
+            return !this.isEmpty(TRUE);
         }
     });
 
@@ -1623,7 +1623,7 @@
             });
         });
 
-        return ret[ret.len() - 1] || {}; // last rule or an empty map
+        return $.filter(ret[ret.len() - 1] || {}); // last rule or an empty map
     }
 
     function getComputedStyle(el) {
@@ -2604,11 +2604,18 @@
         }
     }
 
-    function getData(el, key) {
+    function getData(el, key, opt_remove) {
         if (el) {
             checkData(el);
             key = $trim(key);
-            return (key == '*') ? el.$data : el.$data[key];
+
+            var ret;
+            if (key == '*') {
+                ret = el.$data, (opt_remove && delete el.$data);
+            } else {
+                ret = el.$data[key], (opt_remove && delete el.$data[key]);
+            }
+            return ret;
         }
     }
 
@@ -2913,6 +2920,30 @@
         });
     }
 
+    function fadeCallback(callback) {
+        if ($isTrue(callback)) { // remove element after fading out
+            callback = function(animation) {
+                animation.$dom.remove();
+            };
+        }
+        return callback;
+    }
+
+    function fadeDisplay(el, none, callback, animation) {
+        if (none) { // store display before hiding
+            setData(el, NAME_DISPLAY, getCssStyle(el)[NAME_DISPLAY]);
+        }
+
+        el[NAME_STYLE][NAME_DISPLAY] = none ? NAME_NONE : getData(el, NAME_DISPLAY, TRUE);
+
+        if (callback = fadeCallback(callback)) {
+            callback(animation);
+        }
+    }
+
+    function fadeSpeed(speed) { return speed || 0; }
+    function fadeOpacity(opacity) { return {opacity: opacity}; }
+
     // dom: animations
     var animate = $.animation && $.animation.animate;
     if (animate) {
@@ -2926,10 +2957,6 @@
              * @return {this}
              */
             animate: function(properties, speed, easing, callback) {
-                if ($isFunction(easing)) {
-                    callback = easing, easing = NULL;
-                }
-
                 return ($isFalse(properties)) // stop previous animation
                     ? this.for(function(el, animation) {
                         animation = el.$animation;
@@ -2958,7 +2985,7 @@
              * @return {this}
              */
             fade: function(to, speed, callback) {
-                return this.animate({opacity: to}, speed, callback);
+                return this.animate(fadeOpacity(to), speed, callback);
             },
 
             /**
@@ -2978,71 +3005,50 @@
              * @return {this}
              */
             fadeOut: function(speed, callback) {
-                if ($isTrue(callback)) { // remove element after fading out
-                    callback = function(animation) {
-                        animation.$el.remove();
-                    };
-                }
-
-                return this.fade(0, speed, callback);
+                return this.fade(0, speed, fadeCallback(callback));
             },
 
             /**
              * Show.
-             * @param  {Int|String}      speed?
-             * @param  {String|Function} easing?
-             * @param  {Function}        callback?
+             * @param  {Int|String} speed?
+             * @param  {Function}   callback?
              * @return {this}
              */
-            show: function(speed, easing, callback) {
-                if ($isFunction(easing)) {
-                    callback = easing, easing = NULL;
-                }
-
+            show: function(speed, callback) {
                 return this.for(function(el) {
-                    el[NAME_STYLE][NAME_DISPLAY] = getDefaultStyle(el, NAME_DISPLAY);
-                    animate(el, {opacity: 1}, speed || 0, easing, callback);
+                    fadeDisplay(el); // set & repair display
+                    animate(el, fadeOpacity(1), fadeSpeed(speed), callback);
                 });
             },
 
             /**
              * Hide.
-             * @param  {Int|String}      speed?
-             * @param  {String|Function} easing?
-             * @param  {Function}        callback?
+             * @param  {Int|String} speed?
+             * @param  {Function}   callback?
              * @return {this}
              */
-            hide: function(speed, easing, callback) {
-                if ($isFunction(easing)) {
-                    callback = easing, easing = NULL;
-                }
-
+            hide: function(speed, callback) {
                 return this.for(function(el) {
-                    animate(el, {opacity: 0}, speed || 0, easing, function() {
-                        el[NAME_STYLE][NAME_DISPLAY] = NAME_NONE, (callback && callback(this));
+                    animate(el, fadeOpacity(0), fadeSpeed(speed), function(animation) {
+                        fadeDisplay(el, TRUE, callback, animation); // set & store display
                     });
                 });
             },
 
             /**
              * Toggle.
-             * @param  {Int|String}      speed?
-             * @param  {String|Function} easing?
-             * @param  {Function}        callback?
+             * @param  {Int|String} speed?
+             * @param  {Function}   callback?
              * @return {this}
              */
-            toggle: function(speed, easing, callback) {
-                if ($isFunction(easing)) {
-                    callback = easing, easing = NULL;
-                }
-
+            toggle: function(speed, callback) {
                 return this.for(function(el) {
                     if (!isVisible(el)) {
-                        el[NAME_STYLE][NAME_DISPLAY] = getDefaultStyle(el, NAME_DISPLAY);
-                        animate(el, {opacity: 1}, speed || 0, easing, callback);
+                        fadeDisplay(el); // set & repair display
+                        animate(el, fadeOpacity(1), fadeSpeed(speed), callback);
                     } else {
-                        animate(el, {opacity: 0}, speed || 0, easing, function() {
-                            el[NAME_STYLE][NAME_DISPLAY] = NAME_NONE, (callback && callback(this));
+                        animate(el, fadeOpacity(0), fadeSpeed(speed), function(animation) {
+                            fadeDisplay(el, TRUE, callback, animation); // set & store display
                         });
                     }
                 });
@@ -3050,14 +3056,13 @@
 
             /**
              * Toggle by.
-             * @param  {Bool}            option
-             * @param  {Int|String}      speed?
-             * @param  {String|Function} easing?
-             * @param  {Function}        callback?
+             * @param  {Bool}       option
+             * @param  {Int|String} speed?
+             * @param  {Function}   callback?
              * @return {this}
              */
-            toggleBy: function(option, speed, easing, callback) {
-                return this[option ? 'show' : 'hide'](speed, easing, callback);
+            toggleBy: function(option, speed, callback) {
+                return this[option ? 'show' : 'hide'](speed, callback);
             },
 
             /**
@@ -3076,8 +3081,8 @@
                         if (count && count > times) {
                             return;
                         }
-                        animate(el, {opacity: 0}, speed, function() {
-                            animate(el, {opacity: 1}, speed, callback);
+                        animate(el, fadeOpacity(0), speed, function() {
+                            animate(el, fadeOpacity(1), speed, callback);
                             count++;
                         });
                     }();
@@ -3086,14 +3091,17 @@
 
             /**
              * Scroll to.
-             * @param  {Int}        top
-             * @param  {Int}        left
-             * @param  {Int|String} speed?
-             * @param  {String}     easing?
-             * @param  {Function}   callback?
+             * @param  {Object}   options
+             * @param  {Function} callback?
              * @return {this}
              */
-            scrollTo: function(top, left, speed, easing, callback) {
+            scrollTo: function(options, callback) {
+                // eg: {top: Int, left: Int, gap: Int, relative: Bool, speed: Int|String, easing: String}
+                options = $extend({}, options);
+                if (options.top) { // gap is useful for an accurate position
+                    options.top -= $float(options.gap);
+                }
+
                 return this.for(function(el) {
                     // 'cos window, document or (even body, for chrome & its gangs) won't be animated so..
                     if (isRoot(el) || isRootElement(el)) {
@@ -3102,11 +3110,33 @@
                     }
 
                     var properties = {};
-                    properties[NAME_SCROLL_TOP] = !$isVoid(top) ? top : el[NAME_SCROLL_TOP];
-                    properties[NAME_SCROLL_LEFT] = !$isVoid(left) ? left : el[NAME_SCROLL_LEFT];
+                    properties[NAME_SCROLL_TOP] = !$isVoid(options.top) ? options.top : el[NAME_SCROLL_TOP];
+                    properties[NAME_SCROLL_LEFT] = !$isVoid(options.left) ? options.left : el[NAME_SCROLL_LEFT];
 
-                    animate(el, properties, speed, easing, callback);
+                    animate(el, properties, options.speed, options.easing, callback);
                 });
+            },
+
+            /**
+             * Scroll at.
+             * @param  {String|Object} selector
+             * @param  {Object}        options?
+             * @param  {Function}      callback?
+             * @return {this}
+             */
+            scrollAt: function(selector, options, callback) {
+                var $dom = toDom(selector);
+                if ($dom[0]) {
+                    options = options || {};
+                    options.relative = options.relative || (
+                        getCssStyle($dom[0])['position'] == 'absolute'
+                    );
+
+                    this.scrollTo($extend(options, {
+                        top: getOffset($dom[0], options.relative)['top']
+                    }), callback);
+                }
+                return this;
             }
         });
     }

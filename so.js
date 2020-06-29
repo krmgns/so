@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.108.2';
+    $win.so.VERSION = '5.109.0';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -561,7 +561,7 @@
          * @override
          */
         filter: function(fn) {
-            // prevent: "undefined isn't a function" error
+            // prevent: "undefined not a function" error
             fn = fn || function(value) { return trim(value) };
 
             var _this = this, ret = [];
@@ -581,7 +581,7 @@
          * @source https://stackoverflow.com/a/23976260/362780
          */
         rand: function() {
-            return this[~~(len(this) * Math.random())];
+            return this[len(this) * Math.random() | 0];
         },
 
         /**
@@ -1308,6 +1308,49 @@
             }
 
             return ret;
+        },
+
+        /**
+         * Map.
+         * @param  {Array|Object} input
+         * @param  {Function}     fn
+         * @return {Array|Object|undefined}
+         */
+        map: function(input, fn) {
+            if (isArray(input)) {
+                return input.map(fn);
+            }
+            if (isObject(input, TRUE)) {
+                var ret;
+                $.forEach(input, function(key, value, i) {
+                    ret[key] = fn(value, key, i, input);
+                });
+                return ret;
+            }
+        },
+
+        /**
+         * Filter.
+         * @param  {Array|Object} input
+         * @param  {Function}     fn?
+         * @return {Array|Object|undefined}
+         */
+        filter: function(input, fn) {
+            // prevent: "undefined not a function" error
+            fn = fn || function(value) { return trim(value) };
+
+            if (isArray(input)) {
+                return input.filter(fn);
+            }
+            if (isObject(input, TRUE)) {
+                var ret = {};
+                $.forEach(input, function(key, value, i) {
+                    if (fn(value, key, i, input)) {
+                        ret[key] = value;
+                    }
+                });
+                return ret;
+            }
         },
 
         /**

@@ -26,15 +26,15 @@
 
     /**
      * Animation.
-     * @param {Element}  el
-     * @param {Object}   properties
-     * @param {Int}      speed?
-     * @param {String}   easing?
-     * @param {Function} callback?
+     * @param {Element}         el
+     * @param {Object}          properties
+     * @param {Int|Function}    speed?
+     * @param {String|Function} easing?
+     * @param {Function}        callback?
      */
     function Animation(el, properties, speed, easing, callback) {
         var _this = this; // just as minify candy
-        _this.$el = $(el);
+        _this.$dom = $(el);
         _this.properties = properties;
 
         // swap arguments
@@ -45,17 +45,17 @@
         }
 
         _this.speed = $isNumber(speed) ? speed : opt_speeds[speed] || opt_speeds.default;
-        _this.easing = $easing[easing] || fn_easing;
-        _this.callback = callback;
+        _this.easing = easing ? $easing[easing] || fn_easing : NULL;
+        _this.callback = callback ? function() { callback(_this) } : NULL;
 
         _this.running = _this.stopped = _this.ended = FALSE;
         _this.startTime = _this.elapsedTime = 0;
 
         _this.tasks = [];
 
-        if (_this.$el.len()) {
+        if (_this.$dom.len()) {
             // for stop tool
-            _this.$el.setProperty('$animation', _this);
+            _this.$dom.setProperty('$animation', _this);
 
             // assign animation tasks
             $forEach(properties, function(name, value) {
@@ -66,8 +66,8 @@
 
                 if (!scroll) {
                     style = $isString(value)
-                        ? _this.$el.getCssStyle(name) // get original style to catch unit sign
-                        : _this.$el.getComputedStyle(name);
+                        ? _this.$dom.getCssStyle(name) // get original style to catch unit sign
+                        : _this.$dom.getComputedStyle(name);
 
                     startValue = $float(style);
                     endValue = $float(value);
@@ -76,7 +76,7 @@
                         unit = style.remove(re_digit);
                     }
                 } else {
-                    startValue = _this.$el.scroll()[name.slice(6).lower()];
+                    startValue = _this.$dom.scroll()[name.slice(6).lower()];
                     endValue = value;
                 }
 
@@ -111,7 +111,7 @@
             _this.startTime = $now();
 
             !function run() {
-                if (!_this.$el.len()) {
+                if (!_this.$dom.len()) {
                     // no element(s) to animate
                     return (_this.running = FALSE, _this.stopped = _this.ended = TRUE);
                 }
@@ -135,7 +135,7 @@
          * @return {this}
          */
         start: function() {
-            var _this = this, el = _this.$el, scroll, value;
+            var _this = this, $dom = _this.$dom, scroll, value;
 
             _this.elapsedTime = $now() - _this.startTime;
 
@@ -143,10 +143,10 @@
                 value = fn_easing(_this.elapsedTime, 0.00, task.diff, _this.speed);
                 value = task.reverse ? task.startValue - value : task.startValue + value;
                 if (!task.scroll) {
-                    el.setStyle(task.name, value.toFixed(9) /* use 'toFixed' for a good percent */
+                    $dom.setStyle(task.name, value.toFixed(9) /* use 'toFixed' for a good percent */
                         + task.unit);
                 } else {
-                    el.setProperty(task.name, value.toFixed(0));
+                    $dom.setProperty(task.name, value.toFixed(0));
                 }
             });
 
@@ -158,13 +158,13 @@
          * @return {this}
          */
         end: function() {
-            var _this = this, el = _this.$el;
+            var _this = this, $dom = _this.$dom;
 
             $for(_this.tasks, function(task) {
                 if (!task.scroll) {
-                    el.setStyle(task.name, task.endValue + task.unit);
+                    $dom.setStyle(task.name, task.endValue + task.unit);
                 } else {
-                    el.setProperty(task.name, task.endValue);
+                    $dom.setProperty(task.name, task.endValue);
                 }
             });
 
@@ -182,14 +182,14 @@
          * @return {this}
          */
         stop: function() {
-            var _this = this, el = _this.$el;
+            var _this = this, $dom = _this.$dom;
 
             if (_this.running) {
                 _this.running = FALSE, _this.stopped = TRUE;
             }
 
             // set as null (for stop, animated() etc.)
-            el.setProperty('$animation', NULL);
+            $dom.setProperty('$animation', NULL);
 
             return _this;
         }
