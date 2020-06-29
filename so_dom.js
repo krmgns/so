@@ -3094,11 +3094,15 @@
 
             /**
              * Scroll to.
-             * @param  {Object}   options
-             * @param  {Function} callback?
+             * @param  {Object|Number} options
+             * @param  {Function}      callback?
              * @return {this}
              */
             scrollTo: function(options, callback) {
+                if ($isNumber(options)) {
+                    options = {top: options};
+                }
+
                 // eg: {top: Int, left: Int, gap: Int, relative: Bool, speed: Int|String, easing: String}
                 options = $extend({}, options);
                 if (options.top) { // gap is useful for an accurate position
