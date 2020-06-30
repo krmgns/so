@@ -2850,25 +2850,6 @@
             },
 
             /**
-             * One.
-             * @param  {String|Object} type
-             * @param  {Function}      fn
-             * @param  {Object}        options?
-             * @return {this}
-             */
-            one: function(type, fn, options) {
-                return this.for(function(el) {
-                    if ($isString(type)) {
-                        $event.one(el, type, fn, options);
-                    } else if ($isObject(type)) {
-                        $forEach(type, function(type, fn) {
-                            $event.one(el, type, fn);
-                        })
-                    }
-                });
-            },
-
-            /**
              * Off.
              * @param  {String|Object} type
              * @param  {Function}      fn
@@ -2882,6 +2863,25 @@
                     } else if ($isObject(type)) {
                         $forEach(type, function(type, fn) {
                             $event.off(el, type, fn);
+                        })
+                    }
+                });
+            },
+
+            /**
+             * Once.
+             * @param  {String|Object} type
+             * @param  {Function}      fn
+             * @param  {Object}        options?
+             * @return {this}
+             */
+            once: function(type, fn, options) {
+                return this.for(function(el) {
+                    if ($isString(type)) {
+                        $event.once(el, type, fn, options);
+                    } else if ($isObject(type)) {
+                        $forEach(type, function(type, fn) {
+                            $event.once(el, type, fn);
                         })
                     }
                 });

@@ -407,16 +407,11 @@
          */
         addEvent: function(event) {
             var target = prepareEventTarget(this.target, event.type);
-            var targetEvents = target.$events;
 
             event.id = event.id || ++_id;
             event.target = target;
             event.eventTarget = this;
-            targetEvents[event.type][event.id] = event;
-            targetEvents.$count = (function(count) {
-                $for(targetEvents, function() { count++ });
-                return (count > 1) ? count - 1 : count;
-            })(0);
+            target.$events[event.type][event.id] = event;
 
             target.addEventListener(event.type, event.fn, event.useCapture);
         },
@@ -518,19 +513,16 @@
         }
     });
 
-    // on, one, off, fire helper
     function prepareArguments(fn, options, target) {
         options = options || {};
-
         if ($isObject(fn)) {
             options = fn, fn = options.fn;
         }
-
         return {fn: fn, options: $extend(options, {target: target})};
     }
 
     /**
-     * On, one, off, fire.
+     * On, off, once, fire.
      * @param  {Object}   target
      * @param  {String}   type
      * @param  {Function} fn
@@ -545,20 +537,20 @@
             eventTarget.addEvent(event);
         });
     }
-    function one(target, type, fn, options) {
-        var args = prepareArguments(fn, $extend(options, {once: TRUE}), target), event, eventTarget;
-        split(type, re_comma).each(function(type) {
-            event = initEvent(type, args.fn, args.options);
-            eventTarget = initEventTarget(target);
-            eventTarget.addEvent(event);
-        });
-    }
     function off(target, type, fn, options) {
         var args = prepareArguments(fn, options, target), event, eventTarget;
         split(type, re_comma).each(function(type) {
             event = initEvent(type, args.fn, args.options);
             eventTarget = initEventTarget(target);
             eventTarget.removeEvent(event);
+        });
+    }
+    function once(target, type, fn, options) {
+        var args = prepareArguments(fn, $extend(options, {once: TRUE}), target), event, eventTarget;
+        split(type, re_comma).each(function(type) {
+            event = initEvent(type, args.fn, args.options);
+            eventTarget = initEventTarget(target);
+            eventTarget.addEvent(event);
         });
     }
     function fire(target, type, fn, options) {
@@ -603,8 +595,8 @@
     // add event to so
     $.event = {
         on: on,
-        one: one,
         off: off,
+        once: once,
         fire: fire,
         has: has,
         create: create,
