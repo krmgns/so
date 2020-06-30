@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.111.0';
+    $win.so.VERSION = '5.112.0';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -582,6 +582,24 @@
          */
         rand: function() {
             return this[len(this) * Math.random() | 0];
+        },
+
+        /**
+         * Chunk.
+         * @param  {Int} size
+         * @return {Array}
+         */
+        chunk: function(size) {
+            var _this = this, ret = [];
+            if (!size) {
+                return _this;
+            }
+
+            while (len(_this)) {
+                ret.push(_this.splice(0, size));
+            }
+
+            return ret;
         },
 
         /**
