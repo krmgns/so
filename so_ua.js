@@ -35,7 +35,11 @@
     $.ua = (function() {
         var $ua = {
             os: {},
-            screen: [screen.width, screen.height, screenAngle],
+            screen: (function(ret) {
+                ret = [screen.width, screen.height, screenAngle];
+                ret.isSmall = function() { return (ret[0] < 768) };
+                return ret;
+            })(),
             isMobile: function() { return re_mobile.test(ua); },
             isTablet: function() { return re_tablet.test(ua); },
             isTouchable: function() {
