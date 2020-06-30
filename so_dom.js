@@ -2508,9 +2508,10 @@
          * @return {Bool|this}
          */
         class: function(name, option) {
-            return $isUndefined(option) ? this.addClass(name)
+            return $isUndefined(name) ? this.getClass()
+                : $isUndefined(option) ? this.addClass(name)
                 : $isNull(option) || $isNulls(option) ? this.removeClass(name)
-                    : $isTrue(option) ? this.setClass(name) : this.replaceClass(name, option);
+                : $isTrue(option) ? this.setClass(name) : this.replaceClass(name, option);
         },
 
         /**
