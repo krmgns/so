@@ -3065,20 +3065,22 @@
              * Blip.
              * @param  {Int}        times?
              * @param  {Int|String} speed?
+             * @param  {Function}   callback?
              * @return {this}
              */
-            blip: function(times, speed) {
+            blip: function(times, speed, callback) {
                 times = times || Infinity;
                 speed = speed || 255;
 
                 return this.for(function(el) {
                     var count = times > 0 ? 1 : 0;
-                    !function callback() {
+                    !function run() {
                         if (count && count > times) {
+                            callback && callback();
                             return;
                         }
                         animate(el, fadeOpacity(0), speed, function() {
-                            animate(el, fadeOpacity(1), speed, callback);
+                            animate(el, fadeOpacity(1), speed, run);
                             count++;
                         });
                     }();
