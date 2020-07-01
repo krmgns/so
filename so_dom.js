@@ -24,8 +24,8 @@
         NAME_SCROLL_TOP = 'scrollTop', NAME_SCROLL_LEFT = 'scrollLeft',
         NAME_INNER_HTML = 'innerHTML', NAME_TEXT_CONTENT = 'textContent',
         NAME_ID = 'id', NAME_NAME = 'name', NAME_VALUE = 'value', NAME_TEXT = 'text',
+        NAME_STYLE = 'style', NAME_CLASS = 'class', NAME_CLASS_NAME = 'className', NAME_TAG_NAME = 'tagName',
         NAME_TYPE = 'type', NAME_OPTIONS = 'options', NAME_SELECTED_INDEX = 'selectedIndex', NAME_HIDDEN = 'hidden',
-        NAME_STYLE = 'style', NAME_CLASS_NAME = 'className', NAME_TAG_NAME = 'tagName',
         NAME_CHECKED = 'checked', NAME_SELECTED = 'selected', NAME_DISABLED = 'disabled', NAME_READONLY = 'readOnly',
         NAME_DISPLAY = 'display', NAME_VISIBILITY = 'visibility', NAME_NONE = 'none', NAME_CSS_TEXT = 'cssText',
         NAME_OWNER_DOCUMENT = 'ownerDocument', NAME_DOCUMENT_ELEMENT = 'documentElement', NAME_SCROLLING_ELEMENT = 'scrollingElement',
@@ -1832,7 +1832,7 @@
             var _this = this;
 
             if (name == '*') {
-                _this.attr('style', '');
+                _this.attr(NAME_STYLE, '');
             } else {
                 name = split(name, re_comma);
                 _this.for(function(el) {
@@ -1883,7 +1883,7 @@
         }
 
         // temporary style element
-        style = createElement(doc, 'style', {
+        style = createElement(doc, NAME_STYLE, {
             textContent: '.'+ rid +'{display:block!important;visibility:hidden!important}'
         });
         appendChild(body, style);
@@ -2515,6 +2515,14 @@
         },
 
         /**
+         * Class list.
+         * @return {Array}
+         */
+        classList: function() {
+            return this.getClass().split(re_space);
+        },
+
+        /**
          * Has class.
          * @param  {String} name
          * @return {Bool}
@@ -2538,7 +2546,7 @@
          * @return {this}
          */
         removeClass: function(name) {
-            return (name == '*') ? this.attr('class', '')
+            return (name == '*') ? this.attr(NAME_CLASS, '')
                 : this.for(function(el) { removeClass(el, name); });
         },
 
@@ -2581,7 +2589,7 @@
          * @return {String}
          */
         getClass: function() {
-            return getAttr(this[0], 'class');
+            return getAttr(this[0], NAME_CLASS) || '';
         }
     });
 
