@@ -846,11 +846,12 @@
         /**
          * Test.
          * @param  {RegExp|String} re
+         * @param  {Bool}          opt_esc?
          * @return {Bool}
          */
-        test: function(re) {
+        test: function(re, opt_esc) {
             if (!isRegExp(re)) {
-                re = toRegExp(re);
+                re = toRegExp(re, NULL, NULL, opt_esc);
             }
 
             return re.test(this);
