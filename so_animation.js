@@ -18,11 +18,11 @@
     var re_nonUnitStyles = /(?:(?:fill-?)?opacity|z(?:oom|index)|(?:font-?w|line-?h)eight|column(?:-?count|s))/i;
 
     var opt_fps = 1000 / 60;
-    var opt_speeds = {fast: 50, slow: 650, normal: 150, default: 325};
+    var opt_speeds = {fast: 50, slow: 650, ease: 255, normal: 150, default: 325};
 
     // thanks: http://easings.net/ (easeOutQuad)
     var fn_easing = function(t,b,c,d) { return -c*(t/=d)*(t-2)+b; };
-    var fn_runner = $win.requestAnimationFrame || function(fn) { setTimeout(fn, opt_fps); };
+    var fn_runner = $win.requestAnimationFrame || function(fn) { $win.setTimeout(fn, opt_fps); };
 
     /**
      * Animation.
