@@ -246,7 +246,7 @@
                         }
                     }
                 }
-            } else if ($isWindow(selector) || $isDocument(selector)) {
+            } else if (isRoot(selector)) {
                 els = [selector];
             } else if (isNode(selector)) {
                 if (root && root != selector[NAME_PARENT_NODE]) {
@@ -2150,11 +2150,16 @@
          * @return {Bool|this}
          */
         hidden: function(opt_value) {
-            return $isUndefined(opt_value)
-                ? hasAttr(this[0], NAME_HIDDEN)
-                : setAttr(this[0], NAME_HIDDEN,
-                      $isTrue(opt_value) ? '' /* set */ : NULL /* remove */
-                  );
+            var el = this[0];
+
+            if (isRoot(el)) { // discard set
+                return $bool($doc[NAME_HIDDEN]);
+            }
+
+            return $isUndefined(opt_value) ? hasAttr(el, NAME_HIDDEN) : setAttr(el, NAME_HIDDEN,
+                $bool(opt_value) ? '' // set
+                                 : NULL // unset
+            ), this;
         },
 
         /**
