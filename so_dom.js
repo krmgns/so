@@ -2975,6 +2975,14 @@
             },
 
             /**
+             * Stop.
+             * @return {this}
+             */
+            stop: function() {
+                return this.animate(FALSE);
+            },
+
+            /**
              * Fade.
              * @param  {Float}      to
              * @param  {Int|String} speed?
