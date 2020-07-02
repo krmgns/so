@@ -1933,7 +1933,8 @@
             }
         } else if (isRoot(el)) {
             win = $getWindow(el);
-            width = win[NAME_INNER_WIDTH], height = win[NAME_INNER_HEIGHT];
+            ret[NAME_WIDTH] = win[NAME_INNER_WIDTH];
+            ret[NAME_HEIGHT] = win[NAME_INNER_HEIGHT];
         }
 
         return ret;
@@ -2040,10 +2041,10 @@
     // dom: dimensions & width & height
     toDomPrototype(Dom, {
         /**
-         * Dimensions.
+         * Dims.
          * @return {Object}
          */
-        dimensions: function() {
+        dims: function() {
             return getDimensions(this[0]);
         },
 
