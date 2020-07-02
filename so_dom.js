@@ -17,11 +17,10 @@
         NAME_MARGIN_LEFT = 'marginLeft', NAME_MARGIN_RIGHT = 'marginRight',
         NAME_BORDER_TOP_WIDTH = 'borderTopWidth', NAME_BORDER_BOTTOM_WIDTH = 'borderBottomWidth',
         NAME_BORDER_LEFT_WIDTH = 'borderLeftWidth', NAME_BORDER_RIGHT_WIDTH = 'borderRightWidth',
-        NAME_WIDTH = 'width', NAME_INNER_WIDTH = 'innerWidth', NAME_OUTER_WIDTH = 'outerWidth',
-        NAME_HEIGHT = 'height', NAME_INNER_HEIGHT = 'innerHeight', NAME_OUTER_HEIGHT = 'outerHeight',
-        NAME_OFFSET_WIDTH = 'offsetWidth', NAME_OFFSET_HEIGHT = 'offsetHeight',
-        NAME_OFFSET_TOP = 'offsetTop', NAME_OFFSET_LEFT = 'offsetLeft',
-        NAME_SCROLL_TOP = 'scrollTop', NAME_SCROLL_LEFT = 'scrollLeft',
+        NAME_WIDTH = 'width', NAME_INNER_WIDTH = 'innerWidth', NAME_OUTER_WIDTH = 'outerWidth', NAME_OFFSET_WIDTH = 'offsetWidth',
+        NAME_HEIGHT = 'height', NAME_INNER_HEIGHT = 'innerHeight', NAME_OUTER_HEIGHT = 'outerHeight', NAME_OFFSET_HEIGHT = 'offsetHeight',
+        NAME_TOP = 'top', NAME_OFFSET_TOP = 'offsetTop', NAME_SCROLL_TOP = 'scrollTop',
+        NAME_LEFT = 'left', NAME_OFFSET_LEFT = 'offsetLeft', NAME_SCROLL_LEFT = 'scrollLeft',
         NAME_INNER_HTML = 'innerHTML', NAME_TEXT_CONTENT = 'textContent',
         NAME_ID = 'id', NAME_NAME = 'name', NAME_VALUE = 'value', NAME_TEXT = 'text',
         NAME_STYLE = 'style', NAME_CLASS = 'class', NAME_CLASS_NAME = 'className', NAME_TAG_NAME = 'tagName',
@@ -1926,9 +1925,11 @@
         if (isElementNode(el)) {
             if (!isVisible(el) || !isVisibleParent(el)) {
                 properties = getInvisibleElementProperties(el, [NAME_OFFSET_WIDTH, NAME_OFFSET_HEIGHT]);
-                ret.width = properties[0], ret.height = properties[1];
+                ret[NAME_WIDTH] = properties[0];
+                ret[NAME_HEIGHT] = properties[1];
             } else {
-                ret.width = el[NAME_OFFSET_WIDTH], ret.height = el[NAME_OFFSET_HEIGHT];
+                ret[NAME_WIDTH] = el[NAME_OFFSET_WIDTH];
+                ret[NAME_HEIGHT] = el[NAME_OFFSET_HEIGHT];
             }
         } else if (isRoot(el)) {
             win = $getWindow(el);
@@ -1941,8 +1942,8 @@
     function getDimensionsBy(el, by, margins) {
         var dim = getDimensions(el);
         var ret = $extend(dim, {
-            innerWidth: dim.width, outerWidth: dim.width,
-            innerHeight: dim.height, outerHeight: dim.height
+            innerWidth: dim[NAME_WIDTH], outerWidth: dim[NAME_WIDTH],
+            innerHeight: dim[NAME_HEIGHT], outerHeight: dim[NAME_HEIGHT]
         });
         var style;
 
@@ -1951,41 +1952,41 @@
             style = getStyle(el);
 
             if (!by || by == NAME_WIDTH) {
-                if (dim.width) {
-                    ret.width -= sumStyleValue(NULL, style, NAME_PADDING_LEFT, NAME_PADDING_RIGHT)
-                               + sumStyleValue(NULL, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);
+                if (dim[NAME_WIDTH]) {
+                    ret[NAME_WIDTH] -= sumStyleValue(NULL, style, NAME_PADDING_LEFT, NAME_PADDING_RIGHT)
+                                     + sumStyleValue(NULL, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);
                 }
                 if (by) return ret[by];
             }
             if (!by || by == NAME_INNER_WIDTH) {
-                if (dim.width) {
-                    ret.innerWidth -= sumStyleValue(NULL, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);
+                if (dim[NAME_WIDTH]) {
+                    ret[NAME_INNER_WIDTH] -= sumStyleValue(NULL, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);
                 }
                 if (by) return ret[by];
             }
             if (!by || by == NAME_OUTER_WIDTH) {
-                if (dim.width && margins) {
-                    ret.outerWidth += sumStyleValue(NULL, style, NAME_MARGIN_LEFT, NAME_MARGIN_RIGHT);
+                if (dim[NAME_WIDTH] && margins) {
+                    ret[NAME_OUTER_WIDTH] += sumStyleValue(NULL, style, NAME_MARGIN_LEFT, NAME_MARGIN_RIGHT);
                 }
                 if (by) return ret[by];
             }
 
             if (!by || by == NAME_HEIGHT) {
-                if (dim.height) {
-                    ret.height -= sumStyleValue(NULL, style, NAME_PADDING_TOP, NAME_PADDING_BOTTOM)
-                                + sumStyleValue(NULL, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
+                if (dim[NAME_HEIGHT]) {
+                    ret[NAME_HEIGHT] -= sumStyleValue(NULL, style, NAME_PADDING_TOP, NAME_PADDING_BOTTOM)
+                                      + sumStyleValue(NULL, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
                 }
                 if (by) return ret[by];
             }
             if (!by || by == NAME_INNER_HEIGHT) {
-                if (dim.height) {
-                    ret.innerHeight -= sumStyleValue(NULL, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
+                if (dim[NAME_HEIGHT]) {
+                    ret[NAME_INNER_HEIGHT] -= sumStyleValue(NULL, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
                 }
                 if (by) return ret[by];
             }
             if (!by || by == NAME_OUTER_HEIGHT) {
-                if (dim.height && margins) {
-                    ret.outerHeight += sumStyleValue(NULL, style, NAME_MARGIN_TOP, NAME_MARGIN_BOTTOM);
+                if (dim[NAME_HEIGHT] && margins) {
+                    ret[NAME_OUTER_HEIGHT] += sumStyleValue(NULL, style, NAME_MARGIN_TOP, NAME_MARGIN_BOTTOM);
                 }
                 if (by) return ret[by];
             }
@@ -2001,16 +2002,19 @@
         if (isElementNode(el)) {
             if (!isVisible(el) || !isVisibleParent(el)) {
                 properties = getInvisibleElementProperties(el, [NAME_OFFSET_TOP, NAME_OFFSET_LEFT]);
-                ret.top = properties[0], ret.left = properties[1];
+                ret[NAME_TOP] = properties[0];
+                ret[NAME_LEFT] = properties[1];
             } else {
-                ret.top = el[NAME_OFFSET_TOP], ret.left = el[NAME_OFFSET_LEFT];
+                ret[NAME_TOP] = el[NAME_OFFSET_TOP];
+                ret[NAME_LEFT] = el[NAME_OFFSET_LEFT];
             }
 
             body = $getDocument(el)[TAG_BODY];
-            ret.top += body[NAME_SCROLL_TOP], ret.left += body[NAME_SCROLL_LEFT];
+            ret[NAME_TOP] += body[NAME_SCROLL_TOP];
+            ret[NAME_LEFT] += body[NAME_SCROLL_LEFT];
             if (opt_relative) {
                 parentOffset = getOffset(el[NAME_PARENT_ELEMENT], opt_relative);
-                ret.top += parentOffset.top, ret.left += parentOffset.left;
+                ret[NAME_TOP] += parentOffset[NAME_TOP], ret[NAME_LEFT] += parentOffset[NAME_LEFT];
             }
         }
 
@@ -2022,10 +2026,12 @@
         var win;
 
         if (isElementNode(el)) {
-            ret.top = el[NAME_SCROLL_TOP], ret.left = el[NAME_SCROLL_LEFT];
+            ret[NAME_TOP] = el[NAME_SCROLL_TOP];
+            ret[NAME_LEFT] = el[NAME_SCROLL_LEFT];
         } else if (isRoot(el) || isRootElement(el)) {
             win = $getWindow(el);
-            ret.top = win.pageYOffset, ret.left = win.pageXOffset;
+            ret[NAME_TOP] = win.pageYOffset;
+            ret[NAME_LEFT] = win.pageXOffset;
         }
 
         return ret;
@@ -2112,6 +2118,22 @@
         },
 
         /**
+         * Scroll top.
+         * @return {Int}
+         */
+        scrollTop: function() {
+            return getScroll(this[0])[NAME_TOP];
+        },
+
+        /**
+         * Scroll left.
+         * @return {Int}
+         */
+        scrollLeft: function() {
+            return getScroll(this[0])[NAME_LEFT];
+        },
+
+        /**
          * Box.
          * @return {Object}
          */
@@ -2124,21 +2146,25 @@
                 var borderYSize = sumStyleValue(NULL, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
                 var marginXSize = sumStyleValue(NULL, style, NAME_MARGIN_LEFT, NAME_MARGIN_RIGHT);
                 var marginYSize = sumStyleValue(NULL, style, NAME_MARGIN_TOP, NAME_MARGIN_BOTTOM);
-                var dim = getDimensionsBy(el), parentDim = getDimensions(el[NAME_PARENT_ELEMENT]);
+                var dim = getDimensionsBy(el), dimParent = getDimensions(el[NAME_PARENT_ELEMENT]);
                 var offset = getOffset(el), scroll = getScroll(el);
 
                 ret = dim;
                 // add width, height
-                ret.outerWidthMargined = dim.width + marginXSize;
-                ret.outerHeightMargined = dim.height + marginYSize;
+                ret.outerWidthMargined = dim[NAME_WIDTH] + marginXSize;
+                ret.outerHeightMargined = dim[NAME_HEIGHT] + marginYSize;
                 // add offset
                 ret.offset = offset;
-                ret.offset.right = ret.offset.x = parentDim.width - borderXSize - (offset.left + dim.outerWidth);
-                ret.offset.bottom = ret.offset.y = parentDim.height - borderYSize - (offset.top + dim.outerHeight);
+                ret.offset.right = ret.offset.x = (
+                    dimParent[NAME_WIDTH] - borderXSize - (offset[NAME_LEFT] + dim[NAME_OUTER_WIDTH])
+                );
+                ret.offset.bottom = ret.offset.y = (
+                    dimParent[NAME_HEIGHT] - borderYSize - (offset[NAME_TOP] + dim[NAME_OUTER_HEIGHT])
+                );
                 // add scroll
                 ret.scroll = scroll;
-                ret.scroll.x = scroll.left;
-                ret.scroll.y = scroll.top;
+                ret.scroll.x = scroll[NAME_LEFT];
+                ret.scroll.y = scroll[NAME_TOP];
             }
 
             return ret;
@@ -2970,6 +2996,18 @@
     function fadeSpeed(speed) { return speed || 0; }
     function fadeOpacity(opacity) { return {opacity: opacity}; }
 
+    function scrollOptions(options) {
+        // eg: Int or {top: Int, left: Int, gap: Int, relative: Bool, speed: Int|String, easing: String}
+        var optionsOrig = options;
+
+        options = $extend({direction: NAME_TOP}, options);
+        if ($isNumber(optionsOrig)) {
+            options[options.direction] = optionsOrig;
+        }
+
+        return options;
+    }
+
     // dom: animations
     var animate = $.animation && $.animation.animate;
     if (animate) {
@@ -2983,7 +3021,7 @@
              * @return {this}
              */
             animate: function(properties, speed, easing, callback) {
-                return ($isFalse(properties)) // stop previous animation
+                return $isFalse(properties) // stop previous animation
                     ? this.for(function(el, animation) {
                         animation = el.$animation;
                         if (animation && animation.running) {
@@ -3173,14 +3211,13 @@
              * @return {this}
              */
             scrollTo: function(options, callback) {
-                if ($isNumber(options)) {
-                    options = {top: options};
-                }
+                options = scrollOptions(options);
 
-                // eg: {top: Int, left: Int, gap: Int, relative: Bool, speed: Int|String, easing: String}
-                options = $extend({}, options);
-                if (options.top) { // gap is useful for an accurate position
-                    options.top -= $float(options.gap);
+                if (options[NAME_TOP]) { // gap is useful for an accurate position
+                    options[NAME_TOP] -= $float(options.gap);
+                }
+                if (options[NAME_LEFT]) {
+                    options[NAME_LEFT] -= $float(options.gap);
                 }
 
                 return this.for(function(el) {
@@ -3191,8 +3228,8 @@
                     }
 
                     var properties = {};
-                    properties[NAME_SCROLL_TOP] = !$isVoid(options.top) ? options.top : el[NAME_SCROLL_TOP];
-                    properties[NAME_SCROLL_LEFT] = !$isVoid(options.left) ? options.left : el[NAME_SCROLL_LEFT];
+                    properties[NAME_SCROLL_TOP] = !$isVoid(options[NAME_TOP]) ? options[NAME_TOP] : el[NAME_SCROLL_TOP];
+                    properties[NAME_SCROLL_LEFT] = !$isVoid(options[NAME_LEFT]) ? options[NAME_LEFT] : el[NAME_SCROLL_LEFT];
 
                     animate(el, properties, options.speed, options.easing, callback);
                 });
@@ -3206,18 +3243,23 @@
              * @return {this}
              */
             scrollAt: function(selector, options, callback) {
-                var $dom = toDom(selector);
-                if ($dom[0]) {
-                    options = options || {};
+                var el = toDom(selector)[0], optionsOther, offset, _this = this;
+
+                if (el) {
+                    options = scrollOptions(options);
                     options.relative = options.relative || (
-                        getCssStyle($dom[0])['position'] == 'absolute'
+                        getCssStyle(el).position == 'absolute'
                     );
 
-                    this.scrollTo($extend(options, {
-                        top: getOffset($dom[0], options.relative)['top']
-                    }), callback);
+                    optionsOther = {}, offset = getOffset(el, options.relative);
+                    if (options.direction) {
+                        optionsOther[options.direction] = offset[options.direction];
+                    }
+
+                    _this.scrollTo($extend(options, optionsOther), callback);
                 }
-                return this;
+
+                return _this;
             }
         });
     }

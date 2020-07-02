@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.115.0';
+    $win.so.VERSION = '5.116.0';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -1079,6 +1079,16 @@
          */
         equals: function(input) {
             return (this === input);
+        },
+
+        /**
+         * Between.
+         * @param  {Number} inputMin
+         * @param  {Number} inputMax
+         * @return {Bool}
+         */
+        between: function(inputMin, inputMax) {
+            return (this >= inputMin && this <= inputMax);
         }
     });
 
