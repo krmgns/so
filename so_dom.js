@@ -2119,22 +2119,6 @@
         },
 
         /**
-         * Scroll top.
-         * @return {Int}
-         */
-        scrollTop: function() {
-            return getScroll(this[0])[NAME_TOP];
-        },
-
-        /**
-         * Scroll left.
-         * @return {Int}
-         */
-        scrollLeft: function() {
-            return getScroll(this[0])[NAME_LEFT];
-        },
-
-        /**
          * Box.
          * @return {Object}
          */
