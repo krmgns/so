@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.114.3';
+    $win.so.VERSION = '5.115.0';
 
     // minify candies
     var PROTOTYPE = 'prototype',

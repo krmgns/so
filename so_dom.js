@@ -945,8 +945,8 @@
 
         /**
          * Replace with.
-         * @param  {String} selector
-         * @param  {Bool}   opt_clone?
+         * @param  {String|Node} selector
+         * @param  {Bool}        opt_clone?
          * @return {this}
          */
         replaceWith: function(selector, opt_clone) {
@@ -2581,6 +2581,22 @@
         },
 
         /**
+         * Toggle classes.
+         * @param  {String} name1
+         * @param  {String} name2
+         * @return {this}
+         */
+        toggleClasses: function(name1, name2) {
+            return this.for(function(el) {
+                if (hasClass(el, name1)) {
+                    removeClass(el, name1), addClass(el, name2);
+                } else if (hasClass(el, name2)) {
+                    removeClass(el, name2), addClass(el, name1);
+                }
+            });
+        },
+
+        /**
          * Set class.
          * @param  {String} name
          * @return {this}
@@ -3034,7 +3050,7 @@
              */
             show: function(speed, callback) {
                 return this.for(function(el) {
-                    fadeDisplay(el); // set & repair display
+                    fadeDisplay(el); // set & restore display
                     animate(el, fadeOpacity(1), fadeSpeed(speed), callback);
                 });
             },
@@ -3048,7 +3064,7 @@
             hide: function(speed, callback) {
                 return this.for(function(el) {
                     animate(el, fadeOpacity(0), fadeSpeed(speed), function(animation) {
-                        fadeDisplay(el, TRUE, callback, animation); // set & store display
+                        fadeDisplay(el, TRUE, callback, animation); // set & restore display
                     });
                 });
             },
@@ -3060,13 +3076,54 @@
              * @return {this}
              */
             toggle: function(speed, callback) {
+                speed = fadeSpeed(speed);
+
                 return this.for(function(el) {
                     if (!isVisible(el)) {
-                        fadeDisplay(el); // set & repair display
-                        animate(el, fadeOpacity(1), fadeSpeed(speed), callback);
+                        fadeDisplay(el); // set & restore display
+                        animate(el, fadeOpacity(1), speed, callback);
                     } else {
-                        animate(el, fadeOpacity(0), fadeSpeed(speed), function(animation) {
-                            fadeDisplay(el, TRUE, callback, animation); // set & store display
+                        animate(el, fadeOpacity(0), speed, function(animation) {
+                            fadeDisplay(el, TRUE, callback, animation); // set & restore display
+                        });
+                    }
+                });
+            },
+
+            /**
+             * Toggle with.
+             * @param  {String|Node} selector
+             * @param  {Int|String}  speed?
+             * @param  {Function}    callback?
+             * @return {this}
+             */
+            toggleWith: function(selector, speed, callback) {
+                speed = fadeSpeed(speed);
+
+                var $dom = toDom(selector);
+                return this.for(function(el) {
+                    if (!isVisible(el)) {
+                        fadeDisplay(el); // set & restore display
+                        animate(el, fadeOpacity(1), speed, function() {
+                            $dom.for(function(_el) {
+                                if (!isVisible(_el)) {
+                                    fadeDisplay(_el); // set & restore display
+                                    animate(_el, fadeOpacity(1), speed, callback);
+                                } else {
+                                    animate(_el, fadeOpacity(0), speed, function(animation) {
+                                        fadeDisplay(_el, TRUE, callback, animation); // set & restore display
+                                    });
+                                }
+                            });
+                        });
+                    } else {
+                        animate(el, fadeOpacity(0), speed, function(animation) {
+                            fadeDisplay(el, TRUE, callback, animation); // set & restore display
+                            $dom.for(function(_el) {
+                                animate(_el, fadeOpacity(0), speed, function(animation) {
+                                    fadeDisplay(_el, TRUE, callback, animation); // set & restore display
+                                });
+                            });
                         });
                     }
                 });
