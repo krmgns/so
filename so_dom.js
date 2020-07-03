@@ -2940,12 +2940,16 @@
 
             /**
              * Fire.
-             * @param  {String}   type
-             * @param  {Function} fn
-             * @param  {Object}   options?
+             * @param  {String}          type
+             * @param  {Function|Object} fn?
+             * @param  {Object}          options?
              * @return {this}
              */
             fire: function(type, fn, options) {
+                if ($isObject(fn)) {
+                    options = fn, fn = NULL;
+                }
+
                 return this.for(function(el) {
                     $event.fire(el, type, fn, options);
                 });

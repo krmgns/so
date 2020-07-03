@@ -146,7 +146,7 @@
 
             // when "e.foo = event.foo", error: cannot assign to read only property 'foo'..
             if (!e.data) {
-                e = objectDefineProperty(e, 'data', {value: event.data, writable: TRUE});
+                e = objectDefineProperty(e, 'data', {value: event.options.data || {}, writable: TRUE});
             }
             if (!e.target) {
                 e = objectDefineProperty(e, 'target', {value: event.target});
@@ -258,7 +258,6 @@
         var _this = this; // just as minify candy
         _this.type = type;
         _this.options = options;
-        _this.data = options.data;
 
         _this.custom = options.custom;
         if (_this.custom) {
@@ -368,7 +367,9 @@
             var event = this.copy();
             var eventTarget = initEventTarget(event.target);
 
+            data = data || event.options.data;
             delay = delay || event.options.delay;
+
             $.fire(delay, function() {
                 if (!type) {
                     eventTarget.dispatch(event, data);
@@ -500,7 +501,7 @@
                     if (data) { // call-time data (eg: fire("foo", {data: {a: 1, b: ..}}))
                         event.event.data = event.event.data || {};
                         for (var key in data) {
-                            event.data[key] = event.event.data[key] = data[key];
+                            event.event.data[key] = data[key];
                         }
                     }
                     event.fn(event.event);
@@ -557,7 +558,7 @@
         var args = prepareArguments(fn, options, target), event;
         split(type, re_comma).each(function(type) {
             event = initEvent(type, args.fn, args.options);
-            event.fire(type, args.options.data);
+            event.fire(type);
         });
     }
 
