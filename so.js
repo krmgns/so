@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.117.0';
+    $win.so.VERSION = '5.118.0';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -473,7 +473,7 @@
 
         /**
          * Has.
-         * @param  {Any}  src
+         * @param  {Any} src
          * @return {Bool}
          */
         has: function(src) {
@@ -645,11 +645,20 @@
 
         /**
          * Has.
-         * @param  {Any}  src
+         * @param  {Any} src
          * @return {Bool}
          */
         has: function(src) {
             return has(src, this);
+        },
+
+        /**
+         * In.
+         * @param  {Array|String} stack
+         * @return {Bool}
+         */
+        in: function(stack) {
+            return index(this, stack) > -1;
         },
 
         /**
