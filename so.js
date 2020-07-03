@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.119.0';
+    $win.so.VERSION = '5.120.0';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -151,7 +151,7 @@
     var fn_toString = {}.toString;
 
     // array maker
-    function makeArray(input, begin, end) {
+    function toArray(input, begin, end) {
         var ret = [];
 
         if (!input || isString(input) || isWindow(input)
@@ -166,7 +166,7 @@
 
     // object extender
     function extend() {
-        var args = makeArray(arguments), source, target = args.shift() || {}, k;
+        var args = toArray(arguments), source, target = args.shift() || {}, k;
 
         while (len(args)) {
             source = args.shift();
@@ -608,7 +608,7 @@
          * @return {Object}
          */
         extract: function() {
-            var keys = makeArray(arguments), values = {};
+            var keys = toArray(arguments), values = {};
 
             $.for(keys, function(key, i) {
                 // [1,2,3].extract('one', '', 'three') => {one: 1, three: 3}
@@ -1185,27 +1185,28 @@
 
         /**
          * Fire & ifire.
-         * @param  {Int|String} delay (ms)
-         * @param  {Function}   fn
-         * @param  {Array}      fnArgs?
+         * @param  {Int|Float|String} delay (ms)
+         * @param  {Function}         fn
+         * @param  {Array}            fnArgs?
+         * @param  {Object}           opt_this?
          * @return {Int}
          */
-        fire: function(delay, fn, fnArgs) {
+        fire: function(delay, fn, fnArgs, opt_this) {
             if (isString(delay)) {
                 delay = toMilliseconds(delay);
             }
 
             return setTimeout(function() {
-                apply(fn, NULL, fnArgs || []);
+                apply(fn, opt_this, toArray(fnArgs));
             }, delay || 1);
         },
-        ifire: function(delay, fn, fnArgs) {
+        ifire: function(delay, fn, fnArgs, opt_this) {
             if (isString(delay)) {
                 delay = toMilliseconds(delay);
             }
 
             return setInterval(function() {
-                apply(fn, NULL, fnArgs || []);
+                apply(fn, opt_this, toArray(fnArgs));
             }, delay || 1);
         },
 
@@ -1342,7 +1343,7 @@
             var ret = [], args = arguments, argsLen = len(args), i = 0;
 
             while (i < argsLen) {
-                ret = ret.concat(makeArray(args[i++]));
+                ret = ret.concat(toArray(args[i++]));
             }
 
             return ret;

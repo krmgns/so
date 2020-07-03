@@ -2582,13 +2582,23 @@
 
         /**
          * Toggle.
-         * @param  {String} name
+         * @param  {String}           name
+         * @param  {Function}         fn?
+         * @param  {Int|Float|String} fnDelay?
          * @return {this}
          */
-        toggleClass: function(name) {
-            return this.for(function(el) {
+        toggleClass: function(name, fn, fnDelay) {
+            var _this = this;
+
+            _this.for(function(el) {
                 hasClass(el, name) ? removeClass(el, name) : addClass(el, name);
             });
+
+            if (fn) {
+                fnDelay ? $.fire(fnDelay, fn, _this, _this) : fn(_this);
+            }
+
+            return _this;
         },
 
         /**
