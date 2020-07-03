@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.118.0';
+    $win.so.VERSION = '5.119.0';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -1426,6 +1426,15 @@
         }
     });
 
+    // Module shortcuts.
+    ['q', 'qa', 'loadStyle', 'loadScript'].each(function(fn) {
+        $[fn] = function() { return apply($.dom[fn], $.dom, arguments) };
+    });
+    ['get', 'post', 'put', 'delete', 'request', 'load'].each(function(fn) {
+        $[fn] = function() { return apply($.http[fn], $.http, arguments) };
+    });
+
+    // Ready things.
     var readyCallbacks = [];
     var readyCallbacksFire = function() {
         while (len(readyCallbacks)) {

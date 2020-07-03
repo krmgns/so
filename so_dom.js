@@ -3329,6 +3329,10 @@
         },
 
         loadStyle: function(src, root, onload, attributes) {
+            if ($isFunction(root)) {
+                onload = root, root = NULL;
+            }
+
             var el = createElement(NULL, 'link');
             el.href = src, el.onload = onload, el.rel = 'stylesheet';
 
@@ -3339,6 +3343,10 @@
             appendChild(toDom(root || $doc[TAG_HEAD])[0], el);
         },
         loadScript: function(src, root, onload, attributes) {
+            if ($isFunction(root)) {
+                onload = root, root = NULL;
+            }
+
             var el = createElement(NULL, 'script');
             el.src = src, el.onload = onload;
 
@@ -3347,6 +3355,13 @@
             });
 
             appendChild(toDom(root || $doc[TAG_HEAD])[0], el);
+        },
+
+        q: function(selector, root) {
+            return querySelector(root || $doc, selector);
+        },
+        qa: function(selector, root) {
+            return $array(querySelectorAll(root || $doc, selector));
         }
     });
 
