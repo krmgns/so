@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.120.1';
+    $win.so.VERSION = '5.120.2';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -1439,7 +1439,7 @@
     var readyCallbacks = [];
     var readyCallbacksFire = function() {
         while (len(readyCallbacks)) {
-            readyCallbacks.shift()($);
+            readyCallbacks.shift().call($win, $);
         }
     };
 
