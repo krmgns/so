@@ -961,6 +961,17 @@
         },
 
         /**
+         * Replace with clone.
+         * @return {this}
+         */
+        replaceWithClone: function() {
+            // 'cos im sick and tired of trying to hide mobile tab focuses..
+            return this.for(function(el) {
+                replaceChild(el[NAME_PARENT_NODE], cloneElement(el), el);
+            });
+        },
+
+        /**
          * Wrap.
          * @param  {String|Object|this} content
          * @param  {Object}             opt_attributes?
@@ -1554,7 +1565,7 @@
                     if (el[NAME_CLASS_NAME]) s += '.'+ el[NAME_CLASS_NAME].replace(re_space, '.');
 
                     ret.push(
-                        (sims.len() > 1 && !s.test(/[#.]/)) // if no id or class
+                        (sims.len() > 1 && !test(s, /[#.]/)) // if no id or class
                             ? s +':nth-child('+ (sims.index(el) + 1) +')' : s
                     );
 
@@ -1595,6 +1606,7 @@
     var re_rgb = /rgb/i;
     var re_unit = /(?:px|em|%)/i; // short & quick
     var re_unitMore = /(?:ex|in|[cm]m|p[tc]|v[hw]?min)/i;
+    var re_unitClean = /(-?\d*\.?\d+).*/g
     var re_nonUnitStyles = /(?:(?:fill-?)?opacity|z(?:oom|index)|(?:font-?w|line-?h)eight|column(?:-?count|s))/i;
     var re_colon = /\s*:\s*/;
     var re_scolon = /\s*;\s*/;
@@ -1645,7 +1657,7 @@
     function setStyle(el, name, value) {
         name = $toStyleName(name), value = $string(value);
 
-        if (value && $isNumeric(value) && !test(name, re_nonUnitStyles)) { // fix pixsels
+        if (value && $isNumeric(value) && !test(name, re_nonUnitStyles)) { // fix pixels
             value += 'px';
         }
 
@@ -1670,11 +1682,15 @@
         return styles;
     }
 
-    function sumStyleValue(el, style) {
+    function cleanStyleValue(value) {
+        return $string(value).replace(re_unitClean, '$1');
+    }
+
+    function sumStyleValues(el, style) {
         var i = 2, args = arguments, ret = 0, style = style || getStyle(el), name;
 
         while (name = args[i++]) {
-            ret += $float(style[name]);
+            ret += $float(cleanStyleValue(style[name]));
         }
 
         return ret;
@@ -1700,15 +1716,14 @@
          * Style.
          * @param  {String}                    name
          * @param  {String|Number|Object|Bool} value? (true=opt_convert?)
-         * @param  {Bool}                      opt_raw?
          * @return {String}
          */
-        style: function(name, value, opt_raw) {
+        style: function(name, value) {
             return $isNull(name) || $isNulls(name)
                 ? this.removeAttr(NAME_STYLE) : $isNull(value) || $isNulls(value)
                 ? this.removeStyle(name) : $isString(value) || $isNumber(value) || $isObject(name)
                     || (name && name.has(':')) /* eg: 'color:red' */
-                ? this.setStyle(name, value) : this.getStyle(name, value /* or opt_convert */, opt_raw);
+                ? this.setStyle(name, value) : this.getStyle(name, value /* or opt_convert */);
         },
 
         /**
@@ -1746,17 +1761,12 @@
          * Get style.
          * @param  {String} name
          * @param  {Bool}   opt_convert? @default=true
-         * @param  {Bool}   opt_raw?     @default=false
          * @return {String|null|undefined}
          */
-        getStyle: function(name, opt_convert, opt_raw) {
+        getStyle: function(name, opt_convert) {
             var el = this[0], value, opt_convert;
 
             if (el) {
-                if (opt_raw) {
-                    return el[NAME_STYLE][$toStyleName(name)] || value;
-                }
-
                 value = getStyle(el, name);
                 if ($isNulls(value)) {
                     value = NULL;
@@ -1765,7 +1775,7 @@
                         test(value, re_rgb) ? $.util.parseRgb(value, TRUE) // make rgb - hex
                             : test(value, re_unit) || test(value, re_unitMore) // make px etc. - float
                                 // || test(name, re_nonUnitStyles) // make opacity etc. - float
-                            ? $float(value) : value
+                            ? $float(cleanStyleValue(value)) : value
                     );
                 }
             }
@@ -1777,16 +1787,16 @@
          * Get styles.
          * @param  {String} name
          * @param  {Bool}  opt_convert? @default=true
-         * @param  {Bool}  opt_raw?     @default=false
          * @return {Object|undefined}
          */
-        getStyles: function(names, opt_convert, opt_raw) {
+        getStyles: function(names, opt_convert) {
             var el = this[0], styles = {};
+
             if (el) {
                 if (names) {
                     el = toDom(el);
                     split(names, re_comma).each(function(name) {
-                        styles[name] = el.getStyle(name, opt_convert, opt_raw);
+                        styles[name] = el.getStyle(name, opt_convert);
                     });
                 } else {
                     styles = toStyleObject(getStyle(el));
@@ -1868,12 +1878,12 @@
         var doc = $getDocument(el), body = doc[TAG_BODY];
         var rid = $rid(), ridClass = (' '+ rid);
         var style, styleText = el[NAME_STYLE][NAME_CSS_TEXT];
-        var parent = el[NAME_PARENT_ELEMENT], parents = [], parentStyle;
+        var parent = el[NAME_PARENT_ELEMENT], parents = [];
 
         while (parent) { // doesn't give the properties if parents are invisible
             if (!isVisible(parent)) {
-                parentStyle = getStyle(parent);
                 parents.push({el: parent, styleText: parent[NAME_STYLE][NAME_CSS_TEXT]});
+
                 parent[NAME_CLASS_NAME] += ridClass;
                 parent[NAME_STYLE][NAME_DISPLAY] = '';
                 parent[NAME_STYLE][NAME_VISIBILITY] = ''; // for !important annots
@@ -1954,46 +1964,46 @@
 
             if (!by || by == NAME_WIDTH) {
                 if (dim[NAME_WIDTH]) {
-                    ret[NAME_WIDTH] -= sumStyleValue(NULL, style, NAME_PADDING_LEFT, NAME_PADDING_RIGHT)
-                                     + sumStyleValue(NULL, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);
+                    ret[NAME_WIDTH] -= sumStyleValues(NULL, style, NAME_PADDING_LEFT, NAME_PADDING_RIGHT)
+                                     + sumStyleValues(NULL, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);
                 }
                 if (by) return ret[by];
             }
             if (!by || by == NAME_INNER_WIDTH) {
                 if (dim[NAME_WIDTH]) {
-                    ret[NAME_INNER_WIDTH] -= sumStyleValue(NULL, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);
+                    ret[NAME_INNER_WIDTH] -= sumStyleValues(NULL, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);
                 }
                 if (by) return ret[by];
             }
             if (!by || by == NAME_OUTER_WIDTH) {
                 if (dim[NAME_WIDTH] && margins) {
-                    ret[NAME_OUTER_WIDTH] += sumStyleValue(NULL, style, NAME_MARGIN_LEFT, NAME_MARGIN_RIGHT);
+                    ret[NAME_OUTER_WIDTH] += sumStyleValues(NULL, style, NAME_MARGIN_LEFT, NAME_MARGIN_RIGHT);
                 }
                 if (by) return ret[by];
             }
 
             if (!by || by == NAME_HEIGHT) {
                 if (dim[NAME_HEIGHT]) {
-                    ret[NAME_HEIGHT] -= sumStyleValue(NULL, style, NAME_PADDING_TOP, NAME_PADDING_BOTTOM)
-                                      + sumStyleValue(NULL, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
+                    ret[NAME_HEIGHT] -= sumStyleValues(NULL, style, NAME_PADDING_TOP, NAME_PADDING_BOTTOM)
+                                      + sumStyleValues(NULL, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
                 }
                 if (by) return ret[by];
             }
             if (!by || by == NAME_INNER_HEIGHT) {
                 if (dim[NAME_HEIGHT]) {
-                    ret[NAME_INNER_HEIGHT] -= sumStyleValue(NULL, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
+                    ret[NAME_INNER_HEIGHT] -= sumStyleValues(NULL, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
                 }
                 if (by) return ret[by];
             }
             if (!by || by == NAME_OUTER_HEIGHT) {
                 if (dim[NAME_HEIGHT] && margins) {
-                    ret[NAME_OUTER_HEIGHT] += sumStyleValue(NULL, style, NAME_MARGIN_TOP, NAME_MARGIN_BOTTOM);
+                    ret[NAME_OUTER_HEIGHT] += sumStyleValues(NULL, style, NAME_MARGIN_TOP, NAME_MARGIN_BOTTOM);
                 }
                 if (by) return ret[by];
             }
         }
 
-        return ret; // all
+        return by ? ret[by] : ret; // all
     }
 
     function getOffset(el, opt_relative) {
@@ -2127,10 +2137,10 @@
 
             if (el) {
                 var style = getStyle(el);
-                var borderXSize = sumStyleValue(NULL, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);
-                var borderYSize = sumStyleValue(NULL, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
-                var marginXSize = sumStyleValue(NULL, style, NAME_MARGIN_LEFT, NAME_MARGIN_RIGHT);
-                var marginYSize = sumStyleValue(NULL, style, NAME_MARGIN_TOP, NAME_MARGIN_BOTTOM);
+                var borderXSize = sumStyleValues(NULL, style, NAME_BORDER_LEFT_WIDTH, NAME_BORDER_RIGHT_WIDTH);
+                var borderYSize = sumStyleValues(NULL, style, NAME_BORDER_TOP_WIDTH, NAME_BORDER_BOTTOM_WIDTH);
+                var marginXSize = sumStyleValues(NULL, style, NAME_MARGIN_LEFT, NAME_MARGIN_RIGHT);
+                var marginYSize = sumStyleValues(NULL, style, NAME_MARGIN_TOP, NAME_MARGIN_BOTTOM);
                 var dim = getDimensionsBy(el), dimParent = getDimensions(el[NAME_PARENT_ELEMENT]);
                 var offset = getOffset(el), scroll = getScroll(el);
 
@@ -2996,7 +3006,8 @@
     function fadeOpacity(opacity) { return {opacity: opacity}; }
 
     function scrollOptions(options) {
-        // eg: Int or {top: Int, left: Int, gap: Int, relative: Bool, speed: Int|String, easing: String}
+        // eg: Int or {top: Int, left: Int, gapTop: Int, gapLeft: Int,
+        //             noGap: Bool, relative: Bool, speed: Int|String, easing: String}
         var optionsOrig = options;
 
         options = $extend({direction: NAME_TOP}, options);
@@ -3212,23 +3223,23 @@
             scrollTo: function(options, callback) {
                 options = scrollOptions(options);
 
-                if (options[NAME_TOP]) { // gap is useful for an accurate position
-                    options[NAME_TOP] -= $float(options.gap);
-                }
-                if (options[NAME_LEFT]) {
-                    options[NAME_LEFT] -= $float(options.gap);
-                }
-
                 return this.for(function(el) {
                     // 'cos window, document or (even body, for chrome & its gangs) won't be animated so..
                     if (isRoot(el) || isRootElement(el)) {
-                        el = $getDocument(el)[NAME_SCROLLING_ELEMENT] ||
-                             $getDocument(el)[NAME_DOCUMENT_ELEMENT];
+                        el = $getDocument(el)[NAME_SCROLLING_ELEMENT] || $getDocument(el)[NAME_DOCUMENT_ELEMENT];
                     }
 
                     var properties = {};
-                    properties[NAME_SCROLL_TOP] = !$isVoid(options[NAME_TOP]) ? options[NAME_TOP] : el[NAME_SCROLL_TOP];
-                    properties[NAME_SCROLL_LEFT] = !$isVoid(options[NAME_LEFT]) ? options[NAME_LEFT] : el[NAME_SCROLL_LEFT];
+                    properties[NAME_SCROLL_TOP] = (options[NAME_TOP] != NULL) ? options[NAME_TOP] : el[NAME_OFFSET_TOP];
+                    properties[NAME_SCROLL_LEFT] = (options[NAME_LEFT] != NULL) ? options[NAME_LEFT] : el[NAME_OFFSET_LEFT];
+
+                    // manual gaps are useful for an accurate position
+                    if (options[NAME_TOP] != NULL && options.gapTop) {
+                        properties[NAME_SCROLL_TOP] -= $float(options.gapTop);
+                    }
+                    if (options[NAME_LEFT] != NULL && options.gapLeft) {
+                        properties[NAME_SCROLL_LEFT] -= $float(options.gapLeft);
+                    }
 
                     animate(el, properties, options.speed, options.easing, callback);
                 });
@@ -3255,7 +3266,19 @@
                         optionsOther[options.direction] = offset[options.direction];
                     }
 
-                    _this.scrollTo($extend(options, optionsOther), callback);
+                    options = $extend(options, optionsOther);
+
+                    // fix gaps?
+                    if (options.noGap) {
+                        if (options[NAME_TOP] != NULL && el[NAME_PARENT_ELEMENT]) {
+                            options[NAME_TOP] = options[NAME_TOP] - el[NAME_PARENT_ELEMENT][NAME_OFFSET_TOP];
+                        }
+                        if (options[NAME_LEFT] != NULL && el[NAME_PARENT_ELEMENT]) {
+                            options[NAME_LEFT] = options[NAME_LEFT] - el[NAME_PARENT_ELEMENT][NAME_OFFSET_LEFT];
+                        }
+                    }
+
+                    _this.scrollTo(options, callback);
                 }
 
                 return _this;
