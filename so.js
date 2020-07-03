@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.121.0';
+    $win.so.VERSION = '5.122.0';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -1433,6 +1433,9 @@
     });
     ['get', 'post', 'put', 'delete', 'request', 'load'].each(function(fn) {
         $[fn] = function() { return apply($.http[fn], $.http, arguments) };
+    });
+    ['isMobile', 'isTouchable'].each(function(fn) {
+        $[fn] = function() { return $.ua[fn]() };
     });
 
     // Ready things.
