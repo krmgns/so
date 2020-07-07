@@ -953,9 +953,9 @@
                 selector = toDom(selector);
             }
 
-            return this.for(function(el) {
+            var _this = this; return _this.for(function(el, i) {
                 selector.for(function(_el) {
-                    replaceChild(el[NAME_PARENT_NODE], cloneIf(opt_clone, _el), el);
+                    replaceChild(el[NAME_PARENT_NODE], _this[i] = cloneIf(opt_clone, _el), el);
                 });
             });
         },
@@ -966,8 +966,8 @@
          */
         replaceWithClone: function() {
             // 'cos im sick and tired of trying to hide mobile tab focuses..
-            return this.for(function(el) {
-                replaceChild(el[NAME_PARENT_NODE], cloneElement(el), el);
+            var _this = this; return _this.for(function(el, i) {
+                replaceChild(el[NAME_PARENT_NODE], _this[i] = cloneElement(el), el);
             });
         },
 
