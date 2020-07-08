@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.122.1';
+    $win.so.VERSION = '5.123.0';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -1198,7 +1198,7 @@
 
             return setTimeout(function() {
                 apply(fn, opt_this, toArray(fnArgs));
-            }, delay || 1);
+            }, delay || 0);
         },
         ifire: function(delay, fn, fnArgs, opt_this) {
             if (isString(delay)) {
@@ -1207,7 +1207,7 @@
 
             return setInterval(function() {
                 apply(fn, opt_this, toArray(fnArgs));
-            }, delay || 1);
+            }, delay || 0);
         },
 
         /**

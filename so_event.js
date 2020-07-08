@@ -10,7 +10,7 @@
     var PROTOTYPE = 'prototype';
 
     var $win = $.win(), $doc = $.doc();
-    var $trim = $.trim, $extend = $.extend, $for = $.for, $forEach = $.forEach,
+    var $trim = $.trim, $extend = $.extend, $for = $.for, $forEach = $.forEach, $fire = $.fire,
         $isObject = $.isObject, $isFunction = $.isFunction
 
     var Object = $win.Object, objectDefineProperty = Object.defineProperty,
@@ -358,28 +358,23 @@
 
         /**
          * Fire.
-         * @param  {String} type?
-         * @param  {Object} data?
-         * @param  {Int}    delay?
+         * @param  {String}     type?
+         * @param  {Object}     data?
+         * @param  {Int|String} delay?
          * @return {Event}
          */
         fire: function(type, data, delay) {
             var event = this.copy();
             var eventTarget = initEventTarget(event.target);
 
-            data = data || event.options.data;
-            delay = delay || event.options.delay;
-
-            $.fire(delay, function() {
-                if (!type) {
-                    eventTarget.dispatch(event, data);
-                } else {
-                    split(type, re_comma).each(function(type) {
-                        event.type = type;
-                        eventTarget.dispatch(event, data);
-                    });
-                }
-            });
+            if (!type) {
+                eventTarget.fireEvent(event, data, delay);
+            } else {
+                split(type, re_comma).each(function(type) {
+                    event.type = type;
+                    eventTarget.fireEvent(event, data, delay);
+                });
+            }
 
             return event;
         },
@@ -488,26 +483,37 @@
         },
 
         /**
-         * Dispatch.
-         * @param  {Event}  event
-         * @param  {Object} data?
+         * Fire event.
+         * @param  {Event}      event
+         * @param  {Object}     data?
+         * @param  {Int|String} delay?
          * @return {void}
          */
-        dispatch: function(event, data) {
+        fireEvent: function(event, data, delay) {
             var target = prepareEventTarget(this.target);
 
             if (target.$events[event.type]) {
                 $for(target.$events[event.type], function(event) {
+                    data = data || event.options.data;
+                    delay = delay || event.options.delay;
+
                     if (data) { // call-time data (eg: fire("foo", {data: {a: 1, b: ..}}))
                         event.event.data = event.event.data || {};
                         for (var key in data) {
                             event.event.data[key] = data[key];
                         }
                     }
-                    event.fn(event.event);
+
+                    $fire(delay, function() {
+                        event.fn(event.event);
+                    });
                 });
             } else if ($isFunction(target[event.type])) { // natives
-                target[event.type](event.event);
+                delay = delay || event.options.delay;
+
+                $fire(delay, function() {
+                    target[event.type](event.event);
+                });
             } else {
                 warn('No "'+ event.type +'" to fire.');
             }
