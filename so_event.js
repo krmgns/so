@@ -35,7 +35,6 @@
         DeviceMotionEvent: 'devicemotion', DeviceOrientationEvent: 'deviceorientation'
     };
     var re_typesFix = /^(UI|Mouse|Mutation|HTML)Event$/i;
-    var re_typesStandard = $.re('('+ Object.values(types).join('|') +')', 'i');
     var re_comma = /\s*,\s*/;
 
     var domLevel = $doc.adoptNode ? 3 : 2;
@@ -281,7 +280,6 @@
         _this.id = ++_id;
         _this.fired = 0;
         _this.cancalled = FALSE;
-        _this.custom = (event.eventClass == 'CustomEvent') || !re_typesStandard.test(type);
     }
 
     $extend(Event[PROTOTYPE], {
@@ -564,7 +562,7 @@
         var args = prepareArguments(fn, options, target), event;
         split(type, re_comma).each(function(type) {
             event = initEvent(type, args.fn, args.options);
-            event.fire(type);
+            event.fire(type, args.options.data, args.options.delay);
         });
     }
 

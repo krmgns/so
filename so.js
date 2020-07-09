@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.123.0';
+    $win.so.VERSION = '5.123.1';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -166,7 +166,9 @@
 
     // object extender
     function extend() {
-        var args = toArray(arguments), source, target = args.shift() || {}, k;
+        var args = toArray(arguments),
+            target = args.shift() || {}, // first is target & return
+            source, k;
 
         while (len(args)) {
             source = args.shift();
