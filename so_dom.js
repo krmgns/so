@@ -46,8 +46,6 @@
     var re_tag = /^<([\w-]+)[^>]*>/i;
     var re_tagVoid = /^area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr$/i;
 
-    var _id = 0;
-
     // general helpers
     function test(s, re) {
         return re.test(s);
@@ -55,6 +53,14 @@
     function split(s, re) {
         return $trim(s).split(re);
     }
+    function pick(key, object, value) {
+        if (key in object) {
+            value = $string(object[key]);
+            delete object[key];
+        }
+        return value;
+    }
+
     function querySelector(root, selector) {
         return root.querySelector(selector);
     }
@@ -542,14 +548,6 @@
         node.insertBefore(childNode, childNodeBefore);
     }
 
-    function pick(key, object, value) {
-        if (key in object) {
-            value = $string(object[key]);
-            delete object[key];
-        }
-        return value;
-    }
-
     function create(content, doc, attributes, tag) {
         // all possible, attributes can be mixed width content and event listeners
         // ("<a/>", ...attributes) or ("<a>Click!</a>", ...attributes)
@@ -648,6 +646,10 @@
         return $array(fragment[NAME_CHILD_NODES]);
     }
 
+    function createFor(el, content, attributes) {
+        return create(content, $getDocument(el), attributes);
+    }
+
     function createElement(doc, tag, properties) {
         var el = (doc || $doc).createElement(tag);
 
@@ -660,18 +662,35 @@
         return el;
     }
 
+    function cleanElement(el, opt_self, _child) {
+        if (!$isFalse(opt_self)) {
+            el.$data = el.$events = el.$animation = NULL;
+        }
+
+        while (_child = el[NAME_FIRST_CHILD]) {
+            if (isElementNode(_child)) {
+                cleanElement(_child);
+            }
+            removeChild(el, _child);
+        }
+
+        return el;
+    }
+
+    var cloneId = 0,
+        cloneIdAttr = soAttrPrefix +'clone-id';
+
     function cloneElement(el, opt_deep) {
         var clone = el.cloneNode();
 
         // clone.$cloneOf = el; // @debug
         if (isElementNode(el)) {
-            setAttr(clone, soAttrPrefix +'clone', ++_id, FALSE);
+            setAttr(clone, cloneIdAttr, ++cloneId, FALSE);
         }
 
         if (!$isFalse(opt_deep)) {
-            if (el.$data) {
-                clone.$data = el.$data;
-            }
+            clone.$data = el.$data || {};
+            clone.$data[cloneIdAttr] = cloneId;
 
             if (el.$events) {
                 $for(el.$events, function(events) {
@@ -691,30 +710,10 @@
         return clone;
     }
 
-    function cleanElement(el, opt_self) {
-        if (!$isFalse(opt_self)) {
-            el.$data = el.$events = el.$animation = NULL;
-        }
-
-        var child;
-        while (child = el[NAME_FIRST_CHILD]) {
-            if (isElementNode(child)) {
-                cleanElement(child);
-            }
-            removeChild(el, child);
-        }
-
-        return el;
-    }
-
-    function createFor(el, content, attributes) {
-        return create(content, $getDocument(el), attributes);
-    }
-
-    function cloneIf(opt_clone, node) { // note: inserts only once without 'clone'
+    function cloneIf(opt_clone, node) { // note: inserts only once without clone id
         if ($isFalse(opt_clone)) {
             // pass
-        } else if ($isTrue(opt_clone) && !hasAttr(node, soAttrPrefix +'clone')) {
+        } else if ($isTrue(opt_clone) && !hasAttr(node, cloneIdAttr)) {
             node = cloneElement(node);
         }
         return node;
@@ -1861,15 +1860,11 @@
     }
 
     function isVisibleParent(el) {
-        var parent = (el && el[NAME_PARENT_ELEMENT]);
-
+        var parent = el && el[NAME_PARENT_ELEMENT];
         while (parent) {
-            if (isVisible(parent)) {
-                return TRUE;
-            }
+            if (isVisible(parent)) return TRUE;
             parent = parent[NAME_PARENT_ELEMENT];
         }
-
         return FALSE;
     }
 
@@ -2684,13 +2679,14 @@
     toDomPrototype(Dom, {
         /**
          * Data.
-         * @param  {String|Object} key
-         * @param  {Any}           value
+         * @param  {String|Object} key?
+         * @param  {Any}           value?
          * @return {Any}
          */
         data: function(key, value) {
-            return $isObject(key) ? this.setData(key) :
-                $isDefined(value) ? this.setData(key, value) : this.getData(key);
+            return $isObject(key) ? this.setData(key)
+                 : $isDefined(value) ? this.setData(key, value)
+                 : $isDefined(key) ? this.getData(key) : this.getData('*');
         },
 
         /**
