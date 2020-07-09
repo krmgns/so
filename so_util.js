@@ -13,7 +13,7 @@
     var Math = $win.Math, JSON = $win.JSON;
     // var MAX_INT = Number.MAX_SAFE_INTEGER || Math.pow(2, 53) - 1, MAX_FLOAT = Number.MAX_VALUE;
 
-    var $int = $.int, $float = $.float, $string = $.string;
+    var $int = $.int, $float = $.float, $trim = $.trim, $string = $.string;
 
     var re_rgb = /.*rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(.*))?\)/i;
     var re_url = /^((\w+):)?(\/\/(([\w-]+)?(:([^@]+))?@)?([^/?:]+)(:(\d+))?)?([/]?([^/?#][^?#]*)?)?(\?([^#]*))?(#(.*)$)?/;
@@ -112,7 +112,7 @@
          * @return {Object|String|undefined}
          */
         parseRgb: function(input, opt_hex) {
-            input = $string(input);
+            input = $trim(input);
             if (!input.has('rgb')) {
                 return;
             }
@@ -194,13 +194,6 @@
         urlDecode: function(input) { return decodeURIComponent(input); },
 
         /**
-         * Json (alias of jsonEncode()).
-         */
-        json: function() {
-            return this.jsonEncode.apply(NULL, arguments);
-        },
-
-        /**
          * Json encode.
          * @param  {Any}            input
          * @param  {Function|Array} replacer?
@@ -228,10 +221,18 @@
         /**
          * To style name.
          * @param  {String} name
+         * @param  {Bool}   opt_uppers?
          * @return {String}
          */
-        toStyleName: function(name) {
-            return (name = $string(name)), name.has('-') ? name.toCamelCase('-') : name;
+        toStyleName: function(name, opt_uppers, _re /* @local */) {
+            name = $trim(name);
+            if (!opt_uppers) {
+                return (_re = /- */), name.has(_re) ? name.toCamelCase(_re) : name;
+            } else {
+                return (_re = /[A-Z]/), name.has(_re) ? name.replaceAll(_re, function(char) {
+                    return '-'+ char.lower()
+                }) : name;
+            }
         }
     };
 

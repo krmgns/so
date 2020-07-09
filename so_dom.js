@@ -2214,19 +2214,19 @@
     function getAttr(el, name) {
         return hasAttr(el, name) ? el.getAttribute(name) : UNDEFINED;
     }
-    function getAttrs(el, opt_namesOnly) {
-        var ret = $array(el && el.attributes);
+    function getAttrs(el, opt_namesOnly, _ret) {
+        _ret = $array(el && el.attributes);
         if (opt_namesOnly) {
-            ret = ret.map(function(attr) { return attr[NAME_NAME] });
+            _ret = _ret.map(function(attr) { return attr[NAME_NAME] });
         }
-        return ret;
+        return _ret;
     }
     function removeAttr(el, name) {
         if (isElementNode(el)) el.removeAttribute(name);
     }
 
-    function toDataAttrName(name) {
-        return 'data-'+ $trim(name);
+    function toDataAttrName(name, _re) {
+        return 'data-'+ $toStyleName(name, TRUE);
     }
 
     // input helpers
