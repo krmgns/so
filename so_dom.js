@@ -713,7 +713,8 @@
     function cloneIf(opt_clone, node) { // note: inserts only once without clone id
         if ($isFalse(opt_clone)) {
             // pass
-        } else if ($isTrue(opt_clone) && !hasAttr(node, cloneIdAttr)) {
+        } else if ($isTrue(opt_clone) && !hasAttr(node, cloneIdAttr)
+                                      && !hasData(node, cloneIdAttr)) {
             node = cloneElement(node);
         }
         return node;
@@ -2246,7 +2247,7 @@
          */
         attr: function(name, value) {
             return $isObject(name) || $isDefined(value) || $isNull(value)
-                ? this.setAttr(name, value) : this.getAttr(name);
+                 ? this.setAttr(name, value) : this.getAttr(name);
         },
 
         /**
@@ -2386,11 +2387,11 @@
          * So attr (so:* attributes).
          * @param  {String} name
          * @param  {String} value?
-         * @return {String?|this}
+         * @return {String|this|undefined}
          */
         soAttr: function(name, value) {
             return $isUndefined(value) ? this.attr(soAttrPrefix + name) // get
-                : this.attr(soAttrPrefix + name, value); // set or remove if null
+                 : this.attr(soAttrPrefix + name, value); // set or remove if null
         }
     });
 
@@ -2645,6 +2646,11 @@
         el.$data = el.$data || {};
     }
 
+    function hasData(el, key) {
+        return $bool(el && $isDefined(key) ? $isDefined(getData(el, key))
+                                           : !$.empty(getData(el, '*')))
+    }
+
     function setData(el, key, value) {
         if (el) {
             checkData(el);
@@ -2695,9 +2701,7 @@
          * @return {Bool}
          */
         hasData: function(key) {
-            var el = this[0];
-
-            return (el && $isDefined(key ? getData(el, key) : getData(el, '*')));
+            return hasData(this[0], key);
         },
 
         /**
