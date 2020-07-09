@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.124.0';
+    $win.so.VERSION = '5.125.0';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -1187,13 +1187,17 @@
 
         /**
          * Fire & ifire.
-         * @param  {Int|Float|String} delay (ms)
-         * @param  {Function}         fn
+         * @param  {Int|Float|String} delay (ms) or id
+         * @param  {Function|void}    fn
          * @param  {Array}            fnArgs?
          * @param  {Object}           opt_this?
-         * @return {Int}
+         * @return {Int|undefined}
          */
         fire: function(delay, fn, fnArgs, opt_this) {
+            if (delay && isVoid(fn)) { // clear
+                return clearTimeout(delay);
+            }
+
             if (isString(delay)) {
                 delay = toMilliseconds(delay);
             }
@@ -1203,6 +1207,10 @@
             }, delay || 0);
         },
         ifire: function(delay, fn, fnArgs, opt_this) {
+            if (delay && isVoid(fn)) { // clear
+                return clearInterval(delay);
+            }
+
             if (isString(delay)) {
                 delay = toMilliseconds(delay);
             }
