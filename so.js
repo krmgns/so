@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.125.0';
+    $win.so.VERSION = '5.125.1';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -1370,7 +1370,7 @@
                 return input.map(fn);
             }
             if (isObject(input, TRUE)) {
-                var ret;
+                var ret = {};
                 $.forEach(input, function(key, value, i) {
                     ret[key] = fn(value, key, i, input);
                 });

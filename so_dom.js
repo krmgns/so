@@ -2390,8 +2390,17 @@
          * @return {String|this|undefined}
          */
         soAttr: function(name, value) {
-            return $isUndefined(value) ? this.attr(soAttrPrefix + name) // get
-                 : this.attr(soAttrPrefix + name, value); // set or remove if null
+            if (!$isObject(name) && !$isDefined(value)) {
+                return this.attr(soAttrPrefix + name);
+            }
+
+            var attrs = toKeyValue(name, value);
+            $forEach(attrs, function(name, value) {
+                attrs[soAttrPrefix + name] = value;
+                delete attrs[name];
+            });
+
+            return this.attr(attrs);
         }
     });
 
