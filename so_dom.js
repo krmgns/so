@@ -40,6 +40,7 @@
         $isNumber = $.isNumber, $isArray = $.isArray, $isObject = $.isObject, $isFunction = $.isFunction,
         $isTrue = $.isTrue, $isFalse = $.isFalse, $isWindow = $.isWindow, $isDocument = $.isDocument,
         $getWindow = $.win, $getDocument = $.doc;
+    var warn = console.warn;
 
     var re_space = /\s+/g;
     var re_comma = /\s*,\s*/;
@@ -664,7 +665,7 @@
 
     function cleanElement(el, opt_self, _child) {
         if (!$isFalse(opt_self)) {
-            el.$data = el.$events = el.$animation = NULL;
+            el.$animation = el.$data = el.$observer = el.$events = NULL;
         }
 
         while (_child = el[NAME_FIRST_CHILD]) {
@@ -691,6 +692,11 @@
         if (!$isFalse(opt_deep)) {
             clone.$data = el.$data || {};
             clone.$data[cloneIdAttr] = cloneId;
+
+            if (el.$observer) {
+                clone.$observer = el.$observer;
+                clone.$observer.observe(clone, el.$observer.options);
+            }
 
             if (el.$events) {
                 $for(el.$events, function(events) {
@@ -2993,6 +2999,34 @@
             }
         });
     }
+
+    // dom: observer
+    toDomPrototype(Dom, {
+        observe: function(options) {
+            try { // safe for MutationObserver support
+                var el = this[0];
+                if (el && isElementNode(el)) {
+                    el.$observer = new MutationObserver(function(ms) {
+                        $for(ms, function(m) {
+                            $forEach(options, function(type, fn) {
+                                if (m.type == type) {
+                                    fn(m);
+                                }
+                            });
+                        });
+                    });
+                    el.$observer.options = options;
+                    el.$observer.observe(el, options);
+                }
+            } catch (e) { warn(e) }
+        },
+        unobserve: function() {
+            var el = this[0];
+            if (el && isElementNode(el)) {
+                el.$observer && el.$observer.disconnect();
+            }
+        }
+    });
 
     function fadeCallback(callback) {
         if ($isTrue(callback)) { // remove element after fading out
