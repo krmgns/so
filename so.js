@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.126.0';
+    $win.so.VERSION = '5.127.0';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -62,9 +62,9 @@
 
     // faster trim for space only purposes
     function trim(input, opt_side) {
-        return (input != NULL) ? (''+ input).replace(
+        return (input == NULL) ? ('') : (''+ input).replace(
             opt_side ? (opt_side == 1 ? re_trimLeft : re_trimRight) : re_trim, ''
-        ) : '';
+        );
     }
 
     // convert helpers

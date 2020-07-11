@@ -21,7 +21,7 @@
         NAME_HEIGHT = 'height', NAME_INNER_HEIGHT = 'innerHeight', NAME_OUTER_HEIGHT = 'outerHeight', NAME_OFFSET_HEIGHT = 'offsetHeight',
         NAME_TOP = 'top', NAME_OFFSET_TOP = 'offsetTop', NAME_SCROLL_TOP = 'scrollTop',
         NAME_LEFT = 'left', NAME_OFFSET_LEFT = 'offsetLeft', NAME_SCROLL_LEFT = 'scrollLeft',
-        NAME_INNER_HTML = 'innerHTML', NAME_TEXT_CONTENT = 'textContent',
+        NAME_INNER_HTML = 'innerHTML', NAME_OUTER_HTML = 'outerHTML', NAME_TEXT_CONTENT = 'textContent',
         NAME_ID = 'id', NAME_NAME = 'name', NAME_VALUE = 'value', NAME_TEXT = 'text',
         NAME_STYLE = 'style', NAME_CLASS = 'class', NAME_CLASS_NAME = 'className', NAME_TAG_NAME = 'tagName',
         NAME_TYPE = 'type', NAME_OPTIONS = 'options', NAME_SELECTED_INDEX = 'selectedIndex', NAME_HIDDEN = 'hidden',
@@ -33,7 +33,7 @@
     var $doc = $.doc();
     var $event = $.event, $toStyleName = $.util.toStyleName, $json = $.util.json;
     var $re = $.re, $rid = $.rid, $array = $.array, $each = $.each, $for = $.for, $forEach = $.forEach;
-    var $len = $.len, $trim = $.trim, $extend = $.extend,
+    var $len = $.len, $trim = $.trim, $extend = $.extend, $fire = $.fire,
         $int = $.int, $float = $.float, $string = $.string, $bool = $.bool,
         $isVoid = $.isVoid, $isNull = $.isNull, $isNulls = $.isNulls, $isDefined = $.isDefined,
         $isUndefined = $.isUndefined, $isString = $.isString, $isNumeric = $.isNumeric,
@@ -306,8 +306,10 @@
          * @param  {String|Object} selector
          * @return {Dom|this}
          */
-        find: function(selector) {
-            return this[0] ? toDom(selector, this[0], TRUE) : this;
+        find: function(selector, _this /* local */) {
+            return (_this = this),
+                    _this[0] ? toDom(selector, _this[0], TRUE)
+                             : _this;
         },
 
         /**
@@ -315,8 +317,10 @@
          * @param  {String|Object} selector
          * @return {Dom|this}
          */
-        findAll: function(selector) {
-            return this[0] ? toDom(selector, this[0]) : this;
+        findAll: function(selector, _this /* local */) {
+            return (_this = this),
+                    _this[0] ? toDom(selector, _this[0])
+                             : _this;
         },
 
         /**
@@ -414,7 +418,7 @@
         /**
          * El.
          * @param  {Int} i?
-         * @return {Element}
+         * @return {Node}
          */
         el: function(i) {
             return this[(i || 1) - 1]; // 1 = first, not 0
@@ -423,7 +427,7 @@
         /**
          * Els.
          * @param  {Int} ...arguments
-         * @return {Element[]}
+         * @return {Node[]}
          */
         els: function() {
             var el, els = [], _this = this, args = $array(arguments);
@@ -488,6 +492,26 @@
             i = $int(i);
             return toDom(this.filter(function(node, _i) {
                 return !((_i + 1) % i) && i;
+            }));
+        },
+
+        /**
+         * Odd.
+         * @return {Dom}
+         */
+        odd: function() {
+            return toDom(this.filter(function(el, i) {
+                return (i & 1);
+            }));
+        },
+
+        /**
+         * Even.
+         * @return {Dom}
+         */
+        even: function() {
+            return toDom(this.filter(function(el, i) {
+                return !(i & 1);
             }));
         },
 
@@ -729,9 +753,9 @@
     // dom: modifiers
     toDomPrototype(Dom, {
         /**
-         * Colne.
+         * Clone.
          * @param  {Bool} opt_deep?
-         * @return {this}
+         * @return {Dom}
          */
         clone: function(opt_deep) {
             var clones = [];
@@ -981,7 +1005,7 @@
          * Wrap.
          * @param  {String|Object|this} content
          * @param  {Object}             opt_attributes?
-         * @return {this}
+         * @return {Dom}
          */
         wrap: function(content, opt_attributes) {
             var el = this[0], elParent = el && el[NAME_PARENT_NODE];
@@ -1007,7 +1031,7 @@
         /**
          * Unwrap
          * @param  {Bool} opt_remove?
-         * @return {this}
+         * @return {Dom}
          */
         unwrap: function(opt_remove) {
             var el = this[0], elParent = el && el[NAME_PARENT_NODE],
@@ -1049,7 +1073,8 @@
          * @return {Any|this}
          */
         property: function(name, value) {
-            return $isDefined(value) ? this.setProperty(name, value) : this.getProperty(name);
+            return $isDefined(value) ? this.setProperty(name, value)
+                                     : this.getProperty(name);
         },
 
         /**
@@ -1088,15 +1113,22 @@
 
         /**
          * Get property.
-         * @param  {String[]} names
+         * @param  {String|String[]} names?
          * @return {Object}
          */
         getProperties: function(names) {
             var el = this[0], ret = {};
 
             if (el) {
-                names = names || (function(names, name) {
-                    for (name in el) names.push(name); return names;
+                if ($isString(names)) {
+                    names = split(names, re_comma)
+                }
+
+                names = names || (function(names, name) { // all names
+                    for (name in el) {
+                        names.push(name);
+                    }
+                    return names;
                 })([]);
 
                 names.each(function(name) {
@@ -1111,14 +1143,14 @@
          * Set (alias of setProperty()).
          */
         set: function(name, value) {
-            return this.setProperty(name, value);
+            return this.property(name, value);
         },
 
         /**
          * Get (alias of getProperty()).
          */
         get: function(name) {
-            return this.getProperty(name);
+            return this.property(name);
         }
     });
 
@@ -1130,7 +1162,8 @@
          * @return {String|this}
          */
         text: function(input) {
-            return $isDefined(input) ? this.setText(input) : this.getText();
+            return $isDefined(input) ? this.setText(input)
+                                     : this.getText();
         },
 
         /**
@@ -1158,7 +1191,8 @@
          * @return {String|Any}
          */
         html: function(input) {
-            return $isUndefined(input) || $isTrue(input) ? this.getHtml(input) : this.setHtml(input);
+            return $isUndefined(input) || $isTrue(input)
+                 ? this.getHtml(input) : this.setHtml(input);
         },
 
         /**
@@ -1178,7 +1212,8 @@
          * @return {String}
          */
         getHtml: function(opt_outer) {
-            return opt_outer ? __(this, 'outerHTML') : __(this, NAME_INNER_HTML);
+            return opt_outer ? __(this, NAME_OUTER_HTML)
+                             : __(this, NAME_INNER_HTML);
         },
 
         /**
@@ -1237,25 +1272,25 @@
 
     function toAllSelector(selector) {
         return ((selector = $trim(selector)) && (selector[0] != '>'))
-            ? '>'+ selector : selector;
+             ? '>'+ selector : selector;
     }
 
     // dom: walkers
     toDomPrototype(Dom, {
         /**
          * Not.
-         * @param  {String|HTMLElement|Int ...arguments} selector
+         * @param  {String|Node|Int ...arguments} selector
          * @param  {Bool} opt_useParent?
-         * @return {this}
+         * @return {Dom}
          */
         not: function(selector, opt_useParent) {
             var _this = this, ret = [], args;
 
             if ($isString(selector)) {
                 // eg: $.dom("p").not(".red")
-                ret = intersect(_this.all(),
-                    $isFalse(opt_useParent) ? toDom(selector).all()
-                        : _this.parent().$$(toAllSelector(selector)).all()
+                ret = intersect(_this.all(), $isFalse(opt_useParent) // @default=true
+                    ? toDom(selector).all()
+                    : _this.parent().$$(toAllSelector(selector)).all()
                 );
             } else if (isDom(selector)) {
                 // eg: $.dom("p").not($element)
@@ -1276,28 +1311,8 @@
         },
 
         /**
-         * Odd.
-         * @return {this}
-         */
-        odd: function() {
-            return toDom(this.filter(function(el, i) {
-                return (i & 1);
-            }));
-        },
-
-        /**
-         * Even.
-         * @return {this}
-         */
-        even: function() {
-            return toDom(this.filter(function(el, i) {
-                return !(i & 1);
-            }));
-        },
-
-        /**
          * Parent.
-         * @return {this}
+         * @return {Dom}
          */
         parent: function() {
             return toDom(__(this, NAME_PARENT_NODE));
@@ -1305,7 +1320,7 @@
 
         /**
          * Parents.
-         * @return {this}
+         * @return {Dom}
          */
         parents: function() {
             return toDom(walk(this[0], NAME_PARENT_NODE));
@@ -1314,7 +1329,7 @@
         /**
          * Siblings.
          * @param  {Int|String} selector?
-         * @return {this}
+         * @return {Dom}
          */
         siblings: function(selector) {
             var el = this[0], ret;
@@ -1322,7 +1337,9 @@
             if (el) {
                 ret = noIntersect(el, walk(el[NAME_PARENT_NODE], NAME_CHILDREN));
                 if (ret.len() && (selector = toAllSelector(selector))) {
-                    ret = intersect(ret, noIntersect(el, toDom(el[NAME_PARENT_NODE]).$$(selector).all()), TRUE);
+                    ret = intersect(ret, noIntersect(
+                        el, toDom(el[NAME_PARENT_NODE]).$$(selector).all()
+                    ), TRUE);
                 }
             }
 
@@ -1331,7 +1348,7 @@
 
         /**
          * Children.
-         * @return {this}
+         * @return {Dom}
          */
         children: function() {
             return toDom($array(__(this, NAME_CHILDREN)));
@@ -1339,7 +1356,7 @@
 
         /**
          * First child.
-         * @return {this}
+         * @return {Dom|this}
          */
         firstChild: function() {
             return this.$('> :first');
@@ -1347,7 +1364,7 @@
 
         /**
          * Last child.
-         * @return {this}
+         * @return {Dom|this}
          */
         lastChild: function() {
             return this.$('> :last');
@@ -1356,7 +1373,7 @@
         /**
          * Nth child.
          * @param  {Int} i
-         * @return {this}
+         * @return {Dom|this}
          */
         nthChild: function(i) {
             return this.$('> :nth('+ i +')');
@@ -1364,10 +1381,11 @@
 
         /**
          * Comments.
-         * @return {this}
+         * @return {Dom}
          */
         comments: function() {
             var el = this[0], node, nodes = [], i = 0;
+
             if (el) {
                 while (node = el[NAME_CHILD_NODES][i++]) {
                     if (node[NAME_NODE_TYPE] === 8) {
@@ -1375,12 +1393,13 @@
                     }
                 }
             }
+
             return toDom(nodes);
         },
 
         /**
          * Prev.
-         * @return {this}
+         * @return {Dom}
          */
         prev: function() {
             return toDom(__(this, NAME_PREVIOUS_ELEMENT_SIBLING));
@@ -1389,7 +1408,7 @@
         /**
          * Prev all.
          * @param  {String} selector?
-         * @return {this}
+         * @return {Dom}
          */
         prevAll: function(selector) {
             var el = this[0], ret = [];
@@ -1397,7 +1416,9 @@
             if (el) {
                 ret = walk(el, NAME_PREVIOUS_ELEMENT_SIBLING).reverse();
                 if (ret.len() && (selector = toAllSelector(selector))) {
-                    ret = intersect(ret, toDom(el[NAME_PARENT_NODE]).$$(selector).all(), TRUE);
+                    ret = intersect(
+                        ret, toDom(el[NAME_PARENT_NODE]).$$(selector).all()
+                    , TRUE);
                 }
             }
 
@@ -1406,7 +1427,7 @@
 
         /**
          * Next.
-         * @return {this}
+         * @return {Dom}
          */
         next: function() {
             return toDom(__(this, NAME_NEXT_ELEMENT_SIBLING));
@@ -1415,7 +1436,7 @@
         /**
          * Next all.
          * @param  {String} selector?
-         * @return {this}
+         * @return {Dom}
          */
         nextAll: function(selector) {
             var el = this[0], ret = [];
@@ -1423,7 +1444,9 @@
             if (el) {
                 ret = walk(el, NAME_NEXT_ELEMENT_SIBLING);
                 if (ret.len() && (selector = toAllSelector(selector))) {
-                    ret = intersect(ret, toDom(el[NAME_PARENT_NODE]).$$(selector).all(), TRUE);
+                    ret = intersect(
+                        ret, toDom(el[NAME_PARENT_NODE]).$$(selector).all()
+                    , TRUE);
                 }
             }
 
@@ -1516,7 +1539,7 @@
         /**
          * Get window.
          * @param  {Bool} opt_contentOf?
-         * @return {this}
+         * @return {Dom}
          */
         getWindow: function(opt_contentOf, el /* @internal */) {
             return toDom((el = this[0]) && (opt_contentOf ? el.contentWindow : $getWindow(el)));
@@ -1525,7 +1548,7 @@
         /**
          * Get document.
          * @param  {Bool} opt_contentOf?
-         * @return {this}
+         * @return {Dom}
          */
         getDocument: function(opt_contentOf, el /* @internal */) {
             return toDom((el = this[0]) && (opt_contentOf ? el.contentDocument : $getDocument(el)));
@@ -1726,10 +1749,10 @@
          */
         style: function(name, value) {
             return $isNull(name) || $isNulls(name)
-                ? this.removeAttr(NAME_STYLE) : $isNull(value) || $isNulls(value)
-                ? this.removeStyle(name) : $isString(value) || $isNumber(value) || $isObject(name)
-                    || (name && name.has(':')) /* eg: 'color:red' */
-                ? this.setStyle(name, value) : this.getStyle(name, value /* or opt_convert */);
+                 ? this.removeAttr(NAME_STYLE) : $isNull(value) || $isNulls(value)
+                 ? this.removeStyle(name) : $isString(value) || $isNumber(value) || $isObject(name)
+                     || (name && name.has(':')) /* eg: 'color:red' */
+                 ? this.setStyle(name, value) : this.getStyle(name, value /* or opt_convert */);
         },
 
         /**
@@ -1819,6 +1842,7 @@
          */
         getCssStyle: function(name) {
             var el = this[0], ret = {};
+
             if (el) {
                 ret = toStyleObject(getCssStyle(el));
                 return name ? ret[name] || '' : ret;
@@ -1832,6 +1856,7 @@
          */
         getComputedStyle: function(name) {
             var el = this[0], ret = {};
+
             if (el) {
                 ret = toStyleObject(getComputedStyle(el));
                 return name ? ret[name] || '' : ret;
@@ -1846,7 +1871,7 @@
         removeStyle: function(name) {
             var _this = this;
 
-            if (name == '*') {
+            if (name == '*') { // all
                 _this.attr(NAME_STYLE, '');
             } else {
                 name = split(name, re_comma);
@@ -2173,16 +2198,17 @@
          * @return {Bool|this}
          */
         hidden: function(opt_value) {
-            var el = this[0];
+            var _this = this, el = _this[0];
 
             if (isRoot(el)) { // discard set
                 return $bool($doc[NAME_HIDDEN]);
             }
 
-            return $isUndefined(opt_value) ? hasAttr(el, NAME_HIDDEN) : setAttr(el, NAME_HIDDEN,
-                $bool(opt_value) ? '' // set
-                                 : NULL // unset
-            ), this;
+            $isUndefined(opt_value)
+                 ? hasAttr(el, NAME_HIDDEN)
+                 : setAttr(el, NAME_HIDDEN, $bool(opt_value) ? '' /* set */ : NULL /* unset */)
+
+            return _this;
         },
 
         /**
@@ -2330,7 +2356,7 @@
             name = split(name, re_comma);
 
             return this.for(function(el) {
-                $each(name[0] != '*' ? name : getAttrs(el, TRUE), function(name) {
+                $each((name[0] != '*' ? name : getAttrs(el, TRUE)), function(name) {
                     removeAttr(el, name);
                 });
             });
@@ -2346,7 +2372,8 @@
             name = split(name, re_comma);
 
             return this.for(function(el) {
-                hasAttr(el, name) ? removeAttr(el, name) : setAttr(el, name, !$isVoid(value) ? value : '');
+                !hasAttr(el, name) ? setAttr(el, name, (!$isVoid(value) ? value : ''))
+                                   : removeAttr(el, name);
             });
         },
 
@@ -2357,14 +2384,31 @@
             if ($isString(name)) {
                 name = toDataAttrName(name);
             } else if ($isObject(name)) {
-                var names = {};
+                var tmp = {};
                 $forEach(name, function(key, value) {
-                    names[toDataAttrName(key)] = value;
+                    tmp[toDataAttrName(key)] = value;
                 });
-                name = names;
+                name = tmp;
             }
 
             return this.attr(name, value);
+        },
+
+        /**
+         * Set data attr.
+         * @param {String|Object} name
+         * @param {Any}           value
+         */
+        setDataAttr: function(name, value) {
+            return this.dataAttr(name, value);
+        },
+
+        /**
+         * Get data attr.
+         * @param {String|Object} name
+         */
+        getDataAttr: function(name) {
+            return this.dataAttr(name);
         },
 
         /**
@@ -2385,7 +2429,7 @@
                         return toDataAttrName(name);
                     });
                 }
-                name.each(function(name) { removeAttr(el, name); });
+                name.each(function(name) { removeAttr(el, name) });
             });
         },
 
@@ -2397,7 +2441,7 @@
          */
         soAttr: function(name, value) {
             if (!$isObject(name) && !$isDefined(value)) {
-                return this.attr(soAttrPrefix + name);
+                return this.attr(soAttrPrefix + name); // get
             }
 
             var attrs = toKeyValue(name, value);
@@ -2406,7 +2450,7 @@
                 delete attrs[name];
             });
 
-            return this.attr(attrs);
+            return this.attr(attrs); // set
         }
     });
 
@@ -2418,7 +2462,8 @@
          * @return {String|this|undefined}
          */
         value: function(value) {
-            return $isDefined(value) ? this.setValue(value) : this.getValue();
+            return $isDefined(value) ? this.setValue(value)
+                                     : this.getValue();
         },
 
         /**
@@ -2500,7 +2545,7 @@
          * @return {String|undefined|this}
          */
         id: function(id) {
-            return $isDefined(id) ? this.setAttr(NAME_ID, id) : this.getAttr(NAME_ID);
+            return this.attr(NAME_ID, id);
         },
 
         /**
@@ -2509,13 +2554,13 @@
          * @return {String|undefined|this}
          */
         name: function(name) {
-            return $isDefined(name) ? this.setAttr(NAME_NAME, name) : this.getAttr(NAME_NAME);
+            return this.attr(NAME_NAME, name);
         }
     });
 
     // class helpers
     function toClassRegExp(name) {
-        return $re('(^|\\s+)'+ name +'(\\s+|$)', NULL, '1m');
+        return $re('(^|\\s+)'+ $trim(name).replaceAll(' ', '\\s+') +'(\\s+|$)', 'g', '1m');
     }
 
     function hasClass(el, name) {
@@ -2525,14 +2570,22 @@
     function addClass(el, name) {
         split(name, re_space).each(function(name) {
             if (!hasClass(el, name)) {
-                el[NAME_CLASS_NAME] = $trim(el[NAME_CLASS_NAME] +' '+ name);
+                 setClass(el, (el[NAME_CLASS_NAME] +' '+ name));
             }
         });
     }
 
+    function setClass(el, value) {
+        el && (el[NAME_CLASS_NAME] = $trim(value));
+    }
+
+    function getClass(el) {
+        return $trim(el && el[NAME_CLASS_NAME]);
+    }
+
     function removeClass(el, name) {
         split(name, re_space).each(function(name) {
-            el[NAME_CLASS_NAME] = $trim(el[NAME_CLASS_NAME].replace(toClassRegExp(name), ' '));
+            setClass(el, getClass(el).replace(toClassRegExp(name), ' '));
         });
     }
 
@@ -2546,9 +2599,9 @@
          */
         class: function(name, option) {
             return $isUndefined(name) ? this.getClass()
-                : $isUndefined(option) ? this.addClass(name)
-                : $isNull(option) || $isNulls(option) ? this.removeClass(name)
-                : $isTrue(option) ? this.setClass(name) : this.replaceClass(name, option);
+                 : $isUndefined(option) ? this.addClass(name)
+                 : $isNull(option) || $isNulls(option) ? this.removeClass(name)
+                 : $isTrue(option) ? this.setClass(name) : this.replaceClass(name, option);
         },
 
         /**
@@ -2556,7 +2609,7 @@
          * @return {Array}
          */
         classList: function() {
-            return this.getClass().split(re_space);
+            return this.getClass().split(re_space).filter();
         },
 
         /**
@@ -2574,7 +2627,9 @@
          * @return {this}
          */
         addClass: function(name) {
-            return this.for(function(el) { addClass(el, name); });
+            return this.for(function(el) {
+                addClass(el, name);
+            });
         },
 
         /**
@@ -2583,8 +2638,12 @@
          * @return {this}
          */
         removeClass: function(name) {
-            return (name == '*') ? this.attr(NAME_CLASS, '')
-                : this.for(function(el) { removeClass(el, name); });
+            return this.for(function(el) {
+                if (name == '*') { // all
+                    name = getClass(el);
+                }
+                removeClass(el, name);
+            });
         },
 
         /**
@@ -2596,8 +2655,9 @@
         replaceClass: function(oldName, newName) {
             return this.for(function(el) {
                 !hasClass(el, oldName) ? addClass(el, newName)
-                    : el[NAME_CLASS_NAME] = $trim(el[NAME_CLASS_NAME]
-                        .replace(toClassRegExp(oldName), ' '+ $trim(newName) +' '));
+                                       : setClass(el, getClass(el).replace(
+                                             toClassRegExp(oldName), (' '+ $trim(newName) +' ')
+                                         ));
             });
         },
 
@@ -2612,11 +2672,13 @@
             var _this = this;
 
             _this.for(function(el) {
-                hasClass(el, name) ? removeClass(el, name) : addClass(el, name);
+                !hasClass(el, name) ? addClass(el, name)
+                                    : removeClass(el, name);
             });
 
             if (fn) {
-                fnDelay ? $.fire(fnDelay, fn, _this, _this) : fn(_this);
+                fnDelay ? $fire(fnDelay, fn, _this, _this)
+                        : fn(_this);
             }
 
             return _this;
@@ -2624,18 +2686,29 @@
 
         /**
          * Toggle classes.
-         * @param  {String} name1
-         * @param  {String} name2
+         * @param  {String}           name1
+         * @param  {String}           name2
+         * @param  {Function}         fn?
+         * @param  {Int|Float|String} fnDelay?
          * @return {this}
          */
-        toggleClasses: function(name1, name2) {
-            return this.for(function(el) {
+        toggleClasses: function(name1, name2, fn, fnDelay) {
+            var _this = this;
+
+            _this.for(function(el) {
                 if (hasClass(el, name1)) {
                     removeClass(el, name1), addClass(el, name2);
                 } else if (hasClass(el, name2)) {
                     removeClass(el, name2), addClass(el, name1);
                 }
             });
+
+            if (fn) {
+                fnDelay ? $fire(fnDelay, fn, _this, _this)
+                        : fn(_this);
+            }
+
+            return _this;
         },
 
         /**
@@ -2644,7 +2717,9 @@
          * @return {this}
          */
         setClass: function(name) {
-            return this.for(function(el) { el[NAME_CLASS_NAME] = name; });
+            return this.for(function(el) {
+                setClass(el, name);
+            });
         },
 
         /**
@@ -2652,7 +2727,7 @@
          * @return {String}
          */
         getClass: function() {
-            return getAttr(this[0], NAME_CLASS) || '';
+            return getClass(this[0]);
         }
     });
 
@@ -2687,7 +2762,7 @@
             key = $trim(key);
 
             var ret;
-            if (key == '*') {
+            if (key == '*') { // all
                 ret = el.$data, (opt_remove && delete el.$data);
             } else {
                 ret = el.$data[key], (opt_remove && delete el.$data[key]);
@@ -2726,7 +2801,9 @@
          * @return {this}
          */
         setData: function(key, value) {
-            return this.for(function(el) { setData(el, key, value); });
+            return this.for(function(el) {
+                setData(el, key, value);
+            });
         },
 
         /**
@@ -2735,7 +2812,7 @@
          * @return {Any}
          */
         getData: function(key) {
-            return (this[0] && getData(this[0], key));
+            return getData(this[0], key);
         },
 
         /**
@@ -2748,7 +2825,7 @@
 
             return this.for(function(el) {
                 checkData(el);
-                if (key[0] == '*') {
+                if (key[0] == '*') { // all
                     el.$data = NULL;
                 } else {
                     key.each(function(key) {
@@ -2852,8 +2929,9 @@
         return $bool(el && el[name]);
     }
     function toStateOption(el, option) {
-        return $.isBool(option) || $.isInt(option) ? option // true|false or 1|0
-            : (option && option === el[NAME_VALUE]);        // detect by value equality
+        return $.isBool(option) || $.isInt(option)
+             ? option // true|false or 1|0
+             : (option && option === el[NAME_VALUE]); // detect by value equality
     }
 
     // dom: form element states
@@ -3004,27 +3082,23 @@
     toDomPrototype(Dom, {
         observe: function(options) {
             try { // safe for MutationObserver support
-                var el = this[0];
-                if (el && isElementNode(el)) {
+                return this.for(function(el) {
                     el.$observer = new MutationObserver(function(ms) {
                         $for(ms, function(m) {
                             $forEach(options, function(type, fn) {
-                                if (m.type == type) {
-                                    fn(m);
-                                }
+                                if (m.type == type) { fn(m) }
                             });
                         });
                     });
                     el.$observer.options = options;
                     el.$observer.observe(el, options);
-                }
+                })
             } catch (e) { warn(e) }
         },
         unobserve: function() {
-            var el = this[0];
-            if (el && isElementNode(el)) {
+            return this.for(function(el) {
                 el.$observer && el.$observer.disconnect();
-            }
+            });
         }
     });
 
@@ -3075,15 +3149,15 @@
              */
             animate: function(properties, speed, easing, callback) {
                 return $isFalse(properties) // stop previous animation
-                    ? this.for(function(el, animation) {
-                        animation = el.$animation;
-                        if (animation && animation.running) {
-                            animation.stop();
-                        }
-                    })
-                    : this.for(function(el) {
-                        animate(el, properties, speed, easing, callback);
-                    });
+                     ? this.for(function(el, animation) {
+                         animation = el.$animation;
+                         if (animation && animation.running) {
+                             animation.stop();
+                         }
+                     })
+                     : this.for(function(el) {
+                         animate(el, properties, speed, easing, callback);
+                     });
             },
 
             /**
@@ -3183,7 +3257,7 @@
 
             /**
              * Toggle with.
-             * @param  {String|Node} selector
+             * @param  {String|Node} selector (with)
              * @param  {Int|String}  speed?
              * @param  {Function}    callback?
              * @return {this}
@@ -3228,7 +3302,7 @@
              * @return {this}
              */
             toggleBy: function(option, speed, callback) {
-                return this[option ? 'show' : 'hide'](speed, callback);
+                return this[(option ? 'show' : 'hide')](speed, callback);
             },
 
             /**
