@@ -2563,14 +2563,14 @@
         return $re('(^|\\s+)'+ $trim(name).replaceAll(' ', '\\s+') +'(\\s+|$)', 'g', '1m');
     }
 
-    function hasClass(el, name) {
-        return $bool(el && el[NAME_CLASS_NAME] && test(el[NAME_CLASS_NAME], toClassRegExp(name)));
+    function hasClass(el, name, value) {
+        return $bool((value = getClass(el)) && test(value, toClassRegExp(name)));
     }
 
     function addClass(el, name) {
         split(name, re_space).each(function(name) {
             if (!hasClass(el, name)) {
-                 setClass(el, (el[NAME_CLASS_NAME] +' '+ name));
+                 setClass(el, getClass(el) +' '+ name);
             }
         });
     }
@@ -2938,7 +2938,7 @@
     toDomPrototype(Dom, {
         /**
          * Checked.
-         * @param  {Bool} option?
+         * @param  {Bool|Int} option?
          * @return {Bool|this}
          */
         checked: function(option) {
@@ -2949,7 +2949,7 @@
 
         /**
          * Selected.
-         * @param  {Bool} option?
+         * @param  {Bool|Int} option?
          * @return {Bool|this}
          */
         selected: function(option) {
@@ -2960,7 +2960,7 @@
 
         /**
          * Disabled.
-         * @param  {Bool} option?
+         * @param  {Bool|Int} option?
          * @return {Bool|this}
          */
         disabled: function(option) {
@@ -2971,7 +2971,7 @@
 
         /**
          * Read-only.
-         * @param  {Bool} option?
+         * @param  {Bool|Int} option?
          * @return {Bool|this}
          */
         readOnly: function(option) {
