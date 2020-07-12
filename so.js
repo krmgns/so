@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.127.0';
+    $win.so.VERSION = '5.128.0';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -456,9 +456,9 @@
     }
 
     function toUniqUnuniq(array, opt_ununiq) {
-        return opt_ununiq
-            ? array.filter(function(src, i, stack) { return index(src, stack) !== i; })
-            : array.filter(function(src, i, stack) { return index(src, stack) === i; });
+        return !opt_ununiq
+             ? array.filter(function(src, i, array) { return index(src, array) === i; })
+             : array.filter(function(src, i, array) { return index(src, array) !== i; });
     }
 
     /**
@@ -484,11 +484,12 @@
 
         /**
          * Index.
-         * @param  {Any} src
+         * @param  {Any}  src
+         * @param  {Bool} opt_last?
          * @return {Int|null}
          */
-        index: function(src) {
-            var ret = index(src, this);
+        index: function(src, opt_last) {
+            var ret = index(src, this, opt_last);
 
             return (ret > -1) ? ret : NULL;
         },
@@ -563,7 +564,7 @@
          * @override
          */
         filter: function(fn) {
-            // prevent: "undefined not a function" error
+            // prevent "undefined not a function" error
             fn = fn || function(value) { return trim(value) };
 
             var _this = this, ret = [];
@@ -666,10 +667,11 @@
         /**
          * Index.
          * @param  {String|RegExp} src
+         * @param  {Bool}          opt_last?
          * @return {Int|null}
          */
-        index: function(src) {
-            var ret = index(src, this);
+        index: function(src, opt_last) {
+            var ret = index(src, this, opt_last);
 
             return (ret > -1) ? ret : NULL;
         },
@@ -1371,8 +1373,8 @@
             }
             if (isObject(input, TRUE)) {
                 var ret = {};
-                $.forEach(input, function(key, value, i) {
-                    ret[key] = fn(value, key, i, input);
+                $.forEach(input, function(key, value) {
+                    ret[key] = fn(value, key, input);
                 });
                 return ret;
             }
@@ -1385,7 +1387,7 @@
          * @return {Array|Object|undefined}
          */
         filter: function(input, fn) {
-            // prevent: "undefined not a function" error
+            // prevent "undefined not a function" error
             fn = fn || function(value) { return trim(value) };
 
             if (isArray(input)) {
@@ -1393,8 +1395,8 @@
             }
             if (isObject(input, TRUE)) {
                 var ret = {};
-                $.forEach(input, function(key, value, i) {
-                    if (fn(value, key, i, input)) {
+                $.forEach(input, function(key, value) {
+                    if (fn(value, key, input)) {
                         ret[key] = value;
                     }
                 });
