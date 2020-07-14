@@ -325,13 +325,22 @@
 
         /**
          * To array.
-         * @return {Array<Node>}
+         * @param  {Bool} opt_dom?
+         * @return {Node[]|Dom[]}
          */
-        toArray: function() {
+        toArray: function(opt_dom) {
             for (var i = 0, el, els = []; el = this[i]; i++) {
                 els[i] = el;
             }
-            return els;
+            return !opt_dom ? els : els.map(toDom);
+        },
+
+        /**
+         * To dom array.
+         * @return {Dom[]}
+         */
+        toDomArray: function() {
+            return this.toArray(TRUE);
         },
 
         /**
@@ -538,22 +547,21 @@
         },
 
         /**
-         * All (alias of toArray()).
+         * All, all dom (alias of toArray(), toDomArray()).
          */
         all: function() {
             return this.toArray();
         },
+        allDom: function() {
+            return this.toDomArray();
+        },
 
         /**
-         * $ (shorthand of find()).
+         * $, $$ (shorthand of find(), findAll()).
          */
         $: function(selector) {
             return this.find(selector);
         },
-
-        /**
-         * $$ (shorthand of findAll()).
-         */
         $$: function(selector) {
             return this.findAll(selector);
         }
