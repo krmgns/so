@@ -2215,25 +2215,6 @@
         },
 
         /**
-         * Hidden.
-         * @param  {Bool} opt_value?
-         * @return {Bool|this}
-         */
-        hidden: function(opt_value) {
-            var _this = this, el = _this[0];
-
-            if (isRoot(el)) { // discard set
-                return $bool($doc[NAME_HIDDEN]);
-            }
-
-            $isUndefined(opt_value)
-                 ? hasAttr(el, NAME_HIDDEN)
-                 : setAttr(el, NAME_HIDDEN, $bool(opt_value) ? '' /* set */ : NULL /* unset */)
-
-            return _this;
-        },
-
-        /**
          * Visible.
          * @return {Bool}
          */
@@ -2242,7 +2223,7 @@
         }
     });
 
-    var re_attrState = /^(?:(?:check|select|disabl)ed|readonly)$/i;
+    var re_attrState = /^(?:(?:check|select|disabl)ed|readonly|hidden)$/i;
 
     // attr helpers
     function hasAttr(el, name) {
@@ -2250,18 +2231,24 @@
     }
     function setAttr(el, name, value, opt_state /* @internal */) {
         if (isElementNode(el)) {
-            if ($isNull(value)) {
-                removeAttr(el, name);
-            } else if (name == NAME_VALUE) {
+            if (name == NAME_VALUE) {
                 el[NAME_VALUE] = value;
             } else if (name == NAME_TEXT && getTag(el) == 'option') {
                 el[NAME_TEXT] = value;
-            } else if (!$isFalse(opt_state) /* speed.. */ && (opt_state || test(name, re_attrState))) {
-                (value || $isUndefined(value))
-                    ? (el.setAttribute(name, ''), el[name] = !!value)
-                    : (removeAttr(el, name), el[name] = FALSE);
             } else {
-                el.setAttribute(name, value);
+                opt_state = (opt_state !== FALSE) // some speed..
+                    && (opt_state || test(name, re_attrState));
+
+                if (opt_state) { // set an empty attribute for states
+                    value = value ? '' : NULL;
+                }
+
+                $isNull(value) ? removeAttr(el, name)
+                               : el.setAttribute(name, value);
+
+                if (opt_state) { // set element property state
+                    el[name] = hasAttr(el, name);
+                }
             }
         }
     }
@@ -2394,7 +2381,7 @@
             name = split(name, re_comma);
 
             return this.for(function(el) {
-                !hasAttr(el, name) ? setAttr(el, name, (!$isVoid(value) ? value : ''))
+                !hasAttr(el, name) ? setAttr(el, name, ((value != NULL) ? value : ''))
                                    : removeAttr(el, name);
             });
         },
@@ -2581,12 +2568,14 @@
     });
 
     // class helpers
-    function toClassRegExp(name) {
-        return $re('(^|\\s+)'+ $trim(name).replaceAll(' ', '\\s+') +'(\\s+|$)', 'g', '1m');
+    function toClassRegExp(name, opt_cache) {
+        return $re('(^|\\s+)'+ $trim(name).replaceAll(' ', '\\s+') +'(\\s+|$)', 'g', (
+            opt_cache ? '1m' : ''
+        ));
     }
 
-    function hasClass(el, name, value) {
-        return $bool((value = getClass(el)) && test(value, toClassRegExp(name)));
+    function hasClass(el, name, opt_cache, _value) {
+        return $bool((_value = getClass(el)) && test(_value, toClassRegExp(name, opt_cache)));
     }
 
     function addClass(el, name) {
@@ -2694,8 +2683,8 @@
             var _this = this;
 
             _this.for(function(el) {
-                !hasClass(el, name) ? addClass(el, name)
-                                    : removeClass(el, name);
+                !hasClass(el, name, !!fn) ? addClass(el, name)
+                                          : removeClass(el, name);
             });
 
             if (fn) {
@@ -2718,9 +2707,9 @@
             var _this = this;
 
             _this.for(function(el) {
-                if (hasClass(el, name1)) {
+                if (hasClass(el, name1, !!fn)) {
                     removeClass(el, name1), addClass(el, name2);
-                } else if (hasClass(el, name2)) {
+                } else if (hasClass(el, name2, !!fn)) {
                     removeClass(el, name2), addClass(el, name1);
                 }
             });
@@ -2950,55 +2939,61 @@
     function getState(el, name) {
         return $bool(el && el[name]);
     }
-    function toStateOption(el, option) {
-        return $.isBool(option) || $.isInt(option)
-             ? option // true|false or 1|0
-             : (option && option === el[NAME_VALUE]); // detect by value equality
-    }
 
     // dom: form element states
     toDomPrototype(Dom, {
         /**
          * Checked.
-         * @param  {Bool|Int} option?
+         * @param  {Bool|Int|null} option?
          * @return {Bool|this}
          */
         checked: function(option) {
-            return $isVoid(option) ? getState(this[0], NAME_CHECKED) : this.for(function(el) {
-                setState(el, NAME_CHECKED, toStateOption(el, option));
+            return $isUndefined(option) ? getState(this[0], NAME_CHECKED) : this.for(function(el) {
+                setState(el, NAME_CHECKED, option);
             });
         },
 
         /**
          * Selected.
-         * @param  {Bool|Int} option?
+         * @param  {Bool|Int|null} option?
          * @return {Bool|this}
          */
         selected: function(option) {
-            return $isVoid(option) ? getState(this[0], NAME_SELECTED) : this.for(function(el) {
-                setState(el, NAME_SELECTED, toStateOption(option));
+            return $isUndefined(option) ? getState(this[0], NAME_SELECTED) : this.for(function(el) {
+                setState(el, NAME_SELECTED, option);
             });
         },
 
         /**
          * Disabled.
-         * @param  {Bool|Int} option?
+         * @param  {Bool|Int|null} option?
          * @return {Bool|this}
          */
         disabled: function(option) {
-            return $isVoid(option) ? getState(this[0], NAME_DISABLED) : this.for(function(el) {
+            return $isUndefined(option) ? getState(this[0], NAME_DISABLED) : this.for(function(el) {
                 setState(el, NAME_DISABLED, option);
             });
         },
 
         /**
-         * Read-only.
-         * @param  {Bool|Int} option?
+         * Readonly.
+         * @param  {Bool|Int|null} option?
          * @return {Bool|this}
          */
-        readOnly: function(option) {
-            return $isVoid(option) ? getState(this[0], NAME_READONLY) : this.for(function(el) {
+        readonly: function(option) {
+            return $isUndefined(option) ? getState(this[0], NAME_READONLY) : this.for(function(el) {
                 setState(el, NAME_READONLY, option);
+            });
+        },
+
+        /**
+         * Hidden.
+         * @param  {Bool|Int|null} option?
+         * @return {Bool|this}
+         */
+        hidden: function(option) {
+            return $isUndefined(option) ? getState(this[0], NAME_HIDDEN) : this.for(function(el) {
+                setState(el, NAME_HIDDEN, option);
             });
         }
     });
@@ -3275,6 +3270,28 @@
                         });
                     }
                 });
+            },
+
+            /**
+             * Toggle display.
+             * @param  {Function}         fn?
+             * @param  {Int|Float|String} fnDelay?
+             * @return {this}
+             */
+            toggleDisplay: function(fn, fnDelay) {
+                var _this = this;
+
+                _this.for(function(el) {
+                    isVisible(el) ? setStyle(el, NAME_DISPLAY, NAME_NONE)
+                                  : setStyle(el, NAME_DISPLAY, '')
+                });
+
+                if (fn) {
+                    fnDelay ? $fire(fnDelay, fn, _this, _this)
+                            : fn(_this);
+                }
+
+                return _this;
             },
 
             /**
