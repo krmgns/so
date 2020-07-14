@@ -332,7 +332,10 @@
             for (var i = 0, el, els = []; el = this[i]; i++) {
                 els[i] = el;
             }
-            return !opt_dom ? els : els.map(toDom);
+
+            return !opt_dom ? els : els.map(function(el) {
+                return toDom(el)
+            });
         },
 
         /**
