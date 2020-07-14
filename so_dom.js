@@ -1153,7 +1153,7 @@
                     return names;
                 })([]);
 
-                names.each(function(name) {
+                $each(names, function(name) {
                     ret[name] = el[name];
                 });
             }
@@ -1898,7 +1898,7 @@
             } else {
                 name = split(name, re_comma);
                 _this.for(function(el) {
-                    name.each(function(name) {
+                    $each(name, function(name) {
                         setStyle(el, name, '');
                     });
                 });
@@ -1951,7 +1951,7 @@
         el[NAME_STYLE][NAME_VISIBILITY] = ''; // for !important annots
 
         // finally, grap it!
-        properties.each(function(name) {
+        $each(properties, function(name) {
             var value = el[name];
             if (value.call) { // getBoundingClientRect() etc.
                 value = value.call(el);
@@ -2266,7 +2266,7 @@
         if (isElementNode(el)) el.removeAttribute(name);
     }
 
-    function toDataAttrName(name, _re) {
+    function toDataAttrName(name) {
         return 'data-'+ $toStyleName(name, TRUE);
     }
 
@@ -2365,7 +2365,7 @@
             name = split(name, re_comma);
 
             return this.for(function(el) {
-                $each((name[0] != '*' ? name : getAttrs(el, TRUE)), function(name) {
+                $each((name[0] == '*' ? getAttrs(el, TRUE) : name), function(name) {
                     removeAttr(el, name);
                 });
             });
@@ -2381,8 +2381,10 @@
             name = split(name, re_comma);
 
             return this.for(function(el) {
-                !hasAttr(el, name) ? setAttr(el, name, ((value != NULL) ? value : ''))
-                                   : removeAttr(el, name);
+                $each(name, function(name) {
+                    !hasAttr(el, name) ? setAttr(el, name, $isDefined(value) ? value : name)
+                                       : removeAttr(el, name);
+                });
             });
         },
 
@@ -2434,11 +2436,12 @@
                         return name.startsWith('data-');
                     });
                 } else {
-                    name = name.map(function(name) {
-                        return toDataAttrName(name);
-                    });
+                    name = name.map(toDataAttrName);
                 }
-                name.each(function(name) { removeAttr(el, name) });
+
+                $each(name, function(name) {
+                    removeAttr(el, name);
+                });
             });
         },
 
@@ -2579,7 +2582,7 @@
     }
 
     function addClass(el, name) {
-        split(name, re_space).each(function(name) {
+        $each(split(name, re_space), function(name) {
             if (!hasClass(el, name)) {
                  setClass(el, getClass(el) +' '+ name);
             }
@@ -2595,7 +2598,7 @@
     }
 
     function removeClass(el, name) {
-        split(name, re_space).each(function(name) {
+        $each(split(name, re_space), function(name) {
             setClass(el, getClass(el).replace(toClassRegExp(name), ' '));
         });
     }
@@ -2839,7 +2842,7 @@
                 if (key[0] == '*') { // all
                     el.$data = NULL;
                 } else {
-                    key.each(function(key) {
+                    $each(key, function(key) {
                         delete el.$data[key];
                     });
                 }
