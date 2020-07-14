@@ -219,6 +219,7 @@
         var _this = this, els, len = 0, re, idn, idv;
 
         if (selector) {
+            // select & create
             if ($isString(selector)) {
                 selector = $trim(selector);
                 if (selector) {
@@ -252,21 +253,31 @@
                         }
                     }
                 }
-            } else if (isRoot(selector)) {
+            }
+            // window & document
+            else if (isRoot(selector)) {
                 els = [selector];
-            } else if (isNode(selector)) {
+            }
+            // node
+            else if (isNode(selector)) {
                 if (root && root != selector[NAME_PARENT_NODE]) {
                     // pass (check root reliability)
                 } else {
                     els = [selector];
                 }
-            } else if ($isArray(selector)) {
+            }
+            // array
+            else if ($isArray(selector)) {
                 els = [], selector.each(function(el) {
                     isDom(el) ? els = els.concat(el.all()) : els.push(el);
                 });
-            } else if ($isObject(selector)) {
+            }
+            // create
+            else if ($isObject(selector)) {
                 els = create(selector);
-            } else {
+            }
+            // node list & element list etc
+            else {
                 els = selector;
             }
 
