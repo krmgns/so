@@ -3149,7 +3149,7 @@
 
         options = $extend({direction: NAME_TOP}, options);
         if ($isNumeric(optionsOrig)) {
-            options[options.direction] = optionsOrig;
+            options[options.direction] = $float(optionsOrig);
         }
 
         return options;
