@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.131.0';
+    $win.so.VERSION = '5.132.0';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -415,7 +415,7 @@
     });
 
     /**
-     * Object keys & values.
+     * Object polyfills (keys & values, entries).
      * @param  {Object} object
      * @return {Array}
      */
@@ -424,6 +424,9 @@
     };
     Object.values = Object.values || function(object, ret /* @internal */) {
         return (ret = []), $.forEach(object, function(_, value) { ret.push(value) }), ret;
+    };
+    Object.entries = Object.entries || function(object, ret /* @internal */) {
+        return (ret = []), $.forEach(object, function(key, value) { ret.push([key, value]) }), ret;
     };
 
     // shortcuts
@@ -480,6 +483,15 @@
          */
         has: function(src) {
             return has(src, this);
+        },
+
+        /**
+         * Has index.
+         * @param  {Any} srcIndex
+         * @return {Bool}
+         */
+        hasIndex: function(srcIndex) {
+            return (srcIndex in this);
         },
 
         /**
@@ -558,7 +570,7 @@
          * @param  {Any} ...arguments
          * @return {Int}
          */
-        unpop: function () {
+        unpop: function() {
             return apply(this.push, this, arguments);
         },
 
@@ -602,6 +614,14 @@
         },
 
         /**
+         * Copy.
+         * @return {Array}
+         */
+        copy: function() {
+            return this.slice();
+        },
+
+        /**
          * Chunk.
          * @param  {Int} size
          * @return {Array}
@@ -620,19 +640,36 @@
         },
 
         /**
+         * Pull.
+         * @return {Any|Any[]}
+         */
+        pull: function() {
+            var _this = this, keys = toArray(arguments), ret = [];
+
+            $.for(keys, function (key) {
+                _this.hasIndex(key) && ret.push(_this[key]);
+            });
+
+            // delete used keys and decrease size (fixing length)
+            $.for(ret, function (_, i) { _this.splice(i, 1) });
+
+            return len(keys) == 1 ? ret[0] : ret;
+        },
+
+        /**
          * Extract.
          * @param  {String} ...arguments
          * @return {Object}
          */
         extract: function() {
-            var keys = toArray(arguments), values = {};
+            var _this = this, keys = toArray(arguments), ret = {};
 
             $.for(keys, function(key, i) {
                 // [1,2,3].extract('one', '', 'three') => {one: 1, three: 3}
-                key && (values[key] = this[i]);
-            }, this);
+                key && (ret[key] = _this[i]);
+            });
 
-            return values;
+            return ret;
         }
     });
 

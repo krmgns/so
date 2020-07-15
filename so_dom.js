@@ -1,6 +1,7 @@
 /**
+ * @package so
  * @object  so.dom
- * @depends so, so.util
+ * @depends so, so.event, so.animation, so.util
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
@@ -52,7 +53,7 @@
         return re.test(s);
     }
     function split(s, re) {
-        return $trim(s).split(re);
+        return $trim(s).split(re).filter();
     }
     function pick(key, object, value) {
         if (key in object) {
@@ -1100,6 +1101,13 @@
         },
 
         /**
+         * Properties (alias of getProperties()).
+         */
+        properties: function(names) {
+            return this.getProperties(names);
+        },
+
+        /**
          * Has property.
          * @param  {String} name
          * @return {Bool}
@@ -1135,23 +1143,19 @@
 
         /**
          * Get property.
-         * @param  {String|String[]} names?
+         * @param  {String} names?
          * @return {Object}
          */
         getProperties: function(names) {
-            var el = this[0], ret = {};
+            var el = this[0], ret = {}, name;
 
             if (el) {
-                if ($isString(names)) {
-                    names = split(names, re_comma)
-                }
-
-                names = names || (function(names, name) { // all names
+                names = split(names, re_comma);
+                if (!names.len()) {
                     for (name in el) {
                         names.push(name);
                     }
-                    return names;
-                })([]);
+                }
 
                 $each(names, function(name) {
                     ret[name] = el[name];

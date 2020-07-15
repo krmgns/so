@@ -5,10 +5,16 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function($) { 'use strict';
+;(function($, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
+
+    var $win = $.win();
+
+    // minify candies
+    var OBJECT = 'object', Object = $win.Object;
 
     var $for = $.for, $forEach = $.forEach;
     var fn_slice = [].slice;
+
     var _break = 0;
 
     function copyArray(array) {
@@ -22,14 +28,6 @@
             ir = ~~(Math.random() * (i + 1));
             tmp = ret[i], ret[i] = ret[ir], ret[ir] = tmp;
         }
-        return ret;
-    }
-
-    function flip(items) {
-        var ret = {};
-        $forEach(items, function(key, value) {
-            ret[value] = key;
-        });
         return ret;
     }
 
@@ -57,21 +55,23 @@
             }
 
             var type = $.type(data);
-            if (data instanceof List) {
-                type = data.type;
-                data = data.data;
+            if ($.isList(data)) {
+                type = data._type;
+                data = data._data;
             }
 
             options = $.extend({type: type}, options);
 
-            var _this = this; // just as minify candy
-            _this.type = options.type;
-            _this.data = {};
-            _this._len = 0;
+            var _this = this, _data = {}, _type = options.type, len = 0;
 
             $forEach(data, function(key, value) {
-                _this.data[key] = value;
-                _this._len++; // why naming as 'length' sucks?!
+                _data[key] = value, len++; // dunno, why naming as 'length' sucks?!
+            });
+
+            Object.defineProperties(_this, { // writables for internal modifications
+                 '_len': {value: len, writable: TRUE},
+                '_data': {value: _data, writable: TRUE},
+                '_type': {value: _type},
             });
 
             return _this;
@@ -83,7 +83,7 @@
          * @return {this}
          */
         for: function(fn) {
-            return $for(this.data, fn, this);
+            return $for(this._data, fn, this);
         },
 
         /**
@@ -92,7 +92,7 @@
          * @return {this}
          */
         forEach: function(fn) {
-            return $forEach(this.data, fn, this);
+            return $forEach(this._data, fn, this);
         },
 
         /**
@@ -102,12 +102,12 @@
          * @return {this}
          */
         set: function(key, value) {
-            var _this = this, key = (key != null) ? key : _this._len;
+            var _this = this, key = (key != NULL) ? key : _this._len;
 
-            if (!(key in _this.data)) { // increase size
+            if (!(key in _this._data)) { // increase size
                 _this._len++;
             }
-            _this.data[key] = value;
+            _this._data[key] = value;
 
             return _this;
         },
@@ -119,16 +119,21 @@
          * @return {Any}
          */
         get: function(key, valueDefault) {
-            return this.hasKey(key) ? this.data[key] : valueDefault;
+            return this.hasKey(key) ? this._data[key] : valueDefault;
         },
 
         /**
-         * Append (alias of append()).
-         * @param  {Any} value
-         * @return {this}
+         * Add (alias of append()).
          */
         add: function(value) {
             return this.append(value);
+        },
+
+        /**
+         * Add by (alias of set()).
+         */
+        addBy: function(key, value) {
+            return this.set(key, value);
         },
 
         /**
@@ -137,15 +142,15 @@
          * @return {this}
          */
         remove: function(value) {
-            return this.pull(this.findIndex(value)), this;
+            return this.pull(this.findKey(value)), this;
         },
 
         /**
-         * Remove at.
+         * Remove by.
          * @param  {Int|String} key
          * @return {this}
          */
-        removeAt: function(key) {
+        removeBy: function(key) {
             return this.pull(key), this;
         },
 
@@ -158,19 +163,19 @@
         replace: function(searchValue, replaceValue) {
             return this.forEach(function(key, value) {
                 if (value === searchValue) {
-                    this.data[key] = replaceValue;
+                    this._data[key] = replaceValue;
                 }
             });
         },
 
         /**
-         * Replace at.
+         * Replace by.
          * @param  {Int|String} key
          * @param  {Any}        replaceValue
          * @return {this}
          */
-        replaceAt: function(key, replaceValue) {
-            return (this.data[key] = replaceValue), this;
+        replaceBy: function(key, replaceValue) {
+            return (this._data[key] = replaceValue), this;
         },
 
         /**
@@ -178,15 +183,21 @@
          * @return {this}
          */
         empty: function() {
-            return (this.data = {}, this._len = 0), this;
+            return (this._data = {}, this._len = 0), this;
         },
+
+        /**
+         * Is empty.
+         * @return {Bool}
+         */
+        isEmpty: function() { return !this._len; },
 
         /**
          * Keys.
          * @return {Array}
          */
         keys: function() {
-            return Object.keys(this.data);
+            return Object.keys(this._data);
         },
 
         /**
@@ -194,17 +205,24 @@
          * @return {Array}
          */
         values: function() {
-            return Object.values(this.data);
+            return Object.values(this._data);
+        },
+
+        /**
+         * Entries.
+         * @return {Array}
+         */
+        entries: function() {
+            return Object.entries(this._data);
         },
 
         /**
          * Has.
          * @param  {Any}  search
-         * @param  {Bool} opt_strict
          * @return {Bool}
          */
-        has: function(search, opt_strict) {
-            return $.has(search, this.data, opt_strict);
+        has: function(search) {
+            return $.has(search, this._data);
         },
 
         /**
@@ -213,7 +231,7 @@
          * @return {Bool}
          */
         hasKey: function(key) {
-            return (key in this.data);
+            return (key in this._data);
         },
 
         /**
@@ -222,7 +240,7 @@
          * @return {this}
          */
         append: function(value) {
-            return this.set(null, value);
+            return this.set(NULL, value);
         },
 
         /**
@@ -231,20 +249,20 @@
          * @return {this}
          */
         prepend: function(value) {
-            var data = {0: value};
+            var _this = this, data = {0: value};
 
-            this.forEach(function(key, value) {
+            _this.forEach(function(key, value) {
                 if ($.isNumeric(key)) {
                     key++; // push key
                 }
                 data[key] = value;
             })
 
-            return this.init(data, {type: this.type}); // reset data
+            return (_this._data = data), _this;
         },
 
         /**
-         * Top.
+         * Top (like Array.shift()).
          * @return {Any}
          */
         top: function() {
@@ -252,7 +270,7 @@
         },
 
         /**
-         * Pop.
+         * Pop (like Array.pop()).
          * @return {Any}
          */
         pop: function() {
@@ -261,8 +279,8 @@
 
         /**
          * Find.
-         * @param  {Any} searchValue
-         * @param  {Int} opt_returnKey?
+         * @param  {Any}  searchValue
+         * @param  {Bool} opt_returnKey?
          * @return {Any|undefined}
          */
         find: function(searchValue, opt_returnKey) {
@@ -270,12 +288,12 @@
 
             // make test function
             if (!$.isFunction(fn)) {
-                fn = function(key, value) { return value === searchValue; };
+                fn = function(value) { return (value === searchValue) };
             }
 
             this.forEach(function(key, value) {
-                if (fn(key, value)) {
-                    ret = opt_returnKey ? key : value;
+                if (fn(value, key)) {
+                    ret = !opt_returnKey ? value : key;
                     return _break;
                 }
             });
@@ -284,18 +302,16 @@
         },
 
         /**
-         * Find index (key).
+         * Find key .
          * @param  {Any} searchValue
          * @return {String|undefined}
          */
-        findIndex: function(searchValue) {
-            return this.find(searchValue, true);
+        findKey: function(searchValue) {
+            return this.find(searchValue, TRUE);
         },
 
         /**
          * Push (alias of append()).
-         * @param  {Any} value
-         * @return {this}
          */
         push: function(value) {
             return this.append(value);
@@ -318,23 +334,23 @@
          * @return {Any|undefined}
          */
         pull: function(key) {
-            var _this = this, data = {}, ret;
+            var _this = this, data = {}, value;
 
-            if (key in _this.data) {
-                ret = _this.data[key];
+            if (key in _this._data) {
+                value = _this._data[key];
                 // delete key and decrease size
-                delete _this.data[key], _this._len--;
+                delete _this._data[key], _this._len--;
 
                 // reset data with indexes
-                if (_this.type != 'object') {
+                if (_this._type != OBJECT) {
                     $for(_this.values(), function(value, i) {
                         data[i] = value;
                     });
-                    _this.data = data;
+                    _this._data = data;
                 }
             }
 
-            return ret;
+            return value;
         },
 
         /**
@@ -343,45 +359,44 @@
          * @return {Object}
          */
         pullAll: function() {
-            var _this = this, data = {}, ret = {}, i = 0;
+            var _this = this, data = {}, values = {}, i = 0;
 
             $for(arguments, function(key) {
-                ret[i] = undefined;
-                if (key in _this.data) {
-                    ret[i] = _this.data[key];
+                values[i] = UNDEFINED;
+                if (key in _this._data) {
+                    values[i] = _this._data[key];
                     // delete key and decrease size
-                    delete _this.data[key], _this._len--, i++;
+                    delete _this._data[key], _this._len--, i++;
                 }
             });
 
             // reset data with indexes
-            if (_this.type != 'object' && !$.empty(ret)) {
+            if (_this._type != OBJECT && !$.empty(values)) {
                 $for(_this.values(), function(value, i) {
                     data[i] = value;
                 });
-                _this.data = data;
+                _this._data = data;
             }
 
-            return ret;
+            return values;
         },
 
         /**
          * Copy.
-         * @param  {Object} options
          * @return {List}
          */
-        copy: function(options) {
-            return initList(this, options);
+        copy: function() {
+            return initList(this, this.options);
         },
 
         /**
          * Copy to.
          * @param  {List}   list
-         * @param  {Object} options
+         * @param  {Object} options?
          * @return {List}
          */
         copyTo: function(list, options) {
-            return list.init(this.data, options);
+            return list.init(this._data, options || this.options);
         },
 
         /**
@@ -390,13 +405,32 @@
          * @return {List}
          */
         map: function(fn) {
-            var data = {};
+            var _this = this, data = {};
 
-            this.forEach(function(key, value, i) {
-                data[key] = fn(value, key, i);
+            _this.forEach(function(key, value, i) {
+                data[key] = fn(value, key, i, _this._data);
             });
 
-            return initList(data, {type: this.type});
+            return initList(data, {type: _this._type});
+        },
+
+        /**
+         * Filter.
+         * @param  {Function} fn?
+         * @return {List}
+         */
+        filter: function(fn) {
+            fn = fn || function(value) { return $.trim(value); }; // set default tester
+
+            var _this = this, data = {};
+
+            _this.forEach(function(key, value, i) {
+                if (fn(value, key, i, _this._data)) {
+                    data[key] = value;
+                }
+            });
+
+            return initList(data, {type: _this._type});
         },
 
         /**
@@ -406,29 +440,9 @@
          * @return {Any}
          */
         reduce: function(initialValue, fn) {
-            this.forEach(function(key, value, i) {
-                initialValue = fn(value, key, i, initialValue);
-            });
-
-            return initialValue;
-        },
-
-        /**
-         * Filter.
-         * @param  {Function} fn?
-         * @return {List}
-         */
-        filter: function(fn) {
-            var data = {};
-            fn = fn || function(value) { return $.trim(value); }; // set default tester
-
-            this.forEach(function(key, value, i) {
-                if (fn(value, key, i)) {
-                    data[key] = value;
-                }
-            });
-
-            return initList(data, {type: this.type});
+            return this.forEach(function(key, value, i) {
+                initialValue = fn(initialValue, value, key, i, this._data);
+            }), initialValue;
         },
 
         /**
@@ -436,7 +450,7 @@
          * @return {List}
          */
         uniq: function() {
-            return initList(this.values().uniq(), {type: this.type});
+            return initList(this.values().uniq(), {type: this._type});
         },
 
         /**
@@ -444,7 +458,7 @@
          * @return {List}
          */
         ununiq: function() {
-            return initList(this.values().ununiq(), {type: this.type});
+            return initList(this.values().ununiq(), {type: this._type});
         },
 
         /**
@@ -454,15 +468,17 @@
         reverse: function() {
             var _this = this, data = {};
 
-            if (_this.type == 'object') {
-                _this.keys().reverse().forEach(function(key) {
-                    data[key] = _this.data[key];
+            if (_this._type == OBJECT) {
+                $for(_this.keys().reverse(), function(key) {
+                    data[key] = _this._data[key];
                 });
             } else {
-                data = _this.values().reverse(); // keys also will be reversed
+                $for(_this.values().reverse(), function(value, i) {
+                    data[i] = value;
+                });
             }
 
-            return (_this.data = data), _this
+            return (_this._data = data), _this
         },
 
         /**
@@ -471,7 +487,7 @@
          * @return {Any}
          */
         rand: function(size) {
-            var _this = this, values = shuffle(this.values()), ret = [], i = size = size || 1;
+            var values = shuffle(this.values()), ret = [], i = size = size || 1;
 
             while (i--) {
                 ret[i] = values[i];
@@ -487,16 +503,17 @@
         shuffle: function() {
             var _this = this, data = {}, keys, shuffledKeys, i;
 
-            if (_this.type == 'object') {
-                keys = _this.keys(), shuffledKeys = shuffle(_this.keys()), i = keys.len();
-                while (i--) {
-                    data[shuffledKeys[i]] = _this.data[keys[i]];
-                }
+            if (_this._type == OBJECT) {
+                $for(shuffle(_this.keys()), function(key) {
+                    data[key] = _this._data[key];
+                });
             } else {
-                data = shuffle(_this.values());
+                $for(shuffle(_this.values()), function(value, i) {
+                    data[value] = value;
+                });
             }
 
-            return (_this.data = data), _this;
+            return (_this._data = data), _this;
         },
 
         /**
@@ -505,33 +522,55 @@
          * @return {this}
          */
         sort: function(fn) {
-            var _this = this, data = {}, flippedData;
+            var _this = this, data = {}, sortedValues = _this.values().sort(fn);
 
-            if (_this.type == 'object') {
-                flippedData = flip(_this.data);
-                $forEach(_this.values().sort(fn), function(key, value) {
-                    data[flippedData[value]] = value;
-                });
-            } else {
-                $forEach(_this.values().sort(fn), function(key, value) {
-                    data[key] = value;
-                });
-            }
+            $forEach(_this._data, function(key, _, i) {
+                data[key] = sortedValues[i];
+            });
 
-            return (_this.data = data), _this;
+            return (_this._data = data), _this;
         },
 
         /**
-         * Test (alike Array.some()).
+         * Sort key.
+         * @param  {Function} fn?
+         * @return {this}
+         */
+        sortKey: function(fn) {
+            var _this = this, data = {}, sortedKeys = _this.keys().sort(fn);
+
+            $for(sortedKeys, function(key) {
+                data[key] = _this._data[key];
+            });
+
+            return (_this._data = data), _this;
+        },
+
+        /**
+         * Flip.
+         * @return {this}
+         */
+        flip: function() {
+            var _this = this, data = {};
+
+            $forEach(_this._data, function(key, value) {
+                data[value] = key;
+            });
+
+            return (_this._data = data), _this;
+        },
+
+        /**
+         * Test (like Array.some()).
          * @param  {Function} fn
          * @return {Bool}
          */
         test: function(fn) {
-            var ret = false;
+            var ret = FALSE;
 
             this.forEach(function(key, value, i) {
                 if (fn(value, key, i)) {
-                    return (ret = true), _break;
+                    return (ret = TRUE), _break;
                 }
             });
 
@@ -539,16 +578,16 @@
         },
 
         /**
-         * Test all (alike Array.every()).
+         * Test all (like Array.every()).
          * @param  {Function} fn
          * @return {Bool}
          */
         testAll: function(fn) {
-            var ret = true;
+            var ret = TRUE;
 
             this.forEach(function(key, value, i) {
                 if (!fn(value, key, i)) {
-                    return (ret = false), _break;
+                    return (ret = FALSE), _break;
                 }
             });
 
@@ -577,7 +616,7 @@
          * @return {Any|undefined}
          */
         nth: function(i) {
-            return this.data[this.keys()[i - 1]];
+            return this._data[this.keys()[i - 1]];
         },
 
         /**
@@ -589,11 +628,19 @@
         },
 
         /**
-         * Is empty.
-         * @return {Bool}
+         * Data.
+         * @return {Object}
          */
-        isEmpty: function() {
-            return !this._len;
+        data: function() {
+            return this._data;
+        },
+
+        /**
+         * Type.
+         * @return {String}
+         */
+        type: function() {
+            return this._type;
         }
     };
 
@@ -621,4 +668,4 @@
         return (input instanceof List);
     };
 
-})(window.so);
+})(window.so, null, true, false);
