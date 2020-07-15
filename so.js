@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.130.3';
+    $win.so.VERSION = '5.131.0';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -525,9 +525,7 @@
          * @return {Array}
          */
         append: function() {
-            var _this = this;
-
-            return apply(_this.push, _this, arguments), _this;
+            return apply(this.push, this, arguments), this;
         },
 
         /**
@@ -536,9 +534,7 @@
          * @return {Array}
          */
         prepend: function() {
-            var _this = this;
-
-            return apply(_this.unshift, _this, arguments), _this;
+            return apply(this.unshift, this, arguments), this;
         },
 
         /**
@@ -555,6 +551,24 @@
          */
         ununiq: function() {
             return toUniqUnuniq(this, TRUE);
+        },
+
+        /**
+         * Unpop (just for fun).
+         * @param  {Any} ...arguments
+         * @return {Int}
+         */
+        unpop: function () {
+            return apply(this.push, this, arguments);
+        },
+
+        /**
+         * Unsplit (just for fun).
+         * @param  {String} joiner?
+         * @return {String}
+         */
+        unsplit: function(joiner) {
+            return this.join(joiner);
         },
 
         /**
