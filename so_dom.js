@@ -3143,12 +3143,12 @@
     function fadeOpacity(opacity) { return {opacity: opacity}; }
 
     function scrollOptions(options) {
-        // eg: Int or {top: Int, left: Int, gapTop: Int, gapLeft: Int,
-        //             noGap: Bool, relative: Bool, speed: Int|String, easing: String}
+        // eg: Number or {top: Number, left: Number, gapTop: Number, gapLeft: Number,
+        //                noGap: Bool, relative: Bool, speed: Number|String, easing: String}
         var optionsOrig = options;
 
         options = $extend({direction: NAME_TOP}, options);
-        if ($isNumber(optionsOrig)) {
+        if ($isNumeric(optionsOrig)) {
             options[options.direction] = optionsOrig;
         }
 
