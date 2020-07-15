@@ -3451,23 +3451,23 @@
 
     // xpath helper
     function toXDom(selector, root, one) {
-        var doc = root || $doc;
-        var docEl = doc && doc[NAME_DOCUMENT_ELEMENT];
+        var doc = root || $doc, docEvl = doc.evaluate;
+        var docEl = doc && doc[NAME_DOCUMENT_ELEMENT], docEls = docEl && docEl.selectNodes;
         var nodes = [], node, iter, ret;
         if (!docEl) {
-            throw ('XPath isn\'t supported by root object!');
+            throw ('No XPath support by root!');
         }
 
-        if (doc.evaluate) {
-            iter = doc.evaluate(selector, docEl, NULL, XPathResult.ANY_TYPE, NULL);
+        if (docEvl) {
+            iter = docEvl.call(doc, selector, docEl, NULL, 0, NULL);
             while (node = iter.iterateNext()) {
                 nodes.push(node);
                 if (one) {
                     break;
                 }
             }
-        } else if (docEl.selectNodes) { // ie (still..)
-            nodes = docEl.selectNodes(selector);
+        } else if (docEls) { // ie (still..)
+            nodes = docEls.call(doc, selector);
             if (one) {
                 nodes = nodes[0];
             }
