@@ -3213,11 +3213,11 @@
             try { // safe for MutationObserver support
                 var _this = this;
                 return _this.for(function (el) {
-                    el.$observer = new MutationObserver(function (ms) {
-                        $for(ms, function (m) {
+                    el.$observer = new MutationObserver(function (mutationRecords) {
+                        $for(mutationRecords, function (mutationRecord) {
                             $forEach(options, function (type, fn) {
-                                if (m.type == type) {
-                                    fn.call(el, el, _this, m);
+                                if (mutationRecord.type == type) {
+                                    fn.call(el, el, _this, mutationRecord);
                                 }
                             });
                         });
