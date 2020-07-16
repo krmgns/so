@@ -32,14 +32,17 @@
         TAG_WINDOW = '#window', TAG_DOCUMENT = '#document', TAG_HTML = 'html', TAG_HEAD = 'head', TAG_BODY = 'body',
         PROTOTYPE = 'prototype';
     var $doc = $.doc();
-    var $event = $.event, $toStyleName = $.util.toStyleName, $json = $.util.json;
-    var $re = $.re, $rid = $.rid, $array = $.array, $each = $.each, $for = $.for, $forEach = $.forEach;
+    var $event = $.event, $util = $.util, $toStyleName = $util.toStyleName;
+    var $re = $.re, $array = $.array, $uid = $util.uid,
+        $each = $.each, $for = $.for, $forEach = $.forEach;
     var $len = $.len, $trim = $.trim, $extend = $.extend, $fire = $.fire,
         $int = $.int, $float = $.float, $string = $.string, $bool = $.bool,
-        $isVoid = $.isVoid, $isNull = $.isNull, $isNulls = $.isNulls, $isDefined = $.isDefined,
-        $isUndefined = $.isUndefined, $isString = $.isString, $isNumeric = $.isNumeric,
-        $isNumber = $.isNumber, $isArray = $.isArray, $isObject = $.isObject, $isFunction = $.isFunction,
-        $isTrue = $.isTrue, $isFalse = $.isFalse, $isWindow = $.isWindow, $isDocument = $.isDocument,
+        $isNull = $.isNull, $isNulls = $.isNulls, $isVoid = $.isVoid,
+        $isDefined = $.isDefined, $isUndefined = $.isUndefined,
+        $isString = $.isString, $isNumber = $.isNumber, $isNumeric = $.isNumeric,
+        $isArray = $.isArray, $isObject = $.isObject, $isFunction = $.isFunction,
+        $isTrue = $.isTrue, $isFalse = $.isFalse,
+        $isWindow = $.isWindow, $isDocument = $.isDocument,
         $getWindow = $.win, $getDocument = $.doc;
     var warn = console.warn;
 
@@ -110,7 +113,6 @@
         return {'$tag': tag, '$content': content};
     }
 
-    var soAttrPrefix = 'so:', soTempTag = '<so-temp>';
     var re_child = /(?::first|last|nth)(?!-)|(?:[\w-]+):(?:\d+)/;
     var re_childFix = /([\w-]+|):(first|last|nth([^-]+))|([\w-]+):(\d+)/g;
     var re_attr = /\[.+\]/;
@@ -118,6 +120,7 @@
     var re_attrFixMatch = /\[([\w.:]+)(=[^\]]+)?\]/g;
     var re_data = /([\w-]+)?\[(data-[\w-]+)\*/;
     var re_idOrClass = /^([#.])([\w-]+)$/;
+    var _soAttrPrefix = 'so:', _soAttrId = 'so:id', _soTempTag = '<so-temp>';
 
     /**
      * Select.
@@ -241,7 +244,7 @@
                         } else if (selector[0] == '>') {
                             root = isElementNode(root) ? root : $doc[NAME_DOCUMENT_ELEMENT];
                             // buggy :scope selector
-                            idv = getAttr(root, (idn = soAttrPrefix +'_')) || $rid();
+                            idv = getAttr(root, (idn = _soAttrId)) || $uid();
                             setAttr(root, idn, idv, FALSE);
                             // fix '>' only selector
                             if (selector.len() == 1) {
@@ -333,6 +336,19 @@
             return (_this = this),
                     _this[0] ? toDom(selector, _this[0])
                              : _this;
+        },
+
+        /**
+         * Concat.
+         * @return {Any} ...arguments
+         * @return {Dom}
+         */
+        concat: function () {
+            var els = $array(arguments).reduce(function (els, selector) {
+                return els.append(toDom(selector));
+            }, []);
+
+            return toDom(this.all().concat(els).uniq());
         },
 
         /**
@@ -645,7 +661,7 @@
             tag = _tag, content = _content, attributes = mix, doc = NULL;
         }
 
-        var fragment, temp, tempTag = soTempTag.strip('<>'), i = 0, il;
+        var fragment, temp, tempTag = _soTempTag.strip('<>'), i = 0, il;
 
         // fix table & body stuff
         tag = tag || (content && content.grep(re_tag));
@@ -726,7 +742,7 @@
     }
 
     var cloneId = 0,
-        cloneIdAttr = soAttrPrefix +'clone-id';
+        cloneIdAttr = _soAttrPrefix +'clone-id';
 
     function cloneElement(el, opt_deep) {
         var clone = el.cloneNode();
@@ -979,7 +995,7 @@
          */
         replace: function (content, opt_content, opt_attributes, opt_clone) {
             return this.clean().replaceWith(
-                $(soTempTag).append(content, opt_content, opt_attributes, opt_clone).children()
+                $(_soTempTag).append(content, opt_content, opt_attributes, opt_clone).children()
             );
         },
 
@@ -1037,7 +1053,7 @@
 
             if (elParent) {
                 wrapper = createFor(el, content, opt_attributes)[0];
-                replace = createFor(elParent, soTempTag, {style: 'display:none'})[0];
+                replace = createFor(elParent, _soTempTag, {style: 'display:none'})[0];
                 insertBefore(elParent, replace, el);
                 this.for(function (el) {
                     clone = cloneElement(el);
@@ -1827,7 +1843,7 @@
                     value = NULL;
                 } else {
                     value = $isFalse(opt_convert) ? value : (
-                        test(value, re_rgb) ? $.util.parseRgb(value, TRUE) // make rgb - hex
+                        test(value, re_rgb) ? $util.parseRgb(value, TRUE) // make rgb - hex
                             : test(value, re_unit) || test(value, re_unitMore) // make px etc. - float
                                 // || test(name, re_nonUnitStyles) // make opacity etc. - float
                             ? $float(cleanStyleValue(value)) : value
@@ -1929,7 +1945,7 @@
     function getInvisibleElementProperties(el, properties) {
         var ret = [];
         var doc = $getDocument(el), body = doc[TAG_BODY];
-        var rid = $rid(), ridClass = (' '+ rid);
+        var uid = $uid(), uidClass = (' '+ uid);
         var style, styleText = el[NAME_STYLE][NAME_CSS_TEXT];
         var parent = el[NAME_PARENT_ELEMENT], parents = [];
 
@@ -1937,7 +1953,7 @@
             if (!isVisible(parent)) {
                 parents.push({el: parent, styleText: parent[NAME_STYLE][NAME_CSS_TEXT]});
 
-                parent[NAME_CLASS_NAME] += ridClass;
+                parent[NAME_CLASS_NAME] += uidClass;
                 parent[NAME_STYLE][NAME_DISPLAY] = '';
                 parent[NAME_STYLE][NAME_VISIBILITY] = ''; // for !important annots
             }
@@ -1946,11 +1962,11 @@
 
         // temporary style element
         style = createElement(doc, NAME_STYLE, {
-            textContent: '.'+ rid +'{display:block!important;visibility:hidden!important}'
+            textContent: '.'+ uid +'{display:block!important;visibility:hidden!important}'
         });
         appendChild(body, style);
 
-        el[NAME_CLASS_NAME] += ridClass;
+        el[NAME_CLASS_NAME] += uidClass;
         el[NAME_STYLE][NAME_DISPLAY] = '';
         el[NAME_STYLE][NAME_VISIBILITY] = ''; // for !important annots
 
@@ -1965,13 +1981,13 @@
 
         // restore all
         removeChild(body, style);
-        el[NAME_CLASS_NAME] = el[NAME_CLASS_NAME].remove(ridClass);
+        el[NAME_CLASS_NAME] = el[NAME_CLASS_NAME].remove(uidClass);
         if (styleText) {
             el[NAME_STYLE][NAME_CSS_TEXT] = styleText;
         }
 
         while (parent = parents.shift()) {
-            parent.el[NAME_CLASS_NAME] = parent.el[NAME_CLASS_NAME].remove(ridClass);
+            parent.el[NAME_CLASS_NAME] = parent.el[NAME_CLASS_NAME].remove(uidClass);
             if (parent.styleText) {
                 parent.el[NAME_STYLE][NAME_CSS_TEXT] = parent.styleText;
             }
@@ -2260,14 +2276,18 @@
         return hasAttr(el, name) ? el.getAttribute(name) : UNDEFINED;
     }
     function getAttrs(el, opt_namesOnly, _ret) {
-        _ret = $array(el && el.attributes);
-        if (opt_namesOnly) {
-            _ret = _ret.map(function (attr) { return attr[NAME_NAME] });
+        if (isElementNode(el)) {
+            _ret = $array(el.attributes);
+            if (opt_namesOnly) {
+                _ret = _ret.map(function (attr) { return attr[NAME_NAME] });
+            }
+            return _ret;
         }
-        return _ret;
     }
     function removeAttr(el, name) {
-        if (isElementNode(el)) el.removeAttribute(name);
+        if (isElementNode(el)) {
+            el.removeAttribute(name);
+        }
     }
 
     function toDataAttrName(name) {
@@ -2296,17 +2316,45 @@
         },
 
         /**
-         * Attrs.
+         * Attrs (set/get all).
+         * @param  {String} names?
+         * @param  {Null}   opt_remove?
          * @return {Object}
          */
-        attrs: function () {
-            var el = this[0], ret = {};
+        attrs: function (names, opt_remove) {
+            var _this = this, ret = {};
 
-            if (el) {
-                getAttrs(el).each(function (attr) {
-                    ret[attr[NAME_NAME]] = test(attr[NAME_NAME], re_attrState)
-                        ? attr[NAME_NAME] : attr[NAME_VALUE];
-                });
+            getAttrs(_this[0]).each(function (attr) {
+                ret[attr[NAME_NAME]] = test(attr[NAME_NAME], re_attrState)
+                    ? attr[NAME_NAME] : attr[NAME_VALUE];
+            });
+
+            if (names) {
+                if ($isString(names) && $isNull(opt_remove)) { // null=remove
+                    names = (names == '*') ? $.keys(ret) // all
+                          : split(names, re_comma);
+
+                    $for(_this, function (el) {
+                        $for(names, function (name) {
+                            removeAttr(el, name)
+                        });
+                    });
+
+                    return _this;
+                } else if ($isObject(names)) { // object=set
+                    $forEach(names, function (name, value) {
+                        $for(_this, function (el) {
+                            setAttr(el, name, value);
+                        });
+                    });
+
+                    return _this;
+                }
+
+                // select names only
+                ret = split(names, re_comma).reduce(function (_ret, name) {
+                    return _ret[name] = ret[name], _ret;
+                }, {});
             }
 
             return ret;
@@ -2450,6 +2498,19 @@
         },
 
         /**
+         * So id.
+         * @param  {Bool|Int} opt_set?
+         * @return {String|undefined|this}
+         */
+        soId: function (opt_set) {
+            return !opt_set ? getAttr(this[0], _soAttrId) : this.for(function (el) {
+                if (!getAttr(el, _soAttrId)) { // if not already set
+                     setAttr(el, _soAttrId, $uid());
+                }
+            });
+        },
+
+        /**
          * So attr (so:* attributes).
          * @param  {String} name
          * @param  {String} value?
@@ -2457,12 +2518,12 @@
          */
         soAttr: function (name, value) {
             if (!$isObject(name) && !$isDefined(value)) {
-                return this.attr(soAttrPrefix + name); // get
+                return this.attr(_soAttrPrefix + name); // get
             }
 
             var attrs = toKeyValue(name, value);
             $forEach(attrs, function (name, value) {
-                attrs[soAttrPrefix + name] = value;
+                attrs[_soAttrPrefix + name] = value;
                 delete attrs[name];
             });
 
@@ -2855,7 +2916,7 @@
     });
 
     var re_plus = /%20/g;
-    var encode = $.util.urlEncode, decode = $.util.urlDecode;
+    var encode = $util.urlEncode, decode = $util.urlDecode;
 
     // dom: form
     toDomPrototype(Dom, {
@@ -2932,7 +2993,7 @@
             var _ret = function (data, ret) {
                 return ret = {}, $for(data, function (item) {
                     if (item.key) ret[item.key] = item.value;
-                }), $json(ret);
+                }), $util.jsonEncode(ret);
             };
 
             return _ret(this.serializeArray());

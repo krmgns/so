@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.132.0';
+    $win.so.VERSION = '5.133.0';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -34,9 +34,8 @@
         NAME_DEFAULT_VIEW = 'defaultView', NAME_OWNER_DOCUMENT = 'ownerDocument';
 
     var Array = $win.Array, Object = $win.Object, String = $win.String, Number = $win.Number,
-        Date = $win.Date, RegExp = $win.RegExp, Math = $win.Math;
+        Date = $win.Date, RegExp = $win.RegExp, Math = $win.Math, console = $win.console;
 
-    var console = $win.console;
     var apply = function (fn, _this, _arguments) {
         return fn.apply(_this, _arguments);
     };
@@ -129,7 +128,7 @@
         _reCache[id] = _reCache[id] || new RegExp(pattern, flags);
 
         $.fire(ttl, function () { // simple gc
-            delete _reCache[id]
+            delete _reCache[id];
         });
 
         return _reCache[id];

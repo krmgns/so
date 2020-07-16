@@ -18,14 +18,33 @@
     var re_rgb = /.*rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(.*))?\)/i;
     var re_url = /^((\w+):)?(\/\/(([\w-]+)?(:([^@]+))?@)?([^/?:]+)(:(\d+))?)?([/]?([^/?#][^?#]*)?)?(\?([^#]*))?(#(.*)$)?/;
 
-    function now(base) {
-        return Date.now().toString(base);
-    }
     function rand(len, base) {
         return Math.random().toString(base || 16).slice(len ? -len : 2);
     }
 
+    function randId(len, base, opt_now) {
+        len = len || 10, base = base || 36;
+
+        var ret = !opt_now ? rand(0, base) : $.now().toString(base);
+
+        while (len && ret.len() < len) {
+            ret += rand(0, base);
+        }
+
+        return ret.slice(0, len);
+    }
+
     $.util = {
+        /**
+         * Rid.
+         * @param  {Int} len?
+         * @param  {Int} base?
+         * @return {String}
+         */
+        rid: function (len, base) {
+            return randId(len, base);
+        },
+
         /**
          * Uid.
          * @param  {Int} len?
@@ -33,15 +52,7 @@
          * @return {String}
          */
         uid: function (len, base) {
-            len = len || 10, base = base || 36;
-
-            var ret = now(base);
-
-            while (ret.len() < len) {
-                ret += rand(0, base);
-            }
-
-            return ret.slice(0, len);
+            return randId(len, base, true);
         },
 
         /**
