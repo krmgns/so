@@ -5,7 +5,7 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function($, NULL, TRUE, FALSE) { 'use strict';
+;(function ($, NULL, TRUE, FALSE) { 'use strict';
 
     var $win = $.win();
     var $toStyleName = $.util.toStyleName;
@@ -21,8 +21,8 @@
     var opt_speeds = {fast: 50, slow: 650, ease: 255, normal: 150, default: 325};
 
     // thanks: http://easings.net/ (easeOutQuad)
-    var fn_easing = function(t,b,c,d) { return -c*(t/=d)*(t-2)+b; };
-    var fn_runner = $win.requestAnimationFrame || function(fn) { $win.setTimeout(fn, opt_fps); };
+    var fn_easing = function (t,b,c,d) { return -c*(t/=d)*(t-2)+b; };
+    var fn_runner = $win.requestAnimationFrame || function (fn) { $win.setTimeout(fn, opt_fps); };
 
     /**
      * Animation.
@@ -46,7 +46,7 @@
 
         _this.speed = $isNumber(speed) ? speed : opt_speeds[speed] || opt_speeds.default;
         _this.easing = easing ? $easing[easing] || fn_easing : NULL;
-        _this.callback = callback ? function() { callback(_this) } : NULL;
+        _this.callback = callback ? function () { callback(_this) } : NULL;
 
         _this.running = _this.stopped = _this.ended = FALSE;
         _this.startTime = _this.elapsedTime = 0;
@@ -58,7 +58,7 @@
             _this.$dom.setProperty('$animation', _this);
 
             // assign animation tasks
-            $forEach(properties, function(name, value) {
+            $forEach(properties, function (name, value) {
                 var scroll, startValue, endValue, diff, style, unit = '';
 
                 name = $toStyleName(name);
@@ -103,7 +103,7 @@
          * Run.
          * @return {this}
          */
-        run: function() {
+        run: function () {
             var _this = this;
 
             _this.stop(); // stop if running
@@ -134,12 +134,12 @@
          * Start.
          * @return {this}
          */
-        start: function() {
+        start: function () {
             var _this = this, $dom = _this.$dom, scroll, value;
 
             _this.elapsedTime = $now() - _this.startTime;
 
-            $for(_this.tasks, function(task) {
+            $for(_this.tasks, function (task) {
                 value = fn_easing(_this.elapsedTime, 0.00, task.diff, _this.speed);
                 value = task.reverse ? task.startValue - value : task.startValue + value;
                 if (!task.scroll) {
@@ -157,10 +157,10 @@
          * End.
          * @return {this}
          */
-        end: function() {
+        end: function () {
             var _this = this, $dom = _this.$dom;
 
-            $for(_this.tasks, function(task) {
+            $for(_this.tasks, function (task) {
                 if (!task.scroll) {
                     $dom.setStyle(task.name, task.endValue + task.unit);
                 } else {
@@ -181,7 +181,7 @@
          * Stop.
          * @return {this}
          */
-        stop: function() {
+        stop: function () {
             var _this = this, $dom = _this.$dom;
 
             if (_this.running) {
@@ -203,7 +203,7 @@
     // add animation to so
     $.animation = {
         Animation: initAnimation,
-        animate: function(el, properties, speed, easing, callback) {
+        animate: function (el, properties, speed, easing, callback) {
             return initAnimation(el, properties, speed, easing, callback).run();
         }
     };

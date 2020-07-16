@@ -5,7 +5,7 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function($, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
+;(function ($, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
 
     var PROTOTYPE = 'prototype';
 
@@ -77,7 +77,7 @@
 
         var event, eventClassOrig;
         if (!eventClass) { // autodetect
-            $forEach(types, function(name, re) {
+            $forEach(types, function (name, re) {
                 re = $.re('^('+ re +')$', 'i');
                 if (re.test(eventType)) {
                     eventClass = eventClassOrig = name;
@@ -135,7 +135,7 @@
     function extendFn(event, fn) {
         if (!fn) return;
 
-        return function(e) {
+        return function (e) {
             if (event.once) { // remove after call if once
                 event.unbind();
             }
@@ -156,14 +156,14 @@
                 $: $(e.target),
                 event: event,
                 eventTarget: event.eventTarget,
-                stop: function(immediate) {
+                stop: function (immediate) {
                     e.stopDefault();
                     e.stopBubble(immediate);
                 },
-                stopDefault: function() {
+                stopDefault: function () {
                     e.preventDefault();
                 },
-                stopBubble: function(immediate) {
+                stopBubble: function (immediate) {
                     e.stopPropagation();
                     if (immediate) {
                         e.stopImmediatePropagation();
@@ -180,36 +180,36 @@
                 }
             }
 
-            var isKey = function(keyCode) {
+            var isKey = function (keyCode) {
                 return (keyCode == e.keyCode);
             };
 
             // key sugars..
             $extend(e, {
                 isKey: isKey,
-                isBackspaceKey:  function() { return isKey(KEY_BACKSPACE) },
-                isTabKey:        function() { return isKey(KEY_TAB) },
-                isEnterKey:      function() { return isKey(KEY_ENTER) },
-                isEscKey:        function() { return isKey(KEY_ESC) },
-                isLeftKey:       function() { return isKey(KEY_LEFT) },
-                isUpKey:         function() { return isKey(KEY_UP) },
-                isRightKey:      function() { return isKey(KEY_RIGHT) },
-                isDownKey:       function() { return isKey(KEY_DOWN) },
-                isDeleteKey:     function() { return isKey(KEY_DELETE) },
-                isHomeKey:       function() { return isKey(KEY_HOME) },
-                isEndKey:        function() { return isKey(KEY_END) },
-                isPageUpKey:     function() { return isKey(KEY_PAGE_UP) },
-                isPageDownKey:   function() { return isKey(KEY_PAGE_DOWN) },
-                isInsertKey:     function() { return isKey(KEY_INSERT) },
-                isCapsLockKey:   function() { return isKey(KEY_CAPS_LOCK) },
-                isArrowLeftKey:  function() { return isKey(KEY_ARROW_LEFT) },
-                isArrowUpKey:    function() { return isKey(KEY_ARROW_UP) },
-                isArrowRightKey: function() { return isKey(KEY_ARROW_RIGHT) },
-                isArrowDownKey:  function() { return isKey(KEY_ARROW_DOWN) },
-                isShiftKey:      function() { return isKey(KEY_SHIFT) },
-                isControlKey:    function() { return isKey(KEY_CONTROL) },
-                isAltKey:        function() { return isKey(KEY_ALT) },
-                isAltGraphKey:   function() { return isKey(KEY_ALT_GRAPH) }
+                isBackspaceKey:  function () { return isKey(KEY_BACKSPACE) },
+                isTabKey:        function () { return isKey(KEY_TAB) },
+                isEnterKey:      function () { return isKey(KEY_ENTER) },
+                isEscKey:        function () { return isKey(KEY_ESC) },
+                isLeftKey:       function () { return isKey(KEY_LEFT) },
+                isUpKey:         function () { return isKey(KEY_UP) },
+                isRightKey:      function () { return isKey(KEY_RIGHT) },
+                isDownKey:       function () { return isKey(KEY_DOWN) },
+                isDeleteKey:     function () { return isKey(KEY_DELETE) },
+                isHomeKey:       function () { return isKey(KEY_HOME) },
+                isEndKey:        function () { return isKey(KEY_END) },
+                isPageUpKey:     function () { return isKey(KEY_PAGE_UP) },
+                isPageDownKey:   function () { return isKey(KEY_PAGE_DOWN) },
+                isInsertKey:     function () { return isKey(KEY_INSERT) },
+                isCapsLockKey:   function () { return isKey(KEY_CAPS_LOCK) },
+                isArrowLeftKey:  function () { return isKey(KEY_ARROW_LEFT) },
+                isArrowUpKey:    function () { return isKey(KEY_ARROW_UP) },
+                isArrowRightKey: function () { return isKey(KEY_ARROW_RIGHT) },
+                isArrowDownKey:  function () { return isKey(KEY_ARROW_DOWN) },
+                isShiftKey:      function () { return isKey(KEY_SHIFT) },
+                isControlKey:    function () { return isKey(KEY_CONTROL) },
+                isAltKey:        function () { return isKey(KEY_ALT) },
+                isAltGraphKey:   function () { return isKey(KEY_ALT_GRAPH) }
             });
 
             return fn.call(event.target, e, event.target);
@@ -248,7 +248,7 @@
     function Event(type, fn, options) {
         type = $trim(type);
         options = options || {};
-        if ($isObject(fn)) { // ..('click', {fn: function(){..}})
+        if ($isObject(fn)) { // ..('click', {fn: function (){..}})
             options = fn, fn = options.fn;
         }
 
@@ -287,7 +287,7 @@
          * Copy.
          * @return {Event}
          */
-        copy: function() {
+        copy: function () {
             var event = this;
             var eventCopy = initEvent(event.type, event.fno, event.options);
 
@@ -299,14 +299,14 @@
          * @param  {String} type?
          * @return {Event}
          */
-        bind: function(type) {
+        bind: function (type) {
             var event = this.copy();
             var eventTarget = initEventTarget(event.target);
 
             if (!type) {
                 eventTarget.addEvent(event);
             } else {
-                split(type, re_comma).each(function(type) {
+                split(type, re_comma).each(function (type) {
                     event.type = type;
                     eventTarget.addEvent(event);
                 });
@@ -320,7 +320,7 @@
          * @param  {Object} target
          * @return {Event}
          */
-        bindTo: function(target) {
+        bindTo: function (target) {
             var event = this.copy(), fn;
             event.target = event.options.target = target;
 
@@ -338,14 +338,14 @@
          * @param  {String} type?
          * @return {Event}
          */
-        unbind: function(type) {
+        unbind: function (type) {
             var event = this.copy();
             var eventTarget = initEventTarget(event.target);
 
             if (!type) {
                 eventTarget.removeEvent(event);
             } else {
-                split(type, re_comma).each(function(type) {
+                split(type, re_comma).each(function (type) {
                     event.type = type;
                     eventTarget.removeEvent(event);
                 });
@@ -361,14 +361,14 @@
          * @param  {Int|String} delay?
          * @return {Event}
          */
-        fire: function(type, data, delay) {
+        fire: function (type, data, delay) {
             var event = this.copy();
             var eventTarget = initEventTarget(event.target);
 
             if (!type) {
                 eventTarget.fireEvent(event, data, delay);
             } else {
-                split(type, re_comma).each(function(type) {
+                split(type, re_comma).each(function (type) {
                     event.type = type;
                     eventTarget.fireEvent(event, data, delay);
                 });
@@ -380,7 +380,7 @@
         /**
          * Off (alias of unbind(), for chaining, eg: el.on(..).fire().off())
          */
-        off: function(type) {
+        off: function (type) {
             return this.unbind(type);
         }
     });
@@ -399,7 +399,7 @@
          * @param  {Event} event
          * @return {void}
          */
-        addEvent: function(event) {
+        addEvent: function (event) {
             var target = prepareEventTarget(this.target, event.type);
 
             event.id = event.id || ++_id;
@@ -415,21 +415,21 @@
          * @param  {Event} event
          * @return {void}
          */
-        removeEvent: function(event) {
+        removeEvent: function (event) {
             var target = prepareEventTarget(this.target);
             var targetEvents;
             var removeStack = [];
 
             if (target.$events) {
                 if (event.type == '*') { // all
-                    $for(target.$events, function(events) {
-                        $for(events, function(event) {
+                    $for(target.$events, function (events) {
+                        $for(events, function (event) {
                             removeStack.push(event);
                         });
                     });
                 } else if (event.type == '**') { // all fired
-                    $for(target.$events, function(events) {
-                        $for(events, function(event) {
+                    $for(target.$events, function (events) {
+                        $for(events, function (event) {
                             if (event && event.fired) {
                                 removeStack.push(event);
                             }
@@ -437,8 +437,8 @@
                     });
                 } else if (event.type.startsWith('**')) { // all fired 'x' types, eg: .off('**click')
                     var type = event.type.slice(2);
-                    $for(target.$events, function(events) {
-                        $for(events, function(event) {
+                    $for(target.$events, function (events) {
+                        $for(events, function (event) {
                             if (event && event.fired && event.type == type) {
                                 removeStack.push(event);
                             }
@@ -447,13 +447,13 @@
                 } else if (target.$events[event.type]) {
                     var fno = event.fno, events = target.$events[event.type];
                     if (fno) { // all matched type's & fn's, eg: .off('click', fn)
-                        $for(events, function(event) {
+                        $for(events, function (event) {
                             if (event && event.fno == fno) {
                                 removeStack.push(event);
                             }
                         });
                     } else { // all matched type's, eg: .off('click')
-                        $for(events, function(event) {
+                        $for(events, function (event) {
                             removeStack.push(event);
                         });
                     }
@@ -461,7 +461,7 @@
 
                 if (removeStack.len()) {
                     targetEvents = target.$events;
-                    $for(removeStack, function(event) {
+                    $for(removeStack, function (event) {
                         if (event && event.id in targetEvents[event.type]) {
                             delete targetEvents[event.type][event.id];
                             target.removeEventListener(event.type, event.fn, event.useCapture);
@@ -469,7 +469,7 @@
                     });
 
                     // think memory!
-                    $forEach(targetEvents, function(type, events) {
+                    $forEach(targetEvents, function (type, events) {
                         targetEvents[type] = !$.empty(events) ? events : NULL;
                     });
                 } else if ($isFunction(target['on'+ event.type])) { // natives
@@ -487,11 +487,11 @@
          * @param  {Int|String} delay?
          * @return {void}
          */
-        fireEvent: function(event, data, delay) {
+        fireEvent: function (event, data, delay) {
             var target = prepareEventTarget(this.target);
 
             if (target.$events[event.type]) {
-                $for(target.$events[event.type], function(event) {
+                $for(target.$events[event.type], function (event) {
                     data = data || event.options.data;
                     delay = delay || event.options.delay;
 
@@ -502,14 +502,14 @@
                         }
                     }
 
-                    $fire(delay, function() {
+                    $fire(delay, function () {
                         event.fn(event.event);
                     });
                 });
             } else if ($isFunction(target[event.type])) { // natives
                 delay = delay || event.options.delay;
 
-                $fire(delay, function() {
+                $fire(delay, function () {
                     target[event.type](event.event);
                 });
             } else {
@@ -536,7 +536,7 @@
      */
     function on(target, type, fn, options) {
         var args = prepareArguments(fn, options, target), event, eventTarget;
-        split(type, re_comma).each(function(type) {
+        split(type, re_comma).each(function (type) {
             event = initEvent(type, args.fn, args.options);
             eventTarget = initEventTarget(target);
             eventTarget.addEvent(event);
@@ -544,7 +544,7 @@
     }
     function off(target, type, fn, options) {
         var args = prepareArguments(fn, options, target), event, eventTarget;
-        split(type, re_comma).each(function(type) {
+        split(type, re_comma).each(function (type) {
             event = initEvent(type, args.fn, args.options);
             eventTarget = initEventTarget(target);
             eventTarget.removeEvent(event);
@@ -552,7 +552,7 @@
     }
     function once(target, type, fn, options) {
         var args = prepareArguments(fn, $extend(options, {once: TRUE}), target), event, eventTarget;
-        split(type, re_comma).each(function(type) {
+        split(type, re_comma).each(function (type) {
             event = initEvent(type, args.fn, args.options);
             eventTarget = initEventTarget(target);
             eventTarget.addEvent(event);
@@ -560,7 +560,7 @@
     }
     function fire(target, type, fn, options) {
         var args = prepareArguments(fn, options, target), event;
-        split(type, re_comma).each(function(type) {
+        split(type, re_comma).each(function (type) {
             event = initEvent(type, args.fn, args.options);
             event.fire(type, args.options.data, args.options.delay);
         });
@@ -584,7 +584,7 @@
         if (opt_typeOnly) {
             ret = !!events[type]; // just check type
         } else if (events[type] && fn) {
-            $for(events[type], function(event) {
+            $for(events[type], function (event) {
                 if (event.fno && event.fno == fn) {
                     ret = TRUE;
                     return _break;

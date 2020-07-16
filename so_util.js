@@ -5,7 +5,7 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function($, NULL) { 'use strict';
+;(function ($, NULL) { 'use strict';
 
     var $win = $.win();
 
@@ -32,7 +32,7 @@
          * @param  {Int} base?
          * @return {String}
          */
-        uid: function(len, base) {
+        uid: function (len, base) {
             len = len || 10, base = base || 36;
 
             var ret = now(base);
@@ -49,7 +49,7 @@
          * @param  {Bool} noDash?
          * @return {String}
          */
-        uuid: function(noDash) {
+        uuid: function (noDash) {
             var ret = '%s-%s-%s-%s-%s'.format(
                 rand(8), rand(4), rand(4), rand(4), rand(12)
             );
@@ -69,7 +69,7 @@
          * @return {Array}
          * @source https://stackoverflow.com/a/15453499/362780
          */
-        range: function(min, max, step) {
+        range: function (min, max, step) {
             var ret = [min];
 
             while (min < max) {
@@ -85,7 +85,7 @@
          * @param  {Int} max?
          * @return {Int}
          */
-        randInt: function(min, max) {
+        randInt: function (min, max) {
             min = min || 0;
             max = max || Math.pow(2, 53) - 1; // safe max int
 
@@ -98,7 +98,7 @@
          * @param  {Float} max?
          * @return {Float}
          */
-        randFloat: function(min, max) {
+        randFloat: function (min, max) {
             min = min || 0;
             max = max || 1 + min;
 
@@ -111,7 +111,7 @@
          * @param  {Bool}   opt_hex?
          * @return {Object|String|undefined}
          */
-        parseRgb: function(input, opt_hex) {
+        parseRgb: function (input, opt_hex) {
             input = $trim(input);
             if (!input.has('rgb')) {
                 return;
@@ -144,7 +144,7 @@
          * @param  {String} url
          * @return {Object}
          */
-        url: function(url) {
+        url: function (url) {
             // url: "/path/to/file.ext?query=param#hash"
             // or full: "http://user:pass@domain.tld:8080/path/to/file.ext?query=param#hash"
             var re = $string(url).match(re_url) || [],
@@ -167,7 +167,7 @@
 
             if (s = ret.query) {
                 s = s.split('&'), ss = {};
-                s.each(function(query, key, value) {
+                s.each(function (query, key, value) {
                     query = query.splits('=', 2), key = query[0], value = query[1];
                     if (key in ss) {
                         ss[key] = [ss[key]]; // make array with current value
@@ -180,7 +180,7 @@
             }
 
             // return a filtered result
-            return $.forEach(ret, function(name, value) {
+            return $.forEach(ret, function (name, value) {
                 if (!value) ret[name] = NULL;
             })
         },
@@ -190,8 +190,8 @@
          * @param  {String} input
          * @return {String}
          */
-        urlEncode: function(input) { return encodeURIComponent(input); },
-        urlDecode: function(input) { return decodeURIComponent(input); },
+        urlEncode: function (input) { return encodeURIComponent(input) },
+        urlDecode: function (input) { return decodeURIComponent(input) },
 
         /**
          * Json encode.
@@ -200,7 +200,7 @@
          * @param  {Number|String}  space?
          * @return {String|undefined}
          */
-        jsonEncode: function(input, replacer, space) {
+        jsonEncode: function (input, replacer, space) {
             try {
                 return JSON.stringify(input, replacer, space);
             } catch (_) {}
@@ -212,7 +212,7 @@
          * @param  {Function} reviver?
          * @return {Any|undefined}
          */
-        jsonDecode: function(input, reviver) {
+        jsonDecode: function (input, reviver) {
             try {
                 return JSON.parse(input, reviver);
             } catch (_) {}
@@ -224,12 +224,12 @@
          * @param  {Bool}   opt_uppers?
          * @return {String}
          */
-        toStyleName: function(name, opt_uppers, _re /* @local */) {
+        toStyleName: function (name, opt_uppers, _re /* @local */) {
             name = $trim(name);
             if (!opt_uppers) {
                 return (_re = /- */), name.has(_re) ? name.toCamelCase(_re) : name;
             } else {
-                return (_re = /[A-Z]/), name.has(_re) ? name.replaceAll(_re, function(char) {
+                return (_re = /[A-Z]/), name.has(_re) ? name.replaceAll(_re, function (char) {
                     return '-'+ char.lower()
                 }) : name;
             }

@@ -5,7 +5,7 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function($, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
+;(function ($, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
 
     var PROTOTYPE = 'prototype';
 
@@ -67,7 +67,7 @@
          * @param  {String} inputType?
          * @return {Document|null}
          */
-        parseXml: function(input, inputType) {
+        parseXml: function (input, inputType) {
             if ($isDocument(input)) {
                 return input;
             }
@@ -85,7 +85,7 @@
          * @param  {String} input
          * @return {Any|null}
          */
-        parseJson: function(input) {
+        parseJson: function (input) {
             input = $.util.jsonDecode(input);
 
             if ($isDefined(input)) {
@@ -100,12 +100,12 @@
          * @param  {String} headers
          * @return {Object}
          */
-        parseHeaders: function(headers) {
+        parseHeaders: function (headers) {
             var i = 0, ret = {}, name, value;
 
             headers = $trim(headers);
             if (headers) {
-                headers.split(/\r?\n/).each(function(header) {
+                headers.split(/\r?\n/).each(function (header) {
                     header = header.splits(':', 2);
                     if (header[1] == NULL) { // status line etc.
                         ret[i++] = $trim(header[0]);
@@ -130,14 +130,14 @@
          * @param  {Object} data
          * @return {String}
          */
-        serialize: function(data) {
+        serialize: function (data) {
             if ($isString(data) || (!$isArray(data) && !$isObject(data))) {
                 return data;
             }
 
             var ret = [];
 
-            $forEach(data, function(key, value) {
+            $forEach(data, function (key, value) {
                 if ($isArray(value) || $isObject(value)) {
                     ret.push(serialize(value, key));
                 } else {
@@ -235,7 +235,7 @@
                 client.response.data = data;
                 client.response.dataType = dataType;
 
-                // specials, eg: 200: function(){...}
+                // specials, eg: 200: function (){...}
                 client.fire(statusCode);
 
                 // success or failure?
@@ -296,7 +296,7 @@
         // update uriParams
         if (options.uri.has('?')) {
             options.uriParams = options.uriParams || {}
-            options.uri.split('?')[1].split('&').each(function(param) {
+            options.uri.split('?')[1].split('&').each(function (param) {
                 param = param.splits('=', 2);
                 if (param[0]) {
                     options.uriParams[param[0]] = param[1];
@@ -318,14 +318,14 @@
 
         _this.api = new $win[xhr];
         _this.api.open(_this.request.method, _this.request.uri, !!options.async);
-        _this.api.onerror = function(e) {
+        _this.api.onerror = function (e) {
             _this.fire('error', e);
             _this.error = TRUE;
         };
         _this.api.client = _this;
 
         if (options.async) {
-            _this.api.onreadystatechange = function() {
+            _this.api.onreadystatechange = function () {
                 onReadyStateChange(_this);
             };
         }
@@ -341,7 +341,7 @@
          * Send.
          * @return {this}
          */
-        send: function() {
+        send: function () {
             var _this = this, data,
                 request = _this.request,
                 timeout = _this.options.timeout,
@@ -350,7 +350,7 @@
             if (!_this.sent && !_this.aborted) {
                 _this.fire('beforeSend');
 
-                $forEach(request.headers, function(name, value) {
+                $forEach(request.headers, function (name, value) {
                     _this.api.setRequestHeader(name, value);
                 });
 
@@ -369,7 +369,7 @@
                 }
 
                 if (timeout) {
-                    $.fire(timeout, function() {
+                    $.fire(timeout, function () {
                         _this.cancel(TRUE);
                     });
                 }
@@ -384,7 +384,7 @@
          * @param  {Array}           fnArgs?
          * @return {void}
          */
-        fire: function(fn, fnArgs) {
+        fire: function (fn, fnArgs) {
             var _this = this;
 
             // check 'ons'
@@ -412,7 +412,7 @@
          * @param  {Bool} opt_timeout?
          * @return {void}
          */
-        cancel: function(opt_timeout) {
+        cancel: function (opt_timeout) {
             var _this = this;
 
             _this.api.abort();
@@ -429,7 +429,7 @@
          * @param  {Function} fn
          * @return {this}
          */
-        end: function(fn) {
+        end: function (fn) {
             return this.on('done', fn);
         },
 
@@ -437,7 +437,7 @@
          * Ok.
          * @return {Bool}
          */
-        ok: function() {
+        ok: function () {
             return this.code(200);
         },
 
@@ -446,7 +446,7 @@
          * @param  {Int} code
          * @return {Bool}
          */
-        code: function(code) {
+        code: function (code) {
             return (code == this.response.statusCode);
         },
 
@@ -454,7 +454,7 @@
          * Is success.
          * @return {Bool}
          */
-        isSuccess: function(code /* @internal */) {
+        isSuccess: function (code /* @internal */) {
             return (code = this.response.statusCode)
                 && (code >= 200 && code <= 299);
         },
@@ -463,7 +463,7 @@
          * Is failure.
          * @return {Bool}
          */
-        isFailure: function(code /* @internal */) {
+        isFailure: function (code /* @internal */) {
             return (code = this.response.statusCode)
                 && (code >= 400 && code <= 599);
         },
@@ -474,7 +474,7 @@
          * @param  {Function} callback
          * @return {this}
          */
-        on: function(name, callback) {
+        on: function (name, callback) {
             this.options.ons[name] = callback;
             return this;
         }
@@ -536,22 +536,22 @@
         Client: initClient,
         Request: initRequest,
         Response: initResponse,
-        get: function(uri, options, onDone, onSuccess, onFailure) {
+        get: function (uri, options, onDone, onSuccess, onFailure) {
             return init(uri, options, onDone, onSuccess, onFailure, 'get');
         },
-        post: function(uri, options, onDone, onSuccess, onFailure) {
+        post: function (uri, options, onDone, onSuccess, onFailure) {
             return init(uri, options, onDone, onSuccess, onFailure, 'post');
         },
-        put: function(uri, options, onDone, onSuccess, onFailure) {
+        put: function (uri, options, onDone, onSuccess, onFailure) {
             return init(uri, options, onDone, onSuccess, onFailure, 'put');
         },
-        delete: function(uri, options, onDone, onSuccess, onFailure) {
+        delete: function (uri, options, onDone, onSuccess, onFailure) {
             return init(uri, options, onDone, onSuccess, onFailure, 'delete');
         },
-        request: function(uri, options, onDone, onSuccess, onFailure) {
+        request: function (uri, options, onDone, onSuccess, onFailure) {
             return init(uri, options, onDone, onSuccess, onFailure);
         },
-        load: function(uri, options, onDone, onSuccess, onFailure) {
+        load: function (uri, options, onDone, onSuccess, onFailure) {
             return init(uri, options, onDone, onSuccess, onFailure, 'get');
         }
     });

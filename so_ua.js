@@ -5,7 +5,7 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function($) { 'use strict';
+;(function ($) { 'use strict';
 
     var $win = $.win();
 
@@ -32,17 +32,17 @@
         screenAngle = $win.orientation // happy old days..
             || (screen.orientation && screen.orientation.angle);
 
-    $.ua = (function() {
+    $.ua = (function () {
         var $ua = {
             os: {},
-            screen: (function(ret) {
+            screen: (function (ret) {
                 ret = [screen.width, screen.height, screenAngle];
-                ret.isSmall = function() { return (ret[0] < 768) };
+                ret.isSmall = function () { return (ret[0] < 768) };
                 return ret;
             })(),
-            isMobile: function() { return re_mobile.test(ua); },
-            isTablet: function() { return re_tablet.test(ua); },
-            isTouchable: function() {
+            isMobile: function () { return re_mobile.test(ua); },
+            isTablet: function () { return re_tablet.test(ua); },
+            isTouchable: function () {
                 return (nav.maxTouchPoints > 0 || 'ontouchend' in $win);
             }
         }, re;
@@ -94,20 +94,20 @@
         }
 
         // geoposition
-        $ua.getGeoposition = function(onDone, onError, options) {
+        $ua.getGeoposition = function (onDone, onError, options) {
             options = $.extend({
                 timeout: 5000,
                 maximumAge: 0,
                 enableHighAccuracy: true
             }, options);
 
-            nav.geolocation.getCurrentPosition(function(position) {
+            nav.geolocation.getCurrentPosition(function (position) {
                 onDone(position, position.coords.latitude, position.coords.longitude);
             }, onError, options);
         };
 
         // beacon (sendBeacon() not supported by all)
-        $ua.sendBeacon = function(url, data) {
+        $ua.sendBeacon = function (url, data) {
             if (nav.sendBeacon) {
                 nav.sendBeacon(url, data);
             } else {

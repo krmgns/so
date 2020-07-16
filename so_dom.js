@@ -5,7 +5,7 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
-;(function($, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
+;(function ($, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
 
     // minify candies
     var NAME_NODE_NAME = 'nodeName', NAME_NODE_TYPE = 'nodeType',
@@ -154,10 +154,10 @@
                 }
                 s = s.filter().len() ? s.join(',') : '*'; // query all selector
 
-                $array(querySelectorAll(root, s)).each(function(el) {
+                $array(querySelectorAll(root, s)).each(function (el) {
                     i = 0;
                     while (r = re[i++]) {
-                        getAttrs(el, TRUE).each(function(name) {
+                        getAttrs(el, TRUE).each(function (name) {
                             if (name.startsWith(r[2])) {
                                 ret.push(el);
                             }
@@ -173,7 +173,7 @@
             i = 0, il = $len(selector.matchAll(re_child));
             while ((i++) < il) {
                 // eg: p:first => p:first-child or div:1 => div:nth-child(1)
-                selector = selector.replace(re_childFix, function(args) {
+                selector = selector.replace(re_childFix, function (args) {
                     return args = $array(arguments),
                         args[4] ? args[4] +':nth-child('+ args[5] +')' // eg: div:1 => div:nth-child(1)
                                 : args[1] +':'+ (args[3] ? 'nth-child'+ args[3] : args[2] +'-child');
@@ -189,7 +189,7 @@
         // grammar: https://www.w3.org/TR/css3-selectors/#grammar
         if (isAttr) {
             // eg: 'a.b' => 'a\.b' or 'a.b="c"' => 'a\.b="c"'
-            selector = selector.replace(re_attrFixMatch, function(_, _1, _2) {
+            selector = selector.replace(re_attrFixMatch, function (_, _1, _2) {
                 _1 = _1.replace(re_attrFix, '\\$1'); // name
                 _2 = _2 ? _2.slice(1) : '';          // value
                 return '['+ _1 + (_2 ? $isNumeric(_2) ? '="'+ _2 +'"' : '='+ _2 : '') +']';
@@ -202,7 +202,7 @@
         );
 
         if (isParent) {
-            ret = ret.each(function(el, i) {
+            ret = ret.each(function (el, i) {
                 ret[i] = el[NAME_PARENT_NODE];
             })
         }
@@ -269,7 +269,7 @@
             }
             // array
             else if ($isArray(selector)) {
-                els = [], selector.each(function(el) {
+                els = [], selector.each(function (el) {
                     isDom(el) ? els = els.concat(el.all()) : els.push(el);
                 });
             }
@@ -282,7 +282,7 @@
                 els = selector;
             }
 
-            $for(els, function(el) {
+            $for(els, function (el) {
                 if (el) _this[len++] = el;
             });
         }
@@ -301,7 +301,7 @@
          * Len.
          * @return {Int}
          */
-        len: function() {
+        len: function () {
             return this._len;
         },
 
@@ -309,7 +309,7 @@
          * Root.
          * @return {Object}
          */
-        root: function() {
+        root: function () {
             return this._root;
         },
 
@@ -318,7 +318,7 @@
          * @param  {String|Object} selector
          * @return {Dom|this}
          */
-        find: function(selector, _this /* local */) {
+        find: function (selector, _this /* local */) {
             return (_this = this),
                     _this[0] ? toDom(selector, _this[0], TRUE)
                              : _this;
@@ -329,7 +329,7 @@
          * @param  {String|Object} selector
          * @return {Dom|this}
          */
-        findAll: function(selector, _this /* local */) {
+        findAll: function (selector, _this /* local */) {
             return (_this = this),
                     _this[0] ? toDom(selector, _this[0])
                              : _this;
@@ -340,12 +340,12 @@
          * @param  {Bool} opt_dom?
          * @return {Node[]|Dom[]}
          */
-        toArray: function(opt_dom) {
+        toArray: function (opt_dom) {
             for (var i = 0, el, els = []; el = this[i]; i++) {
                 els[i] = el;
             }
 
-            return !opt_dom ? els : els.map(function(el) {
+            return !opt_dom ? els : els.map(function (el) {
                 return toDom(el)
             });
         },
@@ -354,7 +354,7 @@
          * To dom array.
          * @return {Dom[]}
          */
-        toDomArray: function() {
+        toDomArray: function () {
             return this.toArray(TRUE);
         },
 
@@ -364,12 +364,12 @@
          * @param  {Bool}     init?
          * @return {this}
          */
-        each: function(fn, init) {
+        each: function (fn, init) {
             var all = this.all();
 
             if (init) {
-                // shortcut for: ... each(function(el) { var $el = $(el) ...
-                all = all.map(function(el) {
+                // shortcut for: ... each(function (el) { var $el = $(el) ...
+                all = all.map(function (el) {
                     return toDom(el, NULL, TRUE);
                 });
             }
@@ -382,7 +382,7 @@
          * @param  {Function} fn
          * @return {this}
          */
-        for: function(fn) {
+        for: function (fn) {
             return $for(this.all(), fn, this);
         },
 
@@ -391,7 +391,7 @@
          * @param  {Function} fn
          * @return {this}
          */
-        forEach: function(fn) {
+        forEach: function (fn) {
             return $forEach(this.all(), fn, this);
         },
 
@@ -399,7 +399,7 @@
          * Copy.
          * @return {Dom}
          */
-        copy: function() {
+        copy: function () {
             return toDom(this.all());
         },
 
@@ -408,7 +408,7 @@
          * @param  {Function} fn
          * @return {Dom}
          */
-        map: function(fn) {
+        map: function (fn) {
             return toDom(this.all().map(fn));
         },
 
@@ -417,7 +417,7 @@
          * @param  {Function|String} fn
          * @return {Dom}
          */
-        filter: function(fn) {
+        filter: function (fn) {
             var all = this.all(), alls;
 
             if ($isFunction(fn)) {
@@ -426,7 +426,7 @@
 
             // selector given
             alls = toDom(fn);
-            return toDom(all.filter(function(el) {
+            return toDom(all.filter(function (el) {
                 return alls.has(el);
             }));
         },
@@ -435,7 +435,7 @@
          * Reverse.
          * @return {Dom}
          */
-        reverse: function() {
+        reverse: function () {
             return toDom(this.all().reverse());
         },
 
@@ -444,7 +444,7 @@
          * @param  {Int} i?
          * @return {Node}
          */
-        el: function(i) {
+        el: function (i) {
             return this[(i || 1) - 1]; // 1 = first, not 0
         },
 
@@ -453,13 +453,13 @@
          * @param  {Int} ...arguments
          * @return {Node[]}
          */
-        els: function() {
+        els: function () {
             var el, els = [], _this = this, args = $array(arguments);
 
             if (!args.len()) {
                 els = _this.all();
             } else {
-                $for(args, function(i) {
+                $for(args, function (i) {
                     el = _this.el(i);
                     if (el && !els.has(el)) {
                         els.push(el);
@@ -475,7 +475,7 @@
          * @param  {Int} i
          * @return {Dom}
          */
-        item: function(i) {
+        item: function (i) {
             return toDom(this[i - 1]);
         },
 
@@ -483,7 +483,7 @@
          * Items.
          * @return {Dom}
          */
-        items: function() {
+        items: function () {
             return toDom(this.els.apply(this, arguments));
         },
 
@@ -491,7 +491,7 @@
          * First.
          * @return {Dom}
          */
-        first: function() {
+        first: function () {
             return this.item(1);
         },
 
@@ -499,7 +499,7 @@
          * Last.
          * @return {Dom}
          */
-        last: function() {
+        last: function () {
             return this.item(this._len);
         },
 
@@ -508,13 +508,13 @@
          * @param  {Int|String} i
          * @return {Dom}
          */
-        nth: function(i) {
+        nth: function (i) {
             if ($isNumber(i)) {
                 return this.item(i);
             }
 
             i = $int(i);
-            return toDom(this.filter(function(node, _i) {
+            return toDom(this.filter(function (node, _i) {
                 return !((_i + 1) % i) && i;
             }));
         },
@@ -523,8 +523,8 @@
          * Odd.
          * @return {Dom}
          */
-        odd: function() {
-            return toDom(this.filter(function(el, i) {
+        odd: function () {
+            return toDom(this.filter(function (el, i) {
                 return (i & 1);
             }));
         },
@@ -533,8 +533,8 @@
          * Even.
          * @return {Dom}
          */
-        even: function() {
-            return toDom(this.filter(function(el, i) {
+        even: function () {
+            return toDom(this.filter(function (el, i) {
                 return !(i & 1);
             }));
         },
@@ -543,7 +543,7 @@
          * Tag.
          * @return {String|null}
          */
-        tag: function() {
+        tag: function () {
             return getTag(this[0])
         },
 
@@ -551,10 +551,10 @@
          * Tags.
          * @return {String[]}
          */
-        tags: function() {
+        tags: function () {
             var ret = [];
 
-            this.for(function(el) {
+            this.for(function (el) {
                 ret.push(getTag(el))
             })
 
@@ -564,20 +564,20 @@
         /**
          * All, all dom (alias of toArray(), toDomArray()).
          */
-        all: function() {
+        all: function () {
             return this.toArray();
         },
-        allDom: function() {
+        allDom: function () {
             return this.toDomArray();
         },
 
         /**
          * $, $$ (shorthand of find(), findAll()).
          */
-        $: function(selector) {
+        $: function (selector) {
             return this.find(selector);
         },
-        $$: function(selector) {
+        $$: function (selector) {
             return this.findAll(selector);
         }
     });
@@ -680,7 +680,7 @@
                             }
                             $event && $event.on(node, name, value);
                         } else if (name == NAME_STYLE) {
-                            $forEach(value, function(name, value) {
+                            $forEach(value, function (name, value) {
                                 setStyle(node, name, value);
                             });
                         } else {
@@ -702,7 +702,7 @@
         var el = (doc || $doc).createElement(tag);
 
         if (properties) {
-            $forEach(properties, function(name, value) {
+            $forEach(properties, function (name, value) {
                 el[name] = value;
             });
         }
@@ -746,15 +746,15 @@
             }
 
             if (el.$events) {
-                $for(el.$events, function(events) {
-                    $for(events, function(event) {
+                $for(el.$events, function (events) {
+                    $for(events, function (event) {
                         event.bindTo(clone);
                     });
                 });
             }
 
             if (el[NAME_CHILD_NODES]) {
-                $for(el[NAME_CHILD_NODES], function(child) {
+                $for(el[NAME_CHILD_NODES], function (child) {
                     appendChild(clone, cloneElement(child, opt_deep));
                 });
             }
@@ -780,10 +780,10 @@
          * @param  {Bool} opt_deep?
          * @return {Dom}
          */
-        clone: function(opt_deep) {
+        clone: function (opt_deep) {
             var clones = [];
 
-            this.for(function(el, i) {
+            this.for(function (el, i) {
                 clones[i] = cloneElement(el, opt_deep);
             });
 
@@ -795,8 +795,8 @@
          * @param  {Bool} opt_self?
          * @return {this}
          */
-        clean: function(opt_self) {
-            return this.for(function(el) {
+        clean: function (opt_self) {
+            return this.for(function (el) {
                 cleanElement(el, opt_self);
             });
         },
@@ -805,7 +805,7 @@
          * Empty.
          * @return {this}
          */
-        empty: function() {
+        empty: function () {
             return this.clean(FALSE);
         },
 
@@ -814,11 +814,11 @@
          * @param  {String} selector?
          * @return {this}
          */
-        remove: function(selector) {
+        remove: function (selector) {
             var _this = this;
 
             if (!selector) { // self remove
-                return _this.for(function(el) {
+                return _this.for(function (el) {
                     cleanElement(el);
                     if (el[NAME_PARENT_NODE]) {
                         removeChild(el[NAME_PARENT_NODE], el);
@@ -827,7 +827,7 @@
             }
 
             if (_this[0]) {
-                _this.$$(selector).for(function(el, parent) {
+                _this.$$(selector).for(function (el, parent) {
                     parent = el[NAME_PARENT_NODE];
                     if (parent && parent == _this[0]) {
                         removeChild(_this[0], cleanElement(el));
@@ -846,7 +846,7 @@
          * @param  {Bool}               opt_clone?
          * @return {this}
          */
-        append: function(content, opt_content, opt_attributes, opt_clone) {
+        append: function (content, opt_content, opt_attributes, opt_clone) {
             // eg: ("a", "Click!", {...attributes}) or ("<a>Click!</a>", {...attributes})
             if ($isString(opt_content) || $isObject(opt_content)) {
                 content = $isString(opt_content)
@@ -854,8 +854,8 @@
                     : $extend(toTagContent(content), opt_content)
             }
 
-            return this.for(function(el) {
-                createFor(el, content, opt_attributes).each(function(_el) {
+            return this.for(function (el) {
+                createFor(el, content, opt_attributes).each(function (_el) {
                     appendChild(el, cloneIf(opt_clone, _el));
                 });
             });
@@ -867,13 +867,13 @@
          * @param  {Bool}   opt_clone?
          * @return {this}
          */
-        appendTo: function(selector, opt_clone) {
+        appendTo: function (selector, opt_clone) {
             if (!isDom(selector)) {
                 selector = toDom(selector);
             }
 
-            return this.for(function(el) {
-                selector.for(function(_el) {
+            return this.for(function (el) {
+                selector.for(function (_el) {
                     appendChild(_el, cloneIf(opt_clone, el));
                 });
             });
@@ -887,15 +887,15 @@
          * @param  {Bool}               opt_clone?
          * @return {this}
          */
-        prepend: function(content, opt_content, opt_attributes, opt_clone) {
+        prepend: function (content, opt_content, opt_attributes, opt_clone) {
             if ($isString(opt_content) || $isObject(opt_content)) {
                 content = $isString(opt_content)
                     ? $extend(toTagContent(content, opt_content), opt_attributes)
                     : $extend(toTagContent(content), opt_content)
             }
 
-            return this.for(function(el) {
-                createFor(el, content, opt_attributes).each(function(_el) {
+            return this.for(function (el) {
+                createFor(el, content, opt_attributes).each(function (_el) {
                     insertBefore(el, cloneIf(opt_clone, _el), el[NAME_FIRST_CHILD]);
                 });
             });
@@ -907,13 +907,13 @@
          * @param  {Bool}   opt_clone?
          * @return {this}
          */
-        prependTo: function(selector, opt_clone) {
+        prependTo: function (selector, opt_clone) {
             if (!isDom(selector)) {
                 selector = toDom(selector);
             }
 
-            return this.for(function(el) {
-                selector.for(function(_el) {
+            return this.for(function (el) {
+                selector.for(function (_el) {
                     insertBefore(_el, cloneIf(opt_clone, el), _el[NAME_FIRST_CHILD]);
                 });
             });
@@ -922,14 +922,14 @@
         /**
          * Insert (alias of append()).
          */
-        insert: function() {
+        insert: function () {
             return this.append.apply(this, arguments);
         },
 
         /**
          * Insert to (alias of appendTo()).
          */
-        insertTo: function() {
+        insertTo: function () {
             return this.appendTo.apply(this, arguments);
         },
 
@@ -939,13 +939,13 @@
          * @param  {Bool}   opt_clone?
          * @return {this}
          */
-        insertAfter: function(selector, opt_clone) {
+        insertAfter: function (selector, opt_clone) {
             if (!isDom(selector)) {
                 selector = toDom(selector);
             }
 
-            return this.for(function(el) {
-                selector.for(function(_el) {
+            return this.for(function (el) {
+                selector.for(function (_el) {
                     insertBefore(_el[NAME_PARENT_NODE], cloneIf(opt_clone, el), _el.nextSibling)
                 });
             });
@@ -957,13 +957,13 @@
          * @param  {Bool}   opt_clone?
          * @return {this}
          */
-        insertBefore: function(selector, opt_clone) {
+        insertBefore: function (selector, opt_clone) {
             if (!isDom(selector)) {
                 selector = toDom(selector);
             }
 
-            return this.for(function(el) {
-                selector.for(function(_el) {
+            return this.for(function (el) {
+                selector.for(function (_el) {
                     insertBefore(_el[NAME_PARENT_NODE], cloneIf(opt_clone, el), _el);
                 });
             });
@@ -977,7 +977,7 @@
          * @param  {Bool}               opt_clone?
          * @return {this}
          */
-        replace: function(content, opt_content, opt_attributes, opt_clone) {
+        replace: function (content, opt_content, opt_attributes, opt_clone) {
             return this.clean().replaceWith(
                 $(soTempTag).append(content, opt_content, opt_attributes, opt_clone).children()
             );
@@ -991,7 +991,7 @@
          * @param  {Bool}               opt_clone?
          * @return {this}
          */
-        replaceContent: function(content, opt_content, opt_attributes, opt_clone) {
+        replaceContent: function (content, opt_content, opt_attributes, opt_clone) {
             return this.clean().append(content, opt_content, opt_attributes, opt_clone);
         },
 
@@ -1001,13 +1001,13 @@
          * @param  {Bool}        opt_clone?
          * @return {this}
          */
-        replaceWith: function(selector, opt_clone) {
+        replaceWith: function (selector, opt_clone) {
             if (!isDom(selector)) {
                 selector = toDom(selector);
             }
 
-            var _this = this; return _this.for(function(el, i) {
-                selector.for(function(_el) {
+            var _this = this; return _this.for(function (el, i) {
+                selector.for(function (_el) {
                     replaceChild(el[NAME_PARENT_NODE], _this[i] = cloneIf(opt_clone, _el), el);
                 });
             });
@@ -1017,9 +1017,9 @@
          * Replace with clone.
          * @return {this}
          */
-        replaceWithClone: function() {
+        replaceWithClone: function () {
             // 'cos im sick and tired of trying to hide mobile tab focuses..
-            var _this = this; return _this.for(function(el, i) {
+            var _this = this; return _this.for(function (el, i) {
                 replaceChild(el[NAME_PARENT_NODE], _this[i] = cloneElement(el), el);
             });
         },
@@ -1030,7 +1030,7 @@
          * @param  {Object}             opt_attributes?
          * @return {Dom}
          */
-        wrap: function(content, opt_attributes) {
+        wrap: function (content, opt_attributes) {
             var el = this[0], elParent = el && el[NAME_PARENT_NODE];
             var clone, clones = [];
             var wrapper, replace;
@@ -1039,7 +1039,7 @@
                 wrapper = createFor(el, content, opt_attributes)[0];
                 replace = createFor(elParent, soTempTag, {style: 'display:none'})[0];
                 insertBefore(elParent, replace, el);
-                this.for(function(el) {
+                this.for(function (el) {
                     clone = cloneElement(el);
                     clones.push(clone);
                     appendChild(wrapper, clone);
@@ -1056,13 +1056,13 @@
          * @param  {Bool} opt_remove?
          * @return {Dom}
          */
-        unwrap: function(opt_remove) {
+        unwrap: function (opt_remove) {
             var el = this[0], elParent = el && el[NAME_PARENT_NODE],
                 elParentParent = elParent && elParent[NAME_PARENT_NODE];
             var clone, clones = [];
 
             if (elParentParent) {
-                this.for(function(el) {
+                this.for(function (el) {
                     clone = cloneElement(el);
                     clones.push(clone);
                     insertBefore(elParentParent, clone, elParent);
@@ -1095,7 +1095,7 @@
          * @param  {Any}    value?
          * @return {Any|this}
          */
-        property: function(name, value) {
+        property: function (name, value) {
             return $isDefined(value) ? this.setProperty(name, value)
                                      : this.getProperty(name);
         },
@@ -1103,7 +1103,7 @@
         /**
          * Properties (alias of getProperties()).
          */
-        properties: function(names) {
+        properties: function (names) {
             return this.getProperties(names);
         },
 
@@ -1112,7 +1112,7 @@
          * @param  {String} name
          * @return {Bool}
          */
-        hasProperty: function(name) {
+        hasProperty: function (name) {
             return $bool(this[0] && (name in this[0]));
         },
 
@@ -1122,10 +1122,10 @@
          * @param  {Any}    value
          * @return {this}
          */
-        setProperty: function(name, value) {
+        setProperty: function (name, value) {
             var properties = toKeyValue(name, value);
 
-            return this.for(function(el) {
+            return this.for(function (el) {
                 for (name in properties) {
                     el[name] = properties[name];
                 }
@@ -1137,7 +1137,7 @@
          * @param  {String} name
          * @return {Any}
          */
-        getProperty: function(name) {
+        getProperty: function (name) {
             return __(this, name);
         },
 
@@ -1146,7 +1146,7 @@
          * @param  {String} names?
          * @return {Object}
          */
-        getProperties: function(names) {
+        getProperties: function (names) {
             var el = this[0], ret = {}, name;
 
             if (el) {
@@ -1157,7 +1157,7 @@
                     }
                 }
 
-                $each(names, function(name) {
+                $each(names, function (name) {
                     ret[name] = el[name];
                 });
             }
@@ -1168,14 +1168,14 @@
         /**
          * Set (alias of setProperty()).
          */
-        set: function(name, value) {
+        set: function (name, value) {
             return this.property(name, value);
         },
 
         /**
          * Get (alias of getProperty()).
          */
-        get: function(name) {
+        get: function (name) {
             return this.property(name);
         }
     });
@@ -1187,7 +1187,7 @@
          * @param  {String} input?
          * @return {String|this}
          */
-        text: function(input) {
+        text: function (input) {
             return $isDefined(input) ? this.setText(input)
                                      : this.getText();
         },
@@ -1197,8 +1197,8 @@
          * @param  {String} input
          * @return {this}
          */
-        setText: function(input) {
-            return this.for(function(el) {
+        setText: function (input) {
+            return this.for(function (el) {
                 el[NAME_TEXT_CONTENT] = input;
             });
         },
@@ -1207,7 +1207,7 @@
          * Get text.
          * @return {String}
          */
-        getText: function() {
+        getText: function () {
             return __(this, NAME_TEXT_CONTENT);
         },
 
@@ -1216,7 +1216,7 @@
          * @param  {String|Bool} input?
          * @return {String|Any}
          */
-        html: function(input) {
+        html: function (input) {
             return $isUndefined(input) || $isTrue(input)
                  ? this.getHtml(input) : this.setHtml(input);
         },
@@ -1226,8 +1226,8 @@
          * @param  {String} input
          * @return {this}
          */
-        setHtml: function(input) {
-            return this.for(function(el) {
+        setHtml: function (input) {
+            return this.for(function (el) {
                 el[NAME_INNER_HTML] = input;
             });
         },
@@ -1237,7 +1237,7 @@
          * @param  {Bool} opt_outer?
          * @return {String}
          */
-        getHtml: function(opt_outer) {
+        getHtml: function (opt_outer) {
             return opt_outer ? __(this, NAME_OUTER_HTML)
                              : __(this, NAME_INNER_HTML);
         },
@@ -1247,7 +1247,7 @@
          * @param  {Bool} opt_trim?
          * @return {Bool}
          */
-        isEmpty: function(opt_trim) {
+        isEmpty: function (opt_trim) {
             var content;
 
             switch (this.tag()) {
@@ -1273,12 +1273,12 @@
         var tmp, i;
         tmp = (b.len() > a.len()) ? (tmp = b, b = a, a = tmp) : NULL; // loop over shortest
 
-        return a.filter(function(search) {
+        return a.filter(function (search) {
             return (i = b.indexOf(search)), opt_found ? i > -1 : i < 0;
         });
     }
     function noIntersect(el, els) {
-        return els.filter(function(_el) { return _el != el; });
+        return els.filter(function (_el) { return _el != el; });
     }
 
     // walker helper
@@ -1309,7 +1309,7 @@
          * @param  {Bool} opt_useParent?
          * @return {Dom}
          */
-        not: function(selector, opt_useParent) {
+        not: function (selector, opt_useParent) {
             var _this = this, ret = [], args;
 
             if ($isString(selector)) {
@@ -1326,7 +1326,7 @@
                 ret = noIntersect(selector, _this);
             } else {
                 // eg: $.dom("p").not(1) or $.dom("p").not(1,2,3)
-                args = $array(arguments), ret = _this.filter(function(el, i) {
+                args = $array(arguments), ret = _this.filter(function (el, i) {
                     if (!args.has(i + 1)) {
                         return el;
                     }
@@ -1340,7 +1340,7 @@
          * Parent.
          * @return {Dom}
          */
-        parent: function() {
+        parent: function () {
             return toDom(__(this, NAME_PARENT_NODE));
         },
 
@@ -1348,7 +1348,7 @@
          * Parents.
          * @return {Dom}
          */
-        parents: function() {
+        parents: function () {
             return toDom(walk(this[0], NAME_PARENT_NODE));
         },
 
@@ -1357,7 +1357,7 @@
          * @param  {Int|String} selector?
          * @return {Dom}
          */
-        siblings: function(selector) {
+        siblings: function (selector) {
             var el = this[0], ret;
 
             if (el) {
@@ -1376,7 +1376,7 @@
          * Children.
          * @return {Dom}
          */
-        children: function() {
+        children: function () {
             return toDom($array(__(this, NAME_CHILDREN)));
         },
 
@@ -1384,7 +1384,7 @@
          * First child.
          * @return {Dom|this}
          */
-        firstChild: function() {
+        firstChild: function () {
             return this.$('> :first');
         },
 
@@ -1392,7 +1392,7 @@
          * Last child.
          * @return {Dom|this}
          */
-        lastChild: function() {
+        lastChild: function () {
             return this.$('> :last');
         },
 
@@ -1401,7 +1401,7 @@
          * @param  {Int} i
          * @return {Dom|this}
          */
-        nthChild: function(i) {
+        nthChild: function (i) {
             return this.$('> :nth('+ i +')');
         },
 
@@ -1409,7 +1409,7 @@
          * Comments.
          * @return {Dom}
          */
-        comments: function() {
+        comments: function () {
             var el = this[0], node, nodes = [], i = 0;
 
             if (el) {
@@ -1427,7 +1427,7 @@
          * Prev.
          * @return {Dom}
          */
-        prev: function() {
+        prev: function () {
             return toDom(__(this, NAME_PREVIOUS_ELEMENT_SIBLING));
         },
 
@@ -1436,7 +1436,7 @@
          * @param  {String} selector?
          * @return {Dom}
          */
-        prevAll: function(selector) {
+        prevAll: function (selector) {
             var el = this[0], ret = [];
 
             if (el) {
@@ -1455,7 +1455,7 @@
          * Next.
          * @return {Dom}
          */
-        next: function() {
+        next: function () {
             return toDom(__(this, NAME_NEXT_ELEMENT_SIBLING));
         },
 
@@ -1464,7 +1464,7 @@
          * @param  {String} selector?
          * @return {Dom}
          */
-        nextAll: function(selector) {
+        nextAll: function (selector) {
             var el = this[0], ret = [];
 
             if (el) {
@@ -1484,7 +1484,7 @@
          * @param  {String|Node} selector
          * @return {Bool}
          */
-        equals: function(selector, el /* @internal */) {
+        equals: function (selector, el /* @internal */) {
             return $bool((el = this[0]) && (el == selector || el == toDom(selector)[0]));
         },
 
@@ -1493,7 +1493,7 @@
          * @param  {String|Node} selector
          * @return {Bool}
          */
-        matches: function(selector, el /* @internal */) {
+        matches: function (selector, el /* @internal */) {
             return $bool((el = this[0]) && toDom(selector).has(el));
         },
 
@@ -1502,7 +1502,7 @@
          * @param  {String|Node} selector
          * @return {Bool}
          */
-        contains: function(selector, el /* @internal */) {
+        contains: function (selector, el /* @internal */) {
             return $bool((el = this[0]) && toDom(selector, el).len());
         },
 
@@ -1511,7 +1511,7 @@
          * @param  {String|Node} selector
          * @return {Bool}
          */
-        has: function(selector) {
+        has: function (selector) {
             if ($isString(selector)) {
                 selector = toDom(selector)[0];
             }
@@ -1523,7 +1523,7 @@
          * Has parent.
          * @return {Bool}
          */
-        hasParent: function() {
+        hasParent: function () {
             return this.parent().len() > 0;
         },
 
@@ -1531,7 +1531,7 @@
          * Has parents.
          * @return {Bool}
          */
-        hasParents: function() {
+        hasParents: function () {
             return this.parent().parent().len() > 1;
         },
 
@@ -1539,7 +1539,7 @@
          * Has child.
          * @return {Bool}
          */
-        hasChild: function() {
+        hasChild: function () {
             return this.children().len() > 0;
         },
 
@@ -1547,7 +1547,7 @@
          * Has children.
          * @return {Bool}
          */
-        hasChildren: function() {
+        hasChildren: function () {
             return this.children().len() > 1;
         },
 
@@ -1555,7 +1555,7 @@
          * Has content.
          * @return {Bool}
          */
-        hasContent: function() {
+        hasContent: function () {
             return !this.isEmpty(TRUE);
         }
     });
@@ -1567,7 +1567,7 @@
          * @param  {Bool} opt_contentOf?
          * @return {Dom}
          */
-        getWindow: function(opt_contentOf, el /* @internal */) {
+        getWindow: function (opt_contentOf, el /* @internal */) {
             return toDom((el = this[0]) && (opt_contentOf ? el.contentWindow : $getWindow(el)));
         },
 
@@ -1576,7 +1576,7 @@
          * @param  {Bool} opt_contentOf?
          * @return {Dom}
          */
-        getDocument: function(opt_contentOf, el /* @internal */) {
+        getDocument: function (opt_contentOf, el /* @internal */) {
             return toDom((el = this[0]) && (opt_contentOf ? el.contentDocument : $getDocument(el)));
         },
 
@@ -1584,7 +1584,7 @@
          * Is window.
          * @return {Bool}
          */
-        isWindow: function() {
+        isWindow: function () {
             return $isWindow(this[0]);
         },
 
@@ -1592,14 +1592,14 @@
          * Is document.
          * @return {Bool}
          */
-        isDocument: function() {
+        isDocument: function () {
             return $isDocument(this[0]);
         }
     });
 
     function getSimilarElements(el, tag) {
         return walk(el[NAME_PARENT_ELEMENT], NAME_CHILDREN)
-                .filter(function(el) { return tag == getTag(el); });
+                .filter(function (el) { return tag == getTag(el); });
     }
 
     // dom: paths
@@ -1609,7 +1609,7 @@
          * @param  {Bool} opt_join?
          * @return {Array|String|undefined}
          */
-        path: function(opt_join) {
+        path: function (opt_join) {
             var el = this[0], tag, sims, ret = [], s;
 
             if (isElementNode(el)) {
@@ -1637,7 +1637,7 @@
          * @param  {Bool} opt_join?
          * @return {Array|String|undefined}
          */
-        xpath: function(opt_join) {
+        xpath: function (opt_join) {
             var el = this[0], tag, sims, ret = [];
 
             if (isElementNode(el)) {
@@ -1665,7 +1665,7 @@
     var re_nonUnitStyles = /(?:(?:fill-?)?opacity|z(?:oom|index)|(?:font-?w|line-?h)eight|column(?:-?count|s))/i;
     var re_colon = /\s*:\s*/;
     var re_scolon = /\s*;\s*/;
-    var matchesSelector = $doc[NAME_DOCUMENT_ELEMENT].matches || function(selector) {
+    var matchesSelector = $doc[NAME_DOCUMENT_ELEMENT].matches || function (selector) {
         var i = 0, all = $array(querySelectorAll(this[NAME_OWNER_DOCUMENT], selector));
         while (i < all.len()) {
             if (all[i++] == this) {
@@ -1680,9 +1680,9 @@
     function getCssStyle(el) {
         var sheets = el[NAME_OWNER_DOCUMENT].styleSheets, rules, ret = [];
 
-        $for(sheets, function(sheet) {
+        $for(sheets, function (sheet) {
             rules = sheet.rules || sheet.cssRules;
-            $for(rules, function(rule) {
+            $for(rules, function (rule) {
                 if (matchesSelector.call(el, rule.selectorText)) {
                     ret.push(rule[NAME_STYLE]); // loop over all until last
                 }
@@ -1773,7 +1773,7 @@
          * @param  {String|Number|Object|Bool} value? (true=opt_convert?)
          * @return {String}
          */
-        style: function(name, value) {
+        style: function (name, value) {
             return $isNull(name) || $isNulls(name)
                  ? this.removeAttr(NAME_STYLE) : $isNull(value) || $isNulls(value)
                  ? this.removeStyle(name) : $isString(value) || $isNumber(value) || $isObject(name)
@@ -1786,7 +1786,7 @@
          * @param  {String} name
          * @return {Bool}
          */
-        hasStyle: function(name) {
+        hasStyle: function (name) {
             var el = this[0];
 
             return $bool(el && el[NAME_STYLE] && el[NAME_STYLE][NAME_CSS_TEXT].has(name));
@@ -1798,15 +1798,15 @@
          * @param  {String}        value?
          * @return {this}
          */
-        setStyle: function(name, value) {
+        setStyle: function (name, value) {
             var styles = name;
 
             if ($isString(styles)) {
                 styles = $isVoid(value) ? parseStyleText(name) : toKeyValue(name, value);
             }
 
-            return this.for(function(el) {
-                $forEach(styles, function(name, value) {
+            return this.for(function (el) {
+                $forEach(styles, function (name, value) {
                     setStyle(el, name, value);
                 });
             });
@@ -1818,7 +1818,7 @@
          * @param  {Bool}   opt_convert? @default=true
          * @return {String|null|undefined}
          */
-        getStyle: function(name, opt_convert) {
+        getStyle: function (name, opt_convert) {
             var el = this[0], value, opt_convert;
 
             if (el) {
@@ -1844,13 +1844,13 @@
          * @param  {Bool}  opt_convert? @default=true
          * @return {Object|undefined}
          */
-        getStyles: function(names, opt_convert) {
+        getStyles: function (names, opt_convert) {
             var el = this[0], styles = {};
 
             if (el) {
                 if (names) {
                     el = toDom(el);
-                    split(names, re_comma).each(function(name) {
+                    split(names, re_comma).each(function (name) {
                         styles[name] = el.getStyle(name, opt_convert);
                     });
                 } else {
@@ -1866,7 +1866,7 @@
          * @param  {String} name?
          * @return {String|Object|undefined}
          */
-        getCssStyle: function(name) {
+        getCssStyle: function (name) {
             var el = this[0], ret = {};
 
             if (el) {
@@ -1880,7 +1880,7 @@
          * @param  {String} name?
          * @return {String|Object|undefined}
          */
-        getComputedStyle: function(name) {
+        getComputedStyle: function (name) {
             var el = this[0], ret = {};
 
             if (el) {
@@ -1894,15 +1894,15 @@
          * @param  {String} name
          * @return {this}
          */
-        removeStyle: function(name) {
+        removeStyle: function (name) {
             var _this = this;
 
             if (name == '*') { // all
                 _this.attr(NAME_STYLE, '');
             } else {
                 name = split(name, re_comma);
-                _this.for(function(el) {
-                    $each(name, function(name) {
+                _this.for(function (el) {
+                    $each(name, function (name) {
                         setStyle(el, name, '');
                     });
                 });
@@ -1955,7 +1955,7 @@
         el[NAME_STYLE][NAME_VISIBILITY] = ''; // for !important annots
 
         // finally, grap it!
-        $each(properties, function(name) {
+        $each(properties, function (name) {
             var value = el[name];
             if (value.call) { // getBoundingClientRect() etc.
                 value = value.call(el);
@@ -2107,7 +2107,7 @@
          * Dims.
          * @return {Object}
          */
-        dims: function() {
+        dims: function () {
             return getDimensions(this[0]);
         },
 
@@ -2115,7 +2115,7 @@
          * Width.
          * @return {Int}
          */
-        width: function() {
+        width: function () {
             return getDimensionsBy(this[0], NAME_WIDTH);
         },
 
@@ -2123,7 +2123,7 @@
          * Inner width.
          * @return {Int}
          */
-        innerWidth: function() {
+        innerWidth: function () {
             return getDimensionsBy(this[0], NAME_INNER_WIDTH);
         },
 
@@ -2132,7 +2132,7 @@
          * @param  {Bool} opt_margins?
          * @return {Int}
          */
-        outerWidth: function(opt_margins) {
+        outerWidth: function (opt_margins) {
             return getDimensionsBy(this[0], NAME_OUTER_WIDTH, opt_margins);
         },
 
@@ -2140,7 +2140,7 @@
          * Height.
          * @return {Int}
          */
-        height: function() {
+        height: function () {
             return getDimensionsBy(this[0], NAME_HEIGHT);
         },
 
@@ -2148,7 +2148,7 @@
          * Outer height.
          * @return {Int}
          */
-        innerHeight: function() {
+        innerHeight: function () {
             return getDimensionsBy(this[0], NAME_INNER_HEIGHT);
         },
 
@@ -2157,7 +2157,7 @@
          * @param  {Bool} opt_margins?
          * @return {Int}
          */
-        outerHeight: function(opt_margins) {
+        outerHeight: function (opt_margins) {
             return getDimensionsBy(this[0], NAME_OUTER_HEIGHT, opt_margins);
         }
     });
@@ -2169,7 +2169,7 @@
          * @param  {Bool} opt_relative?
          * @return {Object}
          */
-        offset: function(opt_relative) {
+        offset: function (opt_relative) {
             return getOffset(this[0], opt_relative);
         },
 
@@ -2177,7 +2177,7 @@
          * Scroll.
          * @return {Object}
          */
-        scroll: function() {
+        scroll: function () {
             return getScroll(this[0]);
         },
 
@@ -2185,7 +2185,7 @@
          * Box.
          * @return {Object}
          */
-        box: function() {
+        box: function () {
             var el = this[0], ret = {};
 
             if (el) {
@@ -2222,7 +2222,7 @@
          * Visible.
          * @return {Bool}
          */
-        visible: function() {
+        visible: function () {
             return isVisible(this[0]);
         }
     });
@@ -2262,7 +2262,7 @@
     function getAttrs(el, opt_namesOnly, _ret) {
         _ret = $array(el && el.attributes);
         if (opt_namesOnly) {
-            _ret = _ret.map(function(attr) { return attr[NAME_NAME] });
+            _ret = _ret.map(function (attr) { return attr[NAME_NAME] });
         }
         return _ret;
     }
@@ -2290,7 +2290,7 @@
          * @param  {Any}           value?
          * @return {Any}
          */
-        attr: function(name, value) {
+        attr: function (name, value) {
             return $isObject(name) || $isDefined(value) || $isNull(value)
                  ? this.setAttr(name, value) : this.getAttr(name);
         },
@@ -2299,11 +2299,11 @@
          * Attrs.
          * @return {Object}
          */
-        attrs: function() {
+        attrs: function () {
             var el = this[0], ret = {};
 
             if (el) {
-                getAttrs(el).each(function(attr) {
+                getAttrs(el).each(function (attr) {
                     ret[attr[NAME_NAME]] = test(attr[NAME_NAME], re_attrState)
                         ? attr[NAME_NAME] : attr[NAME_VALUE];
                 });
@@ -2315,14 +2315,14 @@
         /**
          * Attribute (alias of attr()).
          */
-        attribute: function(name, value) {
+        attribute: function (name, value) {
             return this.attr(name, value);
         },
 
         /**
          * Attributes (alias of attrs()).
          */
-        attributes: function() {
+        attributes: function () {
             return this.attrs();
         },
 
@@ -2331,7 +2331,7 @@
          * @param  {String} name
          * @return {Bool}
          */
-        hasAttr: function(name) {
+        hasAttr: function (name) {
             return hasAttr(this[0], name);
         },
 
@@ -2341,10 +2341,10 @@
          * @param  {String} value?
          * @return {this}
          */
-        setAttr: function(name, value) {
+        setAttr: function (name, value) {
             var attributes = toKeyValue(name, value);
 
-            return this.for(function(el) {
+            return this.for(function (el) {
                 for (name in attributes) {
                     setAttr(el, name, attributes[name]);
                 }
@@ -2356,7 +2356,7 @@
          * @param  {String} name
          * @return {String|undefined}
          */
-        getAttr: function(name) {
+        getAttr: function (name) {
             return getAttr(this[0], name);
         },
 
@@ -2365,11 +2365,11 @@
          * @param  {String} name
          * @return {this}
          */
-        removeAttr: function(name) {
+        removeAttr: function (name) {
             name = split(name, re_comma);
 
-            return this.for(function(el) {
-                $each((name[0] == '*' ? getAttrs(el, TRUE) : name), function(name) {
+            return this.for(function (el) {
+                $each((name[0] == '*' ? getAttrs(el, TRUE) : name), function (name) {
                     removeAttr(el, name);
                 });
             });
@@ -2381,11 +2381,11 @@
          * @param  {String} value?
          * @return {this}
          */
-        toggleAttr: function(name, value) {
+        toggleAttr: function (name, value) {
             name = split(name, re_comma);
 
-            return this.for(function(el) {
-                $each(name, function(name) {
+            return this.for(function (el) {
+                $each(name, function (name) {
                     !hasAttr(el, name) ? setAttr(el, name, $isDefined(value) ? value : name)
                                        : removeAttr(el, name);
                 });
@@ -2395,12 +2395,12 @@
         /**
          * Data attr (alias of attr() for "data-" attributes).
          */
-        dataAttr: function(name, value) {
+        dataAttr: function (name, value) {
             if ($isString(name)) {
                 name = toDataAttrName(name);
             } else if ($isObject(name)) {
                 var tmp = {};
-                $forEach(name, function(key, value) {
+                $forEach(name, function (key, value) {
                     tmp[toDataAttrName(key)] = value;
                 });
                 name = tmp;
@@ -2414,7 +2414,7 @@
          * @param {String|Object} name
          * @param {Any}           value
          */
-        setDataAttr: function(name, value) {
+        setDataAttr: function (name, value) {
             return this.dataAttr(name, value);
         },
 
@@ -2422,7 +2422,7 @@
          * Get data attr.
          * @param {String|Object} name
          */
-        getDataAttr: function(name) {
+        getDataAttr: function (name) {
             return this.dataAttr(name);
         },
 
@@ -2431,19 +2431,19 @@
          * @param  {String} name
          * @return {this}
          */
-        removeDataAttr: function(name) {
+        removeDataAttr: function (name) {
             name = split(name, re_comma);
 
-            return this.for(function(el) {
+            return this.for(function (el) {
                 if (name[0] == '*') { // all
-                    name = getAttrs(el, TRUE).filter(function(name) {
+                    name = getAttrs(el, TRUE).filter(function (name) {
                         return name.startsWith('data-');
                     });
                 } else {
                     name = name.map(toDataAttrName);
                 }
 
-                $each(name, function(name) {
+                $each(name, function (name) {
                     removeAttr(el, name);
                 });
             });
@@ -2455,13 +2455,13 @@
          * @param  {String} value?
          * @return {String|this|undefined}
          */
-        soAttr: function(name, value) {
+        soAttr: function (name, value) {
             if (!$isObject(name) && !$isDefined(value)) {
                 return this.attr(soAttrPrefix + name); // get
             }
 
             var attrs = toKeyValue(name, value);
-            $forEach(attrs, function(name, value) {
+            $forEach(attrs, function (name, value) {
                 attrs[soAttrPrefix + name] = value;
                 delete attrs[name];
             });
@@ -2477,7 +2477,7 @@
          * @param  {String} value?
          * @return {String|this|undefined}
          */
-        value: function(value) {
+        value: function (value) {
             return $isDefined(value) ? this.setValue(value)
                                      : this.getValue();
         },
@@ -2487,12 +2487,12 @@
          * @param  {String} value?
          * @return {this}
          */
-        setValue: function(value) {
+        setValue: function (value) {
             value = $isNull(value) ? '' : (''+ value); // @important
 
-            return this.for(function(el) {
+            return this.for(function (el) {
                 if (isSelectInput(el)) {
-                    $for(el[NAME_OPTIONS], function(option) {
+                    $for(el[NAME_OPTIONS], function (option) {
                         if (option[NAME_VALUE] === value) {
                             option[NAME_SELECTED] = TRUE;
                         }
@@ -2509,7 +2509,7 @@
          * Get value.
          * @return {String|undefined}
          */
-        getValue: function() {
+        getValue: function () {
             var el = this[0], value, option;
 
             if (el) {
@@ -2531,7 +2531,7 @@
         //  * Option.
         //  * @return {HTMLOptionElement|undefined}
         //  */
-        // option: function() {
+        // option: function () {
         //    var el = this[0];
         //
         //    if (isSelectInput(el)) {
@@ -2544,7 +2544,7 @@
         //  * @param  {Bool} opt_toArray?
         //  * @return {HTMLOptionsCollection|Array|undefined}
         //  */
-        // options: function(opt_toArray) {
+        // options: function (opt_toArray) {
         //    var el = this[0];
         //
         //    if (isSelectInput(el)) {
@@ -2560,7 +2560,7 @@
          * @param  {String} id?
          * @return {String|undefined|this}
          */
-        id: function(id) {
+        id: function (id) {
             return this.attr(NAME_ID, id);
         },
 
@@ -2569,7 +2569,7 @@
          * @param  {String} name?
          * @return {String|undefined|this}
          */
-        name: function(name) {
+        name: function (name) {
             return this.attr(NAME_NAME, name);
         }
     });
@@ -2586,7 +2586,7 @@
     }
 
     function addClass(el, name) {
-        $each(split(name, re_space), function(name) {
+        $each(split(name, re_space), function (name) {
             if (!hasClass(el, name)) {
                  setClass(el, getClass(el) +' '+ name);
             }
@@ -2602,7 +2602,7 @@
     }
 
     function removeClass(el, name) {
-        $each(split(name, re_space), function(name) {
+        $each(split(name, re_space), function (name) {
             setClass(el, getClass(el).replace(toClassRegExp(name), ' '));
         });
     }
@@ -2615,7 +2615,7 @@
          * @param  {String|Bool} option?
          * @return {Bool|this}
          */
-        class: function(name, option) {
+        class: function (name, option) {
             return $isUndefined(name) ? this.getClass()
                  : $isUndefined(option) ? this.addClass(name)
                  : $isNull(option) || $isNulls(option) ? this.removeClass(name)
@@ -2626,7 +2626,7 @@
          * Class list.
          * @return {Array}
          */
-        classList: function() {
+        classList: function () {
             return this.getClass().split(re_space).filter();
         },
 
@@ -2635,7 +2635,7 @@
          * @param  {String} name
          * @return {Bool}
          */
-        hasClass: function(name) {
+        hasClass: function (name) {
             return hasClass(this[0], name);
         },
 
@@ -2644,8 +2644,8 @@
          * @param  {String} name
          * @return {this}
          */
-        addClass: function(name) {
-            return this.for(function(el) {
+        addClass: function (name) {
+            return this.for(function (el) {
                 addClass(el, name);
             });
         },
@@ -2655,8 +2655,8 @@
          * @param  {String} name
          * @return {this}
          */
-        removeClass: function(name) {
-            return this.for(function(el) {
+        removeClass: function (name) {
+            return this.for(function (el) {
                 if (name == '*') { // all
                     name = getClass(el);
                 }
@@ -2670,8 +2670,8 @@
          * @param  {String} newName
          * @return {this}
          */
-        replaceClass: function(oldName, newName) {
-            return this.for(function(el) {
+        replaceClass: function (oldName, newName) {
+            return this.for(function (el) {
                 !hasClass(el, oldName) ? addClass(el, newName)
                                        : setClass(el, getClass(el).replace(
                                              toClassRegExp(oldName), (' '+ $trim(newName) +' ')
@@ -2686,10 +2686,10 @@
          * @param  {Int|Float|String} fnDelay?
          * @return {this}
          */
-        toggleClass: function(name, fn, fnDelay) {
+        toggleClass: function (name, fn, fnDelay) {
             var _this = this;
 
-            _this.for(function(el) {
+            _this.for(function (el) {
                 !hasClass(el, name, !!fn) ? addClass(el, name)
                                           : removeClass(el, name);
             });
@@ -2710,10 +2710,10 @@
          * @param  {Int|Float|String} fnDelay?
          * @return {this}
          */
-        toggleClasses: function(name1, name2, fn, fnDelay) {
+        toggleClasses: function (name1, name2, fn, fnDelay) {
             var _this = this;
 
-            _this.for(function(el) {
+            _this.for(function (el) {
                 if (hasClass(el, name1, !!fn)) {
                     removeClass(el, name1), addClass(el, name2);
                 } else if (hasClass(el, name2, !!fn)) {
@@ -2734,8 +2734,8 @@
          * @param  {String} name
          * @return {this}
          */
-        setClass: function(name) {
-            return this.for(function(el) {
+        setClass: function (name) {
+            return this.for(function (el) {
                 setClass(el, name);
             });
         },
@@ -2744,7 +2744,7 @@
          * Get class.
          * @return {String}
          */
-        getClass: function() {
+        getClass: function () {
             return getClass(this[0]);
         }
     });
@@ -2797,7 +2797,7 @@
          * @param  {Any}           value?
          * @return {Any}
          */
-        data: function(key, value) {
+        data: function (key, value) {
             return $isObject(key) ? this.setData(key)
                  : $isDefined(value) ? this.setData(key, value)
                  : $isDefined(key) ? this.getData(key) : this.getData('*');
@@ -2808,7 +2808,7 @@
          * @param  {String} key?
          * @return {Bool}
          */
-        hasData: function(key) {
+        hasData: function (key) {
             return hasData(this[0], key);
         },
 
@@ -2818,8 +2818,8 @@
          * @param  {Any}           value
          * @return {this}
          */
-        setData: function(key, value) {
-            return this.for(function(el) {
+        setData: function (key, value) {
+            return this.for(function (el) {
                 setData(el, key, value);
             });
         },
@@ -2829,7 +2829,7 @@
          * @param  {String} key
          * @return {Any}
          */
-        getData: function(key) {
+        getData: function (key) {
             return getData(this[0], key);
         },
 
@@ -2838,15 +2838,15 @@
          * @param  {String} key
          * @return {this}
          */
-        removeData: function(key) {
+        removeData: function (key) {
             key = split(key, re_comma);
 
-            return this.for(function(el) {
+            return this.for(function (el) {
                 checkData(el);
                 if (key[0] == '*') { // all
                     el.$data = NULL;
                 } else {
-                    $each(key, function(key) {
+                    $each(key, function (key) {
                         delete el.$data[key];
                     });
                 }
@@ -2864,13 +2864,13 @@
          * @param  {Bool} opt_plus?
          * @return {String|undefined}
          */
-        serialize: function(opt_plus) {
+        serialize: function (opt_plus) {
             var form = this[0];
             var name, value;
             var data = [], ret;
 
             if (getTag(form) == 'form') { // forms only
-                $each(form.elements, function(el) {
+                $each(form.elements, function (el) {
                     name = $trim(el[NAME_NAME]);
                     if (!name || el[NAME_DISABLED]) {
                         return;
@@ -2898,9 +2898,9 @@
          * Serialize array.
          * @return {Array|undefined}
          */
-        serializeArray: function() {
-            var _ret = function(data, ret) {
-                return ret = [], data.split('&').each(function(item) {
+        serializeArray: function () {
+            var _ret = function (data, ret) {
+                return ret = [], data.split('&').each(function (item) {
                     item = item.splits('=', 2), ret.push({
                         key: decode(item[0]), value: decode(item[1])
                     });
@@ -2914,9 +2914,9 @@
          * Serialize object.
          * @return {Object|undefined}
          */
-        serializeObject: function() {
-            var _ret = function(data, ret) {
-                return ret = {}, $for(data, function(item) {
+        serializeObject: function () {
+            var _ret = function (data, ret) {
+                return ret = {}, $for(data, function (item) {
                     if (item.key) ret[item.key] = item.value;
                 }), ret;
             };
@@ -2928,9 +2928,9 @@
          * Serialize json.
          * @return {String|undefined}
          */
-        serializeJson: function() {
-            var _ret = function(data, ret) {
-                return ret = {}, $for(data, function(item) {
+        serializeJson: function () {
+            var _ret = function (data, ret) {
+                return ret = {}, $for(data, function (item) {
                     if (item.key) ret[item.key] = item.value;
                 }), $json(ret);
             };
@@ -2954,8 +2954,8 @@
          * @param  {Bool|Int|null} option?
          * @return {Bool|this}
          */
-        checked: function(option) {
-            return $isUndefined(option) ? getState(this[0], NAME_CHECKED) : this.for(function(el) {
+        checked: function (option) {
+            return $isUndefined(option) ? getState(this[0], NAME_CHECKED) : this.for(function (el) {
                 setState(el, NAME_CHECKED, option);
             });
         },
@@ -2965,8 +2965,8 @@
          * @param  {Bool|Int|null} option?
          * @return {Bool|this}
          */
-        selected: function(option) {
-            return $isUndefined(option) ? getState(this[0], NAME_SELECTED) : this.for(function(el) {
+        selected: function (option) {
+            return $isUndefined(option) ? getState(this[0], NAME_SELECTED) : this.for(function (el) {
                 setState(el, NAME_SELECTED, option);
             });
         },
@@ -2976,8 +2976,8 @@
          * @param  {Bool|Int|null} option?
          * @return {Bool|this}
          */
-        disabled: function(option) {
-            return $isUndefined(option) ? getState(this[0], NAME_DISABLED) : this.for(function(el) {
+        disabled: function (option) {
+            return $isUndefined(option) ? getState(this[0], NAME_DISABLED) : this.for(function (el) {
                 setState(el, NAME_DISABLED, option);
             });
         },
@@ -2987,8 +2987,8 @@
          * @param  {Bool|Int|null} option?
          * @return {Bool|this}
          */
-        readonly: function(option) {
-            return $isUndefined(option) ? getState(this[0], NAME_READONLY) : this.for(function(el) {
+        readonly: function (option) {
+            return $isUndefined(option) ? getState(this[0], NAME_READONLY) : this.for(function (el) {
                 setState(el, NAME_READONLY, option);
             });
         },
@@ -2998,8 +2998,8 @@
          * @param  {Bool|Int|null} option?
          * @return {Bool|this}
          */
-        hidden: function(option) {
-            return $isUndefined(option) ? getState(this[0], NAME_HIDDEN) : this.for(function(el) {
+        hidden: function (option) {
+            return $isUndefined(option) ? getState(this[0], NAME_HIDDEN) : this.for(function (el) {
                 setState(el, NAME_HIDDEN, option);
             });
         }
@@ -3015,12 +3015,12 @@
              * @param  {Object}        options?
              * @return {this}
              */
-            on: function(type, fn, options) {
-                return this.for(function(el) {
+            on: function (type, fn, options) {
+                return this.for(function (el) {
                     if ($isString(type)) {
                         $event.on(el, type, fn, options);
                     } else if ($isObject(type)) {
-                        $forEach(type, function(type, fn) {
+                        $forEach(type, function (type, fn) {
                             $event.on(el, type, fn);
                         })
                     }
@@ -3034,12 +3034,12 @@
              * @param  {Object}        options?
              * @return {this}
              */
-            off: function(type, fn, options) {
-                return this.for(function(el) {
+            off: function (type, fn, options) {
+                return this.for(function (el) {
                     if ($isString(type)) {
                         $event.off(el, type, fn, options);
                     } else if ($isObject(type)) {
-                        $forEach(type, function(type, fn) {
+                        $forEach(type, function (type, fn) {
                             $event.off(el, type, fn);
                         })
                     }
@@ -3053,12 +3053,12 @@
              * @param  {Object}        options?
              * @return {this}
              */
-            once: function(type, fn, options) {
-                return this.for(function(el) {
+            once: function (type, fn, options) {
+                return this.for(function (el) {
                     if ($isString(type)) {
                         $event.once(el, type, fn, options);
                     } else if ($isObject(type)) {
-                        $forEach(type, function(type, fn) {
+                        $forEach(type, function (type, fn) {
                             $event.once(el, type, fn);
                         })
                     }
@@ -3072,12 +3072,12 @@
              * @param  {Object}          options?
              * @return {this}
              */
-            fire: function(type, fn, options) {
+            fire: function (type, fn, options) {
                 if ($isObject(fn)) {
                     options = fn, fn = NULL;
                 }
 
-                return this.for(function(el) {
+                return this.for(function (el) {
                     $event.fire(el, type, fn, options);
                 });
             },
@@ -3085,7 +3085,7 @@
             /**
              * Event (alias of on()).
              */
-            event: function(type, fn, options) {
+            event: function (type, fn, options) {
                 return this.on(type, fn, options);
             },
 
@@ -3096,7 +3096,7 @@
              * @param  {Bool}     opt_typeOnly?
              * @return {Bool}
              */
-            hasEvent: function(type, fn, opt_typeOnly) {
+            hasEvent: function (type, fn, opt_typeOnly) {
                 return $event.has(this[0], type, fn, opt_typeOnly);
             }
         });
@@ -3104,12 +3104,12 @@
 
     // dom: observer
     toDomPrototype(Dom, {
-        observe: function(options) {
+        observe: function (options) {
             try { // safe for MutationObserver support
-                return this.for(function(el) {
-                    el.$observer = new MutationObserver(function(ms) {
-                        $for(ms, function(m) {
-                            $forEach(options, function(type, fn) {
+                return this.for(function (el) {
+                    el.$observer = new MutationObserver(function (ms) {
+                        $for(ms, function (m) {
+                            $forEach(options, function (type, fn) {
                                 if (m.type == type) { fn(m) }
                             });
                         });
@@ -3119,8 +3119,8 @@
                 })
             } catch (e) { warn(e) }
         },
-        unobserve: function() {
-            return this.for(function(el) {
+        unobserve: function () {
+            return this.for(function (el) {
                 el.$observer && el.$observer.disconnect();
             });
         }
@@ -3128,7 +3128,7 @@
 
     function fadeCallback(callback) {
         if ($isTrue(callback)) { // remove element after fading out
-            callback = function(animation) {
+            callback = function (animation) {
                 animation.$dom.remove();
             };
         }
@@ -3171,15 +3171,15 @@
              * @param  {Function}        callback?
              * @return {this}
              */
-            animate: function(properties, speed, easing, callback) {
+            animate: function (properties, speed, easing, callback) {
                 return $isFalse(properties) // stop previous animation
-                     ? this.for(function(el, animation) {
+                     ? this.for(function (el, animation) {
                          animation = el.$animation;
                          if (animation && animation.running) {
                              animation.stop();
                          }
                      })
-                     : this.for(function(el) {
+                     : this.for(function (el) {
                          animate(el, properties, speed, easing, callback);
                      });
             },
@@ -3188,7 +3188,7 @@
              * Animated.
              * @return {Bool}
              */
-            animated: function() {
+            animated: function () {
                 return $bool(this[0] && $isDefined(this[0].$animation));
             },
 
@@ -3196,7 +3196,7 @@
              * Stop.
              * @return {this}
              */
-            stop: function() {
+            stop: function () {
                 return this.animate(FALSE);
             },
 
@@ -3207,7 +3207,7 @@
              * @param  {Function}   callback?
              * @return {this}
              */
-            fade: function(to, speed, callback) {
+            fade: function (to, speed, callback) {
                 return this.animate(fadeOpacity(to), speed, callback);
             },
 
@@ -3217,7 +3217,7 @@
              * @param  {Function}   callback?
              * @return {this}
              */
-            fadeIn: function(speed, callback) {
+            fadeIn: function (speed, callback) {
                 return this.fade(1, speed, callback);
             },
 
@@ -3227,7 +3227,7 @@
              * @param  {Function|Bool} callback?
              * @return {this}
              */
-            fadeOut: function(speed, callback) {
+            fadeOut: function (speed, callback) {
                 return this.fade(0, speed, fadeCallback(callback));
             },
 
@@ -3237,8 +3237,8 @@
              * @param  {Function}   callback?
              * @return {this}
              */
-            show: function(speed, callback) {
-                return this.for(function(el) {
+            show: function (speed, callback) {
+                return this.for(function (el) {
                     fadeDisplay(el); // set & restore display
                     animate(el, fadeOpacity(1), fadeSpeed(speed), callback);
                 });
@@ -3250,9 +3250,9 @@
              * @param  {Function}   callback?
              * @return {this}
              */
-            hide: function(speed, callback) {
-                return this.for(function(el) {
-                    animate(el, fadeOpacity(0), fadeSpeed(speed), function(animation) {
+            hide: function (speed, callback) {
+                return this.for(function (el) {
+                    animate(el, fadeOpacity(0), fadeSpeed(speed), function (animation) {
                         fadeDisplay(el, TRUE, callback, animation); // set & restore display
                     });
                 });
@@ -3264,15 +3264,15 @@
              * @param  {Function}   callback?
              * @return {this}
              */
-            toggle: function(speed, callback) {
+            toggle: function (speed, callback) {
                 speed = fadeSpeed(speed);
 
-                return this.for(function(el) {
+                return this.for(function (el) {
                     if (!isVisible(el)) {
                         fadeDisplay(el); // set & restore display
                         animate(el, fadeOpacity(1), speed, callback);
                     } else {
-                        animate(el, fadeOpacity(0), speed, function(animation) {
+                        animate(el, fadeOpacity(0), speed, function (animation) {
                             fadeDisplay(el, TRUE, callback, animation); // set & restore display
                         });
                     }
@@ -3285,10 +3285,10 @@
              * @param  {Int|Float|String} fnDelay?
              * @return {this}
              */
-            toggleDisplay: function(fn, fnDelay) {
+            toggleDisplay: function (fn, fnDelay) {
                 var _this = this;
 
-                _this.for(function(el) {
+                _this.for(function (el) {
                     isVisible(el) ? setStyle(el, NAME_DISPLAY, NAME_NONE)
                                   : setStyle(el, NAME_DISPLAY, '')
                 });
@@ -3308,30 +3308,30 @@
              * @param  {Function}    callback?
              * @return {this}
              */
-            toggleWith: function(selector, speed, callback) {
+            toggleWith: function (selector, speed, callback) {
                 speed = fadeSpeed(speed);
 
                 var $dom = toDom(selector);
-                return this.for(function(el) {
+                return this.for(function (el) {
                     if (!isVisible(el)) {
                         fadeDisplay(el); // set & restore display
-                        animate(el, fadeOpacity(1), speed, function() {
-                            $dom.for(function(_el) {
+                        animate(el, fadeOpacity(1), speed, function () {
+                            $dom.for(function (_el) {
                                 if (!isVisible(_el)) {
                                     fadeDisplay(_el); // set & restore display
                                     animate(_el, fadeOpacity(1), speed, callback);
                                 } else {
-                                    animate(_el, fadeOpacity(0), speed, function(animation) {
+                                    animate(_el, fadeOpacity(0), speed, function (animation) {
                                         fadeDisplay(_el, TRUE, callback, animation); // set & restore display
                                     });
                                 }
                             });
                         });
                     } else {
-                        animate(el, fadeOpacity(0), speed, function(animation) {
+                        animate(el, fadeOpacity(0), speed, function (animation) {
                             fadeDisplay(el, TRUE, callback, animation); // set & restore display
-                            $dom.for(function(_el) {
-                                animate(_el, fadeOpacity(0), speed, function(animation) {
+                            $dom.for(function (_el) {
+                                animate(_el, fadeOpacity(0), speed, function (animation) {
                                     fadeDisplay(_el, TRUE, callback, animation); // set & restore display
                                 });
                             });
@@ -3347,7 +3347,7 @@
              * @param  {Function}   callback?
              * @return {this}
              */
-            toggleBy: function(option, speed, callback) {
+            toggleBy: function (option, speed, callback) {
                 return this[(option ? 'show' : 'hide')](speed, callback);
             },
 
@@ -3358,18 +3358,18 @@
              * @param  {Function}   callback?
              * @return {this}
              */
-            blip: function(times, speed, callback) {
+            blip: function (times, speed, callback) {
                 times = times || Infinity;
                 speed = speed || 255;
 
-                return this.for(function(el) {
+                return this.for(function (el) {
                     var count = times > 0 ? 1 : 0;
                     !function run() {
                         if (count && count > times) {
                             callback && callback();
                             return;
                         }
-                        animate(el, fadeOpacity(0), speed, function() {
+                        animate(el, fadeOpacity(0), speed, function () {
                             animate(el, fadeOpacity(1), speed, run);
                             count++;
                         });
@@ -3383,10 +3383,10 @@
              * @param  {Function}      callback?
              * @return {this}
              */
-            scrollTo: function(options, callback) {
+            scrollTo: function (options, callback) {
                 options = scrollOptions(options);
 
-                return this.for(function(el) {
+                return this.for(function (el) {
                     // 'cos window, document or (even body, for chrome & its gangs) won't be animated so..
                     if (isRoot(el) || isRootElement(el)) {
                         el = $getDocument(el)[NAME_SCROLLING_ELEMENT] || $getDocument(el)[NAME_DOCUMENT_ELEMENT];
@@ -3415,7 +3415,7 @@
              * @param  {Function}      callback?
              * @return {this}
              */
-            scrollAt: function(selector, options, callback) {
+            scrollAt: function (selector, options, callback) {
                 var el = toDom(selector)[0], optionsOther, offset, _this = this;
 
                 if (el) {
@@ -3486,7 +3486,7 @@
      * @param  {Bool|Object}            one?
      * @return {Dom}
      */
-    var $dom = function(selector, root, one) {
+    var $dom = function (selector, root, one) {
         return !$isFunction(root)
             ? toDom(selector, root, one)
             : toDom(selector).each(root);
@@ -3495,25 +3495,25 @@
     // add static methods to dom
     $extend($dom, {
         // find by selector
-        find: function(selector, root) {
+        find: function (selector, root) {
             return toDom(selector, root, TRUE);
         },
-        findAll: function(selector, root) {
+        findAll: function (selector, root) {
             return toDom(selector, root);
         },
 
         // find by xpath
-        xfind: function(selector, root) {
+        xfind: function (selector, root) {
             return toXDom(selector, root, TRUE);
         },
-        xfindAll: function(selector, root) {
+        xfindAll: function (selector, root) {
             return toXDom(selector, root);
         },
 
         // (name, value) or ({name: value})
-        define: function(name, value) {
+        define: function (name, value) {
             var names = Object.keys(Dom[PROTOTYPE]);
-            $forEach(toKeyValue(name, value), function(name, value) {
+            $forEach(toKeyValue(name, value), function (name, value) {
                 if (names.has(name)) {
                     throw ('Cannot override Dom.'+ name +'!');
                 }
@@ -3521,14 +3521,14 @@
             });
         },
 
-        create: function(content, attributes, doc) {
+        create: function (content, attributes, doc) {
             return create(content, doc, attributes);
         },
-        createDom: function(content, attributes, doc) {
+        createDom: function (content, attributes, doc) {
             return toDom(create(content, doc, attributes));
         },
 
-        loadStyle: function(src, root, onload, attributes) {
+        loadStyle: function (src, root, onload, attributes) {
             if ($isFunction(root)) {
                 onload = root, root = NULL;
             }
@@ -3536,13 +3536,13 @@
             var el = createElement(NULL, 'link');
             el.href = src, el.onload = onload, el.rel = 'stylesheet';
 
-            if (attributes) $forEach(attributes, function(name, value) {
+            if (attributes) $forEach(attributes, function (name, value) {
                 setAttr(el, name, value);
             });
 
             appendChild(toDom(root || $doc[TAG_HEAD])[0], el);
         },
-        loadScript: function(src, root, onload, attributes) {
+        loadScript: function (src, root, onload, attributes) {
             if ($isFunction(root)) {
                 onload = root, root = NULL;
             }
@@ -3550,17 +3550,17 @@
             var el = createElement(NULL, 'script');
             el.src = src, el.onload = onload;
 
-            if (attributes) $forEach(attributes, function(name, value) {
+            if (attributes) $forEach(attributes, function (name, value) {
                 setAttr(el, name, value);
             });
 
             appendChild(toDom(root || $doc[TAG_HEAD])[0], el);
         },
 
-        q: function(selector, root) {
+        q: function (selector, root) {
             return querySelector(root || $doc, selector);
         },
-        qa: function(selector, root) {
+        qa: function (selector, root) {
             return $array(querySelectorAll(root || $doc, selector));
         }
     });
