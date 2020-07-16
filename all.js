@@ -9,7 +9,7 @@
  *                    so_event.js, so_http.js, so_list.js, so_ua.js, so_util.js.
  * External Modules : -
  * Compress Tools   : jscompress.com, uglifyjs.net
- * Orig/GZip Sizes  : 56000/19000 bytes (±)
+ * Orig/GZip Sizes  : 60000/20000 bytes (±)
  */
 
 // so.js
