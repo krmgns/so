@@ -344,8 +344,8 @@
          * @return {Dom}
          */
         concat: function () {
-            var els = $array(arguments).reduce(function (els, selector) {
-                return els.append(toDom(selector));
+            var els = $array(arguments).reduce(function (_els, selector) {
+                return _els.append(toDom(selector));
             }, []);
 
             return toDom(this.all().concat(els).uniq());
@@ -1736,7 +1736,8 @@
     }
 
     function getStyle(el, name) {
-        return name ? getComputedStyle(el)[$toStyleName(name)] || '' : getComputedStyle(el);
+        return !name ? getComputedStyle(el)
+                     : getComputedStyle(el)[$toStyleName(name)] || '';
     }
 
     function parseStyleText(text) {
@@ -1802,10 +1803,12 @@
          * @param  {String} name
          * @return {Bool}
          */
-        hasStyle: function (name) {
-            var el = this[0];
-
-            return $bool(el && el[NAME_STYLE] && el[NAME_STYLE][NAME_CSS_TEXT].has(name));
+        hasStyle: function (name, el /* @internal */) {
+            return $bool((el = this[0]) && (
+                el[NAME_STYLE] && el[NAME_STYLE][NAME_CSS_TEXT].has(
+                    $re('[^-]'+ name + ':') /* eg: 'color:red', not 'border-color:red' */
+                )
+            ));
         },
 
         /**
@@ -1818,7 +1821,8 @@
             var styles = name;
 
             if ($isString(styles)) {
-                styles = $isVoid(value) ? parseStyleText(name) : toKeyValue(name, value);
+                styles = !$isVoid(value) ? toKeyValue(name, value)
+                                         : parseStyleText(name);
             }
 
             return this.for(function (el) {
@@ -1855,57 +1859,6 @@
         },
 
         /**
-         * Get styles.
-         * @param  {String} name
-         * @param  {Bool}  opt_convert? @default=true
-         * @return {Object|undefined}
-         */
-        getStyles: function (names, opt_convert) {
-            var el = this[0], styles = {};
-
-            if (el) {
-                if (names) {
-                    el = toDom(el);
-                    split(names, re_comma).each(function (name) {
-                        styles[name] = el.getStyle(name, opt_convert);
-                    });
-                } else {
-                    styles = toStyleObject(getStyle(el));
-                }
-
-                return styles;
-            }
-        },
-
-        /**
-         * Get css (original) style.
-         * @param  {String} name?
-         * @return {String|Object|undefined}
-         */
-        getCssStyle: function (name) {
-            var el = this[0], ret = {};
-
-            if (el) {
-                ret = toStyleObject(getCssStyle(el));
-                return name ? ret[name] || '' : ret;
-            }
-        },
-
-        /**
-         * Get computed (rendered) style.
-         * @param  {String} name?
-         * @return {String|Object|undefined}
-         */
-        getComputedStyle: function (name) {
-            var el = this[0], ret = {};
-
-            if (el) {
-                ret = toStyleObject(getComputedStyle(el));
-                return name ? ret[name] || '' : ret;
-            }
-        },
-
-        /**
          * Remove style.
          * @param  {String} name
          * @return {this}
@@ -1925,6 +1878,97 @@
             }
 
             return _this;
+        },
+
+        /**
+         * Get styles.
+         * @param  {String} name
+         * @param  {Bool}  opt_convert? @default=true
+         * @return {Object}
+         */
+        getStyles: function (names, opt_convert) {
+            var el = this[0], ret = {};
+
+            if (el) {
+                if (names) {
+                    el = toDom(el);
+                    split(names, re_comma).each(function (name) {
+                        ret[name] = el.getStyle(name, opt_convert);
+                    });
+                } else {
+                    ret = toStyleObject(getStyle(el));
+                }
+            }
+
+            return ret;
+        },
+
+        /**
+         * Get css (original) styles.
+         * @param  {String} names?
+         * @return {Object}
+         */
+        getCssStyles: function (names) {
+            var el = this[0], ret = {};
+
+            if (el) {
+                ret = toStyleObject(getCssStyle(el));
+                if (names) {
+                    ret = split(names, re_comma).reduce(function (_ret, name) {
+                        return _ret[name] = ret[name], _ret;
+                    }, {});
+                }
+            }
+
+            return ret;
+        },
+
+        /**
+         * Get inlined (attributed) styles.
+         * @param  {String} names?
+         * @return {Object}
+         */
+        getInlinedStyles: function (names) {
+            var el = this[0], ret = {};
+
+            if (el) {
+                ret = parseStyleText(el[NAME_STYLE][NAME_CSS_TEXT]);
+                if (names) {
+                    ret = split(names, re_comma).reduce(function (_ret, name) {
+                        return _ret[name] = ret[name], _ret;
+                    }, {});
+                }
+            }
+
+            return ret;
+        },
+
+        /**
+         * Get computed (rendered) styles.
+         * @param  {String} names?
+         * @return {Object}
+         */
+        getComputedStyles: function (names) {
+            var el = this[0], ret = {};
+
+            if (el) {
+                ret = toStyleObject(getComputedStyle(el));
+                if (names) {
+                    ret = split(names, re_comma).reduce(function (_ret, name, value) {
+                        value = ret[name];
+                        if ($isUndefined(value)) { // camel-cased name (eg: 'font-size')
+                            value = ret[$toStyleName(name)];
+                            if ($isUndefined(value)) { // try css text (eg: '-webkit-box-flex')
+                                value = ret.cssText.grep($re(name +'\\s*([^;]+)'));
+                            }
+                        }
+                        return _ret[name] = (value == UNDEFINED) ? UNDEFINED : value // normalize
+                             , _ret;
+                    }, {});
+                }
+            }
+
+            return ret;
         }
     });
 
@@ -3167,11 +3211,14 @@
     toDomPrototype(Dom, {
         observe: function (options) {
             try { // safe for MutationObserver support
-                return this.for(function (el) {
+                var _this = this;
+                return _this.for(function (el) {
                     el.$observer = new MutationObserver(function (ms) {
                         $for(ms, function (m) {
                             $forEach(options, function (type, fn) {
-                                if (m.type == type) { fn(m) }
+                                if (m.type == type) {
+                                    fn.call(el, el, _this, m);
+                                }
                             });
                         });
                     });
