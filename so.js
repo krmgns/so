@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.134.0';
+    $win.so.VERSION = '5.135.0';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -36,9 +36,8 @@
     var Array = $win.Array, Object = $win.Object, String = $win.String, Number = $win.Number,
         Date = $win.Date, RegExp = $win.RegExp, Math = $win.Math, console = $win.console;
 
-    var apply = function (fn, _this, _arguments) {
-        return fn.apply(_this, _arguments);
-    };
+    var call = function (fn, _this, _arg) { return fn.call(_this, _arg) },
+        callArgs = function (fn, _this, _args) { return fn.apply(_this, _args) };
 
     // global Int & Float objects (while BigInt on the stage..)
     $win.Int = function (num) { return toInt(num) };
@@ -46,18 +45,13 @@
 
     // shortcut for 'console.log'
     $win.log = function () {
-        apply(console.log, NULL, arguments);
+        callArgs(console.log, NULL, arguments);
     };
 
     var re_time = /([\d.]+)(\w+)?/;
     var re_numeric = /^[-+]?(?:\.?\d+|\d+\.\d+)$/;
     var re_trim = /^\s+|\s+$/g, re_trimLeft = /^\s+/g, re_trimRight = /\s+$/g;
     var _reCache = {};
-
-    // null/undefined checker
-    function isVoid(input) {
-        return (input == NULL);
-    }
 
     // faster trim for space only purposes
     function trim(input, opt_side) {
@@ -74,7 +68,7 @@
         return Number(input) || 0.0;
     }
     function toString(input) {
-        return (''+ (input != NULL ? input : '')); // null/undefined safe
+        return ''+ (input != NULL ? input : ''); // null/undefined safe
     }
     function toBool(input) {
         return !!input;
@@ -88,13 +82,11 @@
     }
 
     function toMilliseconds(time) {
-        var t = time.split(re_time), ret = toFloat(t[1]);
+        var t = time.split(re_time), tc = t[2], ret = toFloat(t[1]);
 
-        switch (t[2]) {
-            case 's': case 'sec': ret *= 1000; break;
-            case 'm': case 'min': ret *= 1000 * 60; break;
-            case 'h': case 'hour': ret *= 1000 * 60 * 60; break;
-        }
+             if (tc == 's' || tc == 'sec')  ret *= 1000;
+        else if (tc == 'm' || tc == 'min')  ret *= 1000 * 60;
+        else if (tc == 'h' || tc == 'hour') ret *= 1000 * 60 * 60;
 
         return ret;
     }
@@ -145,19 +137,20 @@
     }
 
     var _id = 0;
-    var _break = 0; // loop breaker (for, forEach, each)
+    var _break = FALSE;
     var fn_slice = [].slice;
     var fn_toString = {}.toString;
+    var fn_hasOwnProperty = {}.hasOwnProperty;
 
     // array maker
-    function toArray(input, begin, end) {
+    function toArray(input) {
         var ret = [];
 
         if (!input || isString(input) || isWindow(input)
                    || input[NAME_NODE_TYPE] || input[NAME_LENGTH] == NULL) {
             ret = [input];
         } else {
-            ret = fn_slice.call(input, begin, end);
+            ret = call(fn_slice, input);
         }
 
         return ret;
@@ -167,15 +160,13 @@
     function extend() {
         var args = toArray(arguments),
             target = args.shift() || {}, // first is target & return
-            source, k;
+            source, key;
 
         while (len(args)) {
             source = args.shift();
-            if (isObject(source, TRUE)) {
-                for (k in source) {
-                    if (source.hasOwnProperty(k)) {
-                        target[k] = source[k];
-                    }
+            for (key in source) {
+                if (call(fn_hasOwnProperty, source, key)) {
+                    target[key] = source[key];
                 }
             }
         }
@@ -183,33 +174,28 @@
         return target;
     }
 
-    /**
-     * Loop.
-     * @param  {Array|Object} input
-     * @param  {Function}     fn
-     * @param  {Object}       _this?
-     * @param  {Bool}         opt_useKey?
-     * @param  {Bool}         opt_useLen?
-     * @return {Array|Object}
-     * @private
-     */
+    // array/object loopers
     function loop(input, fn, _this, opt_useKey, opt_useLen) {
         var _this = _this || input, inputLen = len(input), i = 0, key, value;
 
         if (inputLen && opt_useLen) {
             while (i < inputLen) {
                 value = input[i];
-                if (_break === apply(fn, _this, !opt_useKey ?
-                        [value, i++] /* for */ : [i, value, i++] /* forEach */)) {
+                if (_break === callArgs(
+                    fn, _this, !opt_useKey ? [value, i++] // for
+                                           : [i, value, i++] // for-each
+                )) {
                     break;
                 }
             }
         } else {
             for (key in input) {
-                if (input.hasOwnProperty(key)) {
+                if (call(fn_hasOwnProperty, input, key)) {
                     value = input[key];
-                    if (_break === apply(fn, _this, !opt_useKey ?
-                            [value, i++] /* for */ : [key, value, i++] /* forEach */)) {
+                    if (_break === callArgs(
+                        fn, _this, !opt_useKey ? [value, i++] // for
+                                               : [key, value, i++] // for-each
+                    )) {
                         break;
                     }
                 }
@@ -218,8 +204,14 @@
 
         return _this;
     }
+    function loopEach(input, fn, _this) {
+        return loop(input, fn, _this, FALSE, TRUE);
+    }
+    function loopForEach(input, fn, _this) {
+        return loop(input, fn, _this, TRUE, FALSE);
+    }
 
-    // so: each, for, forEach
+    // so: each, for, for-each
     extend($, {
         /**
          * Each: (value, i), (key, value, i)
@@ -247,6 +239,13 @@
     });
 
     // checkers
+    function isTypeOf(input, type) { return (typeof input === type) }
+    function isInstanceOf(input, instance) { return (input instanceof instance) }
+    function isConstructorOf(input, constructor) { return toBool(input && input.constructor === constructor) }
+
+    function isVoid(input) {
+        return (input == NULL); // null/undefined
+    }
     function isNull(input) {
         return (input === NULL);
     }
@@ -260,7 +259,7 @@
         return (input === UNDEFINED);
     }
     function isNumber(input) {
-        return (typeof input == 'number');
+        return isTypeOf(input, 'number');
     }
     function isNumeric(input) {
         return isNumber(input) || re_numeric.test(input);
@@ -272,27 +271,30 @@
         return isNumber(input) && (input !== (input | 0));
     }
     function isString(input) {
-        return (typeof input == 'string' || input instanceof String);
+        return isTypeOf(input, 'string') || isInstanceOf(input, String);
     }
     function isRegExp(input) {
-        return (input instanceof RegExp);
+        return isInstanceOf(input, RegExp);
     }
     function isFunction(input) {
-        return (typeof input == 'function');
+        return isTypeOf(input, 'function');
     }
     function isArray(input) {
         return Array.isArray(input);
     }
     function isObject(input, opt_type) {
-        return toBool(input && (opt_type ? typeof input == 'object' // type-only check
-                                         : input.constructor == Object)); // plain check
+        return opt_type ? isTypeOf(input, 'object') // type-only check
+                        : isConstructorOf(input, Object); // plain
     }
     function isPlainObject(input) {
-        return isObject(input, FALSE);
+        return isObject(input, TRUE) && (
+               isConstructorOf(input, Object) // plain
+            || isConstructorOf(input, UNDEFINED) // dict @see $.object()
+        );
     }
     function isWindow(input) {
-        return toBool(input && input == input[NAME_WINDOW]
-                            && input == input[NAME_WINDOW][NAME_WINDOW] /* window.window.window... */);
+        return toBool(input && input === input[NAME_WINDOW]
+                            && input === input[NAME_WINDOW][NAME_WINDOW]); // window.window.window...
     }
     function isDocument(input) {
         return toBool(input && input[NAME_NODE_TYPE] === 9);
@@ -419,13 +421,13 @@
      * @return {Array}
      */
     Object.keys = Object.keys || function (object, ret /* @internal */) {
-        return (ret = []), $.forEach(object, function (key) { ret.push(key) }), ret;
+        return (ret = []), loopForEach(object, function (key) { ret.push(key) }), ret;
     };
     Object.values = Object.values || function (object, ret /* @internal */) {
-        return (ret = []), $.forEach(object, function (_, value) { ret.push(value) }), ret;
+        return (ret = []), loopForEach(object, function (_, value) { ret.push(value) }), ret;
     };
     Object.entries = Object.entries || function (object, ret /* @internal */) {
-        return (ret = []), $.forEach(object, function (key, value) { ret.push([key, value]) }), ret;
+        return (ret = []), loopForEach(object, function (key, value) { ret.push([key, value]) }), ret;
     };
 
     // shortcuts
@@ -511,7 +513,7 @@
          * @return {Array}
          */
         each: function (fn) {
-            return loop(this, fn, this, FALSE, TRUE);
+            return loopEach(this, fn, this);
         },
 
         /**
@@ -536,7 +538,7 @@
          * @return {Array}
          */
         append: function () {
-            return apply(this.push, this, arguments), this;
+            return callArgs(this.push, this, arguments), this;
         },
 
         /**
@@ -545,7 +547,7 @@
          * @return {Array}
          */
         prepend: function () {
-            return apply(this.unshift, this, arguments), this;
+            return callArgs(this.unshift, this, arguments), this;
         },
 
         /**
@@ -565,12 +567,20 @@
         },
 
         /**
-         * Unpop (just for fun).
+         * Top (shift, just for fun).
+         * @return {Any}
+         */
+        top: function () {
+            return callArgs(this.shift, this, arguments);
+        },
+
+        /**
+         * Unpop (push, just for fun).
          * @param  {Any} ...arguments
          * @return {Int}
          */
         unpop: function () {
-            return apply(this.push, this, arguments);
+            return callArgs(this.push, this, arguments);
         },
 
         /**
@@ -594,7 +604,7 @@
 
             var _this = this, ret = [];
 
-            _this.each(function (value, i) {
+            loopEach(_this, function (value, i) {
                 if (fn(value, i, _this)) {
                     ret.push(value);
                 }
@@ -1155,23 +1165,6 @@
         }
     });
 
-    // /**
-    //  * Boolean extends.
-    //  */
-    // extend(Boolean[PROTOTYPE], {
-    //     /**
-    //      * To int.
-    //      * @return {Int}
-    //      */
-    //     toInt = function () { return this | 0; }
-    //
-    //     /**
-    //      * To value.
-    //      * @return {String}
-    //      */
-    //     toValue = function () { return this ? '1' : ''; }
-    // });
-
     // so: base functions.
     extend($, {
         /**
@@ -1240,36 +1233,28 @@
         /**
          * Fire & ifire.
          * @param  {Int|Float|String} delay (ms) or id
-         * @param  {Function|void}    fn
+         * @param  {Function|void}    fn?
          * @param  {Array}            fnArgs?
          * @param  {Object}           opt_this?
          * @return {Int|undefined}
          */
         fire: function (delay, fn, fnArgs, opt_this) {
-            if (delay && isVoid(fn)) { // clear
+            if (delay && !fn) { // clear
                 return clearTimeout(delay);
             }
 
-            if (isString(delay)) {
-                delay = toMilliseconds(delay);
-            }
-
             return setTimeout(function () {
-                apply(fn, opt_this, toArray(fnArgs));
-            }, delay || 0);
+                callArgs(fn, opt_this, fnArgs);
+            }, 0 | (isString(delay) ? toMilliseconds(delay) : delay));
         },
         ifire: function (delay, fn, fnArgs, opt_this) {
-            if (delay && isVoid(fn)) { // clear
+            if (delay && !fn) { // clear
                 return clearInterval(delay);
             }
 
-            if (isString(delay)) {
-                delay = toMilliseconds(delay);
-            }
-
             return setInterval(function () {
-                apply(fn, opt_this, toArray(fnArgs));
-            }, delay || 0);
+                callArgs(fn, opt_this, fnArgs);
+            }, 0 | (isString(delay) ? toMilliseconds(delay) : delay));
         },
 
         /**
@@ -1324,15 +1309,15 @@
 
         /**
          * Type of.
-         * @param  {Any} x
+         * @param  {Any} input
          * @return {String}
          */
-        type: function (x) {
-            return isNull(x)      ? 'null'
-                 : isUndefined(x) ? 'undefined'
-                 : isWindow(x)    ? NAME_WINDOW
-                 : isDocument(x)  ? NAME_DOCUMENT
-                 : lower(fn_toString.call(x).slice(8, -1));
+        type: function (input) {
+            return isNull(input)      ? 'null'
+                 : isUndefined(input) ? 'undefined'
+                 : isWindow(input)    ? NAME_WINDOW
+                 : isDocument(input)  ? NAME_DOCUMENT
+                 : lower(call(fn_toString, input).slice(8, -1));
         },
 
         /**
@@ -1383,7 +1368,7 @@
          * @return {Object}
          */
         extend: function () {
-            return apply(extend, NULL, arguments);
+            return callArgs(extend, NULL, arguments);
         },
 
         /**
@@ -1412,21 +1397,33 @@
         },
 
         /**
+         * Object.
+         * @param  {Object} properties?
+         * @return {Object}
+         */
+        object: function (properties) {
+            // @note: all same, @todo: waiting for ie support drop?
+            // return properties = properties || {}, properties.__proto__ = null, delete properties.__proto__, properties;
+            // return Object.setPrototypeOf(properties, null);
+            // return extend(Object.setPrototypeOf({}, null), properties);
+            return extend(Object.create(NULL), properties);
+        },
+
+        /**
          * Map.
          * @param  {Array|Object} input
          * @param  {Function}     fn
          * @return {Array|Object|undefined}
          */
-        map: function (input, fn) {
+        map: function (input, fn, ret /* @internal */) {
             if (isArray(input)) {
                 return input.map(fn);
             }
             if (isObject(input, TRUE)) {
-                var ret = {};
-                $.forEach(input, function (key, value) {
-                    ret[key] = fn(value, key, input);
-                });
-                return ret;
+                return ret = isPlainObject(input) ? $.object() : {},
+                    loopForEach(input, function (key, value) {
+                        ret[key] = fn(value, key, input);
+                    }), ret;
             }
         },
 
@@ -1436,7 +1433,7 @@
          * @param  {Function}     fn?
          * @return {Array|Object|undefined}
          */
-        filter: function (input, fn) {
+        filter: function (input, fn, ret /* @internal */) {
             // prevent "undefined not a function" error
             fn = fn || function (value) { return trim(value) };
 
@@ -1444,64 +1441,61 @@
                 return input.filter(fn);
             }
             if (isObject(input, TRUE)) {
-                var ret = {};
-                $.forEach(input, function (key, value) {
-                    if (fn(value, key, input)) {
-                        ret[key] = value;
+                return ret = isPlainObject(input) ? $.object() : {},
+                    loopForEach(input, function (key, value) {
+                        if (fn(value, key, input)) {
+                            ret[key] = value;
                     }
-                });
-                return ret;
+                }), ret;
             }
+        },
+
+        /**
+         * Get window.
+         * @param  {Any} input?
+         * @return {Window|undefined}
+         */
+        getWindow: function (input) {
+            return !input                     ? $win // none
+                 : input[NAME_OWNER_DOCUMENT] ? input[NAME_OWNER_DOCUMENT][NAME_DEFAULT_VIEW] // node
+                 : isWindow(input)            ? input
+                 : isDocument(input)          ? input[NAME_DEFAULT_VIEW]
+                 : UNDEFINED;
+        },
+
+        /**
+         * Get document.
+         * @param  {Any} input?
+         * @return {Document|undefined}
+         */
+        getDocument: function (input) {
+            return !input                     ? $win[NAME_DOCUMENT] // none
+                 : input[NAME_OWNER_DOCUMENT] ? input[NAME_OWNER_DOCUMENT] // node
+                 : isDocument(input)          ? input
+                 : isWindow(input)            ? input[NAME_DOCUMENT]
+                 : UNDEFINED;
         },
 
         /**
          * Win,Doc (alias of getWindow(),getDocument())
          */
-        win: function (x) {
-            return $.getWindow(x);
-        },
-        doc: function (x) {
-            return $.getDocument(x);
-        },
-
-        /**
-         * Get window.
-         * @param  {Any} x
-         * @return {Window}
-         */
-        getWindow: function (x) {
-            if (!x)                     return $win;
-            if (x[NAME_OWNER_DOCUMENT]) return x[NAME_OWNER_DOCUMENT][NAME_DEFAULT_VIEW];
-            if (isWindow(x))            return x;
-            if (isDocument(x))          return x[NAME_DEFAULT_VIEW];
-        },
-
-        /**
-         * Get document.
-         * @param  {Any} x
-         * @return {Document}
-         */
-        getDocument: function (x) {
-            if (!x)                     return $win[NAME_DOCUMENT];
-            if (x[NAME_OWNER_DOCUMENT]) return x[NAME_OWNER_DOCUMENT]; // node
-            if (isDocument(x))          return x;
-            if (isWindow(x))            return x[NAME_DOCUMENT];
-        }
+        win: function (input) { return $.getWindow(input) },
+        doc: function (input) { return $.getDocument(input) }
     });
 
     // Module shortcuts.
-    ['q', 'qa', 'loadStyle', 'loadScript'].each(function (fn) {
-        $[fn] = function () { return apply($.dom[fn], $.dom, arguments) };
+    loopEach(['q', 'qa', 'loadStyle', 'loadScript'], function (fn) {
+        $[fn] = function () { return callArgs($.dom[fn], $.dom, arguments) };
     });
-    ['get', 'post', 'put', 'delete', 'request', 'load'].each(function (fn) {
-        $[fn] = function () { return apply($.http[fn], $.http, arguments) };
+    loopEach(['get', 'post', 'put', 'delete', 'request', 'load'], function (fn) {
+        $[fn] = function () { return callArgs($.http[fn], $.http, arguments) };
     });
 
     // Ready things.
     var readyCallbacks = [];
     var readyCallbacksFire = function () {
         while (len(readyCallbacks)) {
-            readyCallbacks.shift().call($win, $);
+            call(readyCallbacks.shift(), $win, $);
         }
     };
 

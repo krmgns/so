@@ -33,7 +33,7 @@
         // onHeaders: NULL, onProgress: NULL,
         // onDone: NULL, onSuccess: NULL, onFailure: NULL,
         // onAbort: NULL, onTimeout: NULL, onBeforeSend: NULL, onAfterSend: NULL,
-        ons: {} // all other on.. stuff
+        on: {} // all other on.. stuff
     };
 
     var STATE_OPENED = 1, STATE_HEADERS_RECEIVED = 2, STATE_LOADING = 3, STATE_DONE = 4;
@@ -77,7 +77,7 @@
                     .parseFromString(input, inputType || 'text/xml');
             }
 
-            return warn('No valid XML.'), NULL;
+            return warn('No valid XML!'), NULL;
         },
 
         /**
@@ -92,7 +92,7 @@
                 return input;
             }
 
-            return warn('No valid JSON.'), NULL;
+            return warn('No valid JSON!'), NULL;
         },
 
         /**
@@ -226,7 +226,6 @@
                 client.response.statusText = statusText;
                 client.response.headers = headers;
 
-                // parse wars..
                 if (dataType == 'json') {
                     data = $http.parseJson(data);
                 } else if (dataType == 'xml') {
@@ -239,8 +238,7 @@
                 client.fire(statusCode);
 
                 // success or failure?
-                client.fire((statusCode > 99 && statusCode < 400)
-                    ? 'success' : 'failure', data);
+                client.fire((statusCode > 99 && statusCode < 400) ? 'success' : 'failure', data);
 
                 // end, always done
                 client.fire('done', data);
@@ -248,7 +246,7 @@
                 offReadyStateChange(client);
                 break;
             default:
-                $logWarn('Unknown HTTP error.');
+                warn('Unknown HTTP error!');
         }
     }
 
@@ -387,12 +385,12 @@
         fire: function (fn, fnArgs) {
             var _this = this;
 
-            // check 'ons'
-            if (_this.options.ons[fn]) {
-                fn = _this.options.ons[fn];
+            // check 'on'
+            if (_this.options.on[fn]) {
+                fn = _this.options.on[fn];
             } else if (!$isFunction(fn)) {
-                fn = $isNumeric(fn) ? fn // status code functions (eg: 200)
-                   : 'on'+ fn.toCapitalCase();
+                fn = $isNumeric(fn) ? fn // eg: 200 (status code functions).
+                   : 'on'+ fn.toCapitalCase(); // eg: onDone, onSuccess, onFailure.
                 if (_this.options[fn]) {
                     fn = _this.options[fn];
                 }
@@ -475,7 +473,7 @@
          * @return {this}
          */
         on: function (name, callback) {
-            this.options.ons[name] = callback;
+            this.options.on[name] = callback;
             return this;
         }
     });
@@ -525,9 +523,9 @@
         }
 
         return initClient(uri, $extend(options, {
-               onDone: options.onDone    || onDone,
-            onSuccess: options.onSuccess || onSuccess,
-            onFailure: options.onFailure || onFailure
+               onDone: options.onDone    || (options.on && options.on.done)    || onDone,
+            onSuccess: options.onSuccess || (options.on && options.on.success) || onSuccess,
+            onFailure: options.onFailure || (options.on && options.on.failure) || onFailure
         }));
     }
 

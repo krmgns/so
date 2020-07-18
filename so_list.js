@@ -12,10 +12,10 @@
     // minify candies
     var OBJECT = 'object', Object = $win.Object;
 
-    var $for = $.for, $forEach = $.forEach;
+    var $for = $.for, $forEach = $.forEach, $object = $.object;
     var fn_slice = [].slice;
 
-    var _break = 0;
+    var _break = FALSE;
 
     function copyArray(array) {
         return fn_slice.call(array);
@@ -33,23 +33,24 @@
 
     /**
      * List.
-     * @param  {Iterable} data
-     * @param  {Object}   options
+     * @param  {Iterable} data?
+     * @param  {Object}   options?
      * @return {List}
      * @private
      */
     function List(data, options) {
-        this.init(data || {}, options);
+        this.init(data, options);
     }
 
     List.prototype = {
         /**
          * Init.
-         * @param  {Iterable} data
-         * @param  {Object}   options
+         * @param  {Iterable} data?
+         * @param  {Object}   options?
          * @return {this}
          */
         init: function (data, options) {
+            data = data || {};
             if (!$.isIterable(data)) {
                 throw ('Non-iterable object!');
             }
@@ -62,7 +63,8 @@
 
             options = $.extend({type: type}, options);
 
-            var _this = this, _data = {}, _type = options.type, len = 0;
+            var _this = this, _data = $object(), // dict
+                _type = options.type, len = 0;
 
             $forEach(data, function (key, value) {
                 _data[key] = value, len++; // dunno, why naming as 'length' sucks?!
@@ -75,6 +77,17 @@
             });
 
             return _this;
+        },
+
+        /**
+         * Extend.
+         * @param  {Iterable} data
+         * @return {this}
+         */
+        extend: function (data, _this /* @internal */) {
+            return (_this = this), $forEach(data, function (key, value) {
+                _this._data[key] = value, _this._len++;
+            }), _this;
         },
 
         /**
@@ -183,7 +196,7 @@
          * @return {this}
          */
         empty: function () {
-            return (this._data = {}, this._len = 0), this;
+            return (this._data = $object(), this._len = 0), this;
         },
 
         /**
@@ -249,7 +262,7 @@
          * @return {this}
          */
         prepend: function (value) {
-            var _this = this, data = {0: value};
+            var _this = this, data = $object({0: value});
 
             _this.forEach(function (key, value) {
                 if ($.isNumeric(key)) {
@@ -334,7 +347,7 @@
          * @return {Any|undefined}
          */
         pull: function (key) {
-            var _this = this, data = {}, value;
+            var _this = this, data = $object(), value;
 
             if (key in _this._data) {
                 value = _this._data[key];
@@ -359,7 +372,7 @@
          * @return {Object}
          */
         pullAll: function () {
-            var _this = this, data = {}, values = {}, i = 0;
+            var _this = this, data = $object(), values = $object(), i = 0;
 
             $for(arguments, function (key) {
                 values[i] = UNDEFINED;
@@ -405,7 +418,7 @@
          * @return {List}
          */
         map: function (fn) {
-            var _this = this, data = {};
+            var _this = this, data = $object();
 
             _this.forEach(function (key, value, i) {
                 data[key] = fn(value, key, i, _this._data);
@@ -420,9 +433,9 @@
          * @return {List}
          */
         filter: function (fn) {
-            fn = fn || function (value) { return $.trim(value); }; // set default tester
+            fn = fn || function (value) { return $.trim(value) }; // set default tester
 
-            var _this = this, data = {};
+            var _this = this, data = $object();
 
             _this.forEach(function (key, value, i) {
                 if (fn(value, key, i, _this._data)) {
@@ -466,7 +479,7 @@
          * @return {this}
          */
         reverse: function () {
-            var _this = this, data = {};
+            var _this = this, data = $object();
 
             if (_this._type == OBJECT) {
                 $for(_this.keys().reverse(), function (key) {
@@ -501,7 +514,7 @@
          * @return {this}
          */
         shuffle: function () {
-            var _this = this, data = {}, keys, shuffledKeys, i;
+            var _this = this, data = $object(), keys, shuffledKeys, i;
 
             if (_this._type == OBJECT) {
                 $for(shuffle(_this.keys()), function (key) {
@@ -522,7 +535,7 @@
          * @return {this}
          */
         sort: function (fn) {
-            var _this = this, data = {}, sortedValues = _this.values().sort(fn);
+            var _this = this, data = $object(), sortedValues = _this.values().sort(fn);
 
             $forEach(_this._data, function (key, _, i) {
                 data[key] = sortedValues[i];
@@ -537,7 +550,7 @@
          * @return {this}
          */
         sortKey: function (fn) {
-            var _this = this, data = {}, sortedKeys = _this.keys().sort(fn);
+            var _this = this, data = $object(), sortedKeys = _this.keys().sort(fn);
 
             $for(sortedKeys, function (key) {
                 data[key] = _this._data[key];
@@ -551,7 +564,7 @@
          * @return {this}
          */
         flip: function () {
-            var _this = this, data = {};
+            var _this = this, data = $object();
 
             $forEach(_this._data, function (key, value) {
                 data[value] = key;

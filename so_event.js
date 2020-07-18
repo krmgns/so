@@ -7,14 +7,13 @@
  */
 ;(function ($, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
 
-    var PROTOTYPE = 'prototype';
+    var PROTOTYPE = 'prototype', EVENTS = '$events';
 
     var $win = $.win(), $doc = $.doc();
     var $trim = $.trim, $extend = $.extend, $for = $.for, $forEach = $.forEach, $fire = $.fire,
         $isObject = $.isObject, $isFunction = $.isFunction
 
-    var Object = $win.Object, objectDefineProperty = Object.defineProperty,
-        warn = console.warn;
+    var Object = $win.Object, objectDefineProperty = Object.defineProperty, warn = console.warn;
 
     var types = {
         UIEvent: 'resize|scroll|select|(un)?load|DOMActivate',
@@ -54,10 +53,10 @@
         KEY_SHIFT      = 16, KEY_CONTROL  = 17, KEY_ALT         = 18, KEY_ALT_GRAPH  = 225;
 
     var _id = 0;
-    var _break = 0;
+    var _break = FALSE;
 
     function split(s, re) {
-        return $trim(s).split(re);
+        return $trim(s).split(re).filter();
     }
 
     /**
@@ -78,7 +77,7 @@
         var event, eventClassOrig;
         if (!eventClass) { // autodetect
             $forEach(types, function (name, re) {
-                re = $.re('^('+ re +')$', 'i');
+                re = $.re('^('+ re +')$', 'i', '1m');
                 if (re.test(eventType)) {
                     eventClass = eventClassOrig = name;
                     return _break;
@@ -98,32 +97,27 @@
             }
 
             event = $doc.createEvent(eventClass);
-            switch (eventClassOrig) {
-                case 'UIEvent':
-                    event.initUIEvent(eventType, options.bubbles, options.cancelable, options.view, options.detail);
-                    break;
-                case 'MouseEvent':
-                case 'DragEvent':
-                case 'WheelEvent':
-                    event.initMouseEvent(eventType, options.bubbles, options.cancelable, options.view, options.detail,
-                        options.screenX, options.screenY, options.clientX, options.clientY,
-                        options.ctrlKey, options.altKey, options.shiftKey, options.metaKey,
-                        options.button, options.relatedTarget);
-                    break;
-                case 'MutationEvent':
-                    event.initMutationEvent(eventType, options.bubbles, options.cancelable, options.relatedNode,
-                        options.prevValue, options.newValue, options.attrName, options.attrChange);
-                    break;
-                default:
-                    if (eventClass == 'CustomEvent') {
-                        event.initCustomEvent(eventType, options.bubbles, options.cancelable, options.detail);
-                    } else {
-                        event.initEvent(eventType, options.bubbles, options.cancelable); // all others
-                    }
+            if (eventClassOrig == 'UIEvent') {
+                event.initUIEvent(eventType, options.bubbles, options.cancelable, options.view, options.detail);
+            } else if (eventClassOrig == 'MouseEvent'
+                    || eventClassOrig == 'DragEvent'
+                    || eventClassOrig == 'WheelEvent') {
+                event.initMouseEvent(eventType, options.bubbles, options.cancelable, options.view, options.detail,
+                    options.screenX, options.screenY, options.clientX, options.clientY,
+                    options.ctrlKey, options.altKey, options.shiftKey, options.metaKey,
+                    options.button, options.relatedTarget);
+            } else if (eventClassOrig == 'MutationEvent') {
+                event.initMutationEvent(eventType, options.bubbles, options.cancelable, options.relatedNode,
+                    options.prevValue, options.newValue, options.attrName, options.attrChange);
+            } else {
+                (eventClass == 'CustomEvent')
+                    ? event.initCustomEvent(eventType, options.bubbles, options.cancelable, options.detail)
+                    : event.initEvent(eventType, options.bubbles, options.cancelable); // all others
             }
         }
 
-        return {event: event, eventClass: (eventClass in types) ? eventClass : 'CustomEvent'};
+        // return {event: event, eventClass: (eventClass in types) ? eventClass : 'CustomEvent'};
+        return [event, (eventClass in types) ? eventClass : 'CustomEvent'];
     }
 
     /**
@@ -227,13 +221,13 @@
         return new EventTarget(target);
     }
     function prepareEventTarget(target, eventType) {
-        if (!target) throw ('No target given!');
-
-        if (!target.$events) {
-            target.$events = {};
+        if (!target) {
+            throw ('No target given!');
         }
-        if (eventType && !target.$events[eventType]) {
-            target.$events[eventType] = {};
+
+        target[EVENTS] || (target[EVENTS] = {});
+        if (eventType && !target[EVENTS][eventType]) {
+            target[EVENTS][eventType] = {};
         }
 
         return target;
@@ -246,6 +240,8 @@
      * @param {Object}   options?
      */
     function Event(type, fn, options) {
+        var _this, event;
+
         type = $trim(type);
         options = options || {};
         if ($isObject(fn)) { // ..('click', {fn: function (){..}})
@@ -254,18 +250,18 @@
 
         options = $extend({}, optionsDefault, options);
 
-        var _this = this; // just as minify candy
+        _this = this; // just as minify candy
         _this.type = type;
         _this.options = options;
 
-        _this.custom = options.custom;
+        _this.custom = !!options.custom;
         if (_this.custom) {
             _this.options.eventClass = 'CustomEvent';
         }
 
-        var event = create(_this.options.eventClass, _this.type, options);
-        _this.event = event.event;
-        _this.eventClass = event.eventClass;
+        event = create(_this.options.eventClass, _this.type, options);
+        _this.event = event[0];
+        _this.eventClass = event[1];
         _this.eventTarget = NULL;
 
         _this.target = options.target;
@@ -278,6 +274,7 @@
         _this.passive = options.passive;
 
         _this.id = ++_id;
+        _this.idx = $.util.uid();
         _this.fired = 0;
         _this.cancalled = FALSE;
     }
@@ -288,8 +285,8 @@
          * @return {Event}
          */
         copy: function () {
-            var event = this;
-            var eventCopy = initEvent(event.type, event.fno, event.options);
+            var event = this,
+                eventCopy = initEvent(event.type, event.fno, event.options);
 
             return $extend(eventCopy, event);
         },
@@ -300,8 +297,8 @@
          * @return {Event}
          */
         bind: function (type) {
-            var event = this.copy();
-            var eventTarget = initEventTarget(event.target);
+            var event = this.copy(),
+                eventTarget = initEventTarget(event.target);
 
             if (!type) {
                 eventTarget.addEvent(event);
@@ -339,8 +336,8 @@
          * @return {Event}
          */
         unbind: function (type) {
-            var event = this.copy();
-            var eventTarget = initEventTarget(event.target);
+            var event = this.copy(),
+                eventTarget = initEventTarget(event.target);
 
             if (!type) {
                 eventTarget.removeEvent(event);
@@ -362,8 +359,8 @@
          * @return {Event}
          */
         fire: function (type, data, delay) {
-            var event = this.copy();
-            var eventTarget = initEventTarget(event.target);
+            var event = this.copy(),
+                eventTarget = initEventTarget(event.target);
 
             if (!type) {
                 eventTarget.fireEvent(event, data, delay);
@@ -405,7 +402,7 @@
             event.id = event.id || ++_id;
             event.target = target;
             event.eventTarget = this;
-            target.$events[event.type][event.id] = event;
+            target[EVENTS][event.type][event.id] = event;
 
             target.addEventListener(event.type, event.fn, event.useCapture);
         },
@@ -416,36 +413,34 @@
          * @return {void}
          */
         removeEvent: function (event) {
-            var target = prepareEventTarget(this.target);
-            var targetEvents;
-            var removeStack = [];
+            var target = prepareEventTarget(this.target),
+                targetEvents = target[EVENTS],
+                removeStack = [], type;
 
-            if (target.$events) {
+            if (target[EVENTS]) {
                 if (event.type == '*') { // all
-                    $for(target.$events, function (events) {
+                    $for(targetEvents, function (events) {
                         $for(events, function (event) {
                             removeStack.push(event);
                         });
                     });
                 } else if (event.type == '**') { // all fired
-                    $for(target.$events, function (events) {
+                    $for(targetEvents, function (events) {
                         $for(events, function (event) {
                             if (event && event.fired) {
                                 removeStack.push(event);
                             }
                         });
                     });
-                } else if (event.type.startsWith('**')) { // all fired 'x' types, eg: .off('**click')
-                    var type = event.type.slice(2);
-                    $for(target.$events, function (events) {
-                        $for(events, function (event) {
-                            if (event && event.fired && event.type == type) {
-                                removeStack.push(event);
-                            }
-                        });
+                } else if (event.type.endsWith('**')) { // all fired 'x' types, eg: .off('click**')
+                    type = event.type.slice(0, -2);
+                    $for(target[EVENTS][type], function (event) {
+                        if (event && event.fired) {
+                            removeStack.push(event);
+                        }
                     });
-                } else if (target.$events[event.type]) {
-                    var fno = event.fno, events = target.$events[event.type];
+                } else if (targetEvents[event.type]) {
+                    var fno = event.fno, events = targetEvents[event.type];
                     if (fno) { // all matched type's & fn's, eg: .off('click', fn)
                         $for(events, function (event) {
                             if (event && event.fno == fno) {
@@ -460,9 +455,8 @@
                 }
 
                 if (removeStack.len()) {
-                    targetEvents = target.$events;
                     $for(removeStack, function (event) {
-                        if (event && event.id in targetEvents[event.type]) {
+                        if (event && (event.id in targetEvents[event.type])) {
                             delete targetEvents[event.type][event.id];
                             target.removeEventListener(event.type, event.fn, event.useCapture);
                         }
@@ -470,13 +464,13 @@
 
                     // think memory!
                     $forEach(targetEvents, function (type, events) {
-                        targetEvents[type] = !$.empty(events) ? events : NULL;
+                        targetEvents[type] = $.empty(events) ? NULL : events;
                     });
                 } else if ($isFunction(target['on'+ event.type])) { // natives
                     target['on'+ event.type] = NULL;
                 }
             } else {
-                warn('No "'+ event.type +'" to remove.');
+                warn('No "'+ event.type +'" to remove!');
             }
         },
 
@@ -488,16 +482,16 @@
          * @return {void}
          */
         fireEvent: function (event, data, delay) {
-            var target = prepareEventTarget(this.target);
+            var target = prepareEventTarget(this.target), key;
 
-            if (target.$events[event.type]) {
-                $for(target.$events[event.type], function (event) {
+            if (target[EVENTS][event.type]) {
+                $for(target[EVENTS][event.type], function (event) {
                     data = data || event.options.data;
                     delay = delay || event.options.delay;
 
                     if (data) { // call-time data (eg: fire("foo", {data: {a: 1, b: ..}}))
                         event.event.data = event.event.data || {};
-                        for (var key in data) {
+                        for (key in data) {
                             event.event.data[key] = data[key];
                         }
                     }
@@ -513,7 +507,7 @@
                     target[event.type](event.event);
                 });
             } else {
-                warn('No "'+ event.type +'" to fire.');
+                warn('No "'+ event.type +'" to fire!');
             }
         }
     });
@@ -575,8 +569,7 @@
      * @return {Bool}
      */
     function has(target, type, fn, opt_typeOnly) {
-        var ret = FALSE;
-        var events = target && target.$events;
+        var events = target && target[EVENTS], ret = FALSE;
         if (!events) {
             return ret;
         }
