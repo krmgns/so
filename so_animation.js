@@ -55,7 +55,7 @@
 
         if (_this.$dom.len()) {
             // for stop tool
-            _this.$dom.setProperty('$animation', _this);
+            _this.$dom.set('$animation', _this);
 
             // assign animation tasks
             $forEach(properties, function (name, value) {
@@ -146,7 +146,7 @@
                     $dom.setStyle(task.name, value.toFixed(9) /* use 'toFixed' for a good percent */
                         + task.unit);
                 } else {
-                    $dom.setProperty(task.name, value.toFixed(0));
+                    $dom.set(task.name, value.toFixed(0));
                 }
             });
 
@@ -164,7 +164,7 @@
                 if (!task.scroll) {
                     $dom.setStyle(task.name, task.endValue + task.unit);
                 } else {
-                    $dom.setProperty(task.name, task.endValue);
+                    $dom.set(task.name, task.endValue);
                 }
             });
 
@@ -189,7 +189,7 @@
             }
 
             // set as null (for stop, animated() etc.)
-            $dom.setProperty('$animation', NULL);
+            $dom.set('$animation', NULL);
 
             return _this;
         }

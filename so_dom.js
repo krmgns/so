@@ -8,7 +8,10 @@
 ;(function ($, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
 
     // minify candies
-    var NAME_NODE_NAME = 'nodeName', NAME_NODE_TYPE = 'nodeType',
+    var PROTOTYPE = 'prototype',
+        DATA = '$data', ANIMATION = '$animation',
+        OBSERVER = '$observer', EVENTS = '$events',
+        NAME_NODE_NAME = 'nodeName', NAME_NODE_TYPE = 'nodeType',
         NAME_PARENT_NODE = 'parentNode', NAME_PARENT_ELEMENT = 'parentElement',
         NAME_CHILDREN = 'children', NAME_CHILD_NODES = 'childNodes', NAME_FIRST_CHILD = 'firstChild',
         NAME_NEXT_ELEMENT_SIBLING = 'nextElementSibling', NAME_PREVIOUS_ELEMENT_SIBLING = 'previousElementSibling',
@@ -29,8 +32,7 @@
         NAME_CHECKED = 'checked', NAME_SELECTED = 'selected', NAME_DISABLED = 'disabled', NAME_READONLY = 'readOnly',
         NAME_DISPLAY = 'display', NAME_VISIBILITY = 'visibility', NAME_NONE = 'none', NAME_CSS_TEXT = 'cssText',
         NAME_OWNER_DOCUMENT = 'ownerDocument', NAME_DOCUMENT_ELEMENT = 'documentElement', NAME_SCROLLING_ELEMENT = 'scrollingElement',
-        TAG_WINDOW = '#window', TAG_DOCUMENT = '#document', TAG_HTML = 'html', TAG_HEAD = 'head', TAG_BODY = 'body',
-        PROTOTYPE = 'prototype';
+        TAG_WINDOW = '#window', TAG_DOCUMENT = '#document', TAG_HTML = 'html', TAG_HEAD = 'head', TAG_BODY = 'body';
     var $doc = $.doc();
     var $event = $.event, $util = $.util, $toStyleName = $util.toStyleName;
     var $re = $.re, $array = $.array, $uid = $util.uid,
@@ -725,7 +727,7 @@
 
     function cleanElement(el, opt_self, _child) {
         if (!$isFalse(opt_self)) {
-            el.$animation = el.$data = el.$observer = el.$events = NULL;
+            el[DATA] = el[ANIMATION] = el[OBSERVER] = el[EVENTS] = NULL;
         }
 
         while (_child = el[NAME_FIRST_CHILD]) {
@@ -750,16 +752,16 @@
         }
 
         if (!$isFalse(opt_deep)) {
-            clone.$data = el.$data || {};
-            clone.$data[cloneIdAttr] = cloneId;
+            clone[DATA] = el[DATA] || {};
+            clone[DATA][cloneIdAttr] = cloneId;
 
-            if (el.$observer) {
-                clone.$observer = el.$observer;
-                clone.$observer.observe(clone, el.$observer.options);
+            if (el[OBSERVER]) {
+                clone[OBSERVER] = el[OBSERVER];
+                clone[OBSERVER].observe(clone, el[OBSERVER].options);
             }
 
-            if (el.$events) {
-                $for(el.$events, function (events) {
+            if (el[EVENTS]) {
+                $for(el[EVENTS], function (events) {
                     $for(events, function (event) {
                         event.bindTo(clone);
                     });
@@ -2852,7 +2854,7 @@
 
     // data helpers
     function checkData(el) {
-        el.$data = el.$data || {};
+        el[DATA] = el[DATA] || {};
     }
 
     function hasData(el, key) {
@@ -2865,11 +2867,11 @@
             checkData(el);
 
             if ($isString(key)) {
-                el.$data[$trim(key)] = value;
+                el[DATA][$trim(key)] = value;
             } else {
                 var data = toKeyValue(key, value);
                 for (key in data) {
-                    el.$data[key] = data[key];
+                    el[DATA][key] = data[key];
                 }
             }
         }
@@ -2882,9 +2884,9 @@
 
             var ret;
             if (key == '*') { // all
-                ret = el.$data, (opt_remove && delete el.$data);
+                ret = el[DATA], (opt_remove && delete el[DATA]);
             } else {
-                ret = el.$data[key], (opt_remove && delete el.$data[key]);
+                ret = el[DATA][key], (opt_remove && delete el[DATA][key]);
             }
             return ret;
         }
@@ -2945,10 +2947,10 @@
             return this.for(function (el) {
                 checkData(el);
                 if (key[0] == '*') { // all
-                    el.$data = NULL;
+                    el[DATA] = NULL;
                 } else {
                     $each(key, function (key) {
-                        delete el.$data[key];
+                        delete el[DATA][key];
                     });
                 }
             });
@@ -3209,7 +3211,7 @@
             try { // safe for MutationObserver support
                 var _this = this;
                 return _this.for(function (el) {
-                    el.$observer = new MutationObserver(function (mutationRecords) {
+                    el[OBSERVER] = new MutationObserver(function (mutationRecords) {
                         $for(mutationRecords, function (mutationRecord) {
                             $forEach(options, function (type, fn) {
                                 if (mutationRecord.type == type) {
@@ -3218,14 +3220,14 @@
                             });
                         });
                     });
-                    el.$observer.options = options;
-                    el.$observer.observe(el, options);
+                    el[OBSERVER].options = options;
+                    el[OBSERVER].observe(el, options);
                 })
             } catch (e) { warn(e) }
         },
         unobserve: function () {
             return this.for(function (el) {
-                el.$observer && el.$observer.disconnect();
+                el[OBSERVER] && el[OBSERVER].disconnect();
             });
         }
     });
@@ -3278,7 +3280,7 @@
             animate: function (properties, speed, easing, callback) {
                 return $isFalse(properties) // stop previous animation
                      ? this.for(function (el, animation) {
-                         animation = el.$animation;
+                         animation = el[ANIMATION];
                          if (animation && animation.running) {
                              animation.stop();
                          }
@@ -3293,7 +3295,7 @@
              * @return {Bool}
              */
             animated: function () {
-                return $bool(this[0] && $isDefined(this[0].$animation));
+                return $bool(this[0] && $isDefined(this[0][ANIMATION]));
             },
 
             /**

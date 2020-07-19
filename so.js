@@ -7,9 +7,7 @@
 ;(function ($win, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
 
     // simply support check
-    if (!''.trim) {
-        throw ('Archaic browser!');
-    }
+    if (!''.trim) throw ('Archaic browser!');
 
     /**
      * So.
@@ -25,7 +23,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.136.1';
+    $win.so.VERSION = '5.136.2';
 
     // minify candies
     var PROTOTYPE = 'prototype',
