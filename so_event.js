@@ -274,7 +274,6 @@
         _this.passive = options.passive;
 
         _this.id = ++_id;
-        _this.idx = $.util.uid();
         _this.fired = 0;
         _this.cancalled = FALSE;
     }
