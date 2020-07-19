@@ -25,7 +25,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.135.0';
+    $win.so.VERSION = '5.136.0';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -127,8 +127,8 @@
     }
 
     function toRegExpEsc(input) {
-        // @note: slashes (/) are escaped already by RegExp
-        return toString(input).replace(/[.*+?^$|{}()\[\]\\]/g, '\\$&');
+        // @note: slashes (/) are escaped already by RegExp?
+        return toString(input).replace(/[\/.*+?^$|{}()\[\]\\]/g, '\\$&');
     }
 
     // safer length getter
@@ -439,30 +439,24 @@
         );
     }
 
-    function has(src, stack) {
-        var ret;
-
-        if (isNulls(src) || isNulls(stack)) { // fix empty stuff issue
+    function has(src, stack, ret) {
+        if (src === '' || stack === '') { // fix empty stuff issue
             ret = -1;
         } else if (isString(stack)) {
             ret = index(src, stack);
         } else if (isArray(stack)) {
             ret = index(src, stack);
         } else if (isObject(stack)) {
-            $.for(stack, function (value, i) {
-                if (value === src) { // all strict comparison
+            loopEach(stack, function (value, i) {
+                if (src === value) { // all strict comparison
                     ret = i; return _break;
                 }
             });
         }
-
         return (ret > -1);
     }
-
-    function toUniqUnuniq(array, opt_ununiq) {
-        return !opt_ununiq
-             ? array.filter(function (src, i, array) { return index(src, array) === i; })
-             : array.filter(function (src, i, array) { return index(src, array) !== i; });
+    function hasIndex(src, stack) { // @note: in not working for strings
+        return toBool(stack && isString(stack) ? stack[src] : (src in stack));
     }
 
     /**
@@ -488,11 +482,11 @@
 
         /**
          * Has index.
-         * @param  {Any} srcIndex
+         * @param  {Any} src
          * @return {Bool}
          */
-        hasIndex: function (srcIndex) {
-            return (srcIndex in this);
+        hasIndex: function (src) {
+            return hasIndex(src, this);
         },
 
         /**
@@ -555,7 +549,9 @@
          * @return {Array}
          */
         uniq: function () {
-            return toUniqUnuniq(this);
+            return this.filter(function (src, i, stack) {
+                return stack.indexOf(src) === i;
+             });
         },
 
         /**
@@ -563,7 +559,9 @@
          * @return {Array}
          */
         ununiq: function () {
-            return toUniqUnuniq(this, TRUE);
+            return this.filter(function (src, i, stack) {
+                return stack.indexOf(src) !== i;
+            });
         },
 
         /**
@@ -596,7 +594,7 @@
          * Filter.
          * @param  {Function} fn
          * @return {Array}
-         * @override
+         * @override For empty-fn option.
          */
         filter: function (fn) {
             // prevent "undefined not a function" error
@@ -655,12 +653,12 @@
         pull: function () {
             var _this = this, keys = toArray(arguments), ret = [];
 
-            $.for(keys, function (key) {
+            loopEach(keys, function (key) {
                 _this.hasIndex(key) && ret.push(_this[key]);
             });
 
             // delete used keys and decrease size (fixing length)
-            $.for(ret, function (_, i) { _this.splice(i, 1) });
+            loopEach(ret, function (_, i) { _this.splice(i, 1) });
 
             return len(keys) == 1 ? ret[0] : ret;
         },
@@ -673,7 +671,7 @@
         extract: function () {
             var _this = this, keys = toArray(arguments), ret = {};
 
-            $.for(keys, function (key, i) {
+            loopEach(keys, function (key, i) {
                 // [1,2,3].extract('one', '', 'three') => {one: 1, three: 3}
                 key && (ret[key] = _this[i]);
             });
@@ -683,15 +681,35 @@
     });
 
     // string helpers
-    function prepareTrimRegExp(chars, opt_iCase, opt_side) {
-        return toRegExp((opt_side == 1 ? '^%s+' : '%s+$').format(
-            '('+ chars.split('').uniq().map(toRegExpEsc).join('|') +')'
-        ), opt_iCase ? 'i' : '');
+    function prepareTrimRegExp(src, opt_side, opt_icase) {
+        src = toString(src);
+        src = ('('+ src.split('').uniq().map(toRegExpEsc).unsplit('|') +')');
+        src = (opt_side == 1) ? '^'+ src : src +'$';
+        return toRegExp(src, !opt_icase ? '' : 'i');
     }
-    function prepareSearchRegExp(src, opt_iCase, opt_side, opt_esc) {
-        return toRegExp((!opt_side ? '%s' : opt_side == 1 ? '^%s' : '%s$').format(
-            opt_esc ? toRegExpEsc(src): src
-        ), opt_iCase ? 'i' : '');
+    function prepareSearchRegExp(src, opt_esc, opt_side, opt_icase) {
+        src = toString(src);
+        src = !opt_esc ? src : toRegExpEsc(src);
+        src = !opt_side ? src : (opt_side == 1 ? '^'+ src : src +'$');
+        return toRegExp(src, !opt_icase ? '' : 'i');
+    }
+
+    function checkSearchPosition(str, src, offset, opt_side, opt_icase) {
+        for (var str = str.slice(offset), src = toArray(src),
+                  fn = (opt_side == 1) ? startsWith : endsWith,
+                   i = 0, il = len(src); i < il; i++) {
+            if (fn(str, src[i], opt_side, opt_icase)) {
+                return TRUE;
+            }
+        }
+        return FALSE;
+    }
+
+    function startsWith(str, src, opt_side, opt_icase) {
+        return str.test(prepareSearchRegExp(src, TRUE, opt_side, opt_icase));
+    }
+    function endsWith(str, src, opt_side, opt_icase) {
+        return str.test(prepareSearchRegExp(src, TRUE, opt_side, opt_icase));
     }
 
     /**
@@ -708,7 +726,7 @@
 
         /**
          * Has.
-         * @param  {Any} src
+         * @param  {String} src
          * @return {Bool}
          */
         has: function (src) {
@@ -716,12 +734,12 @@
         },
 
         /**
-         * In.
-         * @param  {Array|String} stack
+         * Has index.
+         * @param  {Any} src
          * @return {Bool}
          */
-        in: function (stack) {
-            return index(this, stack) > -1;
+        hasIndex: function (src) {
+            return hasIndex(src, this);
         },
 
         /**
@@ -730,10 +748,9 @@
          * @param  {Bool}          opt_last?
          * @return {Int|null}
          */
-        index: function (src, opt_last) {
-            var ret = index(src, this, opt_last);
-
-            return (ret > -1) ? ret : NULL;
+        index: function (src, opt_last, ret /* @internal */) {
+            return (ret = index(src, this, opt_last)),
+                   (ret > -1) ? ret : NULL;
         },
 
         /**
@@ -847,7 +864,7 @@
         },
 
         /**
-         * Strip (alias of trim() without opt_iCase).
+         * Strip (alias of trim() without opt_icase).
          * @param  {String} chars?
          * @return {String}
          */
@@ -862,10 +879,10 @@
          * @return {Array}
          */
         splits: function (separator, limit) {
-            var s = this.split(separator);
+            var s = this.split(separator), slice;
 
             if (limit) {
-                var slice = s.slice(limit - 1); // rest
+                slice = s.slice(limit - 1); // rest
                 s = s.slice(0, limit - 1);
                 if (len(slice)) {
                     s = s.concat(slice.join(separator));
@@ -956,11 +973,11 @@
                 while (len(re)) {
                     ret.push(re.shift().filter(function (value, i) {
                         // skip 0 index & nones
-                        return (i && !isVoid(value));
+                        return (i && (value != NULL));
                     }));
                 }
 
-                if (!isVoid(i)) {
+                if (i != NULL) {
                     return ret[i | 0];
                 }
             }
@@ -978,7 +995,7 @@
             var flags = pattern.flags;
             var r, re, ret = [], slashIndex;
 
-            if (isVoid(flags)) { // hellö ie.. ?}/=%&'|#)"^*1...!
+            if (flags == NULL) { // hellö ie.. ?}/=%&'|#)"^*1...!
                 slashIndex = index('/', (pattern = toString(pattern)), TRUE)
                 source = pattern.slice(1, slashIndex);
                 flags = pattern.slice(slashIndex + 1);
@@ -1045,27 +1062,27 @@
         /**
          * Trim.
          * @param  {String} chars?
-         * @param  {Bool}   opt_iCase?
+         * @param  {Bool}   opt_icase?
          * @return {String}
-         * @override For chars option.
+         * @override For chars & icase options.
          */
-        trim: function (chars, opt_iCase, s /* @internal */) {
-            return (s = this), !chars ? trim(s)
-                : s.trimLeft(chars, opt_iCase).trimRight(chars, opt_iCase);
+        trim: function (chars, opt_icase, s /* @internal */) {
+            return s = this, !chars ? trim(s)
+                 : s.trimLeft(chars, opt_icase).trimRight(chars, opt_icase);
         },
 
         /**
          * Trim left.
          * @param  {String} chars?
-         * @param  {Bool}   opt_iCase?
+         * @param  {Bool}   opt_icase?
          * @return {String}
-         * @override For chars option.
+         * @override For chars & icase options.
          */
-        trimLeft: function (chars, opt_iCase) {
+        trimLeft: function (chars, opt_icase) {
             var s = this, re;
             if (!chars) return trim(s, 1);
 
-            re = prepareTrimRegExp(chars, opt_iCase, 1);
+            re = prepareTrimRegExp(chars, 1, opt_icase);
             while (re.test(s)) {
                 s = s.replace(re, '');
             }
@@ -1076,15 +1093,15 @@
         /**
          * Trim right.
          * @param  {String} chars?
-         * @param  {Bool}   opt_iCase?
+         * @param  {Bool}   opt_icase?
          * @return {String}
-         * @override For chars option.
+         * @override For chars & icase options.
          */
-        trimRight: function (chars, opt_iCase) {
+        trimRight: function (chars, opt_icase) {
             var s = this, re;
             if (!chars) return trim(s, 2);
 
-            re = prepareTrimRegExp(chars, opt_iCase, 2);
+            re = prepareTrimRegExp(chars, 2, opt_icase);
             while (re.test(s)) {
                 s = s.replace(re, '');
             }
@@ -1093,52 +1110,28 @@
         },
 
         /**
-         * Contains.
-         * @param  {String} src
-         * @param  {Int}    offset?
-         * @param  {Bool}   opt_iCase?
-         * @return {Bool}
-         */
-        contains: function (src, offset, opt_iCase) {
-            return this.slice(offset).test(prepareSearchRegExp(src, opt_iCase, NULL, TRUE));
-        },
-
-        /**
-         * Contains any.
-         * @param  {String|Array} chars
-         * @param  {Int}          offset?
-         * @param  {Bool}         opt_iCase?
-         * @return {Bool}
-         */
-        containsAny: function (chars, offset, opt_iCase) {
-            return this.slice(offset).test(prepareSearchRegExp('('+ (
-                isString(chars) ? chars.split('') : chars // array
-            ).uniq().map(toRegExpEsc).join('|') +')', opt_iCase));
-        },
-
-        /**
          * Starts with.
-         * @param  {String} src
-         * @param  {Int}    offset?
-         * @param  {Bool}   opt_iCase?
+         * @param  {String|String[]} src
+         * @param  {Int}             offset?
+         * @param  {Bool}            opt_icase?
          * @return {Bool}
-         * @override For no-case option.
+         * @override For no-ie support & array & icase options.
          */
-        startsWith: function (src, offset, opt_iCase) {
-            return this.slice(offset).test(prepareSearchRegExp(src, opt_iCase, 1, TRUE));
+        startsWith: function (src, offset, opt_icase) {
+            return checkSearchPosition(this, src, offset, 1, opt_icase);
         },
 
         /**
          * Ends with.
-         * @param  {String} src
-         * @param  {Int}    offset?
-         * @param  {Bool}   opt_iCase?
+         * @param  {String|String[]} src
+         * @param  {Int}             offset?
+         * @param  {Bool}            opt_icase?
          * @return {Bool}
-         * @override For no-case option.
+         * @override For no-ie support & array & icase options.
          */
-        endsWith: function (src, offset, opt_iCase) {
-            return this.slice(offset).test(prepareSearchRegExp(src, opt_iCase, 2, TRUE));
-        }
+        endsWith: function (src, offset, opt_icase) {
+            return checkSearchPosition(this, src, offset, 2, opt_icase);
+        },
     });
 
     /**
@@ -1331,23 +1324,23 @@
         bool: function (input) { return toBool(input); },
 
         /**
-         * In.
-         * @param  {Any}          src
-         * @param  {Array|String} stack
-         * @return {Bool}
-         */
-        in: function (src, stack) {
-            return index(src, stack) > -1;
-        },
-
-        /**
          * Has.
-         * @param  {Any}  src
-         * @param  {Any}  stack
+         * @param  {Any}                 src
+         * @param  {Array|Object|String} stack
          * @return {Bool}
          */
         has: function (src, stack) {
             return has(src, stack);
+        },
+
+        /**
+         * Has key.
+         * @param  {Any}                 src
+         * @param  {Array|Object|String} stack
+         * @return {Bool}
+         */
+        hasKey: function (src, stack) {
+            return hasIndex(src, stack);
         },
 
         /**

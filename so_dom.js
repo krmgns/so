@@ -578,13 +578,10 @@
         },
 
         /**
-         * All, all dom (alias of toArray(), toDomArray()).
+         * All (alias of toArray(), toDomArray()).
          */
-        all: function () {
-            return this.toArray();
-        },
-        allDom: function () {
-            return this.toDomArray();
+        all: function (opt_dom) {
+            return this.toArray(opt_dom);
         },
 
         /**
@@ -1254,8 +1251,7 @@
          * @return {String}
          */
         getHtml: function (opt_outer) {
-            return opt_outer ? __(this, NAME_OUTER_HTML)
-                             : __(this, NAME_INNER_HTML);
+            return opt_outer ? __(this, NAME_OUTER_HTML) : __(this, NAME_INNER_HTML);
         },
 
         /**
@@ -1264,20 +1260,20 @@
          * @return {Bool}
          */
         isEmpty: function (opt_trim) {
-            var content;
+            var _this = this, content;
 
-            switch (this.tag()) {
+            switch (_this.tag()) {
                 case 'input':
                 case 'select':
                 case 'textarea':
-                    content = this.value();
+                    content = _this.value();
                     break;
                 case TAG_WINDOW:
                 case TAG_DOCUMENT:
                     content = 1; // ok
                     break;
                 default:
-                    content = this.html();
+                    content = _this.html();
             }
 
             return $isNulls(opt_trim ? $trim(content) : content);
