@@ -66,8 +66,8 @@
 
                 if (!scroll) {
                     style = $isString(value)
-                        ? _this.$dom.getCssStyle(name) // get original style to catch unit sign
-                        : _this.$dom.getComputedStyle(name);
+                        ? _this.$dom.getCssStyles(name)[name] // get original style to catch unit sign
+                        : _this.$dom.getComputedStyles(name)[name];
 
                     startValue = $float(style);
                     endValue = $float(value);
