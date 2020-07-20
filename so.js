@@ -23,7 +23,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.136.3';
+    $win.so.VERSION = '5.137.0';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -749,6 +749,15 @@
         index: function (src, opt_last, ret /* @internal */) {
             return (ret = index(src, this, opt_last)),
                    (ret > -1) ? ret : NULL;
+        },
+
+        /**
+         * In.
+         * @param  {Array} stack
+         * @return {Bool}
+         */
+        in: function (stack) {
+            return has(this, stack);
         },
 
         /**
