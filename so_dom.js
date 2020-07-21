@@ -384,6 +384,7 @@
          */
         each: function (fn, init) {
             var all = this.all();
+            log(arguments)
 
             if (init) {
                 // shortcut for: ... each(function (el) { var $el = $(el) ...
@@ -3595,7 +3596,7 @@
     var $dom = function (selector, root, one) {
         return !$isFunction(root)
             ? toDom(selector, root, one)
-            : toDom(selector).each(root);
+            : toDom(selector).each(root, one);
     };
 
     // add static methods to dom
