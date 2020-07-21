@@ -384,7 +384,6 @@
          */
         each: function (fn, init) {
             var all = this.all();
-            log(arguments)
 
             if (init) {
                 // shortcut for: ... each(function (el) { var $el = $(el) ...
