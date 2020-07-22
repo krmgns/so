@@ -2614,6 +2614,8 @@
                             option[NAME_SELECTED] = TRUE;
                         }
                     });
+                } else if (getTag(el) == 'textarea') {
+                    el[NAME_VALUE] = el[NAME_TEXT_CONTENT] = value;
                 } else {
                     setAttr(el, NAME_VALUE, value, FALSE);
                 }
