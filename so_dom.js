@@ -755,18 +755,7 @@
             clone[DATA] = el[DATA] || {};
             clone[DATA][cloneIdAttr] = cloneId;
 
-            if (el[OBSERVER]) {
-                clone[OBSERVER] = el[OBSERVER];
-                clone[OBSERVER].observe(clone, el[OBSERVER].options);
-            }
-
-            if (el[EVENTS]) {
-                $for(el[EVENTS], function (events) {
-                    $for(events, function (event) {
-                        event.bindTo(clone);
-                    });
-                });
-            }
+            cloneSpecials(el, clone);
 
             if (el[NAME_CHILD_NODES]) {
                 $for(el[NAME_CHILD_NODES], function (child) {
@@ -776,6 +765,26 @@
         }
 
         return clone;
+    }
+
+    function cloneSpecials(source, target, opt_data) {
+        if (opt_data && source[DATA]) {
+            delete source[DATA][cloneIdAttr]; // no longer valid
+            target[DATA] = source[DATA]
+        }
+
+        if (source[OBSERVER]) {
+            target[OBSERVER] = source[OBSERVER];
+            target[OBSERVER].observe(target, source[OBSERVER].options);
+        }
+
+        if (source[EVENTS]) {
+            $for(source[EVENTS], function (events) {
+                $for(events, function (event) {
+                    event.bindTo(target);
+                });
+            });
+        }
     }
 
     function cloneIf(opt_clone, node) { // note: inserts only once without clone id
@@ -1014,16 +1023,21 @@
          * Replace with.
          * @param  {String|Node} selector
          * @param  {Bool}        opt_clone?
+         * @param  {Bool}        opt_cloneSpecials?
          * @return {this}
          */
-        replaceWith: function (selector, opt_clone) {
+        replaceWith: function (selector, opt_clone, opt_cloneSpecials) {
             if (!isDom(selector)) {
                 selector = toDom(selector);
             }
 
             var _this = this; return _this.for(function (el, i) {
                 selector.for(function (_el) {
-                    replaceChild(el[NAME_PARENT_NODE], _this[i] = cloneIf(opt_clone, _el), el);
+                    _el = _this[i] = cloneIf(opt_clone, _el);
+                    if (opt_cloneSpecials) { // clone special properties
+                        cloneSpecials(el, _el, TRUE);
+                    }
+                    replaceChild(el[NAME_PARENT_NODE], _el, el);
                 });
             });
         },
@@ -2600,10 +2614,8 @@
                             option[NAME_SELECTED] = TRUE;
                         }
                     });
-                } else if (isCheckInput(el)) {
-                    setAttr(el, NAME_CHECKED, (el[NAME_VALUE] === value), TRUE);
                 } else {
-                    setAttr(el, NAME_VALUE, (el[NAME_VALUE] = value), FALSE);
+                    setAttr(el, NAME_VALUE, value, FALSE);
                 }
             });
         },
