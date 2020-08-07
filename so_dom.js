@@ -2612,6 +2612,7 @@
                     $for(el[NAME_OPTIONS], function (option) {
                         if (option[NAME_VALUE] === value) {
                             option[NAME_SELECTED] = TRUE;
+                            setAttr(option, NAME_SELECTED, TRUE, TRUE);
                         }
                     });
                 } else if (getTag(el) == 'textarea') {
