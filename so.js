@@ -23,7 +23,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.138.2';
+    $win.so.VERSION = '5.138.3';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -95,7 +95,7 @@
             throw ('Pattern required!');
         }
 
-        flags = flags || '';
+        flags = flags || (isRegExp(pattern) ? pattern.flags : '');
         if (flags && isInt(flags)) {
             ttl = flags, flags = '';
         }
