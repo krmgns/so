@@ -22,18 +22,19 @@
         return Math.random().toString(base || 16).slice(len ? -len : 2);
     }
 
-    function randId(len, base, opt_now) {
+    function randId(len, base, opt_now, opt_php) {
         len = len || 10, base = base || 36;
 
-        var ret, now, e = 1000;
-        if (!opt_now) {
-            ret = rand(0, base);
+        // more closer to php microtime() but uniq issues for shorts..
+        var ret, now;
+        if (!opt_now || !opt_php) {
+            ret = !opt_now ? rand(0, base) : $.now().toString(base);
         } else {
-            now = $.now() / e;
+            now = $.now() / 1000;
             ret = [
                 ~~now,
-                (~~((now - (now | 0)) * e) / e).toFixed(6).slice(2), // ms
-                $.util.randInt(e, 9999)
+                (~~((now - (now | 0)) * 1000) / 1000).toFixed(6).slice(2), // ms
+                rand(4, base)
             ].map(function (n) { return $int(n).toString(base) }).join('');
         }
 
@@ -57,12 +58,13 @@
 
         /**
          * Uid.
-         * @param  {Int} len?
-         * @param  {Int} base?
+         * @param  {Int}  len?
+         * @param  {Int}  base?
+         * @param  {Bool} opt_php?
          * @return {String}
          */
-        uid: function (len, base) {
-            return randId(len, base, true);
+        uid: function (len, base, opt_php) {
+            return randId(len, base, 1, opt_php);
         },
 
         /**
