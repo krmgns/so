@@ -25,7 +25,17 @@
     function randId(len, base, opt_now) {
         len = len || 10, base = base || 36;
 
-        var ret = !opt_now ? rand(0, base) : $.now().toString(base);
+        var ret, now, e = 1000;
+        if (!opt_now) {
+            ret = rand(0, base);
+        } else {
+            now = $.now() / e;
+            ret = [
+                ~~now,
+                (~~((now - (now | 0)) * e) / e).toFixed(6).slice(2), // ms
+                $.util.randInt(e, 9999)
+            ].map(function (n) { return $int(n).toString(base) }).join('');
+        }
 
         while (len && ret.len() < len) {
             ret += rand(0, base);
