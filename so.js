@@ -23,7 +23,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.138.5';
+    $win.so.VERSION = '5.139.0';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -436,6 +436,9 @@
             )
         );
     }
+    function indexOf(src, stack) { // faster
+        return stack && stack.indexOf(src);
+    }
 
     function has(src, stack, ret) {
         if (src === '' || stack === '') { // fix empty stuff issue
@@ -453,7 +456,7 @@
         }
         return (ret > -1);
     }
-    function hasIndex(src, stack) { // @note: in not working for strings
+    function hasIndex(src, stack) {
         return toBool(stack && isString(stack) ? stack[src] : (src in stack));
     }
 
@@ -522,6 +525,41 @@
          */
         last: function () {
             return this[len(this) - 1];
+        },
+
+        /**
+         * Add.
+         * @param {Any}  item
+         * @param {Bool} opt_replace?
+         */
+        add: function (item, opt_replace) {
+            var _this = this, i = indexOf(item, _this);
+
+            if (i >= 0 && opt_replace) {
+                _this[i] = item; // actually splice(i, 1, item)
+            } else {
+                _this.push(item);
+            }
+
+            return _this;
+        },
+
+        /**
+         * Remove.
+         * @param  {Any} item
+         * @return {Array}
+         */
+        remove: function (item) {
+            return this.removeAt(indexOf(item, this));
+        },
+
+        /**
+         * Remove at.
+         * @param  {Int} i
+         * @return {Array}
+         */
+        removeAt: function (i) {
+            return (i >= 0 && this.splice(i, 1)), this;
         },
 
         /**

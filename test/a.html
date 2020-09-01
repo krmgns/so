@@ -28,13 +28,25 @@ body {height: 3000px}
 <br>
 <s class="outer">Outer s.outer</s>
 
-<script src="so-all.php"></script>
+<script src="all.php"></script>
 <!-- <script src="../so-all.js"></script> -->
 <script>
 // so.ready(function($, $$) {
 so(function($, $$) {
-    var x;
-    log(x instanceof String)
+    // var x = ["a", "b", "c", "d", "e"]
+    var x = [0, 1, 2, 3, 4]
+    log(x)
+    // log(x.add("d"))
+    // log(x.remove("b"))
+    // log(x.removeAt(1))
+    // log(x.removeAt(2))
+    // log(x.removeAt(2))
+    // log(x.add("c"))
+    // log(x.add("c", true))
+    log(x.removeAt(1))
+
+    return
+
     // var url = $.util.url("https://dom.com/i/crop/a.php?x=1&y=22#ooo")
     // log(url)
 
