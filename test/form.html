@@ -1,6 +1,6 @@
 <!doctype html>
 
-<form id="form" onsubmit="buildQuery(this); return !1">
+<form id="form">
     <input type="hidden" name="secret" value="abc">
     <p><input type="text" name="uname" value="kerem"></p>
     <p><input type="password" name="upass" value="111"></p>
@@ -16,12 +16,11 @@
     <p><input type="submit" name="send" value="Submit!"></p>
 </form>
 
-<script src="so-all.php"></script>
+<script src="all.php"></script>
 <script>
-function buildQuery(form) {
-    var data;
-    data = so.dom(form).buildQuery();
-    // data = so.dom(form).buildQueryArray();
-    log(data)
-}
+so(function ($) {
+    var $form = $("#form")
+    log($form)
+    log($form.serializeArray())
+})
 </script>

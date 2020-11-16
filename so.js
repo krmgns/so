@@ -23,7 +23,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.139.0';
+    $win.so.VERSION = '5.139.1';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -141,7 +141,7 @@
     var fn_hasOwnProperty = {}.hasOwnProperty;
 
     // array maker
-    function toArray(input) {
+    function array(input) {
         var ret = [];
 
         if (!input || isString(input) || isWindow(input)
@@ -156,7 +156,7 @@
 
     // object extender
     function extend() {
-        var args = toArray(arguments),
+        var args = array(arguments),
             target = args.shift() || {}, // first is target & return
             source, key;
 
@@ -687,7 +687,7 @@
          * @return {Any|Any[]}
          */
         pull: function () {
-            var _this = this, keys = toArray(arguments), ret = [];
+            var _this = this, keys = array(arguments), ret = [];
 
             loopEach(keys, function (key) {
                 _this.hasIndex(key) && ret.push(_this[key]);
@@ -705,7 +705,7 @@
          * @return {Object}
          */
         extract: function () {
-            var _this = this, keys = toArray(arguments), ret = {};
+            var _this = this, keys = array(arguments), ret = {};
 
             loopEach(keys, function (key, i) {
                 // [1,2,3].extract('one', '', 'three') => {one: 1, three: 3}
@@ -731,7 +731,7 @@
     }
 
     function checkSearchPosition(str, src, offset, opt_side, opt_icase) {
-        for (var str = str.slice(offset), src = toArray(src),
+        for (var str = str.slice(offset), src = array(src),
                   fn = (opt_side == 1) ? startsWith : endsWith,
                    i = 0, il = len(src); i < il; i++) {
             if (fn(str, src[i], opt_side, opt_icase)) {
@@ -1428,7 +1428,7 @@
             var ret = [], args = arguments, argsLen = len(args), i = 0;
 
             while (i < argsLen) {
-                ret = ret.concat(toArray(args[i++]));
+                ret = ret.concat(array(args[i++]));
             }
 
             return ret;

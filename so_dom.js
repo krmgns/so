@@ -2988,7 +2988,9 @@
             var data = [], ret;
 
             if (getTag(form) == 'form') { // forms only
-                $each(form.elements, function (el) {
+                $forEach(form.elements, function (i, el) {
+                    if (!$isNumeric(i)) return; // indexed elements only
+
                     name = $trim(el[NAME_NAME]);
                     if (!name || el[NAME_DISABLED]) {
                         return;
