@@ -23,7 +23,7 @@
     var re_osx = /(os(?: x))? ([\d_]+)/;
     var re_bit = /(64|32)/;
     // @link https://stackoverflow.com/q/19877924/362780
-    var re_platform = /(linux|mac(ppc|int(el|osh)|68k)?|win(dows|ce|\d+)?|(free|open)bsd|symbian|blackberry|(sun|web|palm)os)/;
+    var re_platform = /(linux|mac(ppc|int(osh|el)|68k)?|win(dows|ce|\d+)?|(free|open)bsd|symbian|blackberry|(sun|web|palm)os)/;
 
     var nav = $win.navigator,
         ua = nav.userAgent.lower().slice(0, 250), // slice safe..
@@ -71,7 +71,7 @@
             if ($ua.isMobile()) {
                 while (re = re_osm.shift()) {
                     if (re = re.exec(ua)) {
-                        if (re[1].slice(0, 2) == 'ip') { // ip(hone|ad|od)
+                        if (re[1].startsWith('ip')) { // ip(hone|ad|od)
                             platform = re[1];
                             re = [, 'ios', re[2].replace(/_/g, '.')];
                         }
