@@ -12,6 +12,7 @@
     // minify candies
     var Math = $win.Math, JSON = $win.JSON;
     // var MAX_INT = Number.MAX_SAFE_INTEGER || Math.pow(2, 53) - 1, MAX_FLOAT = Number.MAX_VALUE;
+    var ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
     var $int = $.int, $float = $.float, $trim = $.trim, $string = $.string;
 
@@ -126,6 +127,35 @@
             max = max || 1 + min;
 
             return Math.random() * (max - min) + min;
+        },
+
+        /**
+         * Rand string.
+         *
+         * @param  {Int} len
+         * @param  {Int} base? @default=62
+         * @return {String}
+         */
+        randString: function (len, base) {
+            if (!len || len < 1) {
+                throw ('Len: min=1');
+            }
+
+            base = base || 62;
+            if (base < 2 || base > 62) {
+                throw ('Base: min-max=2-62');
+            }
+
+            var chars = ALPHABET.slice(0, base);
+            var charsLen = chars.len();
+
+            var ret = '';
+
+            while (ret.len() < len) {
+                ret += chars[Math.random() * charsLen | 0];
+            }
+
+            return ret;
         },
 
         /**

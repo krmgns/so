@@ -11,24 +11,19 @@
 
     // minify candies
     var OBJECT = 'object', Object = $win.Object;
-
     var $for = $.for, $forEach = $.forEach, $object = $.object;
-    var fn_slice = [].slice;
-
     var _break = FALSE;
 
-    function copyArray(array) {
-        return fn_slice.call(array);
-    }
-
-    // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm
     function shuffle(items) {
-        var ret = copyArray(items), i = ret.len() - 1, ir, tmp;
-        for (i; i > 0; i--) {
-            ir = ~~(Math.random() * (i + 1));
-            tmp = ret[i], ret[i] = ret[ir], ret[ir] = tmp;
-        }
-        return ret;
+        return items.slice().sort(function() { return 0.5 - Math.random() });
+
+        // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm
+        // var ret = items.slice(), i = ret.len() - 1, ir, tmp;
+        // for (i; i > 0; i--) {
+        //     ir = ~~(Math.random() * (i + 1));
+        //     tmp = ret[i], ret[i] = ret[ir], ret[ir] = tmp;
+        // }
+        // return ret;
     }
 
     /**
@@ -73,7 +68,7 @@
             Object.defineProperties(_this, { // writables for internal modifications
                  '_len': {value: len, writable: TRUE},
                 '_data': {value: _data, writable: TRUE},
-                '_type': {value: _type},
+                '_type': {value: _type}
             });
 
             return _this;
@@ -522,7 +517,7 @@
                 });
             } else {
                 $for(shuffle(_this.values()), function (value, i) {
-                    data[value] = value;
+                    data[i] = value;
                 });
             }
 

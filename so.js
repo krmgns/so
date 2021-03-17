@@ -4,6 +4,11 @@
  * @author  Kerem Güneş <k-gun@mail.com>
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
+
+// simply NodeJS detect
+NODE = typeof module == 'object' && module.exports;
+NODE && (window = global);
+
 ;(function ($win, NULL, TRUE, FALSE, UNDEFINED) { 'use strict';
 
     // simply support check
@@ -23,7 +28,7 @@
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.139.2';
+    $win.so.VERSION = '5.140.0';
 
     // minify candies
     var PROTOTYPE = 'prototype',
@@ -1560,5 +1565,7 @@
 
     // for later
     $.ext = {};
+
+    NODE && (module.exports = $);
 
 })(window, null, true, false);
