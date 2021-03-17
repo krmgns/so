@@ -7,7 +7,6 @@ $files = array(
     'so_list.js',
     'so_http.js',
     'so_event.js',
-    'so_event_swipe.js',
     'so_animation.js',
     'so_dom.js',
 );
