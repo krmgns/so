@@ -100,6 +100,9 @@
     function toDom(selector, root, one) {
         return isDom(selector) ? selector : new Dom(selector, root, one);
     }
+    function toDomArray(elements) {
+        return elements.map(function (element) { return new Dom(element); });
+    }
     function toDomPrototype(Dom, prototype) {
         $extend(Dom[PROTOTYPE], prototype);
     }
@@ -355,17 +358,14 @@
 
         /**
          * To array.
-         * @param  {Bool} opt_dom?
-         * @return {Node[]|Dom[]}
+         * @return {Node[]}
          */
-        toArray: function (opt_dom) {
+        toArray: function () {
             for (var i = 0, el, els = []; el = this[i]; i++) {
                 els[i] = el;
             }
 
-            return !opt_dom ? els : els.map(function (el) {
-                return toDom(el)
-            });
+            return els;
         },
 
         /**
@@ -373,7 +373,7 @@
          * @return {Dom[]}
          */
         toDomArray: function () {
-            return this.toArray(TRUE);
+            return toDomArray(this.toArray());
         },
 
         /**
@@ -468,7 +468,7 @@
 
         /**
          * Els.
-         * @param  {Int} ...arguments
+         * @param  {Int} ...arguments?
          * @return {Node[]}
          */
         els: function () {
@@ -479,9 +479,7 @@
             } else {
                 $for(args, function (i) {
                     el = _this.el(i);
-                    if (el && !els.has(el)) {
-                        els.push(el);
-                    }
+                    el && els.push(el);
                 });
             }
 
@@ -494,15 +492,16 @@
          * @return {Dom}
          */
         item: function (i) {
-            return toDom(this[i - 1]);
+            return toDom(this.el(i));
         },
 
         /**
          * Items.
-         * @return {Dom}
+         * @param  {Int} ...arguments?
+         * @return {Dom[]}
          */
         items: function () {
-            return toDom(this.els.apply(this, arguments));
+            return toDomArray(this.els.apply(this, arguments));
         },
 
         /**
@@ -583,7 +582,7 @@
          * All (alias of toArray(), toDomArray()).
          */
         all: function (opt_dom) {
-            return this.toArray(opt_dom);
+            return !opt_dom ? this.toArray() : this.toDomArray();
         },
 
         /**

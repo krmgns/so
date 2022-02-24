@@ -28,7 +28,7 @@ NODE && (window = global);
 
     // globalize
     $win.so = $;
-    $win.so.VERSION = '5.140.0';
+    $win.so.VERSION = '5.140.1';
 
     // minify candies
     var PROTOTYPE = 'prototype',
