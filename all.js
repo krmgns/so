@@ -1,7 +1,7 @@
 /**
  * @name            : So.js
  * @version         : 5.140.1
- * @description     : Multipurpose JavaScript library. <http://github.com/k-gun/so>
+ * @description     : Multipurpose JavaScript library. <http://github.com/okerem/so>
  * @copyright       : Kerem Güneş (2013-2020)          <http://qeremy.com/sojs>
  * @license         : MIT license                      <http://opensource.org/licenses/mit>
  *

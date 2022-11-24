@@ -2,7 +2,7 @@
  * @package so
  * @object  so.animation
  * @depends so, so.util, so.dom
- * @author  Kerem Güneş <k-gun@mail.com>
+ * @author  Kerem Güneş
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
 ;(function ($, NULL, TRUE, FALSE) { 'use strict';

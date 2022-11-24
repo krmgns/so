@@ -2,7 +2,7 @@
  * @package so
  * @object  so.ua
  * @depends so
- * @author  Kerem Güneş <k-gun@mail.com>
+ * @author  Kerem Güneş
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
 ;(function ($) { 'use strict';

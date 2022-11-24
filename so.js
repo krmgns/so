@@ -1,7 +1,7 @@
 /**
  * @package so
  * @object  so
- * @author  Kerem Güneş <k-gun@mail.com>
+ * @author  Kerem Güneş
  * @license The MIT License <https://opensource.org/licenses/MIT>
  */
 

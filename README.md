@@ -62,4 +62,4 @@ so.onReady(function($) {
 
 <br>
 
-See documentation [here](https://github.com/k-gun/so/wiki).
+See documentation [here](https://github.com/okerem/so/wiki).
